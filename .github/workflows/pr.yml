@@ -9,34 +9,34 @@ on:
       - "main"
   workflow_dispatch:
 
-  jobs:
-    build-check-test:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-        
-        steps:
-            - uses: actions/checkout@v3
+jobs:
+  build-check-test:
+      runs-on: ubuntu-latest
+      permissions:
+          contents: read
+      
+      steps:
+          - uses: actions/checkout@v3
 
-            - uses: actions/setup-python@v3
-              with:
-                python-version: "3.14"
+          - uses: actions/setup-python@v3
+            with:
+              python-version: "3.14"
 
-            - name: Upgrade pip and setuptools
-              run: python -m pip install --upgrade pip setuptools packaging
+          - name: Upgrade pip and setuptools
+            run: python -m pip install --upgrade pip setuptools packaging
 
-            - name: Run pip install
-              run: pip install -e .[dev]
+          - name: Run pip install
+            run: pip install -e .[dev]
 
-            - uses: astral-sh/ruff-action@v3
-              name: Check format with ruff
-              with:
-                args: format --check .
+          - uses: astral-sh/ruff-action@v3
+            name: Check format with ruff
+            with:
+              args: format --check .
 
-            - uses: astral-sh/ruff-action@v3
-              name: Run ruff linting
-              with:
-                args: check .
+          - uses: astral-sh/ruff-action@v3
+            name: Run ruff linting
+            with:
+              args: check .
 
-            - name: Run mypy
-              run: mypy nqcc
+          - name: Run mypy
+            run: mypy nqcc
