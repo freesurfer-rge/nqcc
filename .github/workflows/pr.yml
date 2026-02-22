@@ -39,4 +39,4 @@ jobs:
               args: check .
 
           - name: Run mypy
-            run: mypy nqcc
+            run: mypy src/nqcc
