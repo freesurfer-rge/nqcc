@@ -64,6 +64,7 @@ class WhitespaceToken(FirstSubsequentToken):
     def _allowed_subsequent(self, char: str) -> bool:
         return char in string.whitespace
 
+
 class KeywordToken(Token):
     _KEYWORDS = {"int", "void", "return"}
 

@@ -11,7 +11,7 @@ from nqcc import (
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
-    WhitespaceToken
+    WhitespaceToken,
 )
 
 
@@ -104,6 +104,7 @@ class TestConstantIntegerToken:
         assert not result, "Should NOT accept character after start"
         assert target.start_position == position
         assert target.value == f"{first_char}"
+
 
 class TestWhitespaceToken:
     @pytest.mark.parametrize("position", [0, 10])
