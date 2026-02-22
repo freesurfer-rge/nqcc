@@ -20,6 +20,10 @@ class Token(BaseModel, abc.ABC):
     def is_appendable(self) -> bool:
         pass
 
+    @abc.abstractproperty
+    def precendence(self) -> int:
+        pass
+
 
 class FirstSubsequentToken(Token):
     def try_append(self, char: str, position: int) -> bool:
@@ -64,6 +68,10 @@ class IdentifierToken(FirstSubsequentToken):
     def _allowed_subsequent(self, char: str) -> bool:
         return char in self._SUBSEQUENT_CHARS
 
+    @property
+    def precendence(self) -> int:
+        return 5
+
 
 class ConstantIntegerToken(FirstSubsequentToken):
     def _allowed_first(self, char: str) -> bool:
@@ -72,6 +80,10 @@ class ConstantIntegerToken(FirstSubsequentToken):
     def _allowed_subsequent(self, char: str) -> bool:
         return char in string.digits
 
+    @property
+    def precendence(self) -> int:
+        return 5
+
 
 class WhitespaceToken(FirstSubsequentToken):
     def _allowed_first(self, char: str) -> bool:
@@ -79,6 +91,11 @@ class WhitespaceToken(FirstSubsequentToken):
 
     def _allowed_subsequent(self, char: str) -> bool:
         return char in string.whitespace
+
+    
+    @property
+    def precendence(self) -> int:
+        return -5
 
 
 class KeywordToken(Token):
@@ -108,6 +125,11 @@ class KeywordToken(Token):
     def is_appendable(self) -> bool:
         return not self.is_valid
 
+    
+    @property
+    def precendence(self) -> int:
+        return 10
+
 
 class SingleCharacterToken(Token):
     @abc.abstractproperty
@@ -134,6 +156,11 @@ class SingleCharacterToken(Token):
     @property
     def is_appendable(self) -> bool:
         return not self.is_valid
+    
+
+    @property
+    def precendence(self) -> int:
+        return 5
 
 
 class OpenParenToken(SingleCharacterToken):
