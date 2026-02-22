@@ -25,6 +25,7 @@ runs.
 logging.basicConfig(level=logging.INFO)
 _logger = logging.getLogger("nqcc")
 
+
 def parse_args():
     parser = argparse.ArgumentParser(
         prog="nqcc",
@@ -65,13 +66,12 @@ def main():
     assert args.target.exists(), f"Target {args.target} does not exist!"
 
     if args.working_dir.exists():
-        _logger.warning(f"Deleting working directory {args.working_dir}")
+        _logger.warning("Deleting working directory %s", args.working_dir)
         shutil.rmtree(args.working_dir)
     args.working_dir.mkdir()
 
     _logger.info("Running preprocessor")
-    preprocessed_file = preprocess_c_file(args.target, args.working_dir)
-
+    _ = preprocess_c_file(args.target, args.working_dir)
 
 
 if __name__ == "__main__":
