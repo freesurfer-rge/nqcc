@@ -37,6 +37,7 @@ class FirstSubsequentToken(Token):
     def _allowed_subsequent(self, char: str) -> bool:
         pass
 
+
 class IdentifierToken(FirstSubsequentToken):
     _FIRST_CHARS = {*string.ascii_letters, "_"}
     _SUBSEQUENT_CHARS = {*string.ascii_letters, *string.digits, "_"}
@@ -55,20 +56,26 @@ class ConstantIntegerToken(FirstSubsequentToken):
     def _allowed_subsequent(self, char: str) -> bool:
         return char in string.digits
 
+
 class KeywordToken(Token):
-    _KEYWORDS = { "int", "void", "return"}
+    _KEYWORDS = {"int", "void", "return"}
 
     def try_append(self, char: str, position: int) -> bool:
+        print(f"try_append: {char} {position} {self.model_dump_json()}")
         assert len(char) == 1, f"Got '{char}' and not single character"
-        assert position == self.start_position + len(self.value)
-        
-        tst_value = self.value + char
+        if self.value:
+            assert position == self.start_position + len(self.value)
 
-        valid_prefix = [ s.startswith(tst_value) for s in self._KEYWORDS]
+        tst_value = self.value + char
+        print(f"{tst_value=}")
+
+        valid_prefix = [s.startswith(tst_value) for s in self._KEYWORDS]
+        print(f"{valid_prefix=}")
 
         if any(valid_prefix):
             if not self.value:
                 self.start_position = position
             self.value = tst_value
+            print(f"try_append appended: {self.model_dump_json()}")
             return True
         return False

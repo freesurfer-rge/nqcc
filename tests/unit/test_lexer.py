@@ -97,17 +97,20 @@ class TestConstantIntegerToken:
 
 
 TEST_KEYWORDS = {"int", "void", "return"}
-class TestKeywordToken:
 
+
+class TestKeywordToken:
     @pytest.mark.parametrize("keyword", TEST_KEYWORDS)
     @pytest.mark.parametrize("position", [0, 10])
-    @pytest.mark.parametrize("nxt_char", [*string.ascii_letters, *string.punctuation, *string.whitespace])
+    @pytest.mark.parametrize(
+        "nxt_char", [*string.ascii_letters, *string.punctuation, *string.whitespace]
+    )
     def test_allowed_keywords(self, keyword, position, nxt_char):
         target = KeywordToken()
 
         # The valid portion
         for i, c in enumerate(keyword):
-            result = target.try_append(c, i) + position
+            result = target.try_append(c, position + i)
             assert result, f"Failed to append {c}"
             assert target.start_position == position
         assert target.value == keyword
