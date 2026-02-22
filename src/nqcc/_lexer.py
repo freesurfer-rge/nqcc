@@ -94,3 +94,33 @@ class SingleCharacterToken(Token):
         self.value = char
         self.start_position = position
         return True
+
+
+class OpenParenToken(SingleCharacterToken):
+    @property
+    def allowed_character(self) -> str:
+        return "("
+
+
+class CloseParenToken(SingleCharacterToken):
+    @property
+    def allowed_character(self) -> str:
+        return ")"
+
+
+class OpenBraceToken(SingleCharacterToken):
+    @property
+    def allowed_character(self) -> str:
+        return "{"
+
+
+class CloseBraceToken(SingleCharacterToken):
+    @property
+    def allowed_character(self) -> str:
+        return "}"
+
+
+class SemicolonToken(SingleCharacterToken):
+    @property
+    def allowed_character(self) -> str:
+        return ";"

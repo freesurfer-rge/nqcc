@@ -2,7 +2,16 @@ import string
 
 import pytest
 
-from nqcc import ConstantIntegerToken, IdentifierToken, KeywordToken
+from nqcc import (
+    CloseBraceToken,
+    CloseParenToken,
+    ConstantIntegerToken,
+    IdentifierToken,
+    KeywordToken,
+    OpenBraceToken,
+    OpenParenToken,
+    SemicolonToken,
+)
 
 
 class TestIdentifierToken:
@@ -118,3 +127,39 @@ class TestKeywordToken:
         # Try to append an invalid character
         result = target.try_append(nxt_char, position + len(keyword))
         assert not result, f"Unexpected append {c}"
+        assert target.value == keyword
+
+
+class TestSingleCharacterTokens:
+    @pytest.mark.parametrize(
+        ("tokenClass", "tok"),
+        [
+            (OpenParenToken, "("),
+            (CloseParenToken, ")"),
+            (OpenBraceToken, "{"),
+            (CloseBraceToken, "}"),
+            (SemicolonToken, ";"),
+        ],
+    )
+    @pytest.mark.parametrize("position", [0, 10])
+    def test_allowed_chars(self, tokenClass, tok: str, position: int):
+        target = tokenClass()
+
+        INVALID_FIRST_CHARS = {*string.printable} - {tok}
+        for c in INVALID_FIRST_CHARS:
+            result = target.try_append(c, position)
+            assert not result, f"Unexpected append: {c}"
+            assert target.start_position == -1
+
+        # Append the correct character
+        result = target.try_append(tok, position)
+        assert result, f"Failed to append {c}"
+        assert target.start_position == position
+        assert target.value == tok
+
+        # Try to append another character
+        for c in string.printable:
+            result = target.try_append(c, position)
+            assert not result, f"Unexpected append: {c}"
+        assert target.start_position == position
+        assert target.value == tok
