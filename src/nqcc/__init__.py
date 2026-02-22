@@ -3,9 +3,9 @@ from ._lexer import CloseParenToken as CloseParenToken
 from ._lexer import ConstantIntegerToken as ConstantIntegerToken
 from ._lexer import IdentifierToken as IdentifierToken
 from ._lexer import KeywordToken as KeywordToken
+from ._lexer import Lexer as Lexer
 from ._lexer import OpenBraceToken as OpenBraceToken
 from ._lexer import OpenParenToken as OpenParenToken
 from ._lexer import SemicolonToken as SemicolonToken
 from ._lexer import WhitespaceToken as WhitespaceToken
-from ._lexer import Lexer as Lexer
 from ._preprocess import preprocess_c_file as preprocess_c_file

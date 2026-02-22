@@ -209,7 +209,7 @@ class Lexer:
         return [item for item in self._completed_token_list if item.precedence >= 0]
 
     def push_character(self, ch: str):
-        assert len(ch)==1,"Must only pass single characters!"
+        assert len(ch) == 1, "Must only pass single characters!"
 
         tokens_accept: list[Token] = []
         tokens_reject: list[Token] = []
@@ -233,8 +233,8 @@ class Lexer:
             if len(valid_tokens) == 0:
                 msg = f"No valid token on arriving at '{ch}' at position {self.position}"
                 raise ValueError(msg)
-            
-            valid_tokens.sort(key = lambda t: t.precedence, reverse=True)
+
+            valid_tokens.sort(key=lambda t: t.precedence, reverse=True)
             self._completed_token_list.append(valid_tokens[0])
 
             all_candidates = self._get_fresh_candidate_tokens()
@@ -242,26 +242,25 @@ class Lexer:
             for nc in all_candidates:
                 if nc.try_append(ch, self.position):
                     next_candidates.append(nc)
-            
+
             if len(next_candidates) == 0:
                 raise ValueError(f"No token will accept '{ch}' at position {self.position}")
-            
+
             self._current_candidates = next_candidates
-            
+
         self._position += 1
 
     def character_stream_done(self):
         # Final tidy up, for when we are done pushing characters
         valid_tokens = [t for t in self._current_candidates if t.is_valid]
-        if len(valid_tokens)==0:
+        if len(valid_tokens) == 0:
             candidate_strings = [t.model_jump_json() for t in self._current_candidates]
             all_candidate_str = ", ".join(candidate_strings)
             msg = "No token currently valid: " + all_candidate_str
             raise ValueError(msg)
-        
-        valid_tokens.sort(key = lambda t: t.precedence, reverse=True)
-        self._completed_token_list.append(valid_tokens[0])
 
+        valid_tokens.sort(key=lambda t: t.precedence, reverse=True)
+        self._completed_token_list.append(valid_tokens[0])
 
     def _get_fresh_candidate_tokens(self) -> list[Token]:
         starting_tokens = [

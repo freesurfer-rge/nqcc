@@ -8,11 +8,11 @@ from nqcc import (
     ConstantIntegerToken,
     IdentifierToken,
     KeywordToken,
+    Lexer,
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
     WhitespaceToken,
-    Lexer
 )
 
 
@@ -265,6 +265,6 @@ class TestLexer:
             IdentifierToken(start_position=6, value="main"),
             OpenParenToken(start_position=10, value="("),
             KeywordToken(start_position=12, value="void"),
-            CloseParenToken(start_position=17, value=")")
+            CloseParenToken(start_position=17, value=")"),
         ]
         assert final_tokens == expected_tokens
