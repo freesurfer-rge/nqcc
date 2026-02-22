@@ -92,7 +92,6 @@ class WhitespaceToken(FirstSubsequentToken):
     def _allowed_subsequent(self, char: str) -> bool:
         return char in string.whitespace
 
-    
     @property
     def precendence(self) -> int:
         return -5
@@ -125,7 +124,6 @@ class KeywordToken(Token):
     def is_appendable(self) -> bool:
         return not self.is_valid
 
-    
     @property
     def precendence(self) -> int:
         return 10
@@ -156,7 +154,6 @@ class SingleCharacterToken(Token):
     @property
     def is_appendable(self) -> bool:
         return not self.is_valid
-    
 
     @property
     def precendence(self) -> int:
