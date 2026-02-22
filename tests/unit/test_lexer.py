@@ -21,11 +21,13 @@ class TestIdentifierToken:
     def test_allowed_first_characters(self, position, nxt_char):
         target = IdentifierToken()
         assert not target.is_valid
+        assert target.is_appendable
         result = target.try_append(nxt_char, position)
         assert result, "Should accept character at start"
         assert target.start_position == position
         assert target.value == nxt_char
         assert target.is_valid
+        assert target.is_appendable
 
     @pytest.mark.parametrize("position", [0, 10])
     @pytest.mark.parametrize(
@@ -35,11 +37,13 @@ class TestIdentifierToken:
         # Slightly ugly parameter list because underscores are allowed....
         target = IdentifierToken()
         assert not target.is_valid
+        assert target.is_appendable
         result = target.try_append(nxt_char, position)
         assert not result, "Should NOT accept character at start"
         assert target.start_position == -1
         assert target.value == ""
         assert not target.is_valid
+        assert target.is_appendable
 
     @pytest.mark.parametrize("position", [0, 10])
     @pytest.mark.parametrize("first_char", ["A", "b"])
@@ -47,12 +51,14 @@ class TestIdentifierToken:
     def test_allowed_second_characters(self, position, first_char, nxt_char):
         target = IdentifierToken()
         assert not target.is_valid
+        assert target.is_appendable
         _ = target.try_append(first_char, position)
         result = target.try_append(nxt_char, position + 1)
         assert result, "Should accept character after start"
         assert target.start_position == position
         assert target.value == f"{first_char}{nxt_char}"
         assert target.is_valid
+        assert target.is_appendable
 
     @pytest.mark.parametrize("position", [0, 10])
     @pytest.mark.parametrize("first_char", ["A", "b"])
@@ -60,12 +66,14 @@ class TestIdentifierToken:
     def test_disallowed_second_characters(self, position, first_char, nxt_char):
         target = IdentifierToken()
         assert not target.is_valid
+        assert target.is_appendable
         _ = target.try_append(first_char, position)
         result = target.try_append(nxt_char, position + 1)
         assert not result, "Should NOT accept character after start"
         assert target.start_position == position
         assert target.value == f"{first_char}"
         assert target.is_valid
+        assert target.is_appendable
 
 
 class TestConstantIntegerToken:
@@ -74,11 +82,13 @@ class TestConstantIntegerToken:
     def test_allowed_first_characters(self, position, nxt_char):
         target = ConstantIntegerToken()
         assert not target.is_valid
+        assert target.is_appendable
         result = target.try_append(nxt_char, position)
         assert result, "Should accept character at start"
         assert target.start_position == position
         assert target.value == nxt_char
         assert target.is_valid
+        assert target.is_appendable
 
     @pytest.mark.parametrize("position", [0, 10])
     @pytest.mark.parametrize(
@@ -87,11 +97,13 @@ class TestConstantIntegerToken:
     def test_disallowed_first_characters(self, position, nxt_char):
         target = ConstantIntegerToken()
         assert not target.is_valid
+        assert target.is_appendable
         result = target.try_append(nxt_char, position)
         assert not result, "Should NOT accept character at start"
         assert target.start_position == -1
         assert target.value == ""
         assert not target.is_valid
+        assert target.is_appendable
 
     @pytest.mark.parametrize("position", [0, 10])
     @pytest.mark.parametrize("first_char", ["1", "0"])
@@ -99,12 +111,14 @@ class TestConstantIntegerToken:
     def test_allowed_second_characters(self, position, first_char, nxt_char):
         target = ConstantIntegerToken()
         assert not target.is_valid
+        assert target.is_appendable
         _ = target.try_append(first_char, position)
         result = target.try_append(nxt_char, position + 1)
         assert result, "Should accept character after start"
         assert target.start_position == position
         assert target.value == f"{first_char}{nxt_char}"
         assert target.is_valid
+        assert target.is_appendable
 
     @pytest.mark.parametrize("position", [0, 10])
     @pytest.mark.parametrize("first_char", ["1", "0"])
@@ -114,12 +128,14 @@ class TestConstantIntegerToken:
     def test_disallowed_second_characters(self, position, first_char, nxt_char):
         target = ConstantIntegerToken()
         assert not target.is_valid
+        assert target.is_appendable
         _ = target.try_append(first_char, position)
         result = target.try_append(nxt_char, position + 1)
         assert not result, "Should NOT accept character after start"
         assert target.start_position == position
         assert target.value == f"{first_char}"
         assert target.is_valid
+        assert target.is_appendable
 
 
 class TestWhitespaceToken:
@@ -129,6 +145,7 @@ class TestWhitespaceToken:
     def test_allowed_chars(self, first_char, nxt_char, position):
         target = WhitespaceToken()
         assert not target.is_valid
+        assert target.is_appendable
         result = target.try_append(first_char, position)
         assert result, f"Failed to append '{repr(first_char)}'"
         assert target.start_position == position
@@ -139,17 +156,20 @@ class TestWhitespaceToken:
 
         assert target.value == f"{first_char}{nxt_char}"
         assert target.is_valid
+        assert target.is_appendable
 
     @pytest.mark.parametrize("position", [0, 10])
     @pytest.mark.parametrize("bad_char", {*string.printable} - {*string.whitespace})
     def test_disallowed_char(self, bad_char, position):
         target = WhitespaceToken()
         assert not target.is_valid
+        assert target.is_appendable
         result = target.try_append(bad_char, position)
         assert not result, f"Unexpected append: {bad_char}"
         assert target.start_position == -1
         assert not target.value
         assert not target.is_valid
+        assert target.is_appendable
 
 
 TEST_KEYWORDS = {"int", "void", "return"}
@@ -163,21 +183,25 @@ class TestKeywordToken:
     )
     def test_allowed_keywords(self, keyword, position, nxt_char):
         target = KeywordToken()
+        assert target.is_appendable
 
         # The valid portion
         for i, c in enumerate(keyword):
             assert not target.is_valid
+            assert target.is_appendable
             result = target.try_append(c, position + i)
             assert result, f"Failed to append {c}"
             assert target.start_position == position
         assert target.is_valid
         assert target.value == keyword
+        assert not target.is_appendable
 
         # Try to append an invalid character
         result = target.try_append(nxt_char, position + len(keyword))
         assert not result, f"Unexpected append {c}"
         assert target.value == keyword
         assert target.is_valid
+        assert not target.is_appendable
 
 
 class TestSingleCharacterTokens:
@@ -194,6 +218,7 @@ class TestSingleCharacterTokens:
     @pytest.mark.parametrize("position", [0, 10])
     def test_allowed_chars(self, tokenClass, tok: str, position: int):
         target = tokenClass()
+        assert target.is_appendable
 
         INVALID_FIRST_CHARS = {*string.printable} - {tok}
         for c in INVALID_FIRST_CHARS:
@@ -201,6 +226,7 @@ class TestSingleCharacterTokens:
             assert not result, f"Unexpected append: {c}"
             assert target.start_position == -1
             assert not target.is_valid
+            assert target.is_appendable
 
         # Append the correct character
         result = target.try_append(tok, position)
@@ -208,6 +234,7 @@ class TestSingleCharacterTokens:
         assert target.start_position == position
         assert target.value == tok
         assert target.is_valid
+        assert not target.is_appendable
 
         # Try to append another character
         for c in string.printable:
@@ -216,3 +243,4 @@ class TestSingleCharacterTokens:
         assert target.start_position == position
         assert target.value == tok
         assert target.is_valid
+        assert not target.is_appendable

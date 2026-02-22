@@ -16,6 +16,10 @@ class Token(BaseModel, abc.ABC):
     def is_valid(self) -> bool:
         pass
 
+    @abc.abstractproperty
+    def is_appendable(self) -> bool:
+        pass
+
 
 class FirstSubsequentToken(Token):
     def try_append(self, char: str, position: int) -> bool:
@@ -36,6 +40,10 @@ class FirstSubsequentToken(Token):
     @property
     def is_valid(self) -> bool:
         return len(self.value) > 0
+
+    @property
+    def is_appendable(self) -> bool:
+        return True
 
     @abc.abstractmethod
     def _allowed_first(self, char: str) -> bool:
@@ -96,6 +104,10 @@ class KeywordToken(Token):
     def is_valid(self) -> bool:
         return self.value in self._KEYWORDS
 
+    @property
+    def is_appendable(self) -> bool:
+        return not self.is_valid
+
 
 class SingleCharacterToken(Token):
     @abc.abstractproperty
@@ -118,6 +130,10 @@ class SingleCharacterToken(Token):
     @property
     def is_valid(self) -> bool:
         return self.value == self.allowed_character
+
+    @property
+    def is_appendable(self) -> bool:
+        return not self.is_valid
 
 
 class OpenParenToken(SingleCharacterToken):
@@ -148,5 +164,3 @@ class SemicolonToken(SingleCharacterToken):
     @property
     def allowed_character(self) -> str:
         return ";"
-
-
