@@ -1,4 +1,5 @@
 import argparse
+import pathlib
 
 
 def parse_args():
@@ -8,14 +9,23 @@ def parse_args():
         add_help=True,
     )
 
-    parser.add_argument("--lex", action="store_true", help="Only run the lexer then exit")
-
-    parser.add_argument(
+    book_group = parser.add_argument_group(title="Required for book's test suite")
+    book_group.add_argument("--lex", action="store_true", help="Only run the lexer then exit")
+    book_group.add_argument(
         "--parse", action="store_true", help="Only run the parser then exit (implies --lex)"
     )
+    book_group.add_argument(
+        "--codegen",
+        action="store_true",
+        help="Only run the code generator then exit (implies --lex and --parse)",
+    )
+
+    parser.add_argument("target", type=pathlib.Path, help="Path to target C file")
 
     args = parser.parse_args()
 
+    if args.codegen:
+        args.parse = True
     if args.parse:
         args.lex = True
 
