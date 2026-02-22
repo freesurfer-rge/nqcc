@@ -25,6 +25,7 @@ runs.
 logging.basicConfig(level=logging.INFO)
 _logger = logging.getLogger("nqcc")
 
+
 def parse_args():
     parser = argparse.ArgumentParser(
         prog="nqcc",
@@ -71,7 +72,6 @@ def main():
 
     _logger.info("Running preprocessor")
     preprocessed_file = preprocess_c_file(args.target, args.working_dir)
-
 
 
 if __name__ == "__main__":
