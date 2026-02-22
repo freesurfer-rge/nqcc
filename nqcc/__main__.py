@@ -1,5 +1,7 @@
 import argparse
+import logging
 import pathlib
+import shutil
 
 _DESC = """\
 An implementation of the C Compiler described in Nora 
@@ -17,6 +19,9 @@ directory as the target file. This directory will
 be DELETED and recreated before any other tooling
 runs.
 """
+
+logging.basicConfig(level=logging.INFO)
+_logger = logging.getLogger("nqcc")
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -47,13 +52,20 @@ def parse_args():
         args.lex = True
 
     if not args.working_dir:
-        args.working_dir = args.target.parent() / _DEFAULT_WORKING_DIR
+        args.working_dir = args.target.parent / _DEFAULT_WORKING_DIR
 
     return args
 
 
 def main():
     args = parse_args()
+
+    assert args.target.exists(), f"Target {args.target} does not exist!"
+
+    if args.working_dir.exists():
+        _logger.warning(f"Deleting working directory {args.working_dir}")
+        shutil.rmtree(args.working_dir)
+    args.working_dir.mkdir()
 
 
 if __name__ == "__main__":
