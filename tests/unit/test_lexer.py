@@ -2,7 +2,7 @@ import string
 
 import pytest
 
-from nqcc import ConstantToken, IdentifierToken
+from nqcc import ConstantIntegerToken, IdentifierToken
 
 
 class TestIdentifierToken:
@@ -50,11 +50,11 @@ class TestIdentifierToken:
         assert target.value == f"{first_char}"
 
 
-class TestConstantToken:
+class TestConstantIntegerToken:
     @pytest.mark.parametrize("position", [0, 10])
     @pytest.mark.parametrize("nxt_char", string.digits)
     def test_allowed_first_characters(self, position, nxt_char):
-        target = ConstantToken()
+        target = ConstantIntegerToken()
         result = target.append(nxt_char, position)
         assert result, "Should accept character at start"
         assert target.start_position == position
@@ -65,7 +65,7 @@ class TestConstantToken:
         "nxt_char", [*string.ascii_letters, *string.punctuation, *string.whitespace]
     )
     def test_disallowed_first_characters(self, position, nxt_char):
-        target = ConstantToken()
+        target = ConstantIntegerToken()
         result = target.append(nxt_char, position)
         assert not result, "Should NOT accept character at start"
         assert target.start_position == -1
@@ -75,7 +75,7 @@ class TestConstantToken:
     @pytest.mark.parametrize("first_char", ["1", "0"])
     @pytest.mark.parametrize("nxt_char", string.digits)
     def test_allowed_second_characters(self, position, first_char, nxt_char):
-        target = ConstantToken()
+        target = ConstantIntegerToken()
         _ = target.append(first_char, position)
         result = target.append(nxt_char, position + 1)
         assert result, "Should accept character after start"
@@ -88,7 +88,7 @@ class TestConstantToken:
         "nxt_char", [*string.ascii_letters, *string.punctuation, *string.whitespace]
     )
     def test_disallowed_second_characters(self, position, first_char, nxt_char):
-        target = ConstantToken()
+        target = ConstantIntegerToken()
         _ = target.append(first_char, position)
         result = target.append(nxt_char, position + 1)
         assert not result, "Should NOT accept character after start"

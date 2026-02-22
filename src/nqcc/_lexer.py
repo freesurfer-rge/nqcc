@@ -43,7 +43,7 @@ class IdentifierToken(Token):
         return char in self._SUBSEQUENT_CHARS
 
 
-class ConstantToken(Token):
+class ConstantIntegerToken(Token):
     def _allowed_first(self, char: str) -> bool:
         return char in string.digits
 
