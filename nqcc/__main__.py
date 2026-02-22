@@ -3,6 +3,8 @@ import logging
 import pathlib
 import shutil
 
+from nqcc import preprocess_c_file
+
 _DESC = """\
 An implementation of the C Compiler described in Nora 
 Sandler's book "Writing a C Compiler."
@@ -66,6 +68,10 @@ def main():
         _logger.warning(f"Deleting working directory {args.working_dir}")
         shutil.rmtree(args.working_dir)
     args.working_dir.mkdir()
+
+    _logger.info("Running preprocessor")
+    preprocessed_file = preprocess_c_file(args.target, args.working_dir)
+
 
 
 if __name__ == "__main__":
