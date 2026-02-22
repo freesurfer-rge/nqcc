@@ -6,4 +6,5 @@ from ._lexer import KeywordToken as KeywordToken
 from ._lexer import OpenBraceToken as OpenBraceToken
 from ._lexer import OpenParenToken as OpenParenToken
 from ._lexer import SemicolonToken as SemicolonToken
+from ._lexer import WhitespaceToken as WhitespaceToken
 from ._preprocess import preprocess_c_file as preprocess_c_file

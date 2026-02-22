@@ -11,6 +11,7 @@ from nqcc import (
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
+    WhitespaceToken
 )
 
 
@@ -103,6 +104,33 @@ class TestConstantIntegerToken:
         assert not result, "Should NOT accept character after start"
         assert target.start_position == position
         assert target.value == f"{first_char}"
+
+class TestWhitespaceToken:
+    @pytest.mark.parametrize("position", [0, 10])
+    @pytest.mark.parametrize("first_char", string.whitespace)
+    @pytest.mark.parametrize("nxt_char", string.whitespace)
+    def test_allowed_chars(self, first_char, nxt_char, position):
+        target = WhitespaceToken()
+
+        result = target.try_append(first_char, position)
+        assert result, f"Failed to append '{repr(first_char)}'"
+        assert target.start_position == position
+
+        result = target.try_append(nxt_char, position + 1)
+        assert result, f"Failed to append '{repr(nxt_char)}'"
+        assert target.start_position == position
+
+        assert target.value == f"{first_char}{nxt_char}"
+
+    @pytest.mark.parametrize("position", [0, 10])
+    @pytest.mark.parametrize("bad_char", {*string.printable} - {*string.whitespace})
+    def test_disallowed_char(self, bad_char, position):
+        target = WhitespaceToken()
+
+        result = target.try_append(bad_char, position)
+        assert not result, f"Unexpected append: {bad_char}"
+        assert target.start_position == -1
+        assert not target.value
 
 
 TEST_KEYWORDS = {"int", "void", "return"}
