@@ -21,7 +21,7 @@ class Token(BaseModel, abc.ABC):
         pass
 
     @abc.abstractproperty
-    def precendence(self) -> int:
+    def precedence(self) -> int:
         pass
 
 
@@ -69,7 +69,7 @@ class IdentifierToken(FirstSubsequentToken):
         return char in self._SUBSEQUENT_CHARS
 
     @property
-    def precendence(self) -> int:
+    def precedence(self) -> int:
         return 5
 
 
@@ -81,7 +81,7 @@ class ConstantIntegerToken(FirstSubsequentToken):
         return char in string.digits
 
     @property
-    def precendence(self) -> int:
+    def precedence(self) -> int:
         return 5
 
 
@@ -93,7 +93,7 @@ class WhitespaceToken(FirstSubsequentToken):
         return char in string.whitespace
 
     @property
-    def precendence(self) -> int:
+    def precedence(self) -> int:
         return -5
 
 
@@ -125,7 +125,7 @@ class KeywordToken(Token):
         return not self.is_valid
 
     @property
-    def precendence(self) -> int:
+    def precedence(self) -> int:
         return 10
 
 
@@ -156,7 +156,7 @@ class SingleCharacterToken(Token):
         return not self.is_valid
 
     @property
-    def precendence(self) -> int:
+    def precedence(self) -> int:
         return 5
 
 
@@ -188,3 +188,32 @@ class SemicolonToken(SingleCharacterToken):
     @property
     def allowed_character(self) -> str:
         return ";"
+
+
+class Lexer:
+    def __init__(self):
+        self._position = 0
+        self._completed_token_list: list[Token] = []
+        self._current_candidates = self._get_fresh_candidate_tokens()
+
+    @property
+    def position(self) -> int:
+        return self._position
+
+    @property
+    def completed_token_list(self) -> list[Token]:
+        return [item for item in self._completed_token_list if item.precedence >= 0]
+
+    def _get_fresh_candidate_tokens(self) -> list[Token]:
+        starting_tokens = [
+            CloseBraceToken(),
+            CloseParenToken(),
+            ConstantIntegerToken(),
+            IdentifierToken(),
+            KeywordToken(),
+            OpenBraceToken(),
+            OpenParenToken(),
+            SemicolonToken(),
+            WhitespaceToken(),
+        ]
+        return starting_tokens
