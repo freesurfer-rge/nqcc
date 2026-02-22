@@ -40,3 +40,6 @@ jobs:
 
           - name: Run mypy
             run: mypy src/nqcc
+
+          - name: Run tests
+            run: python -m pytest tests/
