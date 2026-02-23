@@ -13,6 +13,7 @@ from nqcc.lexer import (
     OpenParenToken,
     SemicolonToken,
     TokenItem,
+    LexerError,
 )
 
 
@@ -79,9 +80,16 @@ class TestLexerFailures:
 
         sample_string = "int 123bar;"
 
-        for ch in sample_string:
-            target.push_character(ch)
-        target.character_stream_done()
+        with pytest.raises(LexerError) as le:
+            for ch in sample_string:
+                target.push_character(ch)
+        assert le.value.bad_character == "b"
+        assert le.value.position == 7
+        assert le.value.previous_tokens == [
+            KeywordToken(value="int", position=0),
+            ConstantIntegerToken(value="123", position=5),
+        ]
+        assert le.value.message == "No"
 
     def test_bad_character_atsign(self):
         target = Lexer()

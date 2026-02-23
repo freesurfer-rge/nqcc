@@ -12,6 +12,19 @@ from ._tokens import (
     WhitespaceToken,
 )
 
+MAX_EXCEPTION_TOKENS = 5
+
+
+class LexerError(Exception):
+    def __init__(
+        self, *, bad_character: str, position: int, previous_tokens: list[TokenItem], message: str
+    ):
+        self.bad_character = bad_character
+        self.position = position
+        self.previous_tokens = previous_tokens
+        self.message = message
+        super().__init__(self.message)
+
 
 class Lexer:
     def __init__(self):
@@ -56,8 +69,12 @@ class Lexer:
             if len(tokens_can_follow) > 0:
                 valid_tokens = [t for t in tokens_can_follow if t.is_valid]
                 if len(valid_tokens) == 0:
-                    msg = f"No valid token on arriving at '{ch}' at position {self.position}"
-                    raise ValueError(msg)
+                    raise LexerError(
+                        bad_character=ch,
+                        position=self.position,
+                        previous_tokens=self._completed_token_list[-MAX_EXCEPTION_TOKENS:],
+                        message="No valid token for character",
+                    )
 
                 valid_tokens.sort(key=lambda t: t.precedence, reverse=True)
                 self._completed_token_list.append(valid_tokens[0])
@@ -69,12 +86,19 @@ class Lexer:
                         next_candidates.append(nc)
 
                 if len(next_candidates) == 0:
-                    raise ValueError(f"No token will accept '{ch}' at position {self.position}")
+                    raise LexerError(
+                        bad_character=ch,
+                        position=self.position,
+                        previous_tokens=self._completed_token_list[-MAX_EXCEPTION_TOKENS:],
+                        message="No token will accept character",
+                    )
             else:
-                raise ValueError(
-                    f"No valid action for character '{ch}' at position {self.position}"
+                raise LexerError(
+                    bad_character=ch,
+                    position=self.position,
+                    previous_tokens=self._completed_token_list[-MAX_EXCEPTION_TOKENS:],
+                    message="No valid action for character",
                 )
-
             self._current_candidates = next_candidates
 
         self._position += 1
@@ -83,10 +107,12 @@ class Lexer:
         # Final tidy up, for when we are done pushing characters
         valid_tokens = [t for t in self._current_candidates if t.is_valid]
         if len(valid_tokens) == 0:
-            candidate_strings = [t.model_jump_json() for t in self._current_candidates]
-            all_candidate_str = ", ".join(candidate_strings)
-            msg = "No token currently valid: " + all_candidate_str
-            raise ValueError(msg)
+            raise LexerError(
+                bad_character="",
+                position=self.position,
+                previous_tokens=self._completed_token_list[-MAX_EXCEPTION_TOKENS:],
+                message="No token currently valid at end",
+            )
 
         valid_tokens.sort(key=lambda t: t.precedence, reverse=True)
         self._completed_token_list.append(valid_tokens[0])

@@ -1,5 +1,6 @@
 from ._driver import lexer_driver as lexer_driver
 from ._lexer import Lexer as Lexer
+from ._lexer import LexerError
 from ._tokens import AppendResult as AppendResult
 from ._tokens import (
     CloseBraceToken as CloseBraceToken,
