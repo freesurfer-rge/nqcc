@@ -4,6 +4,7 @@ import pathlib
 import shutil
 
 from nqcc import preprocess_c_file
+from nqcc.lexer import lexer_driver
 
 _DESC = """\
 An implementation of the C Compiler described in Nora 
@@ -34,25 +35,22 @@ def parse_args():
     )
 
     book_group = parser.add_argument_group(title="Required for book's test suite")
-    book_group.add_argument("--lex", action="store_true", help="Only run the lexer then exit")
-    book_group.add_argument(
-        "--parse", action="store_true", help="Only run the parser then exit (implies --lex)"
+
+    exit_group = book_group.add_mutually_exclusive_group()
+    exit_group.add_argument("--lex", action="store_true", help="Exit after the lexer")
+    exit_group.add_argument(
+        "--parse", action="store_true", help="Exit after the parser"
     )
-    book_group.add_argument(
+    exit_group.add_argument(
         "--codegen",
         action="store_true",
-        help="Only run the code generator then exit (implies --lex and --parse)",
+        help="Exit after code generation",
     )
 
     parser.add_argument("--working-dir", type=pathlib.Path, required=False, help=_WORKING_DIR_DESC)
     parser.add_argument("target", type=pathlib.Path, help="Path to target C file")
 
     args = parser.parse_args()
-
-    if args.codegen:
-        args.parse = True
-    if args.parse:
-        args.lex = True
 
     if not args.working_dir:
         args.working_dir = args.target.parent / _DEFAULT_WORKING_DIR
@@ -71,9 +69,13 @@ def main():
     args.working_dir.mkdir()
 
     _logger.info("Running preprocessor")
-    _ = preprocess_c_file(args.target, args.working_dir)
+    preprocessed_file_path = preprocess_c_file(args.target, args.working_dir)
 
     _logger.info("Running lexer")
+    _ = lexer_driver(preprocessed_file_path)
+
+    if args.lex:
+        _logger.info("Exiting after lexer")
 
 
 if __name__ == "__main__":

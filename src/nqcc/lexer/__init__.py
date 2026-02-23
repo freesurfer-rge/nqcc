@@ -1,3 +1,4 @@
+from ._driver import lexer_driver
 from ._lexer import Lexer as Lexer
 from ._tokens import (
     CloseBraceToken as CloseBraceToken,
