@@ -1,3 +1,7 @@
+import string
+
+import pytest
+
 from nqcc.lexer import (
     CloseBraceToken,
     CloseParenToken,
@@ -41,10 +45,12 @@ class TestLexer:
         ]
         assert final_tokens == expected_tokens
 
-    def test_simple_program(self):
+    @pytest.mark.parametrize("space_replace", {*string.whitespace, "  "})
+    def test_simple_program(self, space_replace: str):
         target = Lexer()
 
         program_str = "int my_func ( void ) { return 2; }"
+        program_str = program_str.replace(" ", space_replace)
 
         expected_tokens = [
             KeywordToken(value="int"),
