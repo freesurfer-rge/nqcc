@@ -25,7 +25,7 @@ from ._tokens import (
     SemicolonToken as SemicolonToken,
 )
 from ._tokens import (
-    Token as Token,
+    TokenItem as TokenItem,
 )
 from ._tokens import (
     WhitespaceToken as WhitespaceToken,

@@ -1,10 +1,12 @@
 import abc
 import string
+from typing import Literal, Union
 
 from pydantic import BaseModel, Field
 
 
 class Token(BaseModel, abc.ABC):
+    type: str
     start_position: int = Field(default=-1)
     value: str = Field(default="")
 
@@ -62,6 +64,8 @@ class FirstSubsequentToken(Token):
 
 
 class IdentifierToken(FirstSubsequentToken):
+    type: Literal["IdentifierToken"] = "IdentifierToken"
+
     _FIRST_CHARS = {*string.ascii_letters, "_"}
     _SUBSEQUENT_CHARS = {*string.ascii_letters, *string.digits, "_"}
 
@@ -77,6 +81,8 @@ class IdentifierToken(FirstSubsequentToken):
 
 
 class ConstantIntegerToken(FirstSubsequentToken):
+    type: Literal["ConstantIntegerToken"] = "ConstantIntegerToken"
+
     def _allowed_first(self, char: str) -> bool:
         return char in string.digits
 
@@ -89,6 +95,8 @@ class ConstantIntegerToken(FirstSubsequentToken):
 
 
 class WhitespaceToken(FirstSubsequentToken):
+    type: Literal["WhitespaceToken"] = "WhitespaceToken"
+
     def _allowed_first(self, char: str) -> bool:
         return char in string.whitespace
 
@@ -101,6 +109,8 @@ class WhitespaceToken(FirstSubsequentToken):
 
 
 class KeywordToken(Token):
+    type: Literal["KeywordToken"] = "KeywordToken"
+
     _KEYWORDS = {"int", "void", "return"}
 
     def try_append(self, char: str, position: int) -> bool:
@@ -165,30 +175,54 @@ class SingleCharacterToken(Token):
 
 
 class OpenParenToken(SingleCharacterToken):
+    type: Literal["OpenParenToken"] = "OpenParenToken"
+
     @property
     def allowed_character(self) -> str:
         return "("
 
 
 class CloseParenToken(SingleCharacterToken):
+    type: Literal["CloseParenToken"] = "CloseParenToken"
+
     @property
     def allowed_character(self) -> str:
         return ")"
 
 
 class OpenBraceToken(SingleCharacterToken):
+    type: Literal["OpenBraceToken"] = "OpenBraceToken"
+
     @property
     def allowed_character(self) -> str:
         return "{"
 
 
 class CloseBraceToken(SingleCharacterToken):
+    type: Literal["CloseBraceToken"] = "CloseBraceToken"
+
     @property
     def allowed_character(self) -> str:
         return "}"
 
 
 class SemicolonToken(SingleCharacterToken):
+    type: Literal["SemicolonToken"] = "SemicolonToken"
+
     @property
     def allowed_character(self) -> str:
         return ";"
+
+
+TokenItem = Union[
+    CloseBraceToken,
+    CloseParenToken,
+    ConstantIntegerToken,
+    IdentifierToken,
+    KeywordToken,
+    OpenBraceToken,
+    OpenParenToken,
+    SemicolonToken,
+    Token,
+    WhitespaceToken,
+]

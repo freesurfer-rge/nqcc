@@ -7,7 +7,7 @@ from ._tokens import (
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
-    Token,
+    TokenItem,
     WhitespaceToken,
 )
 
@@ -15,7 +15,7 @@ from ._tokens import (
 class Lexer:
     def __init__(self):
         self._position = 0
-        self._completed_token_list: list[Token] = []
+        self._completed_token_list: list[TokenItem] = []
         self._current_candidates = self._get_fresh_candidate_tokens()
 
     @property
@@ -23,14 +23,14 @@ class Lexer:
         return self._position
 
     @property
-    def completed_token_list(self) -> list[Token]:
+    def completed_token_list(self) -> list[TokenItem]:
         return [item for item in self._completed_token_list if item.precedence >= 0]
 
     def push_character(self, ch: str):
         assert len(ch) == 1, "Must only pass single characters!"
 
-        tokens_accept: list[Token] = []
-        tokens_reject: list[Token] = []
+        tokens_accept: list[TokenItem] = []
+        tokens_reject: list[TokenItem] = []
 
         # Try to append the token
         for tok in self._current_candidates:
@@ -56,7 +56,7 @@ class Lexer:
             self._completed_token_list.append(valid_tokens[0])
 
             all_candidates = self._get_fresh_candidate_tokens()
-            next_candidates: list[Token] = []
+            next_candidates: list[TokenItem] = []
             for nc in all_candidates:
                 if nc.try_append(ch, self.position):
                     next_candidates.append(nc)
@@ -80,7 +80,7 @@ class Lexer:
         valid_tokens.sort(key=lambda t: t.precedence, reverse=True)
         self._completed_token_list.append(valid_tokens[0])
 
-    def _get_fresh_candidate_tokens(self) -> list[Token]:
+    def _get_fresh_candidate_tokens(self) -> list[TokenItem]:
         starting_tokens = [
             CloseBraceToken(),
             CloseParenToken(),
