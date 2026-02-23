@@ -15,8 +15,9 @@ from nqcc.lexer import (
     WhitespaceToken,
 )
 
-_WORD_CHARS = {c for c in string.printable if (c.isalnum() or c=="_")}
+_WORD_CHARS = {c for c in string.printable if (c.isalnum() or c == "_")}
 _NONWORD_CHARS = {*string.printable} - _WORD_CHARS
+
 
 class TestIdentifierToken:
     @pytest.mark.parametrize("position", [0, 10])
@@ -33,9 +34,7 @@ class TestIdentifierToken:
         assert target.is_appendable
 
     @pytest.mark.parametrize("position", [0, 10])
-    @pytest.mark.parametrize(
-        "nxt_char", _NONWORD_CHARS
-    )
+    @pytest.mark.parametrize("nxt_char", _NONWORD_CHARS)
     def test_disallowed_first_characters(self, position, nxt_char):
         # Slightly ugly parameter list because underscores are allowed....
         target = IdentifierToken()
@@ -78,6 +77,7 @@ class TestIdentifierToken:
         assert target.is_valid
         assert target.is_appendable
 
+
 class TestConstantIntegerToken:
     @pytest.mark.parametrize("position", [0, 10])
     @pytest.mark.parametrize("nxt_char", string.digits)
@@ -93,9 +93,7 @@ class TestConstantIntegerToken:
         assert target.is_appendable
 
     @pytest.mark.parametrize("position", [0, 10])
-    @pytest.mark.parametrize(
-        "nxt_char", {*string.printable} - {*string.digits}
-    )
+    @pytest.mark.parametrize("nxt_char", {*string.printable} - {*string.digits})
     def test_disallowed_first_characters(self, position, nxt_char):
         target = ConstantIntegerToken()
         assert not target.is_valid
@@ -124,9 +122,7 @@ class TestConstantIntegerToken:
 
     @pytest.mark.parametrize("position", [0, 10])
     @pytest.mark.parametrize("first_char", ["1", "0"])
-    @pytest.mark.parametrize(
-        "nxt_char", _WORD_CHARS - {*string.digits}
-    )
+    @pytest.mark.parametrize("nxt_char", _WORD_CHARS - {*string.digits})
     def test_disallowed_second_characters_reject(self, position, first_char, nxt_char):
         target = ConstantIntegerToken()
         assert not target.is_valid
@@ -141,9 +137,7 @@ class TestConstantIntegerToken:
 
     @pytest.mark.parametrize("position", [0, 10])
     @pytest.mark.parametrize("first_char", ["1", "0"])
-    @pytest.mark.parametrize(
-        "nxt_char", _NONWORD_CHARS
-    )
+    @pytest.mark.parametrize("nxt_char", _NONWORD_CHARS)
     def test_disallowed_second_characters_can_follow(self, position, first_char, nxt_char):
         target = ConstantIntegerToken()
         assert not target.is_valid
@@ -199,7 +193,7 @@ class TestWhitespaceToken:
         assert target.is_appendable
         result = target.try_append(first_char, position)
         assert result == AppendResult.ACCEPTED
-        result = target.try_append(bad_char, position+1)
+        result = target.try_append(bad_char, position + 1)
         assert result == AppendResult.CAN_FOLLOW, f"Unexpected append: {bad_char}"
         assert target.start_position == position
         assert target.value == first_char
@@ -233,7 +227,10 @@ class TestKeywordToken:
 
         # Try to append an invalid character
         result = target.try_append(nxt_char, position + len(keyword))
-        assert result == AppendResult.REJECTED, f"Unexpected append {c}"
+        if nxt_char in _NONWORD_CHARS:
+            assert result == AppendResult.CAN_FOLLOW, f"Expected CAN_FOLLOW {c}"
+        else:
+            assert result == AppendResult.REJECTED, f"Unexpected append {c}"
         assert target.value == keyword
         assert target.is_valid
         assert not target.is_appendable

@@ -71,7 +71,9 @@ class Lexer:
                 if len(next_candidates) == 0:
                     raise ValueError(f"No token will accept '{ch}' at position {self.position}")
             else:
-                raise ValueError(f"No valid action for character '{ch}' at position {self.position}")
+                raise ValueError(
+                    f"No valid action for character '{ch}' at position {self.position}"
+                )
 
             self._current_candidates = next_candidates
 

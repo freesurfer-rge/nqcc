@@ -12,7 +12,7 @@ class AppendResult(Enum):
     REJECTED = 2
 
 
-_NONWORD_CHARS = {c for c in string.printable if (c!="_" and not c.isalnum())}
+_NONWORD_CHARS = {c for c in string.printable if (c != "_" and not c.isalnum())}
 
 
 class Token(BaseModel, abc.ABC):
