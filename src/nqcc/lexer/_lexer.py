@@ -72,7 +72,7 @@ class Lexer:
                     raise LexerError(
                         bad_character=ch,
                         position=self.position,
-                        previous_tokens=self._completed_token_list[-MAX_EXCEPTION_TOKENS:],
+                        previous_tokens=self.completed_token_list[-MAX_EXCEPTION_TOKENS:],
                         message="No valid token for character",
                     )
 
@@ -89,14 +89,14 @@ class Lexer:
                     raise LexerError(
                         bad_character=ch,
                         position=self.position,
-                        previous_tokens=self._completed_token_list[-MAX_EXCEPTION_TOKENS:],
+                        previous_tokens=self.completed_token_list[-MAX_EXCEPTION_TOKENS:],
                         message="No token will accept character",
                     )
             else:
                 raise LexerError(
                     bad_character=ch,
                     position=self.position,
-                    previous_tokens=self._completed_token_list[-MAX_EXCEPTION_TOKENS:],
+                    previous_tokens=self.completed_token_list[-MAX_EXCEPTION_TOKENS:],
                     message="No valid action for character",
                 )
             self._current_candidates = next_candidates
@@ -110,7 +110,7 @@ class Lexer:
             raise LexerError(
                 bad_character="",
                 position=self.position,
-                previous_tokens=self._completed_token_list[-MAX_EXCEPTION_TOKENS:],
+                previous_tokens=self.completed_token_list[-MAX_EXCEPTION_TOKENS:],
                 message="No token currently valid at end",
             )
 

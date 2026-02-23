@@ -46,6 +46,17 @@ class TestLexer:
         ]
         assert final_tokens == expected_tokens
 
+    def test_token_at_start(self):
+        target = Lexer()
+        sample_string = "123"
+        for ch in sample_string:
+            target.push_character(ch)
+        target.character_stream_done()
+
+        final_tokens = target.completed_token_list
+        assert len(final_tokens) == 1
+        assert final_tokens[0] == ConstantIntegerToken(start_position=0, value="123")
+
     @pytest.mark.parametrize("space_replace", {*string.whitespace, "  "})
     def test_simple_program(self, space_replace: str):
         target = Lexer()
@@ -86,10 +97,9 @@ class TestLexerFailures:
         assert le.value.bad_character == "b"
         assert le.value.position == 7
         assert le.value.previous_tokens == [
-            KeywordToken(value="int", position=0),
-            ConstantIntegerToken(value="123", position=5),
+            KeywordToken(value="int", start_position=0),
         ]
-        assert le.value.message == "No"
+        assert le.value.message == "No valid action for character"
 
     def test_bad_character_atsign(self):
         target = Lexer()
