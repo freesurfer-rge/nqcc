@@ -38,3 +38,30 @@ class TestLexerFailures:
         for ch in sample_string:
             target.push_character(ch)
         target.character_stream_done()
+
+    def test_bad_character_atsign(self):
+        target = Lexer()
+
+        sample_string = "return 0@1;"
+
+        for ch in sample_string:
+            target.push_character(ch)
+        target.character_stream_done()
+
+    def test_bad_character_backslash(self):
+        target = Lexer()
+
+        sample_string = "\\"
+
+        for ch in sample_string:
+            target.push_character(ch)
+        target.character_stream_done()
+
+    def test_bad_character_backtick(self):
+        target = Lexer()
+
+        sample_string = "`"
+
+        for ch in sample_string:
+            target.push_character(ch)
+        target.character_stream_done()
