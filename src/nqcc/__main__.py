@@ -73,6 +73,8 @@ def main():
     _logger.info("Running preprocessor")
     _ = preprocess_c_file(args.target, args.working_dir)
 
+    _logger.info("Running lexer")
+
 
 if __name__ == "__main__":
     main()

@@ -2,7 +2,7 @@ import string
 
 import pytest
 
-from nqcc import (
+from nqcc.lexer import (
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
