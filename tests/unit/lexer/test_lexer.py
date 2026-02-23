@@ -28,3 +28,13 @@ class TestLexer:
             CloseParenToken(start_position=17, value=")"),
         ]
         assert final_tokens == expected_tokens
+
+class TestLexerFailures:
+    def test_bad_identifier(self):
+        target = Lexer()
+
+        sample_string = "int 123bar;"
+
+        for ch in sample_string:
+            target.push_character(ch)
+        target.character_stream_done()
