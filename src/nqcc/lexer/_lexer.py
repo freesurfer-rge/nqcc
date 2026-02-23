@@ -1,4 +1,5 @@
 from ._tokens import (
+    AppendResult,
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
@@ -30,39 +31,47 @@ class Lexer:
         assert len(ch) == 1, "Must only pass single characters!"
 
         tokens_accept: list[TokenItem] = []
+        tokens_can_follow: list[TokenItem] = []
         tokens_reject: list[TokenItem] = []
 
         # Try to append the token
         for tok in self._current_candidates:
-            if tok.try_append(ch, self.position):
-                tokens_accept.append(tok)
-            else:
-                tokens_reject.append(tok)
+            match tok.try_append(ch, self.position):
+                case AppendResult.ACCEPTED:
+                    tokens_accept.append(tok)
+                case AppendResult.CAN_FOLLOW:
+                    tokens_can_follow.append(tok)
+                case AppendResult.REJECTED:
+                    tokens_reject.append(tok)
+                case unrecognised:
+                    raise ValueError(f"Unrecognised try_append result: {unrecognised}")
 
         if len(tokens_accept) > 0:
             # At least one token accepted the character, so we
             # can go to the next character
             self._current_candidates = tokens_accept
         else:
-            # No token accepted the character, so look through
-            # those which rejected it to see if any are
-            # currently valid
-            valid_tokens = [t for t in tokens_reject if t.is_valid]
-            if len(valid_tokens) == 0:
-                msg = f"No valid token on arriving at '{ch}' at position {self.position}"
-                raise ValueError(msg)
+            # No token accepted the character, so see if
+            # any tokens said that the character could follow
+            if len(tokens_can_follow) > 0:
+                valid_tokens = [t for t in tokens_can_follow if t.is_valid]
+                if len(valid_tokens) == 0:
+                    msg = f"No valid token on arriving at '{ch}' at position {self.position}"
+                    raise ValueError(msg)
 
-            valid_tokens.sort(key=lambda t: t.precedence, reverse=True)
-            self._completed_token_list.append(valid_tokens[0])
+                valid_tokens.sort(key=lambda t: t.precedence, reverse=True)
+                self._completed_token_list.append(valid_tokens[0])
 
-            all_candidates = self._get_fresh_candidate_tokens()
-            next_candidates: list[TokenItem] = []
-            for nc in all_candidates:
-                if nc.try_append(ch, self.position):
-                    next_candidates.append(nc)
+                all_candidates = self._get_fresh_candidate_tokens()
+                next_candidates: list[TokenItem] = []
+                for nc in all_candidates:
+                    if nc.try_append(ch, self.position):
+                        next_candidates.append(nc)
 
-            if len(next_candidates) == 0:
-                raise ValueError(f"No token will accept '{ch}' at position {self.position}")
+                if len(next_candidates) == 0:
+                    raise ValueError(f"No token will accept '{ch}' at position {self.position}")
+            else:
+                raise ValueError(f"No valid action for character '{ch}' at position {self.position}")
 
             self._current_candidates = next_candidates
 
