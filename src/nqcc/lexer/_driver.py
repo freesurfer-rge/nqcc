@@ -6,12 +6,13 @@ from ._tokens import Token
 
 TOKEN_EXTENSION = ".tokens"
 
+
 def lexer_driver(preprocessed_file: pathlib.Path) -> list[Token]:
     assert preprocessed_file.exists(), f"Preprocessed file {preprocessed_file} not found!"
 
     lexer = Lexer()
 
-    with open(preprocessed_file, 'r') as f:
+    with open(preprocessed_file, "r") as f:
         while True:
             ch = f.read(1)
             if not ch:
@@ -23,7 +24,7 @@ def lexer_driver(preprocessed_file: pathlib.Path) -> list[Token]:
 
     output_file = preprocessed_file.stem + TOKEN_EXTENSION
     output_path = preprocessed_file.parent / output_file
-    with open(output_path, 'w') as token_file:
+    with open(output_path, "w") as token_file:
         json.dump([t.model_dump(round_trip=True) for t in token_list], token_file, indent=4)
 
     return token_list

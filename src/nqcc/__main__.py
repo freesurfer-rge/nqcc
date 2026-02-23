@@ -38,9 +38,7 @@ def parse_args():
 
     exit_group = book_group.add_mutually_exclusive_group()
     exit_group.add_argument("--lex", action="store_true", help="Exit after the lexer")
-    exit_group.add_argument(
-        "--parse", action="store_true", help="Exit after the parser"
-    )
+    exit_group.add_argument("--parse", action="store_true", help="Exit after the parser")
     exit_group.add_argument(
         "--codegen",
         action="store_true",
