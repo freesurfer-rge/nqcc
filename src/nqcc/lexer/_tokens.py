@@ -153,7 +153,11 @@ class KeywordToken(Token):
                 self.start_position = position
             self.value = tst_value
             return AppendResult.ACCEPTED
-        return AppendResult.REJECTED
+        else:
+            if char in _NONWORD_CHARS:
+                return AppendResult.CAN_FOLLOW
+            else:
+                return AppendResult.REJECTED
 
     @property
     def is_valid(self) -> bool:

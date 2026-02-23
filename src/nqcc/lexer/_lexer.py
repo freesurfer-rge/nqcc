@@ -65,7 +65,7 @@ class Lexer:
                 all_candidates = self._get_fresh_candidate_tokens()
                 next_candidates: list[TokenItem] = []
                 for nc in all_candidates:
-                    if nc.try_append(ch, self.position):
+                    if nc.try_append(ch, self.position) == AppendResult.ACCEPTED:
                         next_candidates.append(nc)
 
                 if len(next_candidates) == 0:
