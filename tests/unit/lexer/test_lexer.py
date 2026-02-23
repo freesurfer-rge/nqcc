@@ -12,7 +12,7 @@ from nqcc.lexer import (
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
-    TokenItem
+    TokenItem,
 )
 
 
@@ -20,8 +20,8 @@ class TestLexer:
     def compare_tokens_without_position(self, expected: list[TokenItem], actual: list[TokenItem]):
         assert len(expected) == len(actual)
 
-        for (t_e, t_a) in zip(expected, actual):
-            assert type(t_e) == type(t_a)
+        for t_e, t_a in zip(expected, actual, strict=True):
+            assert type(t_e) is type(t_a)
             assert t_e.value == t_a.value
 
     def test_smoke(self):
@@ -62,7 +62,7 @@ class TestLexer:
             KeywordToken(value="return"),
             ConstantIntegerToken(value="2"),
             SemicolonToken(value=";"),
-            CloseBraceToken(value="}")
+            CloseBraceToken(value="}"),
         ]
 
         for ch in program_str:
