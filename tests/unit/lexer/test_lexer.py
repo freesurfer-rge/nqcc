@@ -9,11 +9,11 @@ from nqcc.lexer import (
     IdentifierToken,
     KeywordToken,
     Lexer,
+    LexerError,
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
     TokenItem,
-    LexerError,
 )
 
 
@@ -106,24 +106,39 @@ class TestLexerFailures:
 
         sample_string = "return 0@1;"
 
-        for ch in sample_string:
-            target.push_character(ch)
-        target.character_stream_done()
+        with pytest.raises(LexerError) as le:
+            for ch in sample_string:
+                target.push_character(ch)
+        assert le.value.bad_character == "@"
+        assert le.value.position == 8
+        assert le.value.previous_tokens == [
+            KeywordToken(value="return", start_position=0),
+            ConstantIntegerToken(value="0", start_position=7),
+        ]
+        assert le.value.message == "No token will accept character"
 
     def test_bad_character_backslash(self):
         target = Lexer()
 
         sample_string = "\\"
 
-        for ch in sample_string:
-            target.push_character(ch)
-        target.character_stream_done()
+        with pytest.raises(LexerError) as le:
+            for ch in sample_string:
+                target.push_character(ch)
+        assert le.value.bad_character == "\\"
+        assert le.value.position == 0
+        assert le.value.previous_tokens == []
+        assert le.value.message == "No valid token for character"
 
     def test_bad_character_backtick(self):
         target = Lexer()
 
         sample_string = "`"
 
-        for ch in sample_string:
-            target.push_character(ch)
-        target.character_stream_done()
+        with pytest.raises(LexerError) as le:
+            for ch in sample_string:
+                target.push_character(ch)
+        assert le.value.bad_character == "`"
+        assert le.value.position == 0
+        assert le.value.previous_tokens == []
+        assert le.value.message == "No valid token for character"
