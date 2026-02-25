@@ -19,7 +19,7 @@ class SourceASTError(ValueError):
 
 
 class SourceASTNode(BaseModel, abc.ABC):
-    type: str
+    node_type: str
     start_position: int
 
     @classmethod
@@ -58,7 +58,7 @@ class SourceExpressionNode(SourceASTNode):
 
 
 class SourceConstantIntNode(SourceExpressionNode):
-    type: Literal["SourceConstantIntNode"] = "SourceConstantIntNode"
+    node_type: Literal["SourceConstantIntNode"] = "SourceConstantIntNode"
     value: int
 
 
@@ -67,7 +67,7 @@ class SourceStatementNode(SourceASTNode):
 
 
 class SourceReturnNode(SourceStatementNode):
-    type: Literal["SourceReturnNode"] = "SourceReturnNode"
+    node_type: Literal["SourceReturnNode"] = "SourceReturnNode"
     value: SourceExpressionNode
 
 
@@ -76,7 +76,7 @@ class SourceFunctionDefinitionNode(SourceASTNode):
 
 
 class SourceFunctionNode(SourceFunctionDefinitionNode):
-    type: Literal["SourceFunctionNode"] = "SourceFunctionNode"
+    node_type: Literal["SourceFunctionNode"] = "SourceFunctionNode"
     identifier: str
     body: SourceStatementNode
 
@@ -86,5 +86,5 @@ class SourceProgramDefinitionNode(SourceASTNode):
 
 
 class SourceProgramNode(SourceProgramDefinitionNode):
-    type: Literal["SourceProgramNode"] = "SourceProgramNode"
+    node_type: Literal["SourceProgramNode"] = "SourceProgramNode"
     value: SourceFunctionDefinitionNode
