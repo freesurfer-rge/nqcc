@@ -206,6 +206,7 @@ class SingleCharacterToken(Token):
 
 class OpenParenToken(SingleCharacterToken):
     token_type: Literal["OpenParenToken"] = "OpenParenToken"
+    value: str = Field(pattern="^\\(?$", default="")
 
     @property
     def allowed_character(self) -> str:
@@ -214,6 +215,7 @@ class OpenParenToken(SingleCharacterToken):
 
 class CloseParenToken(SingleCharacterToken):
     token_type: Literal["CloseParenToken"] = "CloseParenToken"
+    value: str = Field(pattern="^\\)?$", default="")
 
     @property
     def allowed_character(self) -> str:
@@ -222,6 +224,7 @@ class CloseParenToken(SingleCharacterToken):
 
 class OpenBraceToken(SingleCharacterToken):
     token_type: Literal["OpenBraceToken"] = "OpenBraceToken"
+    value: str = Field(pattern="^\\{?$", default="")
 
     @property
     def allowed_character(self) -> str:
@@ -230,6 +233,7 @@ class OpenBraceToken(SingleCharacterToken):
 
 class CloseBraceToken(SingleCharacterToken):
     token_type: Literal["CloseBraceToken"] = "CloseBraceToken"
+    value: str = Field(pattern="^\\}?$", default="")
 
     @property
     def allowed_character(self) -> str:
@@ -238,6 +242,7 @@ class CloseBraceToken(SingleCharacterToken):
 
 class SemicolonToken(SingleCharacterToken):
     token_type: Literal["SemicolonToken"] = "SemicolonToken"
+    value: str = Field(pattern="^;?$", default="")
 
     @property
     def allowed_character(self) -> str:
