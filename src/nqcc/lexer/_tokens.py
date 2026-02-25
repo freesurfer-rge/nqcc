@@ -16,7 +16,7 @@ _NONWORD_CHARS = {c for c in string.printable if (c != "_" and not c.isalnum())}
 
 
 class Token(BaseModel, abc.ABC):
-    type: str
+    token_type: str
     start_position: int = Field(default=-1)
     value: str = Field(default="")
 
@@ -81,7 +81,7 @@ class FirstSubsequentToken(Token):
 
 
 class IdentifierToken(FirstSubsequentToken):
-    type: Literal["IdentifierToken"] = "IdentifierToken"
+    token_type: Literal["IdentifierToken"] = "IdentifierToken"
 
     _FIRST_CHARS = {*string.ascii_letters, "_"}
     _SUBSEQUENT_CHARS = {*string.ascii_letters, *string.digits, "_"}
@@ -101,7 +101,7 @@ class IdentifierToken(FirstSubsequentToken):
 
 
 class ConstantIntegerToken(FirstSubsequentToken):
-    type: Literal["ConstantIntegerToken"] = "ConstantIntegerToken"
+    token_type: Literal["ConstantIntegerToken"] = "ConstantIntegerToken"
 
     def _allowed_first(self, char: str) -> bool:
         return char in string.digits
@@ -118,7 +118,7 @@ class ConstantIntegerToken(FirstSubsequentToken):
 
 
 class WhitespaceToken(FirstSubsequentToken):
-    type: Literal["WhitespaceToken"] = "WhitespaceToken"
+    token_type: Literal["WhitespaceToken"] = "WhitespaceToken"
 
     def _allowed_first(self, char: str) -> bool:
         return char in string.whitespace
@@ -135,7 +135,7 @@ class WhitespaceToken(FirstSubsequentToken):
 
 
 class KeywordToken(Token):
-    type: Literal["KeywordToken"] = "KeywordToken"
+    token_type: Literal["KeywordToken"] = "KeywordToken"
 
     _KEYWORDS = {"int", "void", "return"}
 
@@ -205,7 +205,7 @@ class SingleCharacterToken(Token):
 
 
 class OpenParenToken(SingleCharacterToken):
-    type: Literal["OpenParenToken"] = "OpenParenToken"
+    token_type: Literal["OpenParenToken"] = "OpenParenToken"
 
     @property
     def allowed_character(self) -> str:
@@ -213,7 +213,7 @@ class OpenParenToken(SingleCharacterToken):
 
 
 class CloseParenToken(SingleCharacterToken):
-    type: Literal["CloseParenToken"] = "CloseParenToken"
+    token_type: Literal["CloseParenToken"] = "CloseParenToken"
 
     @property
     def allowed_character(self) -> str:
@@ -221,7 +221,7 @@ class CloseParenToken(SingleCharacterToken):
 
 
 class OpenBraceToken(SingleCharacterToken):
-    type: Literal["OpenBraceToken"] = "OpenBraceToken"
+    token_type: Literal["OpenBraceToken"] = "OpenBraceToken"
 
     @property
     def allowed_character(self) -> str:
@@ -229,7 +229,7 @@ class OpenBraceToken(SingleCharacterToken):
 
 
 class CloseBraceToken(SingleCharacterToken):
-    type: Literal["CloseBraceToken"] = "CloseBraceToken"
+    token_type: Literal["CloseBraceToken"] = "CloseBraceToken"
 
     @property
     def allowed_character(self) -> str:
@@ -237,7 +237,7 @@ class CloseBraceToken(SingleCharacterToken):
 
 
 class SemicolonToken(SingleCharacterToken):
-    type: Literal["SemicolonToken"] = "SemicolonToken"
+    token_type: Literal["SemicolonToken"] = "SemicolonToken"
 
     @property
     def allowed_character(self) -> str:
