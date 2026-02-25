@@ -1,9 +1,13 @@
 import abc
-from typing import ClassVar, Literal, MutableSequence
+from typing import Literal, MutableSequence
 
 from pydantic import BaseModel
 
-from nqcc.lexer import TokenItem, ConstantIntegerToken
+from nqcc.lexer import (
+    ConstantIntegerToken,
+    ExpressionTokenItem,
+    TokenItem,
+)
 
 
 class SourceASTError(ValueError):
@@ -19,7 +23,7 @@ class SourceASTNode(BaseModel, abc.ABC):
     start_position: int
 
     @classmethod
-    def expect(cls, expected_token_type: type, tokens: MutableSequence[TokenItem]):
+    def expect(cls, expected_token_type: type, tokens: MutableSequence[TokenItem]) -> TokenItem:
         # By default, pop takes the _last_ element
         head = tokens.pop(0)
         if not isinstance(head, expected_token_type):
@@ -28,24 +32,34 @@ class SourceASTNode(BaseModel, abc.ABC):
                 actual_token=head,
                 message="Received token of unexpected type",
             )
-    
+        return head
+
     @classmethod
-    @abc.abstracmethod
+    @abc.abstractmethod
     def parse(cls, tokens: MutableSequence[TokenItem]) -> SourceASTNode:
         pass
 
 
 class SourceExpressionNode(SourceASTNode):
-    
     @classmethod
     def parse(cls, tokens: MutableSequence[TokenItem]) -> SourceASTNode:
-        token = cls.expect(ConstantIntegerToken, tokens)
+        token = cls.expect(ExpressionTokenItem, tokens)
+
+        match token:
+            case ConstantIntegerToken():
+                result = SourceConstantIntNode(
+                    start_position=token.start_position, value=int(token.value)
+                )
+
+            case _:
+                raise ValueError(f"Could not match type of {token}")
+
+        return result
 
 
 class SourceConstantIntNode(SourceExpressionNode):
     type: Literal["SourceConstantIntNode"] = "SourceConstantIntNode"
     value: int
-
 
 
 class SourceStatementNode(SourceASTNode):

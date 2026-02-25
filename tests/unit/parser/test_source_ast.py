@@ -1,9 +1,18 @@
-from nqcc.parser import SourceConstantIntNode, SourceReturnNode
+from nqcc.lexer import *
+from nqcc.parser import *
 
 
-def test_smoke():
-    n1 = SourceConstantIntNode(start_position=1, value=2)
-    n2 = SourceReturnNode(start_position=2, value=n1)
+class TestSourceExpressionNode:
+    def test_constant_integer(self):
+        tokens = [
+            ConstantIntegerToken(start_position=1, value="123"),
+            SemicolonToken(start_position=5, value=";"),
+        ]
 
-    SourceConstantIntNode.last_tokens = "Hello"
-    assert SourceReturnNode.last_tokens == "Hello"
+        node = SourceExpressionNode.parse(tokens)
+        assert isinstance(node, SourceConstantIntNode)
+        assert node.start_position == 1
+        assert node.value == 123
+
+        assert len(tokens) == 1
+        assert tokens[0] == SemicolonToken(start_position=5, value=";")

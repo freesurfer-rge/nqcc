@@ -11,6 +11,7 @@ from ._tokens import (
 from ._tokens import (
     ConstantIntegerToken as ConstantIntegerToken,
 )
+from ._tokens import ExpressionTokenItem as ExpressionTokenItem
 from ._tokens import (
     IdentifierToken as IdentifierToken,
 )
