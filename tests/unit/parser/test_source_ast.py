@@ -1,5 +1,5 @@
-from nqcc.lexer import *
-from nqcc.parser import *
+from nqcc.lexer import ConstantIntegerToken, SemicolonToken
+from nqcc.parser import SourceConstantIntNode, SourceExpressionNode
 
 
 class TestSourceExpressionNode:
