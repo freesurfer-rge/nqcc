@@ -4,7 +4,7 @@ from nqcc.lexer import (
     TokenItem,
 )
 
-from ._exceptions import SourceASTError
+from ._exceptions import SourceASTBadTypeError
 
 
 class TokenTape:
@@ -24,7 +24,7 @@ class TokenTape:
     def expect(self, expected_token_type: type) -> TokenItem:
         head = self.take()
         if not isinstance(head, expected_token_type):
-            raise SourceASTError(
+            raise SourceASTBadTypeError(
                 expected_type=expected_token_type,
                 actual_token=head,
                 message="Received token of unexpected type",

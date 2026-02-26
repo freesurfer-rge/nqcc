@@ -6,8 +6,11 @@ from pydantic import BaseModel
 from nqcc.lexer import (
     ConstantIntegerToken,
     ExpressionTokenItem,
+    KeywordToken,
+    SemicolonToken
 )
 
+from ._exceptions import SourceASTBadValueError
 from ._token_tape import TokenTape
 
 
@@ -44,7 +47,16 @@ class SourceConstantIntNode(SourceExpressionNode):
 
 
 class SourceStatementNode(SourceASTNode):
-    pass
+    @classmethod
+    def parse(cls, token_tape: TokenTape) -> SourceASTNode:
+        return_token = token_tape.expect(KeywordToken)
+        if return_token.value != "return":
+            raise SourceASTBadValueError(expected_value="return", actual_token=return_token, message="Unexpected keyword")
+        return_value = SourceExpressionNode.parse(token_tape)
+        _ = token_tape.expect(SemicolonToken)
+        return SourceReturnNode(start_position=return_token.start_position, value=return_value)
+
+
 
 
 class SourceReturnNode(SourceStatementNode):

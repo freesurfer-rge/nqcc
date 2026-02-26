@@ -1,7 +1,7 @@
 import pytest
 
 from nqcc.lexer import ConstantIntegerToken, SemicolonToken
-from nqcc.parser import SourceASTError, TokenTape
+from nqcc.parser import SourceASTBadTypeError, TokenTape
 
 
 class TestTokenTape:
@@ -42,7 +42,7 @@ class TestTokenTape:
         target = TokenTape([a, b])
         assert target.tokens_remaining == 2
 
-        with pytest.raises(SourceASTError) as sae:
+        with pytest.raises(SourceASTBadTypeError) as sae:
             _ = target.expect(SemicolonToken)
         assert sae.value.actual_token == a
         assert sae.value.expected_type == SemicolonToken
