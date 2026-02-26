@@ -1,5 +1,5 @@
 from nqcc.lexer import ConstantIntegerToken, SemicolonToken
-from nqcc.parser import SourceConstantIntNode, SourceExpressionNode, TokenTape
+from nqcc.parser import TokenTape
 
 
 class TestTokenTape:
@@ -7,7 +7,7 @@ class TestTokenTape:
         a = ConstantIntegerToken(start_position=0, value="2")
         b = SemicolonToken(start_position=3, value=";")
 
-        target = TokenTape([a,b])
+        target = TokenTape([a, b])
         assert target.tokens_remaining == 2
 
         first = target.take()
@@ -15,5 +15,20 @@ class TestTokenTape:
         assert first == a
 
         second = target.take()
+        assert target.tokens_remaining == 0
+        assert second == b
+
+    def test_expect_correct(self):
+        a = ConstantIntegerToken(start_position=0, value="2")
+        b = SemicolonToken(start_position=3, value=";")
+
+        target = TokenTape([a, b])
+        assert target.tokens_remaining == 2
+
+        first = target.expect(ConstantIntegerToken)
+        assert target.tokens_remaining == 1
+        assert first == a
+
+        second = target.expect(SemicolonToken)
         assert target.tokens_remaining == 0
         assert second == b

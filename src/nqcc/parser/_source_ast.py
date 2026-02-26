@@ -9,13 +9,10 @@ from nqcc.lexer import (
     TokenItem,
 )
 
-from ._token_tape import TokenTape
-
 
 class SourceASTNode(BaseModel, abc.ABC):
     node_type: str
     start_position: int
-
 
     @classmethod
     @abc.abstractmethod

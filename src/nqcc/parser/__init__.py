@@ -1,3 +1,4 @@
+from ._exceptions import SourceASTError as SourceASTError
 from ._source_ast import (
     SourceASTNode as SourceASTNode,
 )
@@ -25,5 +26,4 @@ from ._source_ast import (
 from ._source_ast import (
     SourceStatementNode as SourceStatementNode,
 )
-from ._token_tape import TokenTape
-from ._exceptions import SourceASTError
+from ._token_tape import TokenTape as TokenTape
