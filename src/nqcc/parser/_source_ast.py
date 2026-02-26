@@ -1,13 +1,14 @@
 import abc
-from typing import Literal, MutableSequence
+from typing import Literal
 
 from pydantic import BaseModel
 
 from nqcc.lexer import (
     ConstantIntegerToken,
     ExpressionTokenItem,
-    TokenItem,
 )
+
+from ._token_tape import TokenTape
 
 
 class SourceASTNode(BaseModel, abc.ABC):
@@ -16,14 +17,14 @@ class SourceASTNode(BaseModel, abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def parse(cls, tokens: MutableSequence[TokenItem]) -> SourceASTNode:
+    def parse(cls, token_tape: TokenTape) -> SourceASTNode:
         pass
 
 
 class SourceExpressionNode(SourceASTNode):
     @classmethod
-    def parse(cls, tokens: MutableSequence[TokenItem]) -> SourceASTNode:
-        token = cls.expect(ExpressionTokenItem, tokens)
+    def parse(cls, token_tape: TokenTape) -> SourceASTNode:
+        token = token_tape.expect(ExpressionTokenItem)
 
         match token:
             case ConstantIntegerToken():
