@@ -1,5 +1,5 @@
 import abc
-from typing import Literal
+from typing import Literal, Union
 
 from pydantic import BaseModel
 
@@ -46,6 +46,9 @@ class SourceConstantIntNode(SourceExpressionNode):
     value: int
 
 
+SourceASTExpressionNode = Union[SourceExpressionNode, SourceConstantIntNode]
+
+
 class SourceStatementNode(SourceASTNode):
     @classmethod
     def parse_token_tape(cls, token_tape: TokenTape) -> SourceStatementNode:
@@ -54,14 +57,17 @@ class SourceStatementNode(SourceASTNode):
             raise SourceASTBadValueError(
                 expected_value="return", actual_token=return_token, message="Unexpected keyword"
             )
-        return_value: SourceExpressionNode = SourceExpressionNode.parse_token_tape(token_tape)
+        return_value: SourceASTExpressionNode = SourceExpressionNode.parse_token_tape(token_tape)
         _ = token_tape.expect(SemicolonToken)
         return SourceReturnNode(start_position=return_token.start_position, value=return_value)
 
 
 class SourceReturnNode(SourceStatementNode):
     node_type: Literal["SourceReturnNode"] = "SourceReturnNode"
-    value: SourceExpressionNode
+    value: SourceASTExpressionNode
+
+
+SourceASTStatementNode = Union[SourceStatementNode, SourceReturnNode]
 
 
 class SourceFunctionDefinitionNode(SourceASTNode):
@@ -96,7 +102,10 @@ class SourceFunctionDefinitionNode(SourceASTNode):
 class SourceFunctionNode(SourceFunctionDefinitionNode):
     node_type: Literal["SourceFunctionNode"] = "SourceFunctionNode"
     identifier: str
-    body: SourceStatementNode
+    body: SourceASTStatementNode
+
+
+SourceASTFunctionNode = Union[SourceFunctionDefinitionNode, SourceFunctionNode]
 
 
 class SourceProgramDefinitionNode(SourceASTNode):
@@ -105,4 +114,4 @@ class SourceProgramDefinitionNode(SourceASTNode):
 
 class SourceProgramNode(SourceProgramDefinitionNode):
     node_type: Literal["SourceProgramNode"] = "SourceProgramNode"
-    value: SourceFunctionDefinitionNode
+    value: SourceASTFunctionNode

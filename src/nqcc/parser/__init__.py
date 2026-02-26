@@ -28,3 +28,4 @@ from ._source_ast import (
     SourceStatementNode as SourceStatementNode,
 )
 from ._token_tape import TokenTape as TokenTape
+from ._source_ast import SourceASTFunctionNode, SourceASTStatementNode
