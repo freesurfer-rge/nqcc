@@ -14,7 +14,7 @@ class TokenTape:
 
     @property
     def tokens_remaining(self) -> int:
-        return 1 + len(self._tokens) - self._idx
+        return len(self._tokens) - self._idx
 
     def take(self) -> TokenItem:
         nxt = self._tokens[self._idx]
