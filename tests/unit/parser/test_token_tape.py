@@ -1,5 +1,7 @@
+import pytest
+
 from nqcc.lexer import ConstantIntegerToken, SemicolonToken
-from nqcc.parser import TokenTape
+from nqcc.parser import SourceASTError, TokenTape
 
 
 class TestTokenTape:
@@ -32,3 +34,16 @@ class TestTokenTape:
         second = target.expect(SemicolonToken)
         assert target.tokens_remaining == 0
         assert second == b
+
+    def test_expect_incorrect(self):
+        a = ConstantIntegerToken(start_position=0, value="2")
+        b = SemicolonToken(start_position=3, value=";")
+
+        target = TokenTape([a, b])
+        assert target.tokens_remaining == 2
+
+        with pytest.raises(SourceASTError) as sae:
+            _ = target.expect(SemicolonToken)
+        assert sae.value.actual_token == a
+        assert sae.value.expected_type == SemicolonToken
+        assert sae.value.message == "Received token of unexpected type"
