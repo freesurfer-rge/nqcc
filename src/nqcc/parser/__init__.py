@@ -25,3 +25,5 @@ from ._source_ast import (
 from ._source_ast import (
     SourceStatementNode as SourceStatementNode,
 )
+from ._token_tape import TokenTape
+from ._exceptions import SourceASTError

@@ -9,30 +9,13 @@ from nqcc.lexer import (
     TokenItem,
 )
 
-
-class SourceASTError(ValueError):
-    def __init__(self, *, expected_type: type, actual_token: TokenItem, message: str):
-        self.expected_type = expected_type
-        self.actual_token = actual_token
-        self.message = message
-        super().__init__(self.message)
+from ._token_tape import TokenTape
 
 
 class SourceASTNode(BaseModel, abc.ABC):
     node_type: str
     start_position: int
 
-    @classmethod
-    def expect(cls, expected_token_type: type, tokens: MutableSequence[TokenItem]) -> TokenItem:
-        # By default, pop takes the _last_ element
-        head = tokens.pop(0)
-        if not isinstance(head, expected_token_type):
-            raise SourceASTError(
-                expected_type=expected_token_type,
-                actual_token=head,
-                message="Received token of unexpected type",
-            )
-        return head
 
     @classmethod
     @abc.abstractmethod
