@@ -3,7 +3,17 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from nqcc.lexer import ConstantIntegerToken, ExpressionTokenItem, KeywordToken, SemicolonToken, IdentifierToken, OpenBraceToken, OpenParenToken, CloseBraceToken, CloseParenToken
+from nqcc.lexer import (
+    CloseBraceToken,
+    CloseParenToken,
+    ConstantIntegerToken,
+    ExpressionTokenItem,
+    IdentifierToken,
+    KeywordToken,
+    OpenBraceToken,
+    OpenParenToken,
+    SemicolonToken,
+)
 
 from ._exceptions import SourceASTBadValueError
 from ._token_tape import TokenTape
@@ -59,21 +69,28 @@ class SourceFunctionDefinitionNode(SourceASTNode):
     def parse_token_tape(cls, token_tape: TokenTape) -> SourceFunctionDefinitionNode:
         type_token = token_tape.expect(KeywordToken)
         if type_token.value != "int":
-            raise SourceASTBadValueError(expected_value="int", actual_token=type_token, message="Unexpected return type")
+            raise SourceASTBadValueError(
+                expected_value="int", actual_token=type_token, message="Unexpected return type"
+            )
         function_name_token = token_tape.expect(IdentifierToken)
-        
+
         _ = token_tape.expect(OpenParenToken)
         arg_token = token_tape.expect(KeywordToken)
         if arg_token.value != "void":
-            raise SourceASTBadValueError(expected_value="void", actual_token=arg_token, message="Unexpected arguments")
+            raise SourceASTBadValueError(
+                expected_value="void", actual_token=arg_token, message="Unexpected arguments"
+            )
         _ = token_tape.expect(CloseParenToken)
 
         _ = token_tape.expect(OpenBraceToken)
         body_statement = SourceStatementNode.parse_token_tape(token_tape)
         _ = token_tape.expect(CloseBraceToken)
 
-        return SourceFunctionNode(identifier=function_name_token.value, body=body_statement, start_position=type_token.start_position)
-        
+        return SourceFunctionNode(
+            identifier=function_name_token.value,
+            body=body_statement,
+            start_position=type_token.start_position,
+        )
 
 
 class SourceFunctionNode(SourceFunctionDefinitionNode):

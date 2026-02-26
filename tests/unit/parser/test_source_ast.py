@@ -1,10 +1,10 @@
-from nqcc.lexer import ConstantIntegerToken, KeywordToken, SemicolonToken, Lexer
+from nqcc.lexer import ConstantIntegerToken, KeywordToken, Lexer, SemicolonToken
 from nqcc.parser import (
     SourceConstantIntNode,
     SourceExpressionNode,
+    SourceFunctionDefinitionNode,
     SourceReturnNode,
     SourceStatementNode,
-    SourceFunctionDefinitionNode,
     TokenTape,
 )
 
@@ -25,6 +25,8 @@ class TestSourceExpressionNode:
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
 
+
+class TestSourceStatementNode:
     def test_return_statement(self):
         tokens = [
             KeywordToken(start_position=0, value="return"),
@@ -44,13 +46,14 @@ class TestSourceExpressionNode:
 
         assert token_tape.tokens_remaining == 0
 
+
+class TestSourceFunctionDefinitionNode:
     def test_function(self):
         program_str = "int main( void ) { return 2;}"
         lexer = Lexer()
         for c in program_str:
             lexer.push_character(c)
         lexer.character_stream_done()
-        lexer.completed_token_list
 
         # Sanity check the tokens
         assert len(lexer.completed_token_list) == 10
