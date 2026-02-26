@@ -8,6 +8,7 @@ class SourceASTBadTypeError(ValueError):
         self.message = message
         super().__init__(self.message)
 
+
 class SourceASTBadValueError(ValueError):
     def __init__(self, *, expected_value: str, actual_token: TokenItem, message: str):
         self.expected_value = expected_value
