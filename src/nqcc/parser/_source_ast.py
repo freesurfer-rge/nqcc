@@ -1,4 +1,3 @@
-import abc
 from typing import Literal, Union
 
 from pydantic import BaseModel
@@ -19,7 +18,7 @@ from ._exceptions import SourceASTBadValueError
 from ._token_tape import TokenTape
 
 
-class SourceASTNode(BaseModel, abc.ABC):
+class SourceASTNode(BaseModel):
     node_type: str
     start_position: int
 
