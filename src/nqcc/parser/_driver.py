@@ -7,6 +7,7 @@ from ._token_tape import TokenTape
 
 SOURCE_AST_EXTENSION = ".source_ast"
 
+
 def parser_driver(tokens: list[TokenItem], *, working_dir: pathlib.Path, file_stem: str):
     # TODO: Figure out return type
     assert working_dir.exists(), f"Unable to find working directory {working_dir}"

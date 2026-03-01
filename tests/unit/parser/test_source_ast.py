@@ -1,5 +1,9 @@
-from nqcc.lexer import ConstantIntegerToken, KeywordToken, SemicolonToken
+import pytest
+
+from nqcc.lexer import CloseParenToken, ConstantIntegerToken, KeywordToken, SemicolonToken
 from nqcc.parser import (
+    SourceASTBadTypeError,
+    SourceASTBadValueError,
     SourceConstantIntNode,
     SourceFunctionNode,
     SourceProgramNode,
@@ -66,6 +70,32 @@ class TestSourceStatementNode:
 
         assert node == node_serde
 
+    def test_return_mispelled(self):
+        tokens = [
+            KeywordToken(start_position=0, value="returns"),
+            ConstantIntegerToken(start_position=1, value="321"),
+            SemicolonToken(start_position=5, value=";"),
+        ]
+        token_tape = TokenTape(tokens)
+
+        with pytest.raises(SourceASTBadValueError) as sabve:
+            _ = parse_statement(token_tape)
+        assert sabve.value.message == "Unexpected keyword"
+        assert sabve.value.actual_token == tokens[0]
+
+    def test_return_has_space(self):
+        tokens = [
+            KeywordToken(start_position=0, value="retur n"),
+            ConstantIntegerToken(start_position=1, value="321"),
+            SemicolonToken(start_position=5, value=";"),
+        ]
+        token_tape = TokenTape(tokens)
+
+        with pytest.raises(SourceASTBadValueError) as sabve:
+            _ = parse_statement(token_tape)
+        assert sabve.value.message == "Unexpected keyword"
+        assert sabve.value.actual_token == tokens[0]
+
 
 class TestSourceFunctionNode:
     def test_function(self):
@@ -98,6 +128,23 @@ class TestSourceFunctionNode:
 
         node_serde = SourceFunctionNode.model_validate_json(node_str)
         assert node == node_serde
+
+    def test_switched_parens(self):
+        program_str = "int main) void ( { return 2;}"
+
+        token_tape = TokenTape.from_c_source(program_str)
+
+        with pytest.raises(SourceASTBadTypeError) as sabte:
+            _ = parse_function(token_tape)
+        assert sabte.value.message == "Received token of unexpected type"
+        assert sabte.value.actual_token == CloseParenToken(start_position=8, value=")")
+
+    def test_missing_close_brace(self):
+        program_str = "int main( void ) { return 2;"
+        token_tape = TokenTape.from_c_source(program_str)
+
+        with pytest.raises(IndexError, match="No tokens remaining in TokenTape"):
+            _ = parse_function(token_tape)
 
 
 class TestSourceProgramNode:
@@ -133,5 +180,4 @@ class TestSourceProgramNode:
         node_str = node.model_dump_json()
 
         node_serde = SourceProgramNode.model_validate_json(node_str)
-        print(node_str)
-        assert node != node_serde
+        assert node == node_serde

@@ -15,6 +15,8 @@ class TokenTape:
         return len(self._tokens) - self._idx
 
     def take(self) -> TokenItem:
+        if self._idx >= len(self._tokens):
+            raise IndexError("No tokens remaining in TokenTape")
         nxt = self._tokens[self._idx]
         self._idx += 1
         return nxt

@@ -20,6 +20,11 @@ class TestTokenTape:
         assert target.tokens_remaining == 0
         assert second == b
 
+    def test_take_too_many(self):
+        target = TokenTape([])
+        with pytest.raises(IndexError, match="No tokens remaining in TokenTape"):
+            _ = target.take()
+
     def test_expect_correct(self):
         a = ConstantIntegerToken(start_position=0, value="2")
         b = SemicolonToken(start_position=3, value=";")

@@ -1,3 +1,4 @@
+from ._driver import parser_driver as parser_driver
 from ._exceptions import SourceASTBadTypeError as SourceASTBadTypeError
 from ._exceptions import SourceASTBadValueError as SourceASTBadValueError
 from ._source_ast import (
@@ -26,4 +27,3 @@ from ._source_ast import parse_function as parse_function
 from ._source_ast import parse_program as parse_program
 from ._source_ast import parse_statement as parse_statement
 from ._token_tape import TokenTape as TokenTape
-from ._driver import parser_driver

@@ -107,4 +107,7 @@ class SourceProgramNode(SourceASTNode):
 def parse_program(token_tape: TokenTape) -> SourceProgramNode:
     f = parse_function(token_tape)
 
+    if token_tape.tokens_remaining > 0:
+        raise ValueError("Did not expect any more tokens")
+
     return SourceProgramNode(start_position=0, value=f)
