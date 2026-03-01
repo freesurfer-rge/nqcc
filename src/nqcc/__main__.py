@@ -4,6 +4,7 @@ import pathlib
 import shutil
 
 from nqcc import preprocess_c_file
+from nqcc.codegen import codegen_driver
 from nqcc.lexer import lexer_driver
 from nqcc.parser import parser_driver
 
@@ -80,10 +81,17 @@ def main():
     file_stem = args.target.stem
 
     _logger.info("Running parser")
-    parser_driver(all_tokens, working_dir=args.working_dir, file_stem=file_stem)
+    src_ast = parser_driver(all_tokens, working_dir=args.working_dir, file_stem=file_stem)
 
     if args.parse:
         _logger.info("Exiting after parse")
+        return
+
+    _logger.info("Running code generator")
+    _ = codegen_driver(src_ast, working_dir=args.working_dir, file_stem=file_stem)
+
+    if args.codegen:
+        _logger.info("Exiting after code generation")
         return
 
 
