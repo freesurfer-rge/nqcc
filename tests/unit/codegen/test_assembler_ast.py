@@ -1,14 +1,22 @@
 from nqcc.codegen import (
+    AsmFunctionNode,
     AsmImmediateIntNode,
     AsmMovNode,
+    AsmProgramNode,
     AsmRegisterNode,
     AsmRetNode,
-    AsmFunctionNode,
     convert_expression_node,
-    convert_statement_node,
     convert_function_node,
+    convert_program_node,
+    convert_statement_node,
 )
-from nqcc.parser import SourceConstantIntNode, SourceReturnNode, TokenTape, parse_function
+from nqcc.parser import (
+    SourceConstantIntNode,
+    SourceReturnNode,
+    TokenTape,
+    parse_function,
+    parse_program,
+)
 
 
 class TestConvertExpressions:
@@ -68,3 +76,31 @@ class TestConvertFunctionNode:
         assert instr0.destination == AsmRegisterNode(start_position=26, value="eax")
 
         assert result.instructions[1] == AsmRetNode(start_position=19)
+
+
+class TestConvertProgramNode:
+    def test_smoke(self):
+        program_str = "   int main( void ) { return 46;}"
+
+        token_tape = TokenTape.from_c_source(program_str)
+
+        node = parse_program(token_tape)
+
+        result = convert_program_node(node)
+
+        assert isinstance(result, AsmProgramNode)
+        assert result.start_position == 0
+
+        func_node = result.value
+        assert isinstance(func_node, AsmFunctionNode)
+        assert func_node.identifier == "main"
+        assert func_node.start_position == 3
+        assert len(func_node.instructions) == 2
+
+        instr0 = func_node.instructions[0]
+        assert isinstance(instr0, AsmMovNode)
+        assert instr0.start_position == 22
+        assert instr0.source == AsmImmediateIntNode(start_position=29, value=46)
+        assert instr0.destination == AsmRegisterNode(start_position=29, value="eax")
+
+        assert func_node.instructions[1] == AsmRetNode(start_position=22)
