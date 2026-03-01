@@ -10,13 +10,7 @@ from ._source_ast import (
     SourceExpressionNode as SourceExpressionNode,
 )
 from ._source_ast import (
-    SourceFunctionDefinitionNode as SourceFunctionDefinitionNode,
-)
-from ._source_ast import (
     SourceFunctionNode as SourceFunctionNode,
-)
-from ._source_ast import (
-    SourceProgramDefinitionNode as SourceProgramDefinitionNode,
 )
 from ._source_ast import (
     SourceProgramNode as SourceProgramNode,
@@ -28,4 +22,4 @@ from ._source_ast import (
     SourceStatementNode as SourceStatementNode,
 )
 from ._token_tape import TokenTape as TokenTape
-from ._source_ast import SourceASTFunctionNode, SourceASTStatementNode
+from ._source_ast import parse_expression, parse_statement, parse_function

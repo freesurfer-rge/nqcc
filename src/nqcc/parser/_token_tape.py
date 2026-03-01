@@ -1,8 +1,6 @@
 from typing import Sequence
 
-from nqcc.lexer import (
-    TokenItem,
-)
+from nqcc.lexer import TokenItem, Lexer
 
 from ._exceptions import SourceASTBadTypeError
 
@@ -30,3 +28,12 @@ class TokenTape:
                 message="Received token of unexpected type",
             )
         return head
+
+    @classmethod
+    def from_c_source(cls, c_source: str) -> TokenTape:
+        lexer = Lexer()
+        for c in c_source:
+            lexer.push_character(c)
+        lexer.character_stream_done()
+
+        return TokenTape(lexer.completed_token_list)

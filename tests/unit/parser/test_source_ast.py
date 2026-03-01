@@ -1,15 +1,16 @@
 import json
 
-from nqcc.lexer import ConstantIntegerToken, KeywordToken, Lexer, SemicolonToken
+from nqcc.lexer import ConstantIntegerToken, KeywordToken, SemicolonToken
 from nqcc.parser import (
     SourceConstantIntNode,
     SourceExpressionNode,
-    SourceFunctionDefinitionNode,
     SourceFunctionNode,
     SourceReturnNode,
     SourceStatementNode,
     TokenTape,
-    SourceASTFunctionNode,SourceASTStatementNode
+    parse_expression,
+    parse_statement,
+    parse_function,
 )
 
 
@@ -21,7 +22,7 @@ class TestSourceExpressionNode:
         ]
         token_tape = TokenTape(tokens)
 
-        node = SourceExpressionNode.parse_token_tape(token_tape)
+        node = parse_expression(token_tape)
         assert isinstance(node, SourceConstantIntNode)
         assert node.start_position == 1
         assert node.value == 123
@@ -39,7 +40,7 @@ class TestSourceStatementNode:
         ]
         token_tape = TokenTape(tokens)
 
-        node = SourceStatementNode.parse_token_tape(token_tape)
+        node = parse_statement(token_tape)
 
         assert isinstance(node, SourceReturnNode)
         assert node.start_position == 0
@@ -58,11 +59,11 @@ class TestSourceStatementNode:
         ]
         token_tape = TokenTape(tokens)
 
-        node = SourceStatementNode.parse_token_tape(token_tape)
+        node = parse_statement(token_tape)
 
         node_str = node.model_dump_json()
 
-        node_serde = SourceASTStatementNode.model_validate_json(node_str)
+        node_serde = SourceStatementNode.model_validate_json(node_str)
 
         assert node == node_serde
 
@@ -70,17 +71,10 @@ class TestSourceStatementNode:
 class TestSourceFunctionDefinitionNode:
     def test_function(self):
         program_str = "int main( void ) { return 2;}"
-        lexer = Lexer()
-        for c in program_str:
-            lexer.push_character(c)
-        lexer.character_stream_done()
 
-        # Sanity check the tokens
-        assert len(lexer.completed_token_list) == 10
+        token_tape = TokenTape.from_c_source(program_str)
 
-        token_tape = TokenTape(lexer.completed_token_list)
-
-        node = SourceFunctionDefinitionNode.parse_token_tape(token_tape)
+        node = parse_function(token_tape)
 
         assert isinstance(node, SourceFunctionNode)
         assert node.start_position == program_str.find("int")
@@ -96,19 +90,15 @@ class TestSourceFunctionDefinitionNode:
 
     def test_serde(self):
         program_str = "int main( void ) { return 2;}"
-        lexer = Lexer()
-        for c in program_str:
-            lexer.push_character(c)
-        lexer.character_stream_done()
 
-        token_tape = TokenTape(lexer.completed_token_list)
+        token_tape = TokenTape.from_c_source(program_str)
 
-        node = SourceFunctionDefinitionNode.parse_token_tape(token_tape)
+        node = parse_function(token_tape)
 
         node_str = node.model_dump_json()
 
         # This is slightly ugly, but we need to make sure we can deserialise
         # all possibilities
-        node_serde = SourceASTFunctionNode.model_validate_json(node_str)
+        node_serde = SourceFunctionNode.model_validate_json(node_str)
 
         assert node == node_serde
