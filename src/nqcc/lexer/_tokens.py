@@ -261,3 +261,5 @@ TokenItem = Union[
     Token,
     WhitespaceToken,
 ]
+
+ExpressionTokenItem = Union[ConstantIntegerToken]
