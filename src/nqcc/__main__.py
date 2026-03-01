@@ -3,7 +3,7 @@ import logging
 import pathlib
 import shutil
 
-from nqcc import preprocess_c_file, emit_assembler, generate_executable
+from nqcc import emit_assembler, generate_executable, preprocess_c_file
 from nqcc.codegen import codegen_driver
 from nqcc.lexer import lexer_driver
 from nqcc.parser import parser_driver
@@ -93,7 +93,7 @@ def main():
     if args.codegen:
         _logger.info("Exiting after code generation")
         return
-    
+
     _logger.info("Emitting assembly code")
     asm_path = emit_assembler(asm_ast, working_dir=args.working_dir, file_stem=file_stem)
 

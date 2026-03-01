@@ -16,6 +16,7 @@ _OPCODE_FIELD_WIDTH = 8
 _SEP_WIDTH = 70
 _SEP_CHAR = "="
 
+
 class AsmASTNode(BaseModel):
     node_type: str
     start_position: int
@@ -79,7 +80,6 @@ class AsmFunctionNode(AsmASTNode):
             nxt = instr.emit_assembly_string()
             result.append(f"{_INSTRUCTION_INDENT}{nxt}")
         return result
-
 
 
 class AsmProgramNode(AsmASTNode):
