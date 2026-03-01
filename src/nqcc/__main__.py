@@ -5,6 +5,7 @@ import shutil
 
 from nqcc import preprocess_c_file
 from nqcc.lexer import lexer_driver
+from nqcc.parser import parser_driver
 
 _DESC = """\
 An implementation of the C Compiler described in Nora 
@@ -70,11 +71,20 @@ def main():
     preprocessed_file_path = preprocess_c_file(args.target, args.working_dir)
 
     _logger.info("Running lexer")
-    _ = lexer_driver(preprocessed_file_path)
+    all_tokens = lexer_driver(preprocessed_file_path)
 
     if args.lex:
         _logger.info("Exiting after lexer")
+        return
 
+    file_stem = args.target.stem
+
+    _logger.info("Running parser")
+    parser_driver(all_tokens, working_dir=args.working_dir, file_stem=file_stem)
+
+    if args.parse:
+        _logger.info("Exiting after parse")
+        return
 
 if __name__ == "__main__":
     main()

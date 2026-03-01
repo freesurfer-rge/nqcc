@@ -26,3 +26,4 @@ from ._source_ast import parse_function as parse_function
 from ._source_ast import parse_program as parse_program
 from ._source_ast import parse_statement as parse_statement
 from ._token_tape import TokenTape as TokenTape
+from ._driver import parser_driver
