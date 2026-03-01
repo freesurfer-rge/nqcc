@@ -6,7 +6,7 @@ from ._exceptions import SourceASTBadTypeError
 
 
 class TokenTape:
-    def __init__(self, token_list: Sequence[TokenItem]):
+    def __init__(self, token_list: Sequence[TokenItem]) -> None:
         self._tokens = token_list
         self._idx = 0
 
