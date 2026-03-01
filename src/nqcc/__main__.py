@@ -3,7 +3,7 @@ import logging
 import pathlib
 import shutil
 
-from nqcc import preprocess_c_file, emit_assembler
+from nqcc import preprocess_c_file, emit_assembler, generate_executable
 from nqcc.codegen import codegen_driver
 from nqcc.lexer import lexer_driver
 from nqcc.parser import parser_driver
@@ -94,7 +94,12 @@ def main():
         _logger.info("Exiting after code generation")
         return
     
-    _ = emit_assembler(asm_ast, working_dir=args.working_dir, file_stem=file_stem)
+    _logger.info("Emitting assembly code")
+    asm_path = emit_assembler(asm_ast, working_dir=args.working_dir, file_stem=file_stem)
+
+    _logger.info("Generating executable")
+    generate_executable(asm_path, args.target.parent / args.target.stem)
+    _logger.info("Done")
 
 
 if __name__ == "__main__":
