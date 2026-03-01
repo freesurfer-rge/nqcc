@@ -53,7 +53,7 @@ def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
         raise SourceASTBadValueError(
             expected_value="return", actual_token=return_token, message="Unexpected keyword"
         )
-    return_value: SourceExpressionNode = SourceExpressionNode.parse_token_tape(token_tape)
+    return_value = parse_expression(token_tape)
     _ = token_tape.expect(SemicolonToken)
     return SourceReturnNode(start_position=return_token.start_position, value=return_value)
 
@@ -83,7 +83,7 @@ def parse_function(token_tape: TokenTape) -> SourceFunctionNode:
     _ = token_tape.expect(CloseParenToken)
 
     _ = token_tape.expect(OpenBraceToken)
-    body_statement = SourceStatementNode.parse_token_tape(token_tape)
+    body_statement = parse_statement(token_tape)
     _ = token_tape.expect(CloseBraceToken)
 
     return SourceFunctionNode(

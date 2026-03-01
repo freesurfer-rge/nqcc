@@ -1,16 +1,14 @@
-import json
 
 from nqcc.lexer import ConstantIntegerToken, KeywordToken, SemicolonToken
 from nqcc.parser import (
     SourceConstantIntNode,
-    SourceExpressionNode,
     SourceFunctionNode,
     SourceReturnNode,
     SourceStatementNode,
     TokenTape,
     parse_expression,
-    parse_statement,
     parse_function,
+    parse_statement,
 )
 
 

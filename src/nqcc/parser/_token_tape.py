@@ -1,6 +1,6 @@
 from typing import Sequence
 
-from nqcc.lexer import TokenItem, Lexer
+from nqcc.lexer import Lexer, TokenItem
 
 from ._exceptions import SourceASTBadTypeError
 
