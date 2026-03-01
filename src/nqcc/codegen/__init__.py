@@ -7,6 +7,10 @@ from ._assembler_ast import (
     AsmOperandNode,
     AsmRegisterNode,
     AsmRetNode,
+    convert_expression_node,
+    convert_function_node,
+    convert_program_node,
+    convert_statement_node,
 )
 
 __all__ = [
@@ -18,4 +22,8 @@ __all__ = [
     "AsmOperandNode",
     "AsmRegisterNode",
     "AsmRetNode",
+    "convert_expression_node",
+    "convert_function_node",
+    "convert_program_node",
+    "convert_statement_node",
 ]
