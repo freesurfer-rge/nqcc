@@ -102,3 +102,9 @@ class SourceFunctionNode(SourceASTNode):
 class SourceProgramNode(SourceASTNode):
     node_type: Literal["SourceProgramNode"] = "SourceProgramNode"
     value: SourceFunctionNode
+
+
+def parse_program(token_tape: TokenTape) -> SourceProgramNode:
+    f = parse_function(token_tape)
+
+    return SourceProgramNode(start_position=0, value=f)

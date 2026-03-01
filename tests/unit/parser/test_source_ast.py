@@ -1,13 +1,14 @@
-
 from nqcc.lexer import ConstantIntegerToken, KeywordToken, SemicolonToken
 from nqcc.parser import (
     SourceConstantIntNode,
     SourceFunctionNode,
+    SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
     TokenTape,
     parse_expression,
     parse_function,
+    parse_program,
     parse_statement,
 )
 
@@ -66,7 +67,7 @@ class TestSourceStatementNode:
         assert node == node_serde
 
 
-class TestSourceFunctionDefinitionNode:
+class TestSourceFunctionNode:
     def test_function(self):
         program_str = "int main( void ) { return 2;}"
 
@@ -95,8 +96,42 @@ class TestSourceFunctionDefinitionNode:
 
         node_str = node.model_dump_json()
 
-        # This is slightly ugly, but we need to make sure we can deserialise
-        # all possibilities
         node_serde = SourceFunctionNode.model_validate_json(node_str)
-
         assert node == node_serde
+
+
+class TestSourceProgramNode:
+    def test_program(self):
+        program_str = "int main( void ) { return 2;}"
+
+        token_tape = TokenTape.from_c_source(program_str)
+
+        node = parse_program(token_tape)
+
+        assert isinstance(node, SourceProgramNode)
+        assert node.start_position == 0
+
+        func_node = node.value
+        assert isinstance(func_node, SourceFunctionNode)
+
+        assert func_node.identifier == "main"
+
+        body_node = func_node.body
+        assert isinstance(body_node, SourceReturnNode)
+        assert body_node.start_position == program_str.find("return")
+
+        return_value_node = body_node.value
+        assert isinstance(return_value_node, SourceConstantIntNode)
+        assert return_value_node.start_position == program_str.find("2")
+
+    def test_program_serde(self):
+        program_str = "   int main( void ) { return 6;}"
+
+        token_tape = TokenTape.from_c_source(program_str)
+
+        node = parse_program(token_tape)
+        node_str = node.model_dump_json()
+
+        node_serde = SourceProgramNode.model_validate_json(node_str)
+        print(node_str)
+        assert node != node_serde
