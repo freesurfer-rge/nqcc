@@ -3,7 +3,8 @@ import logging
 import pathlib
 import shutil
 
-from nqcc import preprocess_c_file
+from nqcc import emit_assembler, generate_executable, preprocess_c_file
+from nqcc.codegen import codegen_driver
 from nqcc.lexer import lexer_driver
 from nqcc.parser import parser_driver
 
@@ -57,35 +58,63 @@ def parse_args():
     return args
 
 
-def main():
-    args = parse_args()
+def main(
+    *,
+    target: pathlib.Path,
+    working_dir: pathlib.Path,
+    exit_after_lex: bool,
+    exit_after_parse: bool,
+    exit_after_codegen: bool,
+):
 
-    assert args.target.exists(), f"Target {args.target} does not exist!"
+    assert target.exists(), f"Target {target} does not exist!"
 
-    if args.working_dir.exists():
-        _logger.warning("Deleting working directory %s", args.working_dir)
-        shutil.rmtree(args.working_dir)
-    args.working_dir.mkdir()
+    if working_dir.exists():
+        _logger.warning("Deleting working directory %s", working_dir)
+        shutil.rmtree(working_dir)
+    working_dir.mkdir()
 
     _logger.info("Running preprocessor")
-    preprocessed_file_path = preprocess_c_file(args.target, args.working_dir)
+    preprocessed_file_path = preprocess_c_file(target, working_dir)
 
     _logger.info("Running lexer")
     all_tokens = lexer_driver(preprocessed_file_path)
 
-    if args.lex:
+    if exit_after_lex:
         _logger.info("Exiting after lexer")
         return
 
-    file_stem = args.target.stem
+    file_stem = target.stem
 
     _logger.info("Running parser")
-    parser_driver(all_tokens, working_dir=args.working_dir, file_stem=file_stem)
+    src_ast = parser_driver(all_tokens, working_dir=working_dir, file_stem=file_stem)
 
-    if args.parse:
+    if exit_after_parse:
         _logger.info("Exiting after parse")
         return
 
+    _logger.info("Running code generator")
+    asm_ast = codegen_driver(src_ast, working_dir=working_dir, file_stem=file_stem)
+
+    if exit_after_codegen:
+        _logger.info("Exiting after code generation")
+        return
+
+    _logger.info("Emitting assembly code")
+    asm_path = emit_assembler(asm_ast, working_dir=working_dir, file_stem=file_stem)
+
+    _logger.info("Generating executable")
+    executable_path = generate_executable(asm_path, target.parent / file_stem)
+    _logger.info("Done")
+    return executable_path
+
 
 if __name__ == "__main__":
-    main()
+    args = parse_args()
+    _ = main(
+        target=args.target,
+        working_dir=args.working_dir,
+        exit_after_lex=args.lex,
+        exit_after_parse=args.parse,
+        exit_after_codegen=args.codegen,
+    )

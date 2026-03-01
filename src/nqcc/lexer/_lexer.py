@@ -36,7 +36,7 @@ class Lexer:
     the completed_token_list property (this will exclude whitespace)
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._position = 0
         self._completed_token_list: list[TokenItem] = []
         self._current_candidates = self._get_fresh_candidate_tokens()
