@@ -44,7 +44,7 @@ class ConstantIntegerToken(Token):
         return "[0-9]+\\b"
 
 
-_KEYWORDS = {"int", "void", "return"}
+_KEYWORDS = {"int", "return", "void"}
 
 
 class KeywordToken(Token):
@@ -62,7 +62,7 @@ class KeywordToken(Token):
 
 class OpenParenToken(Token):
     token_type: Literal["OpenParenToken"] = "OpenParenToken"
-    value: Literal["(", ""] = ""
+    value: Literal["("] = "("
 
     @property
     def precedence(self) -> int:
@@ -75,7 +75,7 @@ class OpenParenToken(Token):
 
 class CloseParenToken(Token):
     token_type: Literal["CloseParenToken"] = "CloseParenToken"
-    value: Literal[")", ""] = ""
+    value: Literal[")"] = ")"
 
     @property
     def precedence(self) -> int:
@@ -88,7 +88,7 @@ class CloseParenToken(Token):
 
 class OpenBraceToken(Token):
     token_type: Literal["OpenBraceToken"] = "OpenBraceToken"
-    value: Literal["{", ""] = ""
+    value: Literal["{"] = "{"
 
     @property
     def precedence(self) -> int:
@@ -101,7 +101,7 @@ class OpenBraceToken(Token):
 
 class CloseBraceToken(Token):
     token_type: Literal["CloseBraceToken"] = "CloseBraceToken"
-    value: Literal["}", ""] = ""
+    value: Literal["}"] = "}"
 
     @property
     def precedence(self) -> int:
@@ -114,7 +114,7 @@ class CloseBraceToken(Token):
 
 class SemicolonToken(Token):
     token_type: Literal["SemicolonToken"] = "SemicolonToken"
-    value: Literal[";", ""] = ""
+    value: Literal[";"] = ";"
 
     @property
     def precedence(self) -> int:
