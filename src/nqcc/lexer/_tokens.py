@@ -85,6 +85,9 @@ class CloseParenToken(Token):
     def re(cls) -> str:
         return "[)]"
 
+    @classmethod
+    def re(cls) -> str:
+        return "[)]"
 
 class OpenBraceToken(Token):
     token_type: Literal["OpenBraceToken"] = "OpenBraceToken"
@@ -98,6 +101,9 @@ class OpenBraceToken(Token):
     def re(cls) -> str:
         return "[{]"
 
+    @classmethod
+    def re(cls) -> str:
+        return "[{]"
 
 class CloseBraceToken(Token):
     token_type: Literal["CloseBraceToken"] = "CloseBraceToken"
@@ -124,6 +130,9 @@ class SemicolonToken(Token):
     def re(cls) -> str:
         return "[;]"
 
+    @classmethod
+    def re(cls) -> str:
+        return "[;]"
 
 TokenTypes: list[type] = [
     CloseBraceToken,
