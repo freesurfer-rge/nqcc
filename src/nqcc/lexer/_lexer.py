@@ -33,7 +33,7 @@ class LexerError(Exception):
 class LexerMatchError(Exception):
     def __init__(self, *, position: int):
         self.position = position
-        self.message = "Lexer Failed to match"
+        self.message = "Lexer failed to match"
         super().__init__(f"{self.message} at position {self.position}")
 
 
@@ -225,21 +225,20 @@ def extract_tokens(s: str, idx: int) -> list[TokenItem]:
 
 
 def pick_token(tokens: list[TokenItem]) -> TokenItem:
-    assert len(tokens)>0, "Must have hat least one token!"
+    assert len(tokens) > 0, "Must have hat least one token!"
     if len(tokens) == 1:
         return tokens[0]
-    
-    max_length = max([len(x.value) for x in tokens])
-    remaining = [t for t in tokens if len(t.value)==max_length]
+
+    max_length = max(len(x.value) for x in tokens)
+    remaining = [t for t in tokens if len(t.value) == max_length]
     if len(remaining) == 1:
         return remaining[0]
-    
+
     result = remaining[0]
     for t in remaining:
         if t.precedence > result.precedence:
             result = t
     return result
-
 
 
 def lex_string(c_program_str: str) -> list[TokenItem]:
@@ -258,9 +257,7 @@ def lex_string(c_program_str: str) -> list[TokenItem]:
         selection = pick_token(candidates)
 
         idx += len(selection.value)
-        s = s[len(selection.value):]
+        s = s[len(selection.value) :]
 
         lex_tokens.append(selection)
     return lex_tokens
-
-

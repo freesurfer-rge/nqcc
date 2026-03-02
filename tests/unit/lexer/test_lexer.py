@@ -10,12 +10,14 @@ from nqcc.lexer import (
     KeywordToken,
     Lexer,
     LexerError,
+    LexerMatchError,
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
     TokenItem,
     extract_tokens,
-    pick_token
+    lex_string,
+    pick_token,
 )
 
 
@@ -207,8 +209,26 @@ class TestExtractTokens:
         assert len(toks) == 1
         assert toks[0] == CloseBraceToken(start_position=idx, value="}")
 
+    @pytest.mark.parametrize("bad_target", ["2int", "\\", "@", "`"])
+    def test_bad_strings(self, bad_target: str):
+        with pytest.raises(LexerMatchError, match="Lexer failed to match") as lme:
+            _ = extract_tokens(bad_target, 10)
+        assert lme.value.position == 10
+
+
 class TestPickToken:
     def test_smoke(self):
         toks = [IdentifierToken(value="int"), KeywordToken(value="int")]
 
         assert pick_token(toks) == KeywordToken(value="int")
+
+
+class TestLexString:
+    def test_statement(self):
+        sample = "return 2;"
+
+        toks = lex_string(sample)
+        assert len(toks) == 3
+        assert toks[0] == KeywordToken(start_position=0, value="return")
+        assert toks[1] == ConstantIntegerToken(start_position=7, value="2")
+        assert toks[2] == SemicolonToken(start_position=8, value=";")
