@@ -1,3 +1,5 @@
+import re
+
 from ._tokens import (
     AppendResult,
     CloseBraceToken,
@@ -9,6 +11,7 @@ from ._tokens import (
     OpenParenToken,
     SemicolonToken,
     TokenItem,
+    TokenTypes,
     WhitespaceToken,
 )
 
@@ -24,6 +27,13 @@ class LexerError(Exception):
         self.previous_tokens = previous_tokens
         self.message = message
         super().__init__(self.message)
+
+
+class LexerMatchError(Exception):
+    def __init__(self, *, position: int):
+        self.position = position
+        self.message = "Lexer Failed to match"
+        super().__init__(f"{self.message} at position {self.position}")
 
 
 class Lexer:
@@ -193,3 +203,36 @@ class Lexer:
             WhitespaceToken(),
         ]
         return starting_tokens
+
+def extract_tokens(s: str, idx: int) -> list[TokenItem]:
+    assert not s[0].isspace()
+
+    candidates = []
+    for tt in TokenTypes:
+        m = re.match(tt.re(), s)
+        if m and len(m.group[0]) > 0:
+            candidate_token = tt(start_position=idx, value=m.group[0])
+            candidates.append(candidate_token)
+    if len(candidates) == 0:
+        raise LexerMatchError(idx)
+    
+    return candidates
+
+
+
+def lex_string(c_program_str: str) -> list[TokenItem]:
+    # We won't want to change the supplied string
+    s = str(c_program_str)
+    idx = 0
+
+    while s:
+        idx += s.lstrip()
+
+        candidates = []
+        for tt in TokenTypes:
+            m = re.match(tt.re(), s)
+            if m and len(m.group[0]) > 0:
+                candidate_token = tt(start_position=idx, value=m.group[0])
+                candidates.append(candidate_token)
+        if len(candidates) == 0:
+            raise LexerMatchError(idx)

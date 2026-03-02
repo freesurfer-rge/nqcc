@@ -39,6 +39,11 @@ class Token(BaseModel, abc.ABC):
     def precedence(self) -> int:
         pass
 
+    @staticmethod
+    @abc.abstractmethod
+    def re(cls) -> str:
+        pass
+
 
 class FirstSubsequentToken(Token):
     def try_append(self, char: str, position: int) -> AppendResult:
@@ -99,6 +104,10 @@ class IdentifierToken(FirstSubsequentToken):
     def precedence(self) -> int:
         return 5
 
+    @classmethod
+    def re(cls) -> str:
+        return "[a-zA-Z_]\\w*\\b"
+
 
 class ConstantIntegerToken(FirstSubsequentToken):
     token_type: Literal["ConstantIntegerToken"] = "ConstantIntegerToken"
@@ -116,6 +125,10 @@ class ConstantIntegerToken(FirstSubsequentToken):
     def precedence(self) -> int:
         return 5
 
+    @classmethod
+    def re(cls) -> str:
+        return "[0-9]+\\b"
+
 
 class WhitespaceToken(FirstSubsequentToken):
     token_type: Literal["WhitespaceToken"] = "WhitespaceToken"
@@ -132,6 +145,10 @@ class WhitespaceToken(FirstSubsequentToken):
     @property
     def precedence(self) -> int:
         return -5
+
+    @classmethod
+    def re(cls) -> str:
+        return "THIS SHOULD NOT MATCH ANYTHING EVER"
 
 
 class KeywordToken(Token):
@@ -170,6 +187,11 @@ class KeywordToken(Token):
     @property
     def precedence(self) -> int:
         return 10
+
+    @classmethod
+    def re(cls) -> str:
+        keyword_alternatives = "|".join(KeywordToken._KEYWORDS)
+        return f"({keyword_alternatives})\\b"
 
 
 class SingleCharacterToken(Token):
@@ -212,6 +234,10 @@ class OpenParenToken(SingleCharacterToken):
     def allowed_character(self) -> str:
         return "("
 
+    @classmethod
+    def re(cls) -> str:
+        return "[(]"
+
 
 class CloseParenToken(SingleCharacterToken):
     token_type: Literal["CloseParenToken"] = "CloseParenToken"
@@ -220,6 +246,10 @@ class CloseParenToken(SingleCharacterToken):
     @property
     def allowed_character(self) -> str:
         return ")"
+
+    @classmethod
+    def re(cls) -> str:
+        return "[)]"
 
 
 class OpenBraceToken(SingleCharacterToken):
@@ -230,6 +260,10 @@ class OpenBraceToken(SingleCharacterToken):
     def allowed_character(self) -> str:
         return "{"
 
+    @classmethod
+    def re(cls) -> str:
+        return "[{]"
+
 
 class CloseBraceToken(SingleCharacterToken):
     token_type: Literal["CloseBraceToken"] = "CloseBraceToken"
@@ -238,6 +272,10 @@ class CloseBraceToken(SingleCharacterToken):
     @property
     def allowed_character(self) -> str:
         return "}"
+
+    @classmethod
+    def re(cls) -> str:
+        return "[}]"
 
 
 class SemicolonToken(SingleCharacterToken):
@@ -248,8 +286,12 @@ class SemicolonToken(SingleCharacterToken):
     def allowed_character(self) -> str:
         return ";"
 
+    @classmethod
+    def re(cls) -> str:
+        return "[;]"
 
-TokenItem = Union[
+
+TokenTypes = [
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
@@ -258,6 +300,10 @@ TokenItem = Union[
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
+]
+
+TokenItem = Union[
+    *TokenTypes,
     Token,
     WhitespaceToken,
 ]

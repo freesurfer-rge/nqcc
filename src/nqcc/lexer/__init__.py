@@ -1,35 +1,36 @@
-from ._driver import lexer_driver as lexer_driver
-from ._lexer import Lexer as Lexer
-from ._lexer import LexerError as LexerError
-from ._tokens import AppendResult as AppendResult
+from ._driver import lexer_driver
+from ._lexer import Lexer, LexerError, lex_string, extract_tokens
 from ._tokens import (
-    CloseBraceToken as CloseBraceToken,
+    AppendResult,
+    CloseBraceToken,
+    CloseParenToken,
+    ConstantIntegerToken,
+    IdentifierToken,
+    KeywordToken,
+    OpenBraceToken,
+    OpenParenToken,
+    SemicolonToken,
+    TokenItem,
+    ExpressionTokenItem,
+    WhitespaceToken
 )
-from ._tokens import (
-    CloseParenToken as CloseParenToken,
-)
-from ._tokens import (
-    ConstantIntegerToken as ConstantIntegerToken,
-)
-from ._tokens import ExpressionTokenItem as ExpressionTokenItem
-from ._tokens import (
-    IdentifierToken as IdentifierToken,
-)
-from ._tokens import (
-    KeywordToken as KeywordToken,
-)
-from ._tokens import (
-    OpenBraceToken as OpenBraceToken,
-)
-from ._tokens import (
-    OpenParenToken as OpenParenToken,
-)
-from ._tokens import (
-    SemicolonToken as SemicolonToken,
-)
-from ._tokens import (
-    TokenItem as TokenItem,
-)
-from ._tokens import (
-    WhitespaceToken as WhitespaceToken,
-)
+
+__all__ = [
+    lexer_driver,
+    Lexer,
+    LexerError,
+    lex_string,
+    extract_tokens,
+    AppendResult,
+    TokenItem,
+    CloseBraceToken,
+    CloseParenToken,
+    ConstantIntegerToken,
+    IdentifierToken,
+    KeywordToken,
+    OpenBraceToken,
+    OpenParenToken,
+    SemicolonToken,
+    ExpressionTokenItem,
+    WhitespaceToken
+]
