@@ -1,6 +1,6 @@
 import pathlib
 
-from nqcc.lexer import TokenItem
+from nqcc.lexer import Token
 
 from ._source_ast import SourceProgramNode, parse_program
 from ._token_tape import TokenTape
@@ -9,7 +9,7 @@ SOURCE_AST_EXTENSION = ".source_ast"
 
 
 def parser_driver(
-    tokens: list[TokenItem], *, working_dir: pathlib.Path, file_stem: str
+    tokens: list[Token], *, working_dir: pathlib.Path, file_stem: str
 ) -> SourceProgramNode:
     assert working_dir.exists(), f"Unable to find working directory {working_dir}"
     tt = TokenTape(tokens)

@@ -125,19 +125,7 @@ class SemicolonToken(Token):
         return "[;]"
 
 
-TokenTypes = [
-    CloseBraceToken,
-    CloseParenToken,
-    ConstantIntegerToken,
-    IdentifierToken,
-    KeywordToken,
-    OpenBraceToken,
-    OpenParenToken,
-    SemicolonToken,
-]
-
-TokenItem = Union[
-    Token,
+TokenTypes: list[type] = [
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,

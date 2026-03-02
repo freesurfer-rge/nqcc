@@ -10,7 +10,7 @@ from ._tokens import (
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
-    TokenItem,
+    Token,
 )
 
 __all__ = [
@@ -24,7 +24,7 @@ __all__ = [
     "OpenBraceToken",
     "OpenParenToken",
     "SemicolonToken",
-    "TokenItem",
+    "Token",
     "extract_tokens",
     "lex_string",
     "lexer_driver",
