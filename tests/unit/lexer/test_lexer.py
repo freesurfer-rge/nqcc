@@ -14,7 +14,7 @@ from nqcc.lexer import (
     OpenParenToken,
     SemicolonToken,
     TokenItem,
-    extract_tokens,lex_string
+    extract_tokens,
 )
 
 
@@ -144,27 +144,29 @@ class TestLexerFailures:
         assert le.value.previous_tokens == []
         assert le.value.message == "No valid token for character"
 
+
 class TestExtractTokens:
     @pytest.mark.parametrize("target", ["int", "void", "return"])
-    @pytest.mark.parametrize("idx", [0,10])
+    @pytest.mark.parametrize("idx", [0, 10])
     def test_keywords(self, target: str, idx: int):
         toks = extract_tokens(target, idx)
 
-        assert len(toks)==2
+        assert len(toks) == 2
         assert toks[0] == IdentifierToken(start_position=idx, value=target)
         assert toks[1] == KeywordToken(start_position=idx, value=target)
 
     @pytest.mark.parametrize("target", ["a", "some_value", "int2", "voida", "return1"])
-    @pytest.mark.parametrize("idx", [11,12])
+    @pytest.mark.parametrize("idx", [11, 12])
     def test_identifiers(self, target: str, idx: int):
         toks = extract_tokens(target, idx)
 
-        assert len(toks)==1
+        assert len(toks) == 1
         assert toks[0] == IdentifierToken(start_position=idx, value=target)
 
     @pytest.mark.parametrize("target", ["000", "010", "100", "1234567890"])
+    @pytest.mark.parametrize("idx", [121, 130])
     def test_integers(self, target: str, idx: int):
         toks = extract_tokens(target, idx)
 
-        assert len(toks)==1
+        assert len(toks) == 1
         assert toks[0] == ConstantIntegerToken(start_position=idx, value=target)

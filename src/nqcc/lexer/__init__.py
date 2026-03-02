@@ -1,36 +1,36 @@
 from ._driver import lexer_driver
-from ._lexer import Lexer, LexerError, lex_string, extract_tokens
+from ._lexer import Lexer, LexerError, extract_tokens, lex_string
 from ._tokens import (
     AppendResult,
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
+    ExpressionTokenItem,
     IdentifierToken,
     KeywordToken,
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
     TokenItem,
-    ExpressionTokenItem,
-    WhitespaceToken
+    WhitespaceToken,
 )
 
 __all__ = [
-    "lexer_driver",
-    "Lexer",
-    "LexerError",
-    "lex_string",
-    "extract_tokens",
     "AppendResult",
-    "TokenItem",
     "CloseBraceToken",
     "CloseParenToken",
     "ConstantIntegerToken",
+    "ExpressionTokenItem",
     "IdentifierToken",
     "KeywordToken",
+    "Lexer",
+    "LexerError",
     "OpenBraceToken",
     "OpenParenToken",
     "SemicolonToken",
-    "ExpressionTokenItem",
-    "WhitespaceToken"
+    "TokenItem",
+    "WhitespaceToken",
+    "extract_tokens",
+    "lex_string",
+    "lexer_driver",
 ]

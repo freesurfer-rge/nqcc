@@ -151,12 +151,11 @@ class WhitespaceToken(FirstSubsequentToken):
         return "THIS SHOULD NOT MATCH ANYTHING EVER"
 
 
-
 _KEYWORDS = {"int", "void", "return"}
+
 
 class KeywordToken(Token):
     token_type: Literal["KeywordToken"] = "KeywordToken"
-
 
     def try_append(self, char: str, position: int) -> AppendResult:
         assert len(char) == 1, f"Got '{char}' and not single character"

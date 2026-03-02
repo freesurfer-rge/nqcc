@@ -10,10 +10,10 @@ from ._tokens import (
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
+    Token,
     TokenItem,
     TokenTypes,
     WhitespaceToken,
-    Token,
 )
 
 MAX_EXCEPTION_TOKENS = 5
@@ -205,20 +205,22 @@ class Lexer:
         ]
         return starting_tokens
 
+
 def extract_tokens(s: str, idx: int) -> list[TokenItem]:
     assert not s[0].isspace()
 
     candidates = []
     for tt in TokenTypes:
-        assert isinstance(tt, Token)
+        assert issubclass(tt, Token)
         m = re.match(tt.re(), s)
         if m and len(m.group(0)) > 0:
             candidate_token = tt(start_position=idx, value=m.group(0))
             candidates.append(candidate_token)
     if len(candidates) == 0:
         raise LexerMatchError(position=idx)
-    
+
     return candidates
+
 
 def pick_token(tokens: list[TokenItem]) -> TokenItem:
     pass
@@ -232,7 +234,6 @@ def lex_string(c_program_str: str) -> list[TokenItem]:
     while s:
         old_len = len(s)
         s = s.lstrip()
-        idx += (old_len - len(s))
+        idx += old_len - len(s)
 
         candidates = extract_tokens(s, idx)
-
