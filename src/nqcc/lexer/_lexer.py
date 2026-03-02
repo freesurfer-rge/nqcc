@@ -250,6 +250,8 @@ def lex_string(c_program_str: str) -> list[TokenItem]:
     while s:
         old_len = len(s)
         s = s.lstrip()
+        if not s:
+            break
         idx += old_len - len(s)
 
         candidates = extract_tokens(s, idx)
