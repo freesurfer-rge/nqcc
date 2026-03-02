@@ -39,7 +39,7 @@ class Token(BaseModel, abc.ABC):
     def precedence(self) -> int:
         pass
 
-    @staticmethod
+    @classmethod
     @abc.abstractmethod
     def re(cls) -> str:
         pass
@@ -151,10 +151,12 @@ class WhitespaceToken(FirstSubsequentToken):
         return "THIS SHOULD NOT MATCH ANYTHING EVER"
 
 
+
+_KEYWORDS = {"int", "void", "return"}
+
 class KeywordToken(Token):
     token_type: Literal["KeywordToken"] = "KeywordToken"
 
-    _KEYWORDS = {"int", "void", "return"}
 
     def try_append(self, char: str, position: int) -> AppendResult:
         assert len(char) == 1, f"Got '{char}' and not single character"
@@ -163,7 +165,7 @@ class KeywordToken(Token):
 
         tst_value = self.value + char
 
-        valid_prefix = [s.startswith(tst_value) for s in self._KEYWORDS]
+        valid_prefix = [s.startswith(tst_value) for s in _KEYWORDS]
 
         if any(valid_prefix):
             if not self.value:
@@ -178,7 +180,7 @@ class KeywordToken(Token):
 
     @property
     def is_valid(self) -> bool:
-        return self.value in self._KEYWORDS
+        return self.value in _KEYWORDS
 
     @property
     def is_appendable(self) -> bool:
@@ -190,7 +192,7 @@ class KeywordToken(Token):
 
     @classmethod
     def re(cls) -> str:
-        keyword_alternatives = "|".join(KeywordToken._KEYWORDS)
+        keyword_alternatives = "|".join(_KEYWORDS)
         return f"({keyword_alternatives})\\b"
 
 
@@ -303,9 +305,16 @@ TokenTypes = [
 ]
 
 TokenItem = Union[
-    *TokenTypes,
     Token,
     WhitespaceToken,
+    CloseBraceToken,
+    CloseParenToken,
+    ConstantIntegerToken,
+    IdentifierToken,
+    KeywordToken,
+    OpenBraceToken,
+    OpenParenToken,
+    SemicolonToken,
 ]
 
 ExpressionTokenItem = Union[ConstantIntegerToken]

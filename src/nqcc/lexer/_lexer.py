@@ -13,6 +13,7 @@ from ._tokens import (
     TokenItem,
     TokenTypes,
     WhitespaceToken,
+    Token,
 )
 
 MAX_EXCEPTION_TOKENS = 5
@@ -209,15 +210,18 @@ def extract_tokens(s: str, idx: int) -> list[TokenItem]:
 
     candidates = []
     for tt in TokenTypes:
+        assert isinstance(tt, Token)
         m = re.match(tt.re(), s)
-        if m and len(m.group[0]) > 0:
-            candidate_token = tt(start_position=idx, value=m.group[0])
+        if m and len(m.group(0)) > 0:
+            candidate_token = tt(start_position=idx, value=m.group(0))
             candidates.append(candidate_token)
     if len(candidates) == 0:
-        raise LexerMatchError(idx)
+        raise LexerMatchError(position=idx)
     
     return candidates
 
+def pick_token(tokens: list[TokenItem]) -> TokenItem:
+    pass
 
 
 def lex_string(c_program_str: str) -> list[TokenItem]:
@@ -226,13 +230,9 @@ def lex_string(c_program_str: str) -> list[TokenItem]:
     idx = 0
 
     while s:
-        idx += s.lstrip()
+        old_len = len(s)
+        s = s.lstrip()
+        idx += (old_len - len(s))
 
-        candidates = []
-        for tt in TokenTypes:
-            m = re.match(tt.re(), s)
-            if m and len(m.group[0]) > 0:
-                candidate_token = tt(start_position=idx, value=m.group[0])
-                candidates.append(candidate_token)
-        if len(candidates) == 0:
-            raise LexerMatchError(idx)
+        candidates = extract_tokens(s, idx)
+
