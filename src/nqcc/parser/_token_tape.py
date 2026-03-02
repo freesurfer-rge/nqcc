@@ -1,6 +1,6 @@
 from typing import Sequence
 
-from nqcc.lexer import Lexer, TokenItem
+from nqcc.lexer import lex_string, TokenItem
 
 from ._exceptions import SourceASTBadTypeError
 
@@ -33,9 +33,4 @@ class TokenTape:
 
     @classmethod
     def from_c_source(cls, c_source: str) -> TokenTape:
-        lexer = Lexer()
-        for c in c_source:
-            lexer.push_character(c)
-        lexer.character_stream_done()
-
-        return TokenTape(lexer.completed_token_list)
+        return TokenTape(lex_string(c_source))
