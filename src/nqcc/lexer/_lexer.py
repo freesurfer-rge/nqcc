@@ -2,7 +2,6 @@ import re
 
 from ._tokens import (
     Token,
-    TokenItem,
     TokenTypes,
 )
 
@@ -14,7 +13,7 @@ class LexerMatchError(Exception):
         super().__init__(f"{self.message} at position {self.position}")
 
 
-def extract_tokens(s: str, idx: int) -> list[TokenItem]:
+def extract_tokens(s: str, idx: int) -> list[Token]:
     assert not s[0].isspace()
 
     candidates = []
@@ -32,16 +31,19 @@ def extract_tokens(s: str, idx: int) -> list[TokenItem]:
     return candidates
 
 
-def pick_token(tokens: list[TokenItem]) -> TokenItem:
-    assert len(tokens) > 0, "Must have hat least one token!"
+def pick_token(tokens: list[Token]) -> Token:
+    assert len(tokens) > 0, "Must have at least one token!"
     if len(tokens) == 1:
         return tokens[0]
 
+    # First filter is for the longest match
     max_length = max(len(x.value) for x in tokens)
     remaining = [t for t in tokens if len(t.value) == max_length]
     if len(remaining) == 1:
         return remaining[0]
 
+    # If multiple matches, take the highest
+    # precedence
     result = remaining[0]
     for t in remaining:
         if t.precedence > result.precedence:
@@ -49,25 +51,30 @@ def pick_token(tokens: list[TokenItem]) -> TokenItem:
     return result
 
 
-def lex_string(c_program_str: str) -> list[TokenItem]:
+def lex_string(c_program_str: str) -> list[Token]:
     # We won't want to change the supplied string
     s = str(c_program_str)
-    idx = 0
 
+    idx = 0
     lex_tokens = []
     while s:
+        # Consume the string
+
+        # Remove the whitespace at the front
         old_len = len(s)
         s = s.lstrip()
         if not s:
             break
         idx += old_len - len(s)
 
+        # Get the next token
         candidates = extract_tokens(s, idx)
-
         selection = pick_token(candidates)
 
+        # Update position and remove the token
         idx += len(selection.value)
         s = s[len(selection.value) :]
 
+        # Add to the result
         lex_tokens.append(selection)
     return lex_tokens

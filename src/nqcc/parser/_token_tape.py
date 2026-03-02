@@ -1,12 +1,12 @@
 from typing import Sequence
 
-from nqcc.lexer import TokenItem, lex_string
+from nqcc.lexer import Token, lex_string
 
 from ._exceptions import SourceASTBadTypeError
 
 
 class TokenTape:
-    def __init__(self, token_list: Sequence[TokenItem]) -> None:
+    def __init__(self, token_list: Sequence[Token]) -> None:
         self._tokens = token_list
         self._idx = 0
 
@@ -14,14 +14,14 @@ class TokenTape:
     def tokens_remaining(self) -> int:
         return len(self._tokens) - self._idx
 
-    def take(self) -> TokenItem:
+    def take(self) -> Token:
         if self._idx >= len(self._tokens):
             raise IndexError("No tokens remaining in TokenTape")
         nxt = self._tokens[self._idx]
         self._idx += 1
         return nxt
 
-    def expect(self, expected_token_type: type) -> TokenItem:
+    def expect(self, expected_token_type: type) -> Token:
         head = self.take()
         if not isinstance(head, expected_token_type):
             raise SourceASTBadTypeError(

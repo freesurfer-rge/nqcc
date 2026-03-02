@@ -2,12 +2,12 @@ import json
 import pathlib
 
 from ._lexer import lex_string
-from ._tokens import TokenItem
+from ._tokens import Token
 
 TOKEN_EXTENSION = ".tokens"
 
 
-def lexer_driver(preprocessed_file: pathlib.Path) -> list[TokenItem]:
+def lexer_driver(preprocessed_file: pathlib.Path) -> list[Token]:
     assert preprocessed_file.exists(), f"Preprocessed file {preprocessed_file} not found!"
 
     with open(preprocessed_file, "r") as f:

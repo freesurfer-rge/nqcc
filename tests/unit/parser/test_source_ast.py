@@ -149,7 +149,7 @@ class TestSourceFunctionNode:
 
 class TestSourceProgramNode:
     def test_program(self):
-        program_str = "int main( void ) { return 2;}"
+        program_str = " int main( void ) { return 2;}"
 
         token_tape = TokenTape.from_c_source(program_str)
 
