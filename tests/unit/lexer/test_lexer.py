@@ -15,6 +15,7 @@ from nqcc.lexer import (
     SemicolonToken,
     TokenItem,
     extract_tokens,
+    pick_token
 )
 
 
@@ -170,3 +171,44 @@ class TestExtractTokens:
 
         assert len(toks) == 1
         assert toks[0] == ConstantIntegerToken(start_position=idx, value=target)
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_semicolon(self, idx):
+        toks = extract_tokens(";", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == SemicolonToken(start_position=idx, value=";")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_open_paren(self, idx):
+        toks = extract_tokens("(", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == OpenParenToken(start_position=idx, value="(")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_open_brace(self, idx):
+        toks = extract_tokens("{", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == OpenBraceToken(start_position=idx, value="{")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_close_paren(self, idx):
+        toks = extract_tokens(")", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == CloseParenToken(start_position=idx, value=")")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_close_brace(self, idx):
+        toks = extract_tokens("}", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == CloseBraceToken(start_position=idx, value="}")
+
+class TestPickToken:
+    def test_smoke(self):
+        toks = [IdentifierToken(value="int"), KeywordToken(value="int")]
+
+        assert pick_token(toks) == KeywordToken(value="int")

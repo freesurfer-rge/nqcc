@@ -214,7 +214,9 @@ def extract_tokens(s: str, idx: int) -> list[TokenItem]:
         assert issubclass(tt, Token)
         m = re.match(tt.re(), s)
         if m and len(m.group(0)) > 0:
-            candidate_token = tt(start_position=idx, value=m.group(0))
+            # Following has a suppression because the subclasses enforce
+            # a token_type argument but this isn't being picked up
+            candidate_token = tt(start_position=idx, value=m.group(0))  # type: ignore[call-arg]
             candidates.append(candidate_token)
     if len(candidates) == 0:
         raise LexerMatchError(position=idx)
@@ -223,7 +225,21 @@ def extract_tokens(s: str, idx: int) -> list[TokenItem]:
 
 
 def pick_token(tokens: list[TokenItem]) -> TokenItem:
-    pass
+    assert len(tokens)>0, "Must have hat least one token!"
+    if len(tokens) == 1:
+        return tokens[0]
+    
+    max_length = max([len(x.value) for x in tokens])
+    remaining = [t for t in tokens if len(t.value)==max_length]
+    if len(remaining) == 1:
+        return remaining[0]
+    
+    result = remaining[0]
+    for t in remaining:
+        if t.precedence > result.precedence:
+            result = t
+    return result
+
 
 
 def lex_string(c_program_str: str) -> list[TokenItem]:
@@ -231,9 +247,20 @@ def lex_string(c_program_str: str) -> list[TokenItem]:
     s = str(c_program_str)
     idx = 0
 
+    lex_tokens = []
     while s:
         old_len = len(s)
         s = s.lstrip()
         idx += old_len - len(s)
 
         candidates = extract_tokens(s, idx)
+
+        selection = pick_token(candidates)
+
+        idx += len(selection.value)
+        s = s[len(selection.value):]
+
+        lex_tokens.append(selection)
+    return lex_tokens
+
+

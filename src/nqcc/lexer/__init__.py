@@ -1,5 +1,5 @@
 from ._driver import lexer_driver
-from ._lexer import Lexer, LexerError, extract_tokens, lex_string
+from ._lexer import Lexer, LexerError, extract_tokens, lex_string, pick_token
 from ._tokens import (
     AppendResult,
     CloseBraceToken,
@@ -33,4 +33,5 @@ __all__ = [
     "extract_tokens",
     "lex_string",
     "lexer_driver",
+    "pick_token"
 ]
