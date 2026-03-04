@@ -1,9 +1,6 @@
 import re
 
-from ._tokens import (
-    Token,
-    TokenTypes,
-)
+from ._tokens import DecrementToken, Token, TokenTypes
 
 
 class LexerMatchError(Exception):
@@ -70,6 +67,7 @@ def lex_string(c_program_str: str) -> list[Token]:
         # Get the next token
         candidates = extract_tokens(s, idx)
         selection = pick_token(candidates)
+        assert not isinstance(selection, DecrementToken), "Not currently supported"
 
         # Update position and remove the token
         idx += len(selection.value)

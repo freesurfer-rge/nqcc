@@ -60,6 +60,45 @@ class KeywordToken(Token):
         return f"({keyword_alternatives})\\b"
 
 
+class TildeToken(Token):
+    token_type: Literal["TildeToken"] = "TildeToken"
+    value: Literal["~"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "~"
+
+
+class NegationToken(Token):
+    token_type: Literal["NegationToken"] = "NegationToken"
+    value: Literal["-"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "-"
+
+
+class DecrementToken(Token):
+    token_type: Literal["DecrementToken"] = "DecrementToken"
+    value: Literal["--"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "--"
+
+
 class OpenParenToken(Token):
     token_type: Literal["OpenParenToken"] = "OpenParenToken"
     value: Literal["("] = "("
@@ -129,11 +168,16 @@ TokenTypes: list[type] = [
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
+    DecrementToken,
     IdentifierToken,
     KeywordToken,
+    NegationToken,
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
+    TildeToken,
 ]
+
+UnaryOperatorToken = Union[DecrementToken, NegationToken, TildeToken]
 
 ExpressionTokenItem = Union[ConstantIntegerToken]
