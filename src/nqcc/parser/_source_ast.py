@@ -1,4 +1,4 @@
-from typing import Literal, Union
+from typing import Literal, Union, get_args
 
 from pydantic import BaseModel
 
@@ -6,7 +6,6 @@ from nqcc.lexer import (
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
-    DecrementToken,
     IdentifierToken,
     KeywordToken,
     NegationToken,
@@ -14,7 +13,7 @@ from nqcc.lexer import (
     OpenParenToken,
     SemicolonToken,
     TildeToken,
-    UnaryOperatorTypes,
+    UnaryOperatorToken,
 )
 
 from ._exceptions import SourceASTBadValueError
@@ -27,7 +26,7 @@ class SourceASTNode(BaseModel):
 
 
 def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryExpressionNode:
-    op_token = token_tape.expect(UnaryOperatorTypes)
+    op_token = token_tape.expect(get_args(UnaryOperatorToken))
 
     result: SourceUnaryExpressionNode
     match op_token:
@@ -58,7 +57,12 @@ def parse_expression(token_tape: TokenTape) -> SourceExpressionNode:
                 start_position=int_token.start_position, value=int(int_token.value)
             )
 
-        case DecrementToken() | NegationToken() | TildeToken():
+        # See
+        # https://github.com/python/cpython/issues/106246
+        # for the following ugliness
+        # Also get_args is needed to quiet mypy
+        # https://docs.python.org/3/library/typing.html#typing.get_args
+        case unary if isinstance(unary, get_args(UnaryOperatorToken)):
             result = parse_unary_operator(token_tape)
 
         case OpenParenToken():
