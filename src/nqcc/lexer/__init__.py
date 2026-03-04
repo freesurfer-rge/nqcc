@@ -5,7 +5,6 @@ from ._tokens import (
     CloseParenToken,
     ConstantIntegerToken,
     DecrementToken,
-    ExpressionTokenItem,
     IdentifierToken,
     KeywordToken,
     NegationToken,
@@ -14,6 +13,7 @@ from ._tokens import (
     SemicolonToken,
     TildeToken,
     Token,
+    UnaryOperatorToken,
 )
 
 __all__ = [
@@ -21,7 +21,6 @@ __all__ = [
     "CloseParenToken",
     "ConstantIntegerToken",
     "DecrementToken",
-    "ExpressionTokenItem",
     "IdentifierToken",
     "KeywordToken",
     "LexerMatchError",
@@ -31,6 +30,7 @@ __all__ = [
     "SemicolonToken",
     "TildeToken",
     "Token",
+    "UnaryOperatorToken",
     "extract_tokens",
     "lex_string",
     "lexer_driver",

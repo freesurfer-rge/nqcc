@@ -2,7 +2,9 @@ from nqcc.lexer import Token
 
 
 class SourceASTBadTypeError(ValueError):
-    def __init__(self, *, expected_type: type, actual_token: Token, message: str):
+    def __init__(
+        self, *, expected_type: type | tuple[type, ...], actual_token: Token, message: str
+    ):
         self.expected_type = expected_type
         self.actual_token = actual_token
         self.message = message

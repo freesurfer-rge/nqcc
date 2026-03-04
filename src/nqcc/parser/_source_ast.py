@@ -1,4 +1,4 @@
-from typing import Literal, Union
+from typing import Literal, Union, get_args
 
 from pydantic import BaseModel
 
@@ -6,12 +6,14 @@ from nqcc.lexer import (
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
-    ExpressionTokenItem,
     IdentifierToken,
     KeywordToken,
+    NegationToken,
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
+    TildeToken,
+    UnaryOperatorToken,
 )
 
 from ._exceptions import SourceASTBadValueError
@@ -23,14 +25,50 @@ class SourceASTNode(BaseModel):
     start_position: int
 
 
-def parse_expression(token_tape: TokenTape) -> SourceExpressionNode:
-    token = token_tape.expect(ExpressionTokenItem)
+def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryExpressionNode:
+    op_token = token_tape.expect(get_args(UnaryOperatorToken))
 
+    result: SourceUnaryExpressionNode
+    match op_token:
+        case TildeToken():
+            inner_exp = parse_expression(token_tape)
+            result = SourceComplementNode(
+                start_position=op_token.start_position, expression=inner_exp
+            )
+
+        case NegationToken():
+            inner_exp = parse_expression(token_tape)
+            result = SourceNegateNode(start_position=op_token.start_position, expression=inner_exp)
+
+        case _:
+            raise ValueError(f"Could not match type of {op_token}")
+
+    return result
+
+
+def parse_expression(token_tape: TokenTape) -> SourceExpressionNode:
+    token = token_tape.peek()
+
+    result: SourceExpressionNode
     match token:
         case ConstantIntegerToken():
+            int_token = token_tape.take()
             result = SourceConstantIntNode(
-                start_position=token.start_position, value=int(token.value)
+                start_position=int_token.start_position, value=int(int_token.value)
             )
+
+        # See
+        # https://github.com/python/cpython/issues/106246
+        # for the following ugliness
+        # Also get_args is needed to quiet mypy
+        # https://docs.python.org/3/library/typing.html#typing.get_args
+        case unary if isinstance(unary, get_args(UnaryOperatorToken)):
+            result = parse_unary_operator(token_tape)
+
+        case OpenParenToken():
+            _ = token_tape.take()
+            result = parse_expression(token_tape)
+            _ = token_tape.expect(CloseParenToken)
 
         case _:
             raise ValueError(f"Could not match type of {token}")
@@ -43,7 +81,19 @@ class SourceConstantIntNode(SourceASTNode):
     value: int
 
 
-SourceExpressionNode = Union[SourceConstantIntNode]
+class SourceUnaryExpressionNode(SourceASTNode):
+    expression: SourceExpressionNode
+
+
+class SourceComplementNode(SourceUnaryExpressionNode):
+    node_type: Literal["SourceComplementNode"] = "SourceComplementNode"
+
+
+class SourceNegateNode(SourceUnaryExpressionNode):
+    node_type: Literal["SourceNegateNode"] = "SourceNegateNode"
+
+
+SourceExpressionNode = Union[SourceConstantIntNode, SourceUnaryExpressionNode]
 
 
 def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
