@@ -4,15 +4,15 @@ from nqcc.lexer import (
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
+    DecrementToken,
     IdentifierToken,
     KeywordToken,
     LexerMatchError,
+    NegationToken,
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
     TildeToken,
-    DecrementToken,
-    NegationToken,
     extract_tokens,
     lex_string,
     pick_token,
@@ -130,3 +130,14 @@ class TestLexString:
         assert toks[0] == KeywordToken(start_position=0, value="return")
         assert toks[1] == ConstantIntegerToken(start_position=7, value="2")
         assert toks[2] == SemicolonToken(start_position=8, value=";")
+
+    def test_double_tilde(self):
+        sample = "return ~~2;"
+
+        toks = lex_string(sample)
+        assert len(toks) == 5
+        assert toks[0] == KeywordToken(start_position=0, value="return")
+        assert toks[1] == TildeToken(start_position=7, value="~")
+        assert toks[2] == TildeToken(start_position=8, value="~")
+        assert toks[3] == ConstantIntegerToken(start_position=9, value="2")
+        assert toks[4] == SemicolonToken(start_position=10, value=";")
