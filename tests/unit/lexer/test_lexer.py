@@ -10,6 +10,9 @@ from nqcc.lexer import (
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
+    TildeToken,
+    DecrementToken,
+    NegationToken,
     extract_tokens,
     lex_string,
     pick_token,
@@ -83,20 +86,39 @@ class TestExtractTokens:
             _ = extract_tokens(bad_target, 10)
         assert lme.value.position == 10
 
-    
     @pytest.mark.parametrize("idx", [121, 130])
     def test_tilde(self, idx):
         toks = extract_tokens("~", idx)
 
         assert len(toks) == 1
-        assert toks[0] == CloseBraceToken(start_position=idx, value="~")
+        assert toks[0] == TildeToken(start_position=idx, value="~")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_negation(self, idx):
+        toks = extract_tokens("-", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == NegationToken(start_position=idx, value="-")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_decrement(self, idx):
+        toks = extract_tokens("--", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == DecrementToken(start_position=idx, value="--")
+        assert toks[1] == NegationToken(start_position=idx, value="-")
 
 
 class TestPickToken:
-    def test_smoke(self):
+    def test_identifier_vs_keyword(self):
         toks = [IdentifierToken(value="int"), KeywordToken(value="int")]
 
         assert pick_token(toks) == KeywordToken(value="int")
+
+    def test_decrement_vs_negation(self):
+        toks = [DecrementToken(value="--"), NegationToken(value="-")]
+
+        assert pick_token(toks) == DecrementToken(value="--")
 
 
 class TestLexString:

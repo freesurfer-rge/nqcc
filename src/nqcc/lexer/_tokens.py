@@ -59,10 +59,11 @@ class KeywordToken(Token):
         keyword_alternatives = "|".join(_KEYWORDS)
         return f"({keyword_alternatives})\\b"
 
+
 class TildeToken(Token):
     token_type: Literal["TildeToken"] = "TildeToken"
     value: Literal["~"]
-        
+
     @property
     def precedence(self) -> int:
         return 5
@@ -70,11 +71,12 @@ class TildeToken(Token):
     @classmethod
     def re(cls) -> str:
         return "~"
-    
+
+
 class NegationToken(Token):
     token_type: Literal["NegationToken"] = "NegationToken"
     value: Literal["-"]
-        
+
     @property
     def precedence(self) -> int:
         return 5
@@ -82,11 +84,12 @@ class NegationToken(Token):
     @classmethod
     def re(cls) -> str:
         return "-"
-    
+
+
 class DecrementToken(Token):
     token_type: Literal["DecrementToken"] = "DecrementToken"
     value: Literal["--"]
-        
+
     @property
     def precedence(self) -> int:
         return 5
@@ -94,6 +97,7 @@ class DecrementToken(Token):
     @classmethod
     def re(cls) -> str:
         return "--"
+
 
 class OpenParenToken(Token):
     token_type: Literal["OpenParenToken"] = "OpenParenToken"
@@ -164,13 +168,16 @@ TokenTypes: list[type] = [
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
+    DecrementToken,
     IdentifierToken,
     KeywordToken,
+    NegationToken,
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
+    TildeToken,
 ]
 
-UnaryOperatorToken = Union[TildeToken, NegationToken, DecrementToken]
+UnaryOperatorToken = Union[DecrementToken, NegationToken, TildeToken]
 
 ExpressionTokenItem = Union[ConstantIntegerToken]
