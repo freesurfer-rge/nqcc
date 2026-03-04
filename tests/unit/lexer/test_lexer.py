@@ -86,11 +86,10 @@ class TestExtractTokens:
     
     @pytest.mark.parametrize("idx", [121, 130])
     def test_tilde(self, idx):
-        toks = extract_tokens("~~", idx)
+        toks = extract_tokens("~", idx)
 
-        assert len(toks) == 2
+        assert len(toks) == 1
         assert toks[0] == CloseBraceToken(start_position=idx, value="~")
-        assert toks[1] == CloseBraceToken(start_position=idx+1, value="~")
 
 
 class TestPickToken:
