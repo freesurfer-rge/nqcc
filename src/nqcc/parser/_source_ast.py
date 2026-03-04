@@ -6,6 +6,7 @@ from nqcc.lexer import (
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
+    DecrementToken,
     IdentifierToken,
     KeywordToken,
     NegationToken,
@@ -28,6 +29,7 @@ class SourceASTNode(BaseModel):
 def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryExpressionNode:
     op_token = token_tape.expect(UnaryOperatorTypes)
 
+    result: SourceUnaryExpressionNode
     match op_token:
         case TildeToken():
             inner_exp = parse_expression(token_tape)
@@ -48,6 +50,7 @@ def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryExpressionNode:
 def parse_expression(token_tape: TokenTape) -> SourceExpressionNode:
     token = token_tape.peek()
 
+    result: SourceExpressionNode
     match token:
         case ConstantIntegerToken():
             int_token = token_tape.take()
@@ -55,13 +58,13 @@ def parse_expression(token_tape: TokenTape) -> SourceExpressionNode:
                 start_position=int_token.start_position, value=int(int_token.value)
             )
 
-        case UnaryOperatorTypes():
+        case DecrementToken() | NegationToken() | TildeToken():
             result = parse_unary_operator(token_tape)
 
         case OpenParenToken():
-            token_tape.take()
+            _ = token_tape.take()
             result = parse_expression(token_tape)
-            token_tape.expect(CloseParenToken)
+            _ = token_tape.expect(CloseParenToken)
 
         case _:
             raise ValueError(f"Could not match type of {token}")
@@ -74,7 +77,6 @@ class SourceConstantIntNode(SourceASTNode):
     value: int
 
 
-
 class SourceUnaryExpressionNode(SourceASTNode):
     expression: SourceExpressionNode
 
@@ -85,7 +87,6 @@ class SourceComplementNode(SourceUnaryExpressionNode):
 
 class SourceNegateNode(SourceUnaryExpressionNode):
     node_type: Literal["SourceNegateNode"] = "SourceNegateNode"
-
 
 
 SourceExpressionNode = Union[SourceConstantIntNode, SourceUnaryExpressionNode]

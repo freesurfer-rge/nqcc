@@ -4,10 +4,10 @@ from nqcc.lexer import CloseParenToken, ConstantIntegerToken, KeywordToken, Semi
 from nqcc.parser import (
     SourceASTBadTypeError,
     SourceASTBadValueError,
-    SourceConstantIntNode,
     SourceComplementNode,
-    SourceNegateNode,
+    SourceConstantIntNode,
     SourceFunctionNode,
+    SourceNegateNode,
     SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
@@ -38,10 +38,44 @@ class TestSourceExpressionNode:
     def test_complement_integer(self):
         source = " ~ 2 ;"
         token_tape = TokenTape.from_c_source(source)
-        assert token_tape.tokens_remaining==3
+        assert token_tape.tokens_remaining == 3
 
         node = parse_expression(token_tape)
         assert isinstance(node, SourceComplementNode)
+        assert node.start_position == 1
+        assert node.expression == SourceConstantIntNode(start_position=3, value=2)
+
+        # The expression doesn't consume the semicolon
+        assert token_tape.tokens_remaining == 1
+
+    def test_negate_integer(self):
+        source = "  -3;"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 3
+
+        node = parse_expression(token_tape)
+        assert isinstance(node, SourceNegateNode)
+        assert node.start_position == 2
+        assert node.expression == SourceConstantIntNode(start_position=3, value=3)
+
+        # The expression doesn't consume the semicolon
+        assert token_tape.tokens_remaining == 1
+
+    def test_parens_integer(self):
+        source = "(-((~12)));"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 10
+
+        node = parse_expression(token_tape)
+        assert isinstance(node, SourceNegateNode)
+        assert node.start_position == 1
+        inner_exp = node.expression
+        assert isinstance(inner_exp, SourceComplementNode)
+        assert inner_exp.start_position == 4
+        assert inner_exp.expression == SourceConstantIntNode(start_position=5, value=12)
+
+        # The expression doesn't consume the semicolon
+        assert token_tape.tokens_remaining == 1
 
 
 class TestSourceStatementNode:

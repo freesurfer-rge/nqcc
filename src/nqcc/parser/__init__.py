@@ -30,7 +30,7 @@ __all__ = [
     "SourceProgramNode",
     "SourceReturnNode",
     "SourceStatementNode",
-    "SourceUnaryOperatorNode",
+    "SourceUnaryExpressionNode",
     "TokenTape",
     "parse_expression",
     "parse_function",

@@ -179,5 +179,6 @@ TokenTypes: list[type] = [
 ]
 
 UnaryOperatorTypes = (DecrementToken, NegationToken, TildeToken)
+UnaryOperatorToken = Union[DecrementToken, NegationToken, TildeToken]
 
 ExpressionTokenItem = Union[ConstantIntegerToken]
