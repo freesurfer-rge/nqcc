@@ -24,7 +24,7 @@ class TokenTape:
         self._idx += 1
         return nxt
 
-    def expect(self, expected_token_type: type) -> Token:
+    def expect(self, expected_token_type: type | tuple[type, ...]) -> Token:
         head = self.take()
         if not isinstance(head, expected_token_type):
             raise SourceASTBadTypeError(
