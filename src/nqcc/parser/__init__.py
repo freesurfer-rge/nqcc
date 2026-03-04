@@ -10,7 +10,7 @@ from ._source_ast import (
     SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
-    SourceUnaryOperatorNode,
+    SourceUnaryExpressionNode,
     parse_expression,
     parse_function,
     parse_program,

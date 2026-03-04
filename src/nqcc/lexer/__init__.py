@@ -14,6 +14,7 @@ from ._tokens import (
     SemicolonToken,
     TildeToken,
     Token,
+    UnaryOperatorTypes,
 )
 
 __all__ = [
@@ -31,6 +32,7 @@ __all__ = [
     "SemicolonToken",
     "TildeToken",
     "Token",
+    "UnaryOperatorTypes",
     "extract_tokens",
     "lex_string",
     "lexer_driver",

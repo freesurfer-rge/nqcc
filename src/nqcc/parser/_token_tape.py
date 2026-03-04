@@ -14,10 +14,13 @@ class TokenTape:
     def tokens_remaining(self) -> int:
         return len(self._tokens) - self._idx
 
-    def take(self) -> Token:
+    def peek(self) -> Token:
         if self._idx >= len(self._tokens):
             raise IndexError("No tokens remaining in TokenTape")
-        nxt = self._tokens[self._idx]
+        return self._tokens[self._idx]
+
+    def take(self) -> Token:
+        nxt = self.peek()
         self._idx += 1
         return nxt
 

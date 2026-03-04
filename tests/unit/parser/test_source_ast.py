@@ -5,6 +5,8 @@ from nqcc.parser import (
     SourceASTBadTypeError,
     SourceASTBadValueError,
     SourceConstantIntNode,
+    SourceComplementNode,
+    SourceNegateNode,
     SourceFunctionNode,
     SourceProgramNode,
     SourceReturnNode,
@@ -32,6 +34,14 @@ class TestSourceExpressionNode:
 
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
+
+    def test_complement_integer(self):
+        source = " ~ 2 ;"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining==3
+
+        node = parse_expression(token_tape)
+        assert isinstance(node, SourceComplementNode)
 
 
 class TestSourceStatementNode:

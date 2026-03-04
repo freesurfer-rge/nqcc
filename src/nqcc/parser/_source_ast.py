@@ -6,12 +6,14 @@ from nqcc.lexer import (
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
-    ExpressionTokenItem,
     IdentifierToken,
     KeywordToken,
+    NegationToken,
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
+    TildeToken,
+    UnaryOperatorTypes,
 )
 
 from ._exceptions import SourceASTBadValueError
@@ -23,14 +25,43 @@ class SourceASTNode(BaseModel):
     start_position: int
 
 
+def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryExpressionNode:
+    op_token = token_tape.expect(UnaryOperatorTypes)
+
+    match op_token:
+        case TildeToken():
+            inner_exp = parse_expression(token_tape)
+            result = SourceComplementNode(
+                start_position=op_token.start_position, expression=inner_exp
+            )
+
+        case NegationToken():
+            inner_exp = parse_expression(token_tape)
+            result = SourceNegateNode(start_position=op_token.start_position, expression=inner_exp)
+
+        case _:
+            raise ValueError(f"Could not match type of {op_token}")
+
+    return result
+
+
 def parse_expression(token_tape: TokenTape) -> SourceExpressionNode:
-    token = token_tape.expect(ExpressionTokenItem)
+    token = token_tape.peek()
 
     match token:
         case ConstantIntegerToken():
+            int_token = token_tape.take()
             result = SourceConstantIntNode(
-                start_position=token.start_position, value=int(token.value)
+                start_position=int_token.start_position, value=int(int_token.value)
             )
+
+        case UnaryOperatorTypes():
+            result = parse_unary_operator(token_tape)
+
+        case OpenParenToken():
+            token_tape.take()
+            result = parse_expression(token_tape)
+            token_tape.expect(CloseParenToken)
 
         case _:
             raise ValueError(f"Could not match type of {token}")
@@ -43,17 +74,21 @@ class SourceConstantIntNode(SourceASTNode):
     value: int
 
 
-class SourceComplementNode(SourceASTNode):
+
+class SourceUnaryExpressionNode(SourceASTNode):
+    expression: SourceExpressionNode
+
+
+class SourceComplementNode(SourceUnaryExpressionNode):
     node_type: Literal["SourceComplementNode"] = "SourceComplementNode"
 
 
-class SourceNegateNode(SourceASTNode):
+class SourceNegateNode(SourceUnaryExpressionNode):
     node_type: Literal["SourceNegateNode"] = "SourceNegateNode"
 
 
-SourceUnaryOperatorNode = Union[SourceComplementNode, SourceNegateNode]
 
-SourceExpressionNode = Union[SourceConstantIntNode, SourceUnaryOperatorNode]
+SourceExpressionNode = Union[SourceConstantIntNode, SourceUnaryExpressionNode]
 
 
 def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
