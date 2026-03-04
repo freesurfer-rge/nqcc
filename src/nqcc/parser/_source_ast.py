@@ -43,7 +43,17 @@ class SourceConstantIntNode(SourceASTNode):
     value: int
 
 
-SourceExpressionNode = Union[SourceConstantIntNode]
+class SourceComplementNode(SourceASTNode):
+    node_type: Literal["SourceComplementNode"] = "SourceComplementNode"
+
+
+class SourceNegateNode(SourceASTNode):
+    node_type: Literal["SourceNegateNode"] = "SourceNegateNode"
+
+
+SourceUnaryOperatorNode = Union[SourceComplementNode, SourceNegateNode]
+
+SourceExpressionNode = Union[SourceConstantIntNode, SourceUnaryOperatorNode]
 
 
 def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
