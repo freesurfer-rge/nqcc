@@ -1,3 +1,4 @@
+from ._driver import tacky_driver
 from ._tacky_ast import (
     TackyASTNode,
     TackyComplementNode,
@@ -20,4 +21,5 @@ __all__ = [
     "TackyReturnNode",
     "TackyUnaryNode",
     "TackyVarNode",
+    "tacky_driver",
 ]

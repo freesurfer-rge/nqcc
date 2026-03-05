@@ -7,6 +7,7 @@ from nqcc import emit_assembler, generate_executable, preprocess_c_file
 from nqcc.codegen import codegen_driver
 from nqcc.lexer import lexer_driver
 from nqcc.parser import parser_driver
+from nqcc.tacky import tacky_driver
 
 _DESC = """\
 An implementation of the C Compiler described in Nora 
@@ -93,6 +94,13 @@ def main(
 
     if exit_after_parse:
         _logger.info("Exiting after parse")
+        return
+
+    _logger.info("Running tacking generation")
+    tacky_ast = tacky_driver(src_ast, working_dir=working_dir, file_stem=file_stem)
+
+    if exit_after_tacky:
+        _logger.info("Exiting after tacky generation")
         return
 
     _logger.info("Running code generator")
