@@ -18,6 +18,7 @@ def test_return_constant():
             working_dir=working_dir,
             exit_after_lex=False,
             exit_after_parse=False,
+            exit_after_tacky=False,
             exit_after_codegen=False,
         )
         assert executable_path.exists(), f"Executable {executable_path} not generated!"
