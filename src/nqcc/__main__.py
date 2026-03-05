@@ -41,6 +41,7 @@ def parse_args():
     exit_group = book_group.add_mutually_exclusive_group()
     exit_group.add_argument("--lex", action="store_true", help="Exit after the lexer")
     exit_group.add_argument("--parse", action="store_true", help="Exit after the parser")
+    exit_group.add_argument("--tacky", action="store_true", help="Exit after tacky generation")
     exit_group.add_argument(
         "--codegen",
         action="store_true",
@@ -64,6 +65,7 @@ def main(
     working_dir: pathlib.Path,
     exit_after_lex: bool,
     exit_after_parse: bool,
+    exit_after_tacky: bool,
     exit_after_codegen: bool,
 ):
 
@@ -116,5 +118,6 @@ if __name__ == "__main__":
         working_dir=args.working_dir,
         exit_after_lex=args.lex,
         exit_after_parse=args.parse,
+        exit_after_tacky=args.tacky,
         exit_after_codegen=args.codegen,
     )
