@@ -14,6 +14,7 @@ from ._tacky_ast import (
     TackyInstruction,
     TackyNegateNode,
     TackyUnaryNode,
+    TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
 )
@@ -34,7 +35,7 @@ class TackyGenerator:
         assert isinstance(source, SourceConstantIntNode)
         return TackyConstantIntNode(start_position=source.start_position, value=source.value)
 
-    def convert_unary_operator(self, source: SourceUnaryExpressionNode) -> TackyUnaryNode:
+    def convert_unary_operator(self, source: SourceUnaryExpressionNode) -> TackyUnaryOperator:
         match source:
             case SourceComplementNode():
                 return TackyComplementNode(start_position=source.start_position)
@@ -56,10 +57,11 @@ class TackyGenerator:
                 tacky_operator = self.convert_unary_operator(source_node)
                 instr = TackyUnaryNode(
                     start_position=source_node.start_position,
-                    oeprator=tacky_operator,
+                    operator=tacky_operator,
                     src=src,
                     dst=dst,
                 )
                 self._current_instructions.append(instr)
+                return dst
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")

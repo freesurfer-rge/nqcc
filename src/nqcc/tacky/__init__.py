@@ -10,6 +10,7 @@ from ._tacky_ast import (
     TackyUnaryNode,
     TackyVarNode,
 )
+from ._tacky_generator import TackyGenerator
 
 __all__ = [
     "TackyASTNode",
@@ -22,4 +23,5 @@ __all__ = [
     "TackyUnaryNode",
     "TackyVarNode",
     "tacky_driver",
+    "TackyGenerator"
 ]
