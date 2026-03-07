@@ -1,4 +1,4 @@
-from nqcc.parser import TokenTape, parse_expression, parse_function, parse_statement
+from nqcc.parser import TokenTape, parse_expression, parse_function, parse_statement, parse_program
 from nqcc.tacky import (
     TackyComplementNode,
     TackyConstantIntNode,
@@ -8,6 +8,7 @@ from nqcc.tacky import (
     TackyReturnNode,
     TackyUnaryNode,
     TackyVarNode,
+    TackyProgramNode
 )
 
 # These tests access internals of the TackyGenerator
@@ -142,3 +143,32 @@ class TestFunctions:
 
         instr1 = result.instructions[1]
         assert instr1 == TackyReturnNode(start_position=16, value=instr0.dst)
+
+class TestPrograms:
+    def test_simple(self):
+        source = " int main(void) {return -    566;}"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_program(token_tape)
+
+        target = TackyGenerator()
+
+        result = target.emit_program(src_node)
+        assert isinstance(result, TackyProgramNode)
+        assert result.start_position == 0
+
+        main_func = result.function_definition
+        assert isinstance(main_func, TackyFunctionNode)
+        assert main_func.identifier == "main"
+        assert main_func.start_position == 1
+        assert len(main_func.instructions) == 2
+
+        instr0 = main_func.instructions[0]
+        assert instr0 == TackyUnaryNode(
+            start_position=24,
+            operator=TackyNegateNode(start_position=24),
+            src=TackyConstantIntNode(start_position=29, value=566),
+            dst=TackyVarNode(start_position=24, identifier="tmp.main.0"),
+        )
+
+        instr1 = main_func.instructions[1]
+        assert instr1 == TackyReturnNode(start_position=17, value=instr0.dst)

@@ -55,5 +55,4 @@ class TackyFunctionNode(TackyASTNode):
 
 class TackyProgramNode(TackyASTNode):
     node_type: Literal["TackyProgramNode"] = "TackyProgramNode"
-    identifier: str
     function_definition: TackyFunctionNode

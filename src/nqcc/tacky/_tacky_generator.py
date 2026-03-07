@@ -7,6 +7,7 @@ from nqcc.parser import (
     SourceReturnNode,
     SourceStatementNode,
     SourceUnaryExpressionNode,
+    SourceProgramNode
 )
 
 from ._tacky_ast import (
@@ -20,6 +21,7 @@ from ._tacky_ast import (
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
+    TackyProgramNode
 )
 
 
@@ -94,3 +96,10 @@ class TackyGenerator:
             identifier=source_node.identifier,
             instructions=self._current_instructions,
         )
+
+    def emit_program(self, source_node: SourceProgramNode) -> TackyProgramNode:
+        assert isinstance(source_node, SourceProgramNode)
+
+        func = self.emit_function(source_node.value)
+
+        return TackyProgramNode(start_position=0, function_definition=func)
