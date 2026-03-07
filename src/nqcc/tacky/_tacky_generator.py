@@ -4,10 +4,10 @@ from nqcc.parser import (
     SourceExpressionNode,
     SourceFunctionNode,
     SourceNegateNode,
+    SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
     SourceUnaryExpressionNode,
-    SourceProgramNode
 )
 
 from ._tacky_ast import (
@@ -16,12 +16,12 @@ from ._tacky_ast import (
     TackyFunctionNode,
     TackyInstruction,
     TackyNegateNode,
+    TackyProgramNode,
     TackyReturnNode,
     TackyUnaryNode,
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
-    TackyProgramNode
 )
 
 

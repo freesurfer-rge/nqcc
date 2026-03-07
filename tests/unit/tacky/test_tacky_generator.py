@@ -1,14 +1,14 @@
-from nqcc.parser import TokenTape, parse_expression, parse_function, parse_statement, parse_program
+from nqcc.parser import TokenTape, parse_expression, parse_function, parse_program, parse_statement
 from nqcc.tacky import (
     TackyComplementNode,
     TackyConstantIntNode,
     TackyFunctionNode,
     TackyGenerator,
     TackyNegateNode,
+    TackyProgramNode,
     TackyReturnNode,
     TackyUnaryNode,
     TackyVarNode,
-    TackyProgramNode
 )
 
 # These tests access internals of the TackyGenerator
@@ -143,6 +143,7 @@ class TestFunctions:
 
         instr1 = result.instructions[1]
         assert instr1 == TackyReturnNode(start_position=16, value=instr0.dst)
+
 
 class TestPrograms:
     def test_simple(self):
