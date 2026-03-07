@@ -3,6 +3,8 @@ from nqcc.parser import (
     SourceConstantIntNode,
     SourceExpressionNode,
     SourceNegateNode,
+    SourceReturnNode,
+    SourceStatementNode,
     SourceUnaryExpressionNode,
 )
 
@@ -11,6 +13,7 @@ from ._tacky_ast import (
     TackyConstantIntNode,
     TackyInstruction,
     TackyNegateNode,
+    TackyReturnNode,
     TackyUnaryNode,
     TackyUnaryOperator,
     TackyValue,
@@ -61,5 +64,14 @@ class TackyGenerator:
                 )
                 self._current_instructions.append(instr)
                 return dst
+            case _:
+                raise ValueError(f"Unrecognised: {source_node}")
+
+    def emit_statement(self, source_node: SourceStatementNode):
+        match source_node:
+            case SourceReturnNode():
+                src = self.emit_expression(source_node.value)
+                instr = TackyReturnNode(start_position=source_node.start_position, value=src)
+                self._current_instructions.append(instr)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
