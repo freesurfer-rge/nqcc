@@ -97,7 +97,7 @@ def main(
         return
 
     _logger.info("Running tacking generation")
-    tacky_ast = tacky_driver(src_ast, working_dir=working_dir, file_stem=file_stem)
+    _ = tacky_driver(src_ast, working_dir=working_dir, file_stem=file_stem)
 
     if exit_after_tacky:
         _logger.info("Exiting after tacky generation")
