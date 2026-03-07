@@ -1,9 +1,10 @@
-from nqcc.parser import TokenTape, parse_expression
+from nqcc.parser import TokenTape, parse_expression, parse_statement
 from nqcc.tacky import (
     TackyComplementNode,
     TackyConstantIntNode,
     TackyGenerator,
     TackyNegateNode,
+    TackyReturnNode,
     TackyUnaryNode,
     TackyVarNode,
 )
@@ -91,3 +92,27 @@ class TestExpressions:
             dst=TackyVarNode(start_position=1, identifier="tmp.test_simple_nested.1"),
         )
         assert result == instr1.dst
+
+
+class TestStatements:
+    def test_return(self):
+        source = "return ~ 162;"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_statement(token_tape)
+
+        target = TackyGenerator()
+        target._curr_function = "test_return"
+
+        target.emit_statement(src_node)
+        assert target._nxt_tmp == 1, "Expected one temporary used"
+        assert len(target._current_instructions) == 2, "Expected two instructions"
+
+        instr0 = target._current_instructions[0]
+        assert instr0 == TackyUnaryNode(
+            start_position=7,
+            operator=TackyComplementNode(start_position=7),
+            src=TackyConstantIntNode(start_position=9, value=162),
+            dst=TackyVarNode(start_position=7, identifier="tmp.test_return.0"),
+        )
+        instr1 = target._current_instructions[1]
+        assert instr1 == TackyReturnNode(start_position=0, value=instr0.dst)

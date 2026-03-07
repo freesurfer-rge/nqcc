@@ -22,7 +22,7 @@ from ._tacky_ast import (
 
 
 class TackyGenerator:
-    def __init__(self):
+    def __init__(self) -> None:
         self._nxt_tmp = 0
         self._curr_function = ""
         self._current_instructions: list[TackyInstruction] = []
