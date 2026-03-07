@@ -17,11 +17,11 @@ __all__ = [
     "TackyComplementNode",
     "TackyConstantIntNode",
     "TackyFunctionNode",
+    "TackyGenerator",
     "TackyNegateNode",
     "TackyProgramNode",
     "TackyReturnNode",
     "TackyUnaryNode",
     "TackyVarNode",
     "tacky_driver",
-    "TackyGenerator"
 ]

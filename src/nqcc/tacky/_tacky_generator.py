@@ -1,5 +1,3 @@
-from typing import get_args
-
 from nqcc.parser import (
     SourceComplementNode,
     SourceConstantIntNode,
@@ -48,7 +46,7 @@ class TackyGenerator:
         match source_node:
             case SourceConstantIntNode():
                 return self.convert_constant_int(source_node)
-            case t if isinstance(t, get_args(SourceUnaryExpressionNode)):
+            case SourceUnaryExpressionNode():
                 src = self.emit_expression(source_node.expression)
                 dst = TackyVarNode(
                     start_position=source_node.start_position,
