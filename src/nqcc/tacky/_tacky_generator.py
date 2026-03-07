@@ -2,6 +2,7 @@ from nqcc.parser import (
     SourceComplementNode,
     SourceConstantIntNode,
     SourceExpressionNode,
+    SourceFunctionNode,
     SourceNegateNode,
     SourceReturnNode,
     SourceStatementNode,
@@ -11,6 +12,7 @@ from nqcc.parser import (
 from ._tacky_ast import (
     TackyComplementNode,
     TackyConstantIntNode,
+    TackyFunctionNode,
     TackyInstruction,
     TackyNegateNode,
     TackyReturnNode,
@@ -75,3 +77,20 @@ class TackyGenerator:
                 self._current_instructions.append(instr)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
+
+    def emit_function(self, source_node: SourceFunctionNode) -> TackyFunctionNode:
+        assert isinstance(source_node, SourceFunctionNode)
+
+        # Set up internal state
+        self._nxt_tmp = 0
+        self._curr_function = source_node.identifier
+        self._current_instructions = []
+
+        # Process the internals
+        self.emit_statement(source_node.body)
+
+        return TackyFunctionNode(
+            start_position=source_node.start_position,
+            identifier=source_node.identifier,
+            instructions=self._current_instructions,
+        )
