@@ -11,34 +11,20 @@ from nqcc.parser import (
     SourceStatementNode,
 )
 
-_INSTRUCTION_INDENT = "    "
-_OPCODE_FIELD_WIDTH = 8
-_SEP_WIDTH = 70
-_SEP_CHAR = "="
-
 
 class AsmASTNode(BaseModel):
     node_type: str
     start_position: int
-
-    def emit_assembly_string(self) -> str:
-        raise NotImplementedError()
 
 
 class AsmImmediateIntNode(AsmASTNode):
     node_type: Literal["AsmImmediateIntNode"] = "AsmImmediateIntNode"
     value: int
 
-    def emit_assembly_string(self) -> str:
-        return f"${self.value}"
-
 
 class AsmRegisterNode(AsmASTNode):
     node_type: Literal["AsmRegisterNode"] = "AsmRegisterNode"
     value: Literal["eax", "rbp", "rsp", "r10d"]
-
-    def emit_assembly_string(self) -> str:
-        return f"%{self.value}"
 
 
 class AsmPseudoRegisterNode(AsmASTNode):
@@ -59,18 +45,9 @@ class AsmMovNode(AsmASTNode):
     source: AsmOperandNode
     destination: AsmOperandNode
 
-    def emit_assembly_string(self) -> str:
-        opcode = "movl".ljust(_OPCODE_FIELD_WIDTH)
-        src = self.source.emit_assembly_string()
-        dst = self.destination.emit_assembly_string()
-        return f"{opcode}{src}, {dst}"
-
 
 class AsmRetNode(AsmASTNode):
     node_type: Literal["AsmRetNode"] = "AsmRetNode"
-
-    def emit_assembly_string(self):
-        return "ret"
 
 
 class AsmNotOperator(AsmASTNode):
@@ -103,26 +80,10 @@ class AsmFunctionNode(AsmASTNode):
     identifier: str
     instructions: list[AsmInstructionNode]
 
-    def emit_instructions(self) -> list[str]:
-        result = []
-        result.append(f"# Starting {self.identifier} ".ljust(_SEP_WIDTH, _SEP_CHAR))
-        result.append(f"{_INSTRUCTION_INDENT}.globl {self.identifier}")
-        result.append(f"{self.identifier}:")
-        for instr in self.instructions:
-            nxt = instr.emit_assembly_string()
-            result.append(f"{_INSTRUCTION_INDENT}{nxt}")
-        return result
-
 
 class AsmProgramNode(AsmASTNode):
     node_type: Literal["AsmFunctionNode"] = "AsmFunctionNode"
     value: AsmFunctionNode
-
-    def emit_instructions(self) -> list[str]:
-        result = []
-        result += self.value.emit_instructions()
-        result.append('.section .note.GNU-stack, "",@progbits')
-        return result
 
 
 def convert_expression_node(node: SourceExpressionNode) -> AsmOperandNode:
