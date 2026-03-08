@@ -73,7 +73,29 @@ class AsmRetNode(AsmASTNode):
         return "ret"
 
 
-AsmInstructionNode = Union[AsmMovNode, AsmRetNode]
+class AsmNotOperator(AsmASTNode):
+    node_type: Literal["AsmNotOperator"] = "AsmNotOperator"
+
+
+class AsmNegOperator(AsmASTNode):
+    node_type: Literal["AsmNegOperator"] = "AsmNegOperator"
+
+
+AsmUnaryOperator = Union[AsmNotOperator, AsmNegOperator]
+
+
+class AsmUnaryNode(AsmASTNode):
+    node_type: Literal["AsmUnaryNode"] = "AsmUnaryNode"
+    operator: AsmUnaryOperator
+    source: AsmOperandNode
+
+
+class AsmAllocateStackNode(AsmASTNode):
+    node_type: Literal["AsmAllocateStackNode"] = "AsmAllocateStackNode"
+    stack_size: int
+
+
+AsmInstructionNode = Union[AsmMovNode, AsmRetNode, AsmUnaryNode, AsmAllocateStackNode]
 
 
 class AsmFunctionNode(AsmASTNode):
