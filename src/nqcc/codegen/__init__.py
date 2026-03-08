@@ -18,6 +18,7 @@ from ._assembler_ast import (
     convert_statement_node,
 )
 from ._convert_tacky import (
+    convert_tacky_function,
     convert_tacky_instruction,
     convert_tacky_operand,
     convert_tacky_unary_operator,
@@ -43,6 +44,7 @@ __all__ = [
     "convert_function_node",
     "convert_program_node",
     "convert_statement_node",
+    "convert_tacky_function",
     "convert_tacky_instruction",
     "convert_tacky_operand",
     "convert_tacky_unary_operator",

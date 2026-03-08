@@ -1,4 +1,5 @@
 from nqcc.codegen import (
+    AsmFunctionNode,
     AsmImmediateIntNode,
     AsmMovNode,
     AsmNegOperator,
@@ -7,13 +8,16 @@ from nqcc.codegen import (
     AsmRegisterNode,
     AsmRetNode,
     AsmUnaryNode,
+    convert_tacky_function,
     convert_tacky_instruction,
     convert_tacky_operand,
     convert_tacky_unary_operator,
 )
+from nqcc.parser import TokenTape, parse_function
 from nqcc.tacky import (
     TackyComplementNode,
     TackyConstantIntNode,
+    TackyGenerator,
     TackyNegateNode,
     TackyReturnNode,
     TackyUnaryNode,
@@ -84,3 +88,41 @@ class TestInstructions:
             operator=AsmNotOperator(start_position=1234),
             source=result[0].destination,
         )
+
+
+class TestFunctions:
+    def test_simple(self):
+        source = "   int main(void) {return -    508;}"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_function(token_tape)
+
+        tg = TackyGenerator()
+        tacky_func = tg.emit_function(src_node)
+
+        asm_func = convert_tacky_function(tacky_func)
+        assert isinstance(asm_func, AsmFunctionNode)
+        assert asm_func.start_position == 3
+        assert asm_func.identifier == "main"
+        assert len(asm_func.instructions) == 4
+
+        i0 = asm_func.instructions[0]
+        assert i0 == AsmMovNode(
+            start_position=26,
+            source=AsmImmediateIntNode(start_position=31, value=508),
+            destination=AsmPseudoRegisterNode(start_position=26, identifier="tmp.main.0"),
+        )
+
+        i1 = asm_func.instructions[1]
+        assert i1 == AsmUnaryNode(
+            start_position=26, operator=AsmNegOperator(start_position=26), source=i0.destination
+        )
+
+        i2 = asm_func.instructions[2]
+        assert i2 == AsmMovNode(
+            start_position=19,
+            source=i1.source,
+            destination=AsmRegisterNode(start_position=19, value="eax"),
+        )
+
+        i3 = asm_func.instructions[3]
+        assert i3 == AsmRetNode(start_position=19)

@@ -1,6 +1,7 @@
 from nqcc.tacky import (
     TackyComplementNode,
     TackyConstantIntNode,
+    TackyFunctionNode,
     TackyInstruction,
     TackyNegateNode,
     TackyReturnNode,
@@ -11,6 +12,7 @@ from nqcc.tacky import (
 )
 
 from ._assembler_ast import (
+    AsmFunctionNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
     AsmMovNode,
@@ -71,3 +73,18 @@ def convert_tacky_instruction(tacky_instruction: TackyInstruction) -> list[AsmIn
             return [i0_unary, i1_unary]
         case _:
             raise ValueError(f"Unrecognised: {tacky_instruction}")
+
+
+def convert_tacky_function(tacky_function: TackyFunctionNode) -> AsmFunctionNode:
+    assert isinstance(tacky_function, TackyFunctionNode)
+
+    asm_instructions = []
+    for instr in tacky_function.instructions:
+        asm = convert_tacky_instruction(instr)
+        asm_instructions += asm
+
+    return AsmFunctionNode(
+        start_position=tacky_function.start_position,
+        identifier=tacky_function.identifier,
+        instructions=asm_instructions,
+    )
