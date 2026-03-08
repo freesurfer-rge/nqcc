@@ -6,6 +6,7 @@ from ._assembler_ast import (
     AsmMovNode,
     AsmOperandNode,
     AsmProgramNode,
+    AsmPseudoRegisterNode,
     AsmRegisterNode,
     AsmRetNode,
     convert_expression_node,
@@ -13,6 +14,7 @@ from ._assembler_ast import (
     convert_program_node,
     convert_statement_node,
 )
+from ._convert_tacky import convert_tacky_operand
 from ._driver import codegen_driver
 
 __all__ = [
@@ -23,6 +25,7 @@ __all__ = [
     "AsmMovNode",
     "AsmOperandNode",
     "AsmProgramNode",
+    "AsmPseudoRegisterNode",
     "AsmRegisterNode",
     "AsmRetNode",
     "codegen_driver",
@@ -30,4 +33,5 @@ __all__ = [
     "convert_function_node",
     "convert_program_node",
     "convert_statement_node",
+    "convert_tacky_operand",
 ]
