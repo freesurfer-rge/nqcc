@@ -105,3 +105,8 @@ class TestInstructionUpdate:
         assert unary_node.start_position == 32
         assert unary_node.operator == op
         assert unary_node.source == AsmStackNode(start_position=315, offset=-4)
+
+
+class TestFunctionUpdate:
+    def test_tbd(self):
+        raise NotImplementedError("well...")
