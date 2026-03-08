@@ -1,6 +1,6 @@
 from typing import Literal, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AsmASTNode(BaseModel):
@@ -25,7 +25,7 @@ class AsmPseudoRegisterNode(AsmASTNode):
 
 class AsmStackNode(AsmASTNode):
     node_type: Literal["AsmStackNode"] = "AsmStackNode"
-    offset: int
+    offset: int = Field(le=0)
 
 
 AsmOperandNode = Union[AsmImmediateIntNode, AsmRegisterNode, AsmPseudoRegisterNode, AsmStackNode]

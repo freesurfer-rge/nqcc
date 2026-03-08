@@ -11,6 +11,7 @@ from ._assembler_ast import (
     AsmPseudoRegisterNode,
     AsmRegisterNode,
     AsmRetNode,
+    AsmStackNode,
     AsmUnaryNode,
 )
 from ._convert_tacky import (
@@ -21,6 +22,7 @@ from ._convert_tacky import (
     convert_tacky_unary_operator,
 )
 from ._driver import codegen_driver
+from ._pseudo_replace import PseudoRegisterReplacer
 
 __all__ = [
     "AsmASTNode",
@@ -35,7 +37,9 @@ __all__ = [
     "AsmPseudoRegisterNode",
     "AsmRegisterNode",
     "AsmRetNode",
+    "AsmStackNode",
     "AsmUnaryNode",
+    "PseudoRegisterReplacer",
     "codegen_driver",
     "convert_tacky_function",
     "convert_tacky_instruction",

@@ -1,24 +1,23 @@
+from typing import get_args
+
 from ._assembler_ast import (
+    AsmAllocateStackNode,
     AsmFunctionNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
     AsmMovNode,
-    AsmNegOperator,
-    AsmNotOperator,
     AsmOperandNode,
     AsmProgramNode,
-    AsmStackNode,
     AsmPseudoRegisterNode,
     AsmRegisterNode,
     AsmRetNode,
+    AsmStackNode,
     AsmUnaryNode,
-    AsmUnaryOperator,
-    AsmOperandNode,
-    AsmAllocateStackNode
 )
 
 FIRST_STACK_OFFSET = -4
 STACK_DELTA = 4
+
 
 class PseudoRegisterReplacer:
     def __init__(self) -> None:
@@ -37,7 +36,9 @@ class PseudoRegisterReplacer:
             case AsmPseudoRegisterNode():
                 if operand.identifier in self.pseudo_map:
                     return self.pseudo_map[operand.identifier]
-                result = AsmStackNode(start_position=operand.start_position, offset=self.curr_offset)
+                result = AsmStackNode(
+                    start_position=operand.start_position, offset=self.curr_offset
+                )
                 self.curr_offset -= STACK_DELTA
                 self.pseudo_map[operand.identifier] = result
                 return result
@@ -67,7 +68,7 @@ class PseudoRegisterReplacer:
         self._reset()
 
         for instr in asm_func.instructions:
-            if isinstance(instr, AsmInstructionNode):
+            if isinstance(instr, get_args(AsmInstructionNode)):
                 self.update_instruction(instr)
             else:
                 pass
