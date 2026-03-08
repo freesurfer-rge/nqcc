@@ -1,21 +1,23 @@
 from nqcc.codegen import (
     AsmImmediateIntNode,
+    AsmMovNode,
     AsmNegOperator,
     AsmNotOperator,
     AsmPseudoRegisterNode,
-    AsmMovNode,
+    AsmRegisterNode,
     AsmRetNode,
+    AsmUnaryNode,
+    convert_tacky_instruction,
     convert_tacky_operand,
     convert_tacky_unary_operator,
-    convert_tacky_instruction,
-    AsmRegisterNode,
 )
 from nqcc.tacky import (
     TackyComplementNode,
     TackyConstantIntNode,
     TackyNegateNode,
-    TackyVarNode,
     TackyReturnNode,
+    TackyUnaryNode,
+    TackyVarNode,
 )
 
 
@@ -62,3 +64,23 @@ class TestInstructions:
             destination=AsmRegisterNode(start_position=345, value="eax"),
         )
         assert result[1] == AsmRetNode(start_position=345)
+
+    def test_unary(self):
+        target = TackyUnaryNode(
+            start_position=123,
+            operator=TackyComplementNode(start_position=1234),
+            src=TackyVarNode(start_position=12345, identifier="tmp.0"),
+            dst=TackyVarNode(start_position=123456, identifier="tmp.1"),
+        )
+        result = convert_tacky_instruction(target)
+        assert len(result) == 2
+        assert result[0] == AsmMovNode(
+            start_position=123,
+            source=AsmPseudoRegisterNode(start_position=12345, identifier="tmp.0"),
+            destination=AsmPseudoRegisterNode(start_position=123456, identifier="tmp.1"),
+        )
+        assert result[1] == AsmUnaryNode(
+            start_position=123,
+            operator=AsmNotOperator(start_position=1234),
+            source=result[0].destination,
+        )

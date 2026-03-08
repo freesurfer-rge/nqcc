@@ -4,6 +4,7 @@ from nqcc.tacky import (
     TackyInstruction,
     TackyNegateNode,
     TackyReturnNode,
+    TackyUnaryNode,
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
@@ -19,6 +20,7 @@ from ._assembler_ast import (
     AsmPseudoRegisterNode,
     AsmRegisterNode,
     AsmRetNode,
+    AsmUnaryNode,
     AsmUnaryOperator,
 )
 
@@ -48,17 +50,24 @@ def convert_tacky_unary_operator(tacky_operator: TackyUnaryOperator) -> AsmUnary
 
 
 def convert_tacky_instruction(tacky_instruction: TackyInstruction) -> list[AsmInstructionNode]:
+    sp = tacky_instruction.start_position
     match tacky_instruction:
-        case v if isinstance(v, TackyReturnNode):
-            sp = tacky_instruction.start_position
-            src = convert_tacky_operand(tacky_instruction.value)
-            dst = AsmRegisterNode(start_position=sp, value="eax")
-            i0 = AsmMovNode(
+        case TackyReturnNode():
+            src_ret = convert_tacky_operand(tacky_instruction.value)
+            dst_ret = AsmRegisterNode(start_position=sp, value="eax")
+            i0_ret = AsmMovNode(
                 start_position=sp,
-                source=src,
-                destination=dst,
+                source=src_ret,
+                destination=dst_ret,
             )
-            i1 = AsmRetNode(start_position=sp)
-            return [i0, i1]
+            i1_ret = AsmRetNode(start_position=sp)
+            return [i0_ret, i1_ret]
+        case TackyUnaryNode():
+            op_unary = convert_tacky_unary_operator(tacky_instruction.operator)
+            src_unary = convert_tacky_operand(tacky_instruction.src)
+            dst_unary = convert_tacky_operand(tacky_instruction.dst)
+            i0_unary = AsmMovNode(start_position=sp, source=src_unary, destination=dst_unary)
+            i1_unary = AsmUnaryNode(start_position=sp, operator=op_unary, source=dst_unary)
+            return [i0_unary, i1_unary]
         case _:
             raise ValueError(f"Unrecognised: {tacky_instruction}")
