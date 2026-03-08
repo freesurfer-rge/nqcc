@@ -4,6 +4,8 @@ from ._assembler_ast import (
     AsmImmediateIntNode,
     AsmInstructionNode,
     AsmMovNode,
+    AsmNegOperator,
+    AsmNotOperator,
     AsmOperandNode,
     AsmProgramNode,
     AsmPseudoRegisterNode,
@@ -14,7 +16,7 @@ from ._assembler_ast import (
     convert_program_node,
     convert_statement_node,
 )
-from ._convert_tacky import convert_tacky_operand
+from ._convert_tacky import convert_tacky_operand, convert_tacky_unary_operator
 from ._driver import codegen_driver
 
 __all__ = [
@@ -23,6 +25,8 @@ __all__ = [
     "AsmImmediateIntNode",
     "AsmInstructionNode",
     "AsmMovNode",
+    "AsmNegOperator",
+    "AsmNotOperator",
     "AsmOperandNode",
     "AsmProgramNode",
     "AsmPseudoRegisterNode",
@@ -34,4 +38,5 @@ __all__ = [
     "convert_program_node",
     "convert_statement_node",
     "convert_tacky_operand",
+    "convert_tacky_unary_operator",
 ]
