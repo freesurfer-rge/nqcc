@@ -35,13 +35,23 @@ class AsmImmediateIntNode(AsmASTNode):
 
 class AsmRegisterNode(AsmASTNode):
     node_type: Literal["AsmRegisterNode"] = "AsmRegisterNode"
-    value: Literal["eax", "rbp", "rsp"]
+    value: Literal["eax", "rbp", "rsp", "r10d"]
 
     def emit_assembly_string(self) -> str:
         return f"%{self.value}"
 
 
-AsmOperandNode = Union[AsmImmediateIntNode, AsmRegisterNode]
+class AsmPseudoRegisterNode(AsmASTNode):
+    node_type: Literal["AsmPseudoRegisterNode"] = "AsmPseudoRegisterNode"
+    identifier: str
+
+
+class AsmStackNode(AsmASTNode):
+    node_type: Literal["AsmStackNode"] = "AsmStackNode"
+    offset: int
+
+
+AsmOperandNode = Union[AsmImmediateIntNode, AsmRegisterNode, AsmPseudoRegisterNode, AsmStackNode]
 
 
 class AsmMovNode(AsmASTNode):
