@@ -1,13 +1,16 @@
 import pytest
 
 from nqcc.codegen import (
+    AsmAllocateStackNode,
     AsmImmediateIntNode,
+    AsmInstructionNode,
     AsmMovNode,
     AsmNegOperator,
     AsmNotOperator,
     AsmOperandNode,
     AsmPseudoRegisterNode,
     AsmRegisterNode,
+    AsmRetNode,
     AsmStackNode,
     AsmUnaryNode,
     AsmUnaryOperator,
@@ -66,6 +69,16 @@ class TestOperandUpdate:
 
 
 class TestInstructionUpdate:
+    @pytest.mark.parametrize(
+        "instr",
+        [AsmRetNode(start_position=25), AsmAllocateStackNode(start_position=99, stack_size=126)],
+    )
+    def test_unchanged_instructions(self, instr: AsmInstructionNode):
+        orig_instr = instr.model_copy(deep=True)
+        target = PseudoRegisterReplacer()
+        target.update_instruction(instr)
+        assert orig_instr == instr
+
     def test_mov(self):
         target = PseudoRegisterReplacer()
 

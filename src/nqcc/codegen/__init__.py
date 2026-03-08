@@ -1,4 +1,5 @@
 from ._assembler_ast import (
+    AsmAllocateStackNode,
     AsmASTNode,
     AsmFunctionNode,
     AsmImmediateIntNode,
@@ -27,6 +28,7 @@ from ._pseudo_replace import PseudoRegisterReplacer
 
 __all__ = [
     "AsmASTNode",
+    "AsmAllocateStackNode",
     "AsmFunctionNode",
     "AsmImmediateIntNode",
     "AsmInstructionNode",
