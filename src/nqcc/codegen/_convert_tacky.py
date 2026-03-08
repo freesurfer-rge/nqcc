@@ -4,6 +4,7 @@ from nqcc.tacky import (
     TackyFunctionNode,
     TackyInstruction,
     TackyNegateNode,
+    TackyProgramNode,
     TackyReturnNode,
     TackyUnaryNode,
     TackyUnaryOperator,
@@ -19,6 +20,7 @@ from ._assembler_ast import (
     AsmNegOperator,
     AsmNotOperator,
     AsmOperandNode,
+    AsmProgramNode,
     AsmPseudoRegisterNode,
     AsmRegisterNode,
     AsmRetNode,
@@ -88,3 +90,11 @@ def convert_tacky_function(tacky_function: TackyFunctionNode) -> AsmFunctionNode
         identifier=tacky_function.identifier,
         instructions=asm_instructions,
     )
+
+
+def convert_tacky_program(tacky_program: TackyProgramNode) -> AsmProgramNode:
+    assert isinstance(tacky_program, TackyProgramNode)
+
+    func = convert_tacky_function(tacky_program.function_definition)
+
+    return AsmProgramNode(start_position=tacky_program.start_position, function_definition=func)

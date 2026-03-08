@@ -21,6 +21,7 @@ from ._convert_tacky import (
     convert_tacky_function,
     convert_tacky_instruction,
     convert_tacky_operand,
+    convert_tacky_program,
     convert_tacky_unary_operator,
 )
 from ._driver import codegen_driver
@@ -47,5 +48,6 @@ __all__ = [
     "convert_tacky_function",
     "convert_tacky_instruction",
     "convert_tacky_operand",
+    "convert_tacky_program",
     "convert_tacky_unary_operator",
 ]

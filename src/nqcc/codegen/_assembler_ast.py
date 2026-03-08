@@ -83,7 +83,7 @@ class AsmFunctionNode(AsmASTNode):
 
 class AsmProgramNode(AsmASTNode):
     node_type: Literal["AsmFunctionNode"] = "AsmFunctionNode"
-    value: AsmFunctionNode
+    function_definition: AsmFunctionNode
 
 
 def convert_expression_node(node: SourceExpressionNode) -> AsmOperandNode:
