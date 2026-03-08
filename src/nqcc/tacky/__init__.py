@@ -8,6 +8,7 @@ from ._tacky_ast import (
     TackyProgramNode,
     TackyReturnNode,
     TackyUnaryNode,
+    TackyValue,
     TackyVarNode,
 )
 from ._tacky_generator import TackyGenerator
@@ -22,6 +23,7 @@ __all__ = [
     "TackyProgramNode",
     "TackyReturnNode",
     "TackyUnaryNode",
+    "TackyValue",
     "TackyVarNode",
     "tacky_driver",
 ]
