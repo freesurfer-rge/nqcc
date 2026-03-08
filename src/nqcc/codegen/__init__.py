@@ -13,6 +13,7 @@ from ._assembler_ast import (
     AsmRetNode,
     AsmStackNode,
     AsmUnaryNode,
+    AsmUnaryOperator,
 )
 from ._convert_tacky import (
     convert_tacky_function,
@@ -39,6 +40,7 @@ __all__ = [
     "AsmRetNode",
     "AsmStackNode",
     "AsmUnaryNode",
+    "AsmUnaryOperator",
     "PseudoRegisterReplacer",
     "codegen_driver",
     "convert_tacky_function",
