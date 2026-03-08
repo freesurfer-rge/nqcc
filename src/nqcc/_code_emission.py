@@ -56,7 +56,7 @@ def get_function_assembler(func_node: AsmFunctionNode) -> list[str]:
 
 def get_program_assembler(prog_node: AsmProgramNode) -> list[str]:
     result = []
-    result += get_function_assembler(prog_node.value)
+    result += get_function_assembler(prog_node.function_definition)
     result.append('.section .note.GNU-stack, "",@progbits')
     return result
 
