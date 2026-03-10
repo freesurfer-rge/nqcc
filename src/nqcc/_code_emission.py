@@ -11,7 +11,10 @@ from nqcc.codegen import (
     AsmRetNode,
     AsmStackNode,
     AsmAllocateStackNode,
-    AsmNegOperator, AsmNotOperator, AsmUnaryNode, AsmUnaryOperator
+    AsmNegOperator,
+    AsmNotOperator,
+    AsmUnaryNode,
+    AsmUnaryOperator,
 )
 
 ASSEMBLY_EXTENSION = ".s"
@@ -43,7 +46,7 @@ def get_unary_opcode(unary_operator: AsmUnaryOperator) -> str:
             return "notl"
         case _:
             raise ValueError(f"Unrecognised: {unary_operator}")
-    
+
 
 def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:
     match instr_node:
@@ -73,6 +76,7 @@ def stack_setup() -> list[str]:
     op1 = "movq".ljust(_OPCODE_FIELD_WIDTH)
     i1 = f"{_INSTRUCTION_INDENT}{op1} %rsp, %rbp"
     return [i0, i1]
+
 
 def stack_teardown() -> list[str]:
     op0 = "movq".ljust(_OPCODE_FIELD_WIDTH)

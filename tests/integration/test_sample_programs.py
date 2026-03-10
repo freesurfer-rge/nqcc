@@ -2,10 +2,13 @@ import pathlib
 import subprocess
 import tempfile
 
+import pytest
+
 from nqcc import __main__ as compiler_driver
 
 SAMPLE_PROGRAM_DIR = pathlib.Path(__file__).resolve().parent.parent.parent / "sample_programs"
 assert SAMPLE_PROGRAM_DIR.exists(), f"{SAMPLE_PROGRAM_DIR=} not found!"
+
 
 def _compile_run_check(target_file: pathlib.Path, expected_return: int):
     with tempfile.TemporaryDirectory() as tmpdirname:
@@ -25,12 +28,16 @@ def _compile_run_check(target_file: pathlib.Path, expected_return: int):
     executable_path.unlink()
 
 
-def test_return_constant():
-    target_file = SAMPLE_PROGRAM_DIR / "return_constant.c"
+@pytest.mark.parametrize(
+    ["c_source_file", "expected_return"],
+    [
+        ("return_constant.c", 2),
+        ("return_negative_constant.c", 246),
+        ("return_bitwise_zero.c", 255),
+    ],
+)
+def test_return_constant(c_source_file: str, expected_return: int):
+    target_file = SAMPLE_PROGRAM_DIR / c_source_file
+    assert target_file.exists(), f"{target_file} not found"
 
-    _compile_run_check(target_file, 2)
-
-def test_return_negative_constant():
-    target_file = SAMPLE_PROGRAM_DIR / "return_negative_constant.c"
-
-    _compile_run_check(target_file, 246)
+    _compile_run_check(target_file, expected_return)
