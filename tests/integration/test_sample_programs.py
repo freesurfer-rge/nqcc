@@ -22,8 +22,16 @@ def _compile_run_check(target_file: pathlib.Path, expected_return: int):
             exit_after_codegen=False,
         )
         assert executable_path.exists(), f"Executable {executable_path} not generated!"
-
         result = subprocess.run([str(executable_path)], timeout=5)
+
+        gcc_executable = "a.out"
+        gcc_executable_path = working_dir / gcc_executable
+        compile_cmd = ["gcc", "-o", str(gcc_executable_path), str(target_file)]
+        subprocess.run(compile_cmd, check=True, timeout=5)
+
+        gcc_exec = subprocess.run([str(gcc_executable_path)], timeout=5)
+        assert gcc_exec.returncode == result.returncode
+
         assert result.returncode == expected_return
     executable_path.unlink()
 
