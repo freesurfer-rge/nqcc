@@ -72,6 +72,7 @@ class PseudoRegisterReplacer:
                 self.update_instruction(instr)
             else:
                 pass
+        asm_func.stack_size = abs(self.curr_offset)
 
     def pseudo_replace(self, asm_program: AsmProgramNode):
         assert isinstance(asm_program, AsmProgramNode)

@@ -70,6 +70,7 @@ class AsmFunctionNode(AsmASTNode):
     node_type: Literal["AsmFunctionNode"] = "AsmFunctionNode"
     identifier: str
     instructions: list[AsmInstructionNode]
+    stack_size: int = Field(ge=0, default=0)
 
 
 class AsmProgramNode(AsmASTNode):

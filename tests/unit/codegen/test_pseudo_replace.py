@@ -127,6 +127,7 @@ class TestFunctionUpdate:
 
         target.pseudo_replace_function(asm_func)
         assert len(asm_func.instructions) == 4
+        assert asm_func.stack_size == 4
 
         i0 = asm_func.instructions[0]
         assert i0 == AsmMovNode(
@@ -163,6 +164,7 @@ class TestProgramUpdate:
         target = PseudoRegisterReplacer()
         target.pseudo_replace(asm_prog)
         asm_func = asm_prog.function_definition
+        assert asm_func.stack_size == 8
         assert len(asm_func.instructions) == 6
 
         i0 = asm_func.instructions[0]
