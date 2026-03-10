@@ -43,7 +43,7 @@ def _compile_run_check(target_file: pathlib.Path):
         "return_many_negatives.c",
     ],
 )
-def test_return_constant(
+def test_simple_return_values(
     c_source_file: str,
 ):
     target_file = SAMPLE_PROGRAM_DIR / c_source_file
