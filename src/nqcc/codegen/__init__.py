@@ -24,6 +24,7 @@ from ._convert_tacky import (
     convert_tacky_unary_operator,
 )
 from ._driver import codegen_driver
+from ._instruction_fixup import fixup_function_instructions, apply_mov_fixup
 from ._pseudo_replace import PseudoRegisterReplacer
 
 __all__ = [
@@ -50,4 +51,6 @@ __all__ = [
     "convert_tacky_operand",
     "convert_tacky_program",
     "convert_tacky_unary_operator",
+    "apply_mov_fixup",
+    "fixup_function_instructions",
 ]
