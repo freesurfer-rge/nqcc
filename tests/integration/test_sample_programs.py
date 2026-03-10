@@ -43,7 +43,9 @@ def _compile_run_check(target_file: pathlib.Path):
         "return_many_negatives.c",
     ],
 )
-def test_return_constant(c_source_file: str,):
+def test_return_constant(
+    c_source_file: str,
+):
     target_file = SAMPLE_PROGRAM_DIR / c_source_file
     assert target_file.exists(), f"{target_file} not found"
 
