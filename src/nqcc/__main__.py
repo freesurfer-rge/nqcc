@@ -97,14 +97,14 @@ def main(
         return
 
     _logger.info("Running tacking generation")
-    _ = tacky_driver(src_ast, working_dir=working_dir, file_stem=file_stem)
+    tacky_ast = tacky_driver(src_ast, working_dir=working_dir, file_stem=file_stem)
 
     if exit_after_tacky:
         _logger.info("Exiting after tacky generation")
         return
 
     _logger.info("Running code generator")
-    asm_ast = codegen_driver(src_ast, working_dir=working_dir, file_stem=file_stem)
+    asm_ast = codegen_driver(tacky_ast, working_dir=working_dir, file_stem=file_stem)
 
     if exit_after_codegen:
         _logger.info("Exiting after code generation")

@@ -4,10 +4,13 @@ from ._tacky_ast import (
     TackyComplementNode,
     TackyConstantIntNode,
     TackyFunctionNode,
+    TackyInstruction,
     TackyNegateNode,
     TackyProgramNode,
     TackyReturnNode,
     TackyUnaryNode,
+    TackyUnaryOperator,
+    TackyValue,
     TackyVarNode,
 )
 from ._tacky_generator import TackyGenerator
@@ -18,10 +21,13 @@ __all__ = [
     "TackyConstantIntNode",
     "TackyFunctionNode",
     "TackyGenerator",
+    "TackyInstruction",
     "TackyNegateNode",
     "TackyProgramNode",
     "TackyReturnNode",
     "TackyUnaryNode",
+    "TackyUnaryOperator",
+    "TackyValue",
     "TackyVarNode",
     "tacky_driver",
 ]

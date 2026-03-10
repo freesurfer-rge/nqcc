@@ -10,10 +10,7 @@ SAMPLE_PROGRAM_DIR = pathlib.Path(__file__).resolve().parent.parent.parent / "sa
 assert SAMPLE_PROGRAM_DIR.exists(), f"{SAMPLE_PROGRAM_DIR=} not found!"
 
 
-@pytest.mark.xfail(reason="Assembler generation pending tacky update")
-def test_return_constant():
-    target_file = SAMPLE_PROGRAM_DIR / "return_constant.c"
-
+def _compile_run_check(target_file: pathlib.Path, expected_return: int):
     with tempfile.TemporaryDirectory() as tmpdirname:
         working_dir = pathlib.Path(tmpdirname)
         executable_path = compiler_driver.main(
@@ -27,5 +24,21 @@ def test_return_constant():
         assert executable_path.exists(), f"Executable {executable_path} not generated!"
 
         result = subprocess.run([str(executable_path)], timeout=5)
-        assert result.returncode == 2
+        assert result.returncode == expected_return
     executable_path.unlink()
+
+
+@pytest.mark.parametrize(
+    ["c_source_file", "expected_return"],
+    [
+        ("return_constant.c", 2),
+        ("return_negative_constant.c", 246),
+        ("return_bitwise_zero.c", 255),
+        ("return_many_negatives.c", 10),
+    ],
+)
+def test_return_constant(c_source_file: str, expected_return: int):
+    target_file = SAMPLE_PROGRAM_DIR / c_source_file
+    assert target_file.exists(), f"{target_file} not found"
+
+    _compile_run_check(target_file, expected_return)
