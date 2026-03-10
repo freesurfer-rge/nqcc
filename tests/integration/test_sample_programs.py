@@ -10,7 +10,7 @@ SAMPLE_PROGRAM_DIR = pathlib.Path(__file__).resolve().parent.parent.parent / "sa
 assert SAMPLE_PROGRAM_DIR.exists(), f"{SAMPLE_PROGRAM_DIR=} not found!"
 
 
-def _compile_run_check(target_file: pathlib.Path, expected_return: int):
+def _compile_run_check(target_file: pathlib.Path):
     with tempfile.TemporaryDirectory() as tmpdirname:
         working_dir = pathlib.Path(tmpdirname)
         executable_path = compiler_driver.main(
@@ -28,25 +28,23 @@ def _compile_run_check(target_file: pathlib.Path, expected_return: int):
         gcc_executable_path = working_dir / gcc_executable
         compile_cmd = ["gcc", "-o", str(gcc_executable_path), str(target_file)]
         subprocess.run(compile_cmd, check=True, timeout=5)
-
         gcc_exec = subprocess.run([str(gcc_executable_path)], timeout=5)
-        assert gcc_exec.returncode == result.returncode
 
-        assert result.returncode == expected_return
+        assert gcc_exec.returncode == result.returncode
     executable_path.unlink()
 
 
 @pytest.mark.parametrize(
-    ["c_source_file", "expected_return"],
+    "c_source_file",
     [
-        ("return_constant.c", 2),
-        ("return_negative_constant.c", 246),
-        ("return_bitwise_zero.c", 255),
-        ("return_many_negatives.c", 10),
+        "return_constant.c",
+        "return_negative_constant.c",
+        "return_bitwise_zero.c",
+        "return_many_negatives.c",
     ],
 )
-def test_return_constant(c_source_file: str, expected_return: int):
+def test_return_constant(c_source_file: str,):
     target_file = SAMPLE_PROGRAM_DIR / c_source_file
     assert target_file.exists(), f"{target_file} not found"
 
-    _compile_run_check(target_file, expected_return)
+    _compile_run_check(target_file)
