@@ -15,7 +15,11 @@ from nqcc.codegen import (
     AsmUnaryNode,
     AsmUnaryOperator,
     PseudoRegisterReplacer,
+    convert_tacky_function,
+    convert_tacky_program,
 )
+from nqcc.parser import TokenTape, parse_function, parse_program
+from nqcc.tacky import TackyGenerator
 
 
 class TestOperandUpdate:
@@ -33,6 +37,7 @@ class TestOperandUpdate:
 
         result = target.get_updated_operand(orig_op)
         assert result == orig_op
+        assert target.curr_offset == 0
 
     def test_single_operand(self):
         pseudo_op = AsmPseudoRegisterNode(start_position=312, identifier="temp.0")
@@ -42,6 +47,7 @@ class TestOperandUpdate:
         assert isinstance(result0, AsmStackNode)
         assert result0.start_position == 312
         assert result0.offset == -4
+        assert target.curr_offset == -4
 
         result1 = target.get_updated_operand(pseudo_op)
         assert result1 == result0
@@ -66,6 +72,7 @@ class TestOperandUpdate:
 
         result3 = target.get_updated_operand(pseudo_op1)
         assert result3 == result1
+        assert target.curr_offset == -8
 
 
 class TestInstructionUpdate:
@@ -108,5 +115,88 @@ class TestInstructionUpdate:
 
 
 class TestFunctionUpdate:
-    def test_tbd(self):
-        raise NotImplementedError("well...")
+    def test_simple(self):
+        source = "   int main(void) {return -    508;}"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_function(token_tape)
+        tg = TackyGenerator()
+        tacky_func = tg.emit_function(src_node)
+        asm_func = convert_tacky_function(tacky_func)
+
+        target = PseudoRegisterReplacer()
+
+        target.pseudo_replace_function(asm_func)
+        assert len(asm_func.instructions) == 4
+
+        i0 = asm_func.instructions[0]
+        assert i0 == AsmMovNode(
+            start_position=26,
+            source=AsmImmediateIntNode(start_position=31, value=508),
+            destination=AsmStackNode(start_position=26, offset=-4),
+        )
+
+        i1 = asm_func.instructions[1]
+        assert i1 == AsmUnaryNode(
+            start_position=26, operator=AsmNegOperator(start_position=26), source=i0.destination
+        )
+
+        i2 = asm_func.instructions[2]
+        assert i2 == AsmMovNode(
+            start_position=19,
+            source=i1.source,
+            destination=AsmRegisterNode(start_position=19, value="eax"),
+        )
+
+        i3 = asm_func.instructions[3]
+        assert i3 == AsmRetNode(start_position=19)
+
+
+class TestProgramUpdate:
+    def test_simple(self):
+        source = "   int main(void) {return ~(   -509);}"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_program(token_tape)
+        tg = TackyGenerator()
+        tacky_program = tg.emit_program(src_node)
+        asm_prog = convert_tacky_program(tacky_program)
+
+        target = PseudoRegisterReplacer()
+        target.pseudo_replace(asm_prog)
+        asm_func = asm_prog.function_definition
+        assert len(asm_func.instructions) == 6
+
+        i0 = asm_func.instructions[0]
+        assert i0 == AsmMovNode(
+            start_position=31,
+            source=AsmImmediateIntNode(start_position=32, value=509),
+            destination=AsmStackNode(start_position=31, offset=-4),
+        )
+
+        i1 = asm_func.instructions[1]
+        assert i1 == AsmUnaryNode(
+            start_position=31, operator=AsmNegOperator(start_position=31), source=i0.destination
+        )
+
+        i2 = asm_func.instructions[2]
+        assert i2 == AsmMovNode(
+            start_position=26,
+            source=i1.source,
+            destination=AsmStackNode(start_position=26, offset=-8),
+        )
+
+        i3 = asm_func.instructions[3]
+        assert i3 == AsmUnaryNode(
+            start_position=26,
+            operator=AsmNotOperator(start_position=26, source=i2.destination),
+            source=i2.destination,
+        )
+
+        i4 = asm_func.instructions[4]
+        assert i4 == AsmMovNode(
+            start_position=19,
+            source=i3.source,
+            destination=AsmRegisterNode(start_position=19, value="eax"),
+        )
+
+        i5 = asm_func.instructions[5]
+        assert i5 == AsmRetNode(start_position=19)

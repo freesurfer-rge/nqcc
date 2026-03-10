@@ -15,7 +15,7 @@ from ._assembler_ast import (
     AsmUnaryNode,
 )
 
-FIRST_STACK_OFFSET = -4
+FIRST_STACK_OFFSET = 0
 STACK_DELTA = 4
 
 
@@ -36,10 +36,10 @@ class PseudoRegisterReplacer:
             case AsmPseudoRegisterNode():
                 if operand.identifier in self.pseudo_map:
                     return self.pseudo_map[operand.identifier]
+                self.curr_offset -= STACK_DELTA
                 result = AsmStackNode(
                     start_position=operand.start_position, offset=self.curr_offset
                 )
-                self.curr_offset -= STACK_DELTA
                 self.pseudo_map[operand.identifier] = result
                 return result
             case AsmStackNode():
