@@ -1,18 +1,18 @@
 import pathlib
 
 from nqcc.codegen import (
+    AsmAllocateStackNode,
     AsmFunctionNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
     AsmMovNode,
+    AsmNegOperator,
+    AsmNotOperator,
     AsmOperandNode,
     AsmProgramNode,
     AsmRegisterNode,
     AsmRetNode,
     AsmStackNode,
-    AsmAllocateStackNode,
-    AsmNegOperator,
-    AsmNotOperator,
     AsmUnaryNode,
     AsmUnaryOperator,
 )

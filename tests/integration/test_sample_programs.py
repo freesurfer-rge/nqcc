@@ -34,6 +34,7 @@ def _compile_run_check(target_file: pathlib.Path, expected_return: int):
         ("return_constant.c", 2),
         ("return_negative_constant.c", 246),
         ("return_bitwise_zero.c", 255),
+        ("return_many_negatives.c", 10),
     ],
 )
 def test_return_constant(c_source_file: str, expected_return: int):
