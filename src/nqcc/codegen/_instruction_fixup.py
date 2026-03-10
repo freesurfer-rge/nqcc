@@ -3,6 +3,7 @@ from ._assembler_ast import (
     AsmFunctionNode,
     AsmInstructionNode,
     AsmMovNode,
+    AsmProgramNode,
     AsmRegisterNode,
     AsmStackNode,
 )
@@ -46,3 +47,9 @@ def fixup_function_instructions(asm_func: AsmFunctionNode):
             case _:
                 fixed_instructions.append(instr)
     asm_func.instructions = fixed_instructions
+
+
+def fixup_program_instructions(asm_prog: AsmProgramNode):
+    assert isinstance(asm_prog, AsmProgramNode)
+
+    fixup_function_instructions(asm_prog.function_definition)

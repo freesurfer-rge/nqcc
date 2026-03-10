@@ -5,10 +5,12 @@ from nqcc.codegen import (
     AsmFunctionNode,
     AsmMovNode,
     AsmOperandNode,
+    AsmProgramNode,
     AsmRegisterNode,
     AsmStackNode,
     apply_mov_fixup,
     fixup_function_instructions,
+    fixup_program_instructions,
 )
 
 
@@ -80,3 +82,22 @@ class TestFunctionFixup:
 
         i2 = target.instructions[2]
         assert i2 == AsmMovNode(start_position=1, source=reg, destination=dst)
+
+
+class TestProgramFixup:
+    def test_simple(self):
+        src = AsmStackNode(start_position=2, offset=-4)
+        dst = AsmStackNode(start_position=3, offset=-8)
+        func = AsmFunctionNode(
+            start_position=0,
+            identifier="abc",
+            instructions=[AsmMovNode(start_position=1, source=src, destination=dst)],
+            stack_size=8,
+        )
+
+        target = AsmProgramNode(start_position=0, function_definition=func)
+
+        fixup_program_instructions(target)
+
+        # Just check that the expected increase has happened
+        assert len(target.function_definition.instructions) == 3
