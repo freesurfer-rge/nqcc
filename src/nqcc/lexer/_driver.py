@@ -4,7 +4,7 @@ import pathlib
 from ._lexer import lex_string
 from ._tokens import Token
 
-TOKEN_EXTENSION = ".tokens"
+TOKEN_FILE = "lexer.tokens"
 
 
 def lexer_driver(preprocessed_file: pathlib.Path) -> list[Token]:
@@ -15,8 +15,7 @@ def lexer_driver(preprocessed_file: pathlib.Path) -> list[Token]:
 
     token_list = lex_string(c_source)
 
-    output_file = preprocessed_file.stem + TOKEN_EXTENSION
-    output_path = preprocessed_file.parent / output_file
+    output_path = preprocessed_file.parent / TOKEN_FILE
     with open(output_path, "w") as token_file:
         json.dump([t.model_dump(round_trip=True) for t in token_list], token_file, indent=4)
 

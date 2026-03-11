@@ -54,7 +54,7 @@ def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:
             opcode = "subq".ljust(_OPCODE_FIELD_WIDTH)
             src = f"${instr_node.stack_size}"
             dst = r"%rsp"
-            return f"{opcode} {src}, {dst}"
+            return f"{opcode} {src}, {dst} # Allocate stack"
         case v if isinstance(v, AsmMovNode):
             opcode = "movl".ljust(_OPCODE_FIELD_WIDTH)
             src = get_operand_assembler(instr_node.source)
@@ -71,19 +71,23 @@ def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:
 
 
 def stack_setup() -> list[str]:
+    c0 = f"{_INSTRUCTION_INDENT}# Begin stack setup"
     op0 = "pushq".ljust(_OPCODE_FIELD_WIDTH)
     i0 = f"{_INSTRUCTION_INDENT}{op0} %rbp"
     op1 = "movq".ljust(_OPCODE_FIELD_WIDTH)
     i1 = f"{_INSTRUCTION_INDENT}{op1} %rsp, %rbp"
-    return [i0, i1]
+    c1 = f"{_INSTRUCTION_INDENT}# End stack setup"
+    return [c0, i0, i1, c1]
 
 
 def stack_teardown() -> list[str]:
+    c0 = f"{_INSTRUCTION_INDENT}# Begin stack teardown"
     op0 = "movq".ljust(_OPCODE_FIELD_WIDTH)
     i0 = f"{_INSTRUCTION_INDENT}{op0} %rbp, %rsp"
     op1 = "popq".ljust(_OPCODE_FIELD_WIDTH)
     i1 = f"{_INSTRUCTION_INDENT}{op1} %rbp"
-    return [i0, i1]
+    c1 = f"{_INSTRUCTION_INDENT}# End stack teardown"
+    return [c0, i0, i1, c1]
 
 
 def get_function_assembler(func_node: AsmFunctionNode) -> list[str]:
