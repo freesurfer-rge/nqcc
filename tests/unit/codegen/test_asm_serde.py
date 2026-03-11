@@ -1,10 +1,15 @@
-from nqcc.codegen import AsmProgramNode, convert_tacky_program, PseudoRegisterReplacer, fixup_program_instructions
+from nqcc.codegen import (
+    AsmProgramNode,
+    PseudoRegisterReplacer,
+    convert_tacky_program,
+    fixup_program_instructions,
+)
 from nqcc.parser import TokenTape, parse_program
 from nqcc.tacky import TackyGenerator
 
 
 class TestAsmSerde:
-    def _round_trip(self, asm_ast: AsmProgramNode)-> None:
+    def _round_trip(self, asm_ast: AsmProgramNode) -> None:
         json_str = asm_ast.model_dump_json()
         restored = AsmProgramNode.model_validate_json(json_str)
         assert asm_ast == restored
@@ -27,6 +32,3 @@ class TestAsmSerde:
         fixup_program_instructions(asm_prog)
 
         self._round_trip(asm_prog)
-
-
-
