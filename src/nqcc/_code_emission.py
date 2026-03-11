@@ -76,7 +76,7 @@ def stack_setup() -> list[str]:
     i0 = f"{_INSTRUCTION_INDENT}{op0} %rbp"
     op1 = "movq".ljust(_OPCODE_FIELD_WIDTH)
     i1 = f"{_INSTRUCTION_INDENT}{op1} %rsp, %rbp"
-    c1= f"{_INSTRUCTION_INDENT}# End stack setup"
+    c1 = f"{_INSTRUCTION_INDENT}# End stack setup"
     return [c0, i0, i1, c1]
 
 
@@ -86,7 +86,7 @@ def stack_teardown() -> list[str]:
     i0 = f"{_INSTRUCTION_INDENT}{op0} %rbp, %rsp"
     op1 = "popq".ljust(_OPCODE_FIELD_WIDTH)
     i1 = f"{_INSTRUCTION_INDENT}{op1} %rbp"
-    c1= f"{_INSTRUCTION_INDENT}# End stack teardown"
+    c1 = f"{_INSTRUCTION_INDENT}# End stack teardown"
     return [c0, i0, i1, c1]
 
 
