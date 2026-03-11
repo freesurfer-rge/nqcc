@@ -1,6 +1,7 @@
+from nqcc.codegen import AsmProgramNode, convert_tacky_program
 from nqcc.parser import TokenTape, parse_program
 from nqcc.tacky import TackyGenerator
-from nqcc.codegen import convert_tacky_program, AsmProgramNode
+
 
 class TestAsmSerde:
     def test_simple(self):

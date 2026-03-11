@@ -92,6 +92,7 @@ class SourceComplementNode(SourceUnaryExpressionNode):
 class SourceNegateNode(SourceUnaryExpressionNode):
     node_type: Literal["SourceNegateNode"] = "SourceNegateNode"
 
+
 SourceExpressionNode = Union[SourceConstantIntNode, SourceComplementNode, SourceNegateNode]
 
 

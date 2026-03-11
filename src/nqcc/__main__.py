@@ -90,7 +90,7 @@ def main(
     file_stem = target.stem
 
     _logger.info("Running parser")
-    src_ast = parser_driver(all_tokens, working_dir=working_dir, file_stem=file_stem)
+    src_ast = parser_driver(all_tokens, working_dir=working_dir)
 
     if exit_after_parse:
         _logger.info("Exiting after parse")

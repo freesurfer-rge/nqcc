@@ -1,4 +1,5 @@
-from nqcc.parser import TokenTape, parse_program, SourceProgramNode
+from nqcc.parser import SourceProgramNode, TokenTape, parse_program
+
 
 class TestParserSerde:
     def test_simple(self):
