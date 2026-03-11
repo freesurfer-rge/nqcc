@@ -104,7 +104,7 @@ def main(
         return
 
     _logger.info("Running code generator")
-    asm_ast = codegen_driver(tacky_ast, working_dir=working_dir, file_stem=file_stem)
+    asm_ast = codegen_driver(tacky_ast, working_dir=working_dir)
 
     if exit_after_codegen:
         _logger.info("Exiting after code generation")
