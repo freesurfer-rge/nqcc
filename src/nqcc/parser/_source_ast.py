@@ -25,10 +25,10 @@ class SourceASTNode(BaseModel):
     start_position: int
 
 
-def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryExpressionNode:
+def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryNode:
     op_token = token_tape.expect(get_args(UnaryOperatorToken))
 
-    result: SourceUnaryExpressionNode
+    result: SourceUnaryNode
     match op_token:
         case TildeToken():
             inner_exp = parse_expression(token_tape)
@@ -93,7 +93,9 @@ class SourceNegateNode(SourceUnaryExpressionNode):
     node_type: Literal["SourceNegateNode"] = "SourceNegateNode"
 
 
-SourceExpressionNode = Union[SourceConstantIntNode, SourceComplementNode, SourceNegateNode]
+SourceUnaryNode = Union[SourceComplementNode, SourceNegateNode]
+
+SourceExpressionNode = Union[SourceConstantIntNode, SourceUnaryNode]
 
 
 def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
