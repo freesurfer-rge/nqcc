@@ -92,8 +92,7 @@ class SourceComplementNode(SourceUnaryExpressionNode):
 class SourceNegateNode(SourceUnaryExpressionNode):
     node_type: Literal["SourceNegateNode"] = "SourceNegateNode"
 
-
-SourceExpressionNode = Union[SourceConstantIntNode, SourceUnaryExpressionNode]
+SourceExpressionNode = Union[SourceConstantIntNode, SourceComplementNode, SourceNegateNode]
 
 
 def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
