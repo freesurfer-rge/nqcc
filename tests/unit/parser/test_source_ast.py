@@ -2,21 +2,35 @@ import pytest
 
 from nqcc.lexer import CloseParenToken, ConstantIntegerToken, KeywordToken, SemicolonToken
 from nqcc.parser import (
+    SourceAddOperator,
     SourceASTBadTypeError,
     SourceASTBadValueError,
+    SourceBinaryExpressionNode,
     SourceComplementNode,
     SourceConstantIntNode,
+    SourceDivideOperator,
     SourceFunctionNode,
+    SourceModuloOperator,
+    SourceMultiplyOperator,
     SourceNegateNode,
     SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
+    SourceSubtractOperator,
     TokenTape,
     parse_expression,
     parse_function,
     parse_program,
     parse_statement,
 )
+
+_BINARY_EXPRESSION_MAP = {
+    "+": SourceAddOperator,
+    "-": SourceSubtractOperator,
+    "*": SourceMultiplyOperator,
+    "/": SourceDivideOperator,
+    "%": SourceModuloOperator,
+}
 
 
 class TestSourceExpressionNode:
@@ -73,6 +87,22 @@ class TestSourceExpressionNode:
         assert isinstance(inner_exp, SourceComplementNode)
         assert inner_exp.start_position == 4
         assert inner_exp.expression == SourceConstantIntNode(start_position=5, value=12)
+
+        # The expression doesn't consume the semicolon
+        assert token_tape.tokens_remaining == 1
+
+    @pytest.mark.parametrize("operator", ["+", "-", "*", "/", "%"])
+    def test_simple_binary(self, operator: str):
+        source = f"14 {operator} 10;"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 3
+
+        node = parse_expression(token_tape)
+        assert isinstance(node, SourceBinaryExpressionNode)
+        assert node.operator == _BINARY_EXPRESSION_MAP[operator](start_position=4)
+
+        assert node.left == SourceConstantIntNode(start_position=0, value=14)
+        assert node.right == SourceConstantIntNode(start_position=6, value=10)
 
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
