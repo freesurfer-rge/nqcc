@@ -27,7 +27,44 @@ class SourceNegateNode(SourceUnaryExpressionNode):
 
 SourceUnaryNode = Union[SourceComplementNode, SourceNegateNode]
 
-SourceExpressionNode = Union[SourceConstantIntNode, SourceUnaryNode]
+
+class SourceAddOperator(SourceASTNode):
+    node_type: Literal["SourceAddOperator"] = "SourceAddOperator"
+
+
+class SourceSubtractOperator(SourceASTNode):
+    node_type: Literal["SourceSubtractOperator"] = "SourceSubtractOperator"
+
+
+class SourceMultiplyOperator(SourceASTNode):
+    node_type: Literal["SourceMultiplyOperator"] = "SourceMultiplyOperator"
+
+
+class SourceDivideOperator(SourceASTNode):
+    node_type: Literal["SourceDivideOperator"] = "SourceDivideOperator"
+
+
+class SourceModuloOperator(SourceASTNode):
+    node_type: Literal["SourceModuloOperator"] = "SourceModuloOperator"
+
+
+SourceBinaryOperator = Union[
+    SourceAddOperator,
+    SourceSubtractOperator,
+    SourceMultiplyOperator,
+    SourceDivideOperator,
+    SourceModuloOperator,
+]
+
+
+class SourceBinaryExpressionNode(SourceASTNode):
+    node_type: Literal["SourceBinaryExpressionNode"] = "SourceBinaryExpressionNode"
+    operator: SourceBinaryOperator
+    left: SourceExpressionNode
+    right: SourceExpressionNode
+
+
+SourceExpressionNode = Union[SourceConstantIntNode, SourceUnaryNode, SourceBinaryExpressionNode]
 
 
 class SourceReturnNode(SourceASTNode):
