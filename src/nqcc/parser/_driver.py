@@ -2,7 +2,8 @@ import pathlib
 
 from nqcc.lexer import Token
 
-from ._source_ast import SourceProgramNode, parse_program
+from ._parsing import parse_program
+from ._source_ast import SourceProgramNode
 from ._token_tape import TokenTape
 
 SOURCE_AST_FILE = "source.ast"
