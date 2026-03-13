@@ -1,13 +1,18 @@
 import pytest
 
 from nqcc.lexer import (
+    AdditionToken,
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
     DecrementToken,
+    DivideToken,
     IdentifierToken,
+    IncrementToken,
     KeywordToken,
     LexerMatchError,
+    ModuloToken,
+    MultiplyToken,
     NegationToken,
     OpenBraceToken,
     OpenParenToken,
@@ -108,6 +113,42 @@ class TestExtractTokens:
         assert toks[0] == DecrementToken(start_position=idx, value="--")
         assert toks[1] == NegationToken(start_position=idx, value="-")
 
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_addition(self, idx):
+        toks = extract_tokens("+", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == AdditionToken(start_position=idx, value="+")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_increment(self, idx):
+        toks = extract_tokens("++", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == AdditionToken(start_position=idx, value="+")
+        assert toks[1] == IncrementToken(start_position=idx, value="++")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_multiply(self, idx):
+        toks = extract_tokens("*", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == MultiplyToken(start_position=idx, value="*")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_divide(self, idx):
+        toks = extract_tokens("/", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == DivideToken(start_position=idx, value="/")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_modulo(self, idx):
+        toks = extract_tokens("%", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == ModuloToken(start_position=idx, value="%")
+
 
 class TestPickToken:
     def test_identifier_vs_keyword(self):
@@ -151,3 +192,18 @@ class TestLexString:
         assert toks[2] == TildeToken(start_position=8, value="~")
         assert toks[3] == ConstantIntegerToken(start_position=9, value="2")
         assert toks[4] == SemicolonToken(start_position=10, value=";")
+
+    def test_longer_expression(self):
+        sample = "1+2*3/4%2"
+
+        toks = lex_string(sample)
+        assert len(toks) == 9
+        assert toks[0] == ConstantIntegerToken(start_position=0, value="1")
+        assert toks[1] == AdditionToken(start_position=1, value="+")
+        assert toks[2] == ConstantIntegerToken(start_position=2, value="2")
+        assert toks[3] == MultiplyToken(start_position=3, value="*")
+        assert toks[4] == ConstantIntegerToken(start_position=4, value="3")
+        assert toks[5] == DivideToken(start_position=5, value="/")
+        assert toks[6] == ConstantIntegerToken(start_position=6, value="4")
+        assert toks[7] == ModuloToken(start_position=7, value="%")
+        assert toks[8] == ConstantIntegerToken(start_position=8, value="2")

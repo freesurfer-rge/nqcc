@@ -86,6 +86,19 @@ class NegationToken(Token):
         return "-"
 
 
+class AdditionToken(Token):
+    token_type: Literal["AdditionToken"] = "AdditionToken"
+    value: Literal["+"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "[+]"
+
+
 class DecrementToken(Token):
     token_type: Literal["DecrementToken"] = "DecrementToken"
     value: Literal["--"]
@@ -97,6 +110,58 @@ class DecrementToken(Token):
     @classmethod
     def re(cls) -> str:
         return "--"
+
+
+class IncrementToken(Token):
+    token_type: Literal["IncrementToken"] = "IncrementToken"
+    value: Literal["++"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "[+][+]"
+
+
+class MultiplyToken(Token):
+    token_type: Literal["MultiplyToken"] = "MultiplyToken"
+    value: Literal["*"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "[*]"
+
+
+class DivideToken(Token):
+    token_type: Literal["DivideToken"] = "DivideToken"
+    value: Literal["/"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "/"
+
+
+class ModuloToken(Token):
+    token_type: Literal["ModuloToken"] = "ModuloToken"
+    value: Literal["%"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "%"
 
 
 class OpenParenToken(Token):
@@ -165,12 +230,17 @@ class SemicolonToken(Token):
 
 
 TokenTypes: list[type] = [
+    AdditionToken,
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
     DecrementToken,
+    DivideToken,
     IdentifierToken,
+    IncrementToken,
     KeywordToken,
+    ModuloToken,
+    MultiplyToken,
     NegationToken,
     OpenBraceToken,
     OpenParenToken,
@@ -178,4 +248,4 @@ TokenTypes: list[type] = [
     TildeToken,
 ]
 
-UnaryOperatorToken = Union[DecrementToken, NegationToken, TildeToken]
+UnaryOperatorToken = Union[DecrementToken, IncrementToken, NegationToken, TildeToken]
