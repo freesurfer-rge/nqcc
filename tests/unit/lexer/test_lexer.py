@@ -1,13 +1,18 @@
 import pytest
 
 from nqcc.lexer import (
+    AdditionToken,
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
     DecrementToken,
+    DivideToken,
     IdentifierToken,
+    IncrementToken,
     KeywordToken,
     LexerMatchError,
+    ModuloToken,
+    MultiplyToken,
     NegationToken,
     OpenBraceToken,
     OpenParenToken,
@@ -107,6 +112,42 @@ class TestExtractTokens:
         assert len(toks) == 2
         assert toks[0] == DecrementToken(start_position=idx, value="--")
         assert toks[1] == NegationToken(start_position=idx, value="-")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_addition(self, idx):
+        toks = extract_tokens("+", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == AdditionToken(start_position=idx, value="+")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_increment(self, idx):
+        toks = extract_tokens("++", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == AdditionToken(start_position=idx, value="+")
+        assert toks[1] == IncrementToken(start_position=idx, value="++")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_multiply(self, idx):
+        toks = extract_tokens("*", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == MultiplyToken(start_position=idx, value="*")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_divide(self, idx):
+        toks = extract_tokens("/", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == DivideToken(start_position=idx, value="/")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_modulo(self, idx):
+        toks = extract_tokens("%", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == ModuloToken(start_position=idx, value="%")
 
 
 class TestPickToken:

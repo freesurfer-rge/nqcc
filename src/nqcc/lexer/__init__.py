@@ -1,12 +1,17 @@
 from ._driver import lexer_driver
 from ._lexer import LexerMatchError, extract_tokens, lex_string, pick_token
 from ._tokens import (
+    AdditionToken,
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
     DecrementToken,
+    DivideToken,
     IdentifierToken,
+    IncrementToken,
     KeywordToken,
+    ModuloToken,
+    MultiplyToken,
     NegationToken,
     OpenBraceToken,
     OpenParenToken,
@@ -17,13 +22,18 @@ from ._tokens import (
 )
 
 __all__ = [
+    "AdditionToken",
     "CloseBraceToken",
     "CloseParenToken",
     "ConstantIntegerToken",
     "DecrementToken",
+    "DivideToken",
     "IdentifierToken",
+    "IncrementToken",
     "KeywordToken",
     "LexerMatchError",
+    "ModuloToken",
+    "MultiplyToken",
     "NegationToken",
     "OpenBraceToken",
     "OpenParenToken",

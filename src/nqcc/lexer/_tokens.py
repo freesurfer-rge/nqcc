@@ -85,6 +85,7 @@ class NegationToken(Token):
     def re(cls) -> str:
         return "-"
 
+
 class AdditionToken(Token):
     token_type: Literal["AdditionToken"] = "AdditionToken"
     value: Literal["+"]
@@ -95,7 +96,8 @@ class AdditionToken(Token):
 
     @classmethod
     def re(cls) -> str:
-        return "+"
+        return "[+]"
+
 
 class DecrementToken(Token):
     token_type: Literal["DecrementToken"] = "DecrementToken"
@@ -120,7 +122,8 @@ class IncrementToken(Token):
 
     @classmethod
     def re(cls) -> str:
-        return "++"
+        return "[+][+]"
+
 
 class MultiplyToken(Token):
     token_type: Literal["MultiplyToken"] = "MultiplyToken"
@@ -134,6 +137,7 @@ class MultiplyToken(Token):
     def re(cls) -> str:
         return "[*]"
 
+
 class DivideToken(Token):
     token_type: Literal["DivideToken"] = "DivideToken"
     value: Literal["/"]
@@ -145,7 +149,8 @@ class DivideToken(Token):
     @classmethod
     def re(cls) -> str:
         return "/"
-    
+
+
 class ModuloToken(Token):
     token_type: Literal["ModuloToken"] = "ModuloToken"
     value: Literal["%"]
@@ -230,8 +235,12 @@ TokenTypes: list[type] = [
     CloseParenToken,
     ConstantIntegerToken,
     DecrementToken,
+    DivideToken,
     IdentifierToken,
+    IncrementToken,
     KeywordToken,
+    ModuloToken,
+    MultiplyToken,
     NegationToken,
     OpenBraceToken,
     OpenParenToken,
@@ -239,4 +248,4 @@ TokenTypes: list[type] = [
     TildeToken,
 ]
 
-UnaryOperatorToken = Union[DecrementToken, NegationToken, TildeToken]
+UnaryOperatorToken = Union[DecrementToken, IncrementToken, NegationToken, TildeToken]
