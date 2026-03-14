@@ -1,23 +1,37 @@
 from nqcc.parser import (
+    SourceAddOperator,
+    SourceBinaryExpressionNode,
+    SourceBinaryOperator,
     SourceComplementNode,
     SourceConstantIntNode,
+    SourceDivideOperator,
     SourceExpressionNode,
     SourceFunctionNode,
+    SourceModuloOperator,
+    SourceMultiplyOperator,
     SourceNegateNode,
     SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
+    SourceSubtractOperator,
     SourceUnaryExpressionNode,
 )
 
 from ._tacky_ast import (
+    TackyAdd,
+    TackyBinaryNode,
+    TackyBinaryOperator,
     TackyComplementNode,
     TackyConstantIntNode,
+    TackyDivide,
     TackyFunctionNode,
     TackyInstruction,
+    TackyModulo,
+    TackyMultiply,
     TackyNegateNode,
     TackyProgramNode,
     TackyReturnNode,
+    TackySubtract,
     TackyUnaryNode,
     TackyUnaryOperator,
     TackyValue,
@@ -49,6 +63,21 @@ class TackyGenerator:
             case _:
                 raise ValueError(f"Unrecognised: {source}")
 
+    def convert_binary_operator(self, source: SourceBinaryOperator) -> TackyBinaryOperator:
+        match source:
+            case SourceAddOperator():
+                return TackyAdd(start_position=source.start_position)
+            case SourceSubtractOperator():
+                return TackySubtract(start_position=source.start_position)
+            case SourceMultiplyOperator():
+                return TackyMultiply(start_position=source.start_position)
+            case SourceDivideOperator():
+                return TackyDivide(start_position=source.start_position)
+            case SourceModuloOperator():
+                return TackyModulo(start_position=source.start_position)
+            case _:
+                raise ValueError(f"Unrecognised: {source}")
+
     def emit_expression(self, source_node: SourceExpressionNode) -> TackyValue:
         match source_node:
             case SourceConstantIntNode():
@@ -68,6 +97,25 @@ class TackyGenerator:
                 )
                 self._current_instructions.append(instr)
                 return dst
+            case SourceBinaryExpressionNode():
+                # Note that the C standard does not guarantee
+                # ordering here
+                l_val = self.emit_expression(source_node.left)
+                r_val = self.emit_expression(source_node.right)
+                dst_b = TackyVarNode(
+                    start_position=source_node.start_position,
+                    identifier=self.get_function_temporary(),
+                )
+                bin_operator = self.convert_binary_operator(source_node.operator)
+                bin_instr = TackyBinaryNode(
+                    start_position=source_node.start_position,
+                    operator=bin_operator,
+                    left=l_val,
+                    right=r_val,
+                    dst=dst_b,
+                )
+                self._current_instructions.append(bin_instr)
+                return dst_b
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
