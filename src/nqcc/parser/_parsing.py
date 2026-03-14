@@ -16,8 +16,8 @@ from nqcc.lexer import (
     OpenParenToken,
     SemicolonToken,
     TildeToken,
+    Token,
     UnaryOperatorToken,
-    Token
 )
 
 from ._exceptions import SourceASTBadValueError

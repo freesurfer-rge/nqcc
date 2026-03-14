@@ -1,5 +1,3 @@
-from typing import get_args
-
 import pytest
 
 from nqcc.lexer import CloseParenToken, ConstantIntegerToken, KeywordToken, SemicolonToken
@@ -19,7 +17,6 @@ from nqcc.parser import (
     SourceReturnNode,
     SourceStatementNode,
     SourceSubtractOperator,
-    SourceExpressionNode,
     TokenTape,
     parse_expression,
     parse_function,
@@ -199,8 +196,15 @@ class TestSourceExpressionNode:
             ("1+ 2*3 +4;", "1+(2*3)+4;"),
             (" ~1 -2;", "(~1)-2;"),
             ("1 + (4/5) ;", "1 +  4/5 ;"),
+            ("1 + ((-4)/5) ;", "1 +   -4 /5  ;"),
             ("1 + (4%5) ;", "1 +  4%5 ;"),
             (" 1+2 +3;", "(1+2)+3;"),
+            (" 1+2 -3;", "(1+2)-3;"),
+            (" 1-2 +3;", "(1-2)+3;"),
+            (" 1*2 /3;", "(1*2)/3;"),
+            (" 1/2 *3;", "(1/2)*3;"),
+            (" 1*2 %3;", "(1*2)%3;"),
+            (" 1%2 *3;", "(1%2)*3;"),
         ],
     )
     def test_paired_expressions(self, a_str: str, b_str: str):
