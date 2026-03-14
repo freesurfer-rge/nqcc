@@ -141,9 +141,12 @@ class TestSourceExpressionNode:
 
         r_exp = node.right
         assert isinstance(r_exp, SourceBinaryExpressionNode)
-        assert r_exp.operator == SourceMultiplyOperator(start_position=7)
-        assert r_exp.left == SourceConstantIntNode(start_position=5, value=2)
-        assert r_exp.right == SourceConstantIntNode(start_position=9, value=3)
+        assert r_exp.operator == SourceMultiplyOperator(start_position=6)
+        assert r_exp.left == SourceConstantIntNode(start_position=4, value=2)
+        assert r_exp.right == SourceConstantIntNode(start_position=8, value=3)
+        
+        # We are using the semi colon to mark the end of the expression
+        assert token_tape.tokens_remaining == 1
 
 
 
