@@ -1,3 +1,5 @@
+import pytest
+
 from nqcc.parser import TokenTape, parse_expression, parse_function, parse_program, parse_statement
 from nqcc.tacky import (
     TackyComplementNode,
@@ -9,10 +11,18 @@ from nqcc.tacky import (
     TackyReturnNode,
     TackyUnaryNode,
     TackyVarNode,
+    TackyAdd, TackySubtract, TackyMultiply, TackyDivide, TackyModulo, TackyBinaryNode
 )
 
 # These tests access internals of the TackyGenerator
 
+_BINARY_EXPRESSION_MAP = {
+    "+": TackyAdd,
+    "-": TackySubtract,
+    "*": TackyMultiply,
+    "/": TackyDivide,
+    "%": TackyModulo,
+}
 
 class TestExpressions:
     def test_constant(self):
@@ -94,6 +104,30 @@ class TestExpressions:
             dst=TackyVarNode(start_position=1, identifier="tmp.test_simple_nested.1"),
         )
         assert result == instr1.dst
+    
+    @pytest.mark.parametrize("operator", ["+", "-", "*", "/", "%"])
+    def test_simple_binary(self, operator: str):
+        source = f"14 {operator} 10;"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 4
+        src_node = parse_expression(token_tape, min_precedence=0)
+
+        target = TackyGenerator()
+        target._curr_function = "test_simple_binary"
+
+        result = target.emit_expression(src_node)
+        assert result == TackyVarNode(start_position = 3, identifier="tmp.test_simple_binary.0")
+
+        assert len(target._current_instructions) == 1
+        instr0 = target._current_instructions[0]
+        assert isinstance(instr0, TackyBinaryNode)
+        assert instr0.start_position == 3
+        assert isinstance(instr0.operator, _BINARY_EXPRESSION_MAP[operator])
+        assert instr0.left == TackyConstantIntNode(start_position=0, value=14)
+        assert instr0.right == TackyConstantIntNode(start_position=5, value=10)
+
+        # The expression doesn't consume the semicolon
+        assert token_tape.tokens_remaining == 1
 
 
 class TestStatements:
