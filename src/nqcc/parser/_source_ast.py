@@ -28,24 +28,33 @@ class SourceNegateNode(SourceUnaryExpressionNode):
 SourceUnaryNode = Union[SourceComplementNode, SourceNegateNode]
 
 
-class SourceAddOperator(SourceASTNode):
+class SourceBinOp(SourceASTNode):
+    precedence: int
+
+
+class SourceAddOperator(SourceBinOp):
     node_type: Literal["SourceAddOperator"] = "SourceAddOperator"
+    precedence: Literal[45] = 45
 
 
-class SourceSubtractOperator(SourceASTNode):
+class SourceSubtractOperator(SourceBinOp):
     node_type: Literal["SourceSubtractOperator"] = "SourceSubtractOperator"
+    precedence: Literal[45] = 45
 
 
-class SourceMultiplyOperator(SourceASTNode):
+class SourceMultiplyOperator(SourceBinOp):
     node_type: Literal["SourceMultiplyOperator"] = "SourceMultiplyOperator"
+    precedence: Literal[50] = 50
 
 
-class SourceDivideOperator(SourceASTNode):
+class SourceDivideOperator(SourceBinOp):
     node_type: Literal["SourceDivideOperator"] = "SourceDivideOperator"
+    precedence: Literal[50] = 50
 
 
-class SourceModuloOperator(SourceASTNode):
+class SourceModuloOperator(SourceBinOp):
     node_type: Literal["SourceModuloOperator"] = "SourceModuloOperator"
+    precedence: Literal[50] = 50
 
 
 SourceBinaryOperator = Union[

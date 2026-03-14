@@ -1,11 +1,16 @@
 from typing import get_args
 
 from nqcc.lexer import (
+    AdditionToken,
+    BinaryOperatorToken,
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
+    DivideToken,
     IdentifierToken,
     KeywordToken,
+    ModuloToken,
+    MultiplyToken,
     NegationToken,
     OpenBraceToken,
     OpenParenToken,
@@ -16,14 +21,21 @@ from nqcc.lexer import (
 
 from ._exceptions import SourceASTBadValueError
 from ._source_ast import (
+    SourceAddOperator,
+    SourceBinaryExpressionNode,
+    SourceBinaryOperator,
     SourceComplementNode,
     SourceConstantIntNode,
+    SourceDivideOperator,
     SourceExpressionNode,
     SourceFunctionNode,
+    SourceModuloOperator,
+    SourceMultiplyOperator,
     SourceNegateNode,
     SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
+    SourceSubtractOperator,
     SourceUnaryNode,
 )
 from ._token_tape import TokenTape
@@ -35,13 +47,13 @@ def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryNode:
     result: SourceUnaryNode
     match op_token:
         case TildeToken():
-            inner_exp = parse_expression(token_tape)
+            inner_exp = parse_factor(token_tape)
             result = SourceComplementNode(
                 start_position=op_token.start_position, expression=inner_exp
             )
 
         case NegationToken():
-            inner_exp = parse_expression(token_tape)
+            inner_exp = parse_factor(token_tape)
             result = SourceNegateNode(start_position=op_token.start_position, expression=inner_exp)
 
         case _:
@@ -50,7 +62,25 @@ def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryNode:
     return result
 
 
-def parse_expression(token_tape: TokenTape) -> SourceExpressionNode:
+def parse_binary_operator(token_tape: TokenTape) -> SourceBinaryOperator:
+    op_token = token_tape.expect(get_args(BinaryOperatorToken))
+
+    match op_token:
+        case AdditionToken():
+            return SourceAddOperator(start_position=op_token.start_position)
+        case NegationToken():
+            return SourceSubtractOperator(start_position=op_token.start_position)
+        case MultiplyToken():
+            return SourceMultiplyOperator(start_position=op_token.start_position)
+        case DivideToken():
+            return SourceDivideOperator(start_position=op_token.start_position)
+        case ModuloToken():
+            return SourceModuloOperator(start_position=op_token.start_position)
+        case _:
+            raise ValueError(f"Could not match type of {op_token}")
+
+
+def parse_factor(token_tape: TokenTape) -> SourceExpressionNode:
     token = token_tape.peek()
 
     result: SourceExpressionNode
@@ -71,13 +101,26 @@ def parse_expression(token_tape: TokenTape) -> SourceExpressionNode:
 
         case OpenParenToken():
             _ = token_tape.take()
-            result = parse_expression(token_tape)
+            result = parse_expression(token_tape, min_precedence=0)
             _ = token_tape.expect(CloseParenToken)
 
         case _:
             raise ValueError(f"Could not match type of {token}")
-
     return result
+
+
+def parse_expression(token_tape: TokenTape, *, min_precedence: int) -> SourceExpressionNode:
+    left = parse_factor(token_tape)
+
+    token = token_tape.peek()
+    while isinstance(token, get_args(BinaryOperatorToken)) and token.precedence >= min_precedence:
+        operator = parse_binary_operator(token_tape)
+        right = parse_expression(token_tape, min_precedence=1 + operator.precedence)
+        left = SourceBinaryExpressionNode(
+            start_position=operator.start_position, operator=operator, left=left, right=right
+        )
+        token = token_tape.peek()
+    return left
 
 
 def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
@@ -86,7 +129,7 @@ def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
         raise SourceASTBadValueError(
             expected_value="return", actual_token=return_token, message="Unexpected keyword"
         )
-    return_value = parse_expression(token_tape)
+    return_value = parse_expression(token_tape, min_precedence=0)
     _ = token_tape.expect(SemicolonToken)
     return SourceReturnNode(start_position=return_token.start_position, value=return_value)
 
