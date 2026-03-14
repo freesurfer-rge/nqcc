@@ -95,14 +95,14 @@ class TestSourceExpressionNode:
     def test_simple_binary(self, operator: str):
         source = f"14 {operator} 10;"
         token_tape = TokenTape.from_c_source(source)
-        assert token_tape.tokens_remaining == 3
+        assert token_tape.tokens_remaining == 4
 
         node = parse_expression(token_tape, min_precedence=0)
         assert isinstance(node, SourceBinaryExpressionNode)
-        assert node.operator == _BINARY_EXPRESSION_MAP[operator](start_position=4)
+        assert node.operator == _BINARY_EXPRESSION_MAP[operator](start_position=3)
 
         assert node.left == SourceConstantIntNode(start_position=0, value=14)
-        assert node.right == SourceConstantIntNode(start_position=6, value=10)
+        assert node.right == SourceConstantIntNode(start_position=5, value=10)
 
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
