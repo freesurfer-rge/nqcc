@@ -107,6 +107,45 @@ class TestSourceExpressionNode:
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
 
+    def test_simple_binary_with_parens(self):
+        source = "1 + (2 * 3);"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 8
+
+        node = parse_expression(token_tape, min_precedence=0)
+        assert isinstance(node, SourceBinaryExpressionNode)
+        assert node.operator == SourceAddOperator(start_position=2)
+
+        assert node.left == SourceConstantIntNode(start_position=0, value=1)
+
+        r_exp = node.right
+        assert isinstance(r_exp, SourceBinaryExpressionNode)
+        assert r_exp.operator == SourceMultiplyOperator(start_position=7)
+        assert r_exp.left == SourceConstantIntNode(start_position=5, value=2)
+        assert r_exp.right == SourceConstantIntNode(start_position=9, value=3)
+
+        # We are using the semi colon to mark the end of the expression
+        assert token_tape.tokens_remaining == 1
+
+    def test_simple_binary_precedence(self):
+        # This should be the same AST as "1 + (2 * 3);""
+        source = "1 + 2 * 3;"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 6
+
+        node = parse_expression(token_tape, min_precedence=0)
+        assert isinstance(node, SourceBinaryExpressionNode)
+        assert node.operator == SourceAddOperator(start_position=2)
+
+        assert node.left == SourceConstantIntNode(start_position=0, value=1)
+
+        r_exp = node.right
+        assert isinstance(r_exp, SourceBinaryExpressionNode)
+        assert r_exp.operator == SourceMultiplyOperator(start_position=7)
+        assert r_exp.left == SourceConstantIntNode(start_position=5, value=2)
+        assert r_exp.right == SourceConstantIntNode(start_position=9, value=3)
+
+
 
 class TestSourceStatementNode:
     def test_return_statement(self):
