@@ -2,6 +2,7 @@ from ._driver import lexer_driver
 from ._lexer import LexerMatchError, extract_tokens, lex_string, pick_token
 from ._tokens import (
     AdditionToken,
+    BinaryOperatorToken,
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
@@ -23,6 +24,7 @@ from ._tokens import (
 
 __all__ = [
     "AdditionToken",
+    "BinaryOperatorToken",
     "CloseBraceToken",
     "CloseParenToken",
     "ConstantIntegerToken",

@@ -2,21 +2,35 @@ import pytest
 
 from nqcc.lexer import CloseParenToken, ConstantIntegerToken, KeywordToken, SemicolonToken
 from nqcc.parser import (
+    SourceAddOperator,
     SourceASTBadTypeError,
     SourceASTBadValueError,
+    SourceBinaryExpressionNode,
     SourceComplementNode,
     SourceConstantIntNode,
+    SourceDivideOperator,
     SourceFunctionNode,
+    SourceModuloOperator,
+    SourceMultiplyOperator,
     SourceNegateNode,
     SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
+    SourceSubtractOperator,
     TokenTape,
     parse_expression,
     parse_function,
     parse_program,
     parse_statement,
 )
+
+_BINARY_EXPRESSION_MAP = {
+    "+": SourceAddOperator,
+    "-": SourceSubtractOperator,
+    "*": SourceMultiplyOperator,
+    "/": SourceDivideOperator,
+    "%": SourceModuloOperator,
+}
 
 
 class TestSourceExpressionNode:
@@ -27,7 +41,7 @@ class TestSourceExpressionNode:
         ]
         token_tape = TokenTape(tokens)
 
-        node = parse_expression(token_tape)
+        node = parse_expression(token_tape, min_precedence=0)
         assert isinstance(node, SourceConstantIntNode)
         assert node.start_position == 1
         assert node.value == 123
@@ -40,7 +54,7 @@ class TestSourceExpressionNode:
         token_tape = TokenTape.from_c_source(source)
         assert token_tape.tokens_remaining == 3
 
-        node = parse_expression(token_tape)
+        node = parse_expression(token_tape, min_precedence=0)
         assert isinstance(node, SourceComplementNode)
         assert node.start_position == 1
         assert node.expression == SourceConstantIntNode(start_position=3, value=2)
@@ -53,7 +67,7 @@ class TestSourceExpressionNode:
         token_tape = TokenTape.from_c_source(source)
         assert token_tape.tokens_remaining == 3
 
-        node = parse_expression(token_tape)
+        node = parse_expression(token_tape, min_precedence=0)
         assert isinstance(node, SourceNegateNode)
         assert node.start_position == 2
         assert node.expression == SourceConstantIntNode(start_position=3, value=3)
@@ -66,7 +80,7 @@ class TestSourceExpressionNode:
         token_tape = TokenTape.from_c_source(source)
         assert token_tape.tokens_remaining == 10
 
-        node = parse_expression(token_tape)
+        node = parse_expression(token_tape, min_precedence=0)
         assert isinstance(node, SourceNegateNode)
         assert node.start_position == 1
         inner_exp = node.expression
@@ -76,6 +90,134 @@ class TestSourceExpressionNode:
 
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
+
+    @pytest.mark.parametrize("operator", ["+", "-", "*", "/", "%"])
+    def test_simple_binary(self, operator: str):
+        source = f"14 {operator} 10;"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 4
+
+        node = parse_expression(token_tape, min_precedence=0)
+        assert isinstance(node, SourceBinaryExpressionNode)
+        assert node.operator == _BINARY_EXPRESSION_MAP[operator](start_position=3)
+
+        assert node.left == SourceConstantIntNode(start_position=0, value=14)
+        assert node.right == SourceConstantIntNode(start_position=5, value=10)
+
+        # The expression doesn't consume the semicolon
+        assert token_tape.tokens_remaining == 1
+
+    def test_simple_binary_with_parens(self):
+        source = "1 + (2 * 3);"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 8
+
+        node = parse_expression(token_tape, min_precedence=0)
+        assert isinstance(node, SourceBinaryExpressionNode)
+        assert node.operator == SourceAddOperator(start_position=2)
+
+        assert node.left == SourceConstantIntNode(start_position=0, value=1)
+
+        r_exp = node.right
+        assert isinstance(r_exp, SourceBinaryExpressionNode)
+        assert r_exp.operator == SourceMultiplyOperator(start_position=7)
+        assert r_exp.left == SourceConstantIntNode(start_position=5, value=2)
+        assert r_exp.right == SourceConstantIntNode(start_position=9, value=3)
+
+        # We are using the semi colon to mark the end of the expression
+        assert token_tape.tokens_remaining == 1
+
+    def test_simple_binary_precedence(self):
+        # This should be the same AST as "1 + (2 * 3);""
+        source = "1 + 2 * 3;"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 6
+
+        node = parse_expression(token_tape, min_precedence=0)
+        assert isinstance(node, SourceBinaryExpressionNode)
+        assert node.operator == SourceAddOperator(start_position=2)
+
+        assert node.left == SourceConstantIntNode(start_position=0, value=1)
+
+        r_exp = node.right
+        assert isinstance(r_exp, SourceBinaryExpressionNode)
+        assert r_exp.operator == SourceMultiplyOperator(start_position=6)
+        assert r_exp.left == SourceConstantIntNode(start_position=4, value=2)
+        assert r_exp.right == SourceConstantIntNode(start_position=8, value=3)
+
+        # We are using the semi colon to mark the end of the expression
+        assert token_tape.tokens_remaining == 1
+
+    def test_simple_binary_req_parens(self):
+        source = "(1+2)*3;"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 8
+
+        node = parse_expression(token_tape, min_precedence=0)
+        assert isinstance(node, SourceBinaryExpressionNode)
+        assert node.operator == SourceMultiplyOperator(start_position=5)
+
+        assert isinstance(node.left, SourceBinaryExpressionNode)
+        assert node.left.operator == SourceAddOperator(start_position=2)
+        assert node.left.left == SourceConstantIntNode(start_position=1, value=1)
+        assert node.left.right == SourceConstantIntNode(start_position=3, value=2)
+
+        assert node.right == SourceConstantIntNode(start_position=6, value=3)
+
+        # We are using the semi colon to mark the end of the expression
+        assert token_tape.tokens_remaining == 1
+
+    def test_simple_binary_with_negation(self):
+        # This should be the same AST as "1 + ((-2) * 3);""
+        source = "1 + -2 * 3;"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 7
+
+        node = parse_expression(token_tape, min_precedence=0)
+        assert isinstance(node, SourceBinaryExpressionNode)
+        assert node.operator == SourceAddOperator(start_position=2)
+
+        assert node.left == SourceConstantIntNode(start_position=0, value=1)
+        r_exp = node.right
+        assert isinstance(r_exp, SourceBinaryExpressionNode)
+        assert r_exp.operator == SourceMultiplyOperator(start_position=7)
+        assert r_exp.left == SourceNegateNode(
+            start_position=4, expression=SourceConstantIntNode(start_position=5, value=2)
+        )
+        assert r_exp.right == SourceConstantIntNode(start_position=9, value=3)
+
+        # We are using the semi colon to mark the end of the expression
+        assert token_tape.tokens_remaining == 1
+
+    @pytest.mark.parametrize(
+        ["a_str", "b_str"],
+        [
+            ("1 + -2 ;", "1 +(-2);"),
+            ("1+ 2*3 +4;", "1+(2*3)+4;"),
+            (" ~1 -2;", "(~1)-2;"),
+            ("1 + (4/5) ;", "1 +  4/5 ;"),
+            ("1 + ((-4)/5) ;", "1 +   -4 /5  ;"),
+            ("1 + (4%5) ;", "1 +  4%5 ;"),
+            (" 1+2 +3;", "(1+2)+3;"),
+            (" 1+2 -3;", "(1+2)-3;"),
+            (" 1-2 +3;", "(1-2)+3;"),
+            (" 1*2 /3;", "(1*2)/3;"),
+            (" 1/2 *3;", "(1/2)*3;"),
+            (" 1*2 %3;", "(1*2)%3;"),
+            (" 1%2 *3;", "(1%2)*3;"),
+        ],
+    )
+    def test_paired_expressions(self, a_str: str, b_str: str):
+        tt_a = TokenTape.from_c_source(a_str)
+        tt_b = TokenTape.from_c_source(b_str)
+
+        a_node = parse_expression(tt_a, min_precedence=0)
+        b_node = parse_expression(tt_b, min_precedence=0)
+
+        print(f"{a_node.model_dump_json(indent=2)}")
+        print(f"{b_node.model_dump_json(indent=2)}")
+
+        assert a_node == b_node
 
 
 class TestSourceStatementNode:
