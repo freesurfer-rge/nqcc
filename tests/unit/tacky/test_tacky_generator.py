@@ -18,7 +18,7 @@ class TestExpressions:
     def test_constant(self):
         source = "  3;"
         token_tape = TokenTape.from_c_source(source)
-        src_node = parse_expression(token_tape)
+        src_node = parse_expression(token_tape, min_precedence=0)
 
         target = TackyGenerator()
         target._curr_function = "test_constant"
@@ -33,7 +33,7 @@ class TestExpressions:
     def test_negation(self):
         source = "-4;"
         token_tape = TokenTape.from_c_source(source)
-        src_node = parse_expression(token_tape)
+        src_node = parse_expression(token_tape, min_precedence=0)
 
         target = TackyGenerator()
         target._curr_function = "test_negation"
@@ -52,7 +52,7 @@ class TestExpressions:
     def test_complement(self):
         source = "~ 10;"
         token_tape = TokenTape.from_c_source(source)
-        src_node = parse_expression(token_tape)
+        src_node = parse_expression(token_tape, min_precedence=0)
 
         target = TackyGenerator()
         target._curr_function = "test_complement"
@@ -71,7 +71,7 @@ class TestExpressions:
     def test_simple_nested(self):
         source = "(-((~12)));"
         token_tape = TokenTape.from_c_source(source)
-        src_node = parse_expression(token_tape)
+        src_node = parse_expression(token_tape, min_precedence=0)
 
         target = TackyGenerator()
         target._curr_function = "test_simple_nested"
