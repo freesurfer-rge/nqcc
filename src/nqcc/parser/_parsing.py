@@ -113,8 +113,10 @@ def parse_expression(token_tape: TokenTape, *, min_precedence: int) -> SourceExp
     left = parse_factor(token_tape)
 
     token = token_tape.peek()
-    while isinstance(token, get_args(BinaryOperatorToken)) and token.precedence >= min_precedence:
+    while isinstance(token, get_args(BinaryOperatorToken)):
         operator = parse_binary_operator(token_tape)
+        if operator.precedence < min_precedence:
+            break
         right = parse_expression(token_tape, min_precedence=1 + operator.precedence)
         left = SourceBinaryExpressionNode(
             start_position=operator.start_position, operator=operator, left=left, right=right
