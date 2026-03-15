@@ -1,11 +1,18 @@
 from nqcc.tacky import (
+    TackyAdd,
+    TackyBinaryNode,
+    TackyBinaryOperator,
     TackyComplementNode,
     TackyConstantIntNode,
+    TackyDivide,
     TackyFunctionNode,
     TackyInstruction,
+    TackyModulo,
+    TackyMultiply,
     TackyNegateNode,
     TackyProgramNode,
     TackyReturnNode,
+    TackySubtract,
     TackyUnaryNode,
     TackyUnaryOperator,
     TackyValue,
@@ -13,10 +20,16 @@ from nqcc.tacky import (
 )
 
 from ._assembler_ast import (
+    AsmAdd,
+    AsmBinaryNode,
+    AsmBinaryOperator,
+    AsmCdqNode,
     AsmFunctionNode,
+    AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
     AsmMovNode,
+    AsmMultiply,
     AsmNegOperator,
     AsmNotOperator,
     AsmOperandNode,
@@ -24,6 +37,7 @@ from ._assembler_ast import (
     AsmPseudoRegisterNode,
     AsmRegisterNode,
     AsmRetNode,
+    AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
 )
@@ -51,6 +65,60 @@ def convert_tacky_unary_operator(tacky_operator: TackyUnaryOperator) -> AsmUnary
             return AsmNegOperator(start_position=tacky_operator.start_position)
         case _:
             raise ValueError(f"Unrecognised: {tacky_operator}")
+
+
+def convert_tacky_binary_operator(tacky_operator: TackyBinaryOperator) -> AsmBinaryOperator:
+    match tacky_operator:
+        case TackyAdd():
+            return AsmAdd(start_position=tacky_operator.start_position)
+        case TackySubtract():
+            return AsmSubtract(start_position=tacky_operator.start_position)
+        case TackyMultiply():
+            return AsmMultiply(start_position=tacky_operator.start_position)
+        case _:
+            # Div and Modulo handled separately
+            raise ValueError(f"Unrecognised: {tacky_operator}")
+
+
+def convert_tacky_binary_node(tacky_node: TackyBinaryNode) -> list[AsmInstructionNode]:
+    assert isinstance(tacky_node, TackyBinaryNode)
+
+    left = convert_tacky_operand(tacky_node.left)
+    right = convert_tacky_operand(tacky_node.right)
+    dest = convert_tacky_operand(tacky_node.dst)
+    match tacky_node.operator:
+        case TackyAdd() | TackySubtract() | TackyMultiply():
+            asm_bin_op = convert_tacky_binary_operator(tacky_node.operator)
+            i0_bin_op = AsmMovNode(
+                start_position=tacky_node.start_position, source=left, destination=dest
+            )
+            i1_bin_op = AsmBinaryNode(
+                start_position=tacky_node.start_position,
+                operator=asm_bin_op,
+                src=right,
+                dst=i0_bin_op.destination,
+            )
+            return [i0_bin_op, i1_bin_op]
+        case TackyDivide() | TackyModulo():
+            div_eax = AsmRegisterNode(start_position=tacky_node.start_position, value="eax")
+            i0_div_op = AsmMovNode(
+                start_position=tacky_node.start_position,
+                source=left,
+                destination=div_eax,
+            )
+            i1_div_op = AsmCdqNode(start_position=tacky_node.start_position)
+            i2_div_op = AsmIDivNode(start_position=tacky_node.start_position, src=right)
+            if isinstance(tacky_node.operator, TackyDivide):
+                result_register = div_eax
+            else:
+                # Modulo
+                result_register = AsmRegisterNode(
+                    start_position=tacky_node.start_position, value="edx"
+                )
+            i4_div_op = AsmMovNode(
+                start_position=tacky_node.start_position, source=result_register, destination=dest
+            )
+            return [i0_div_op, i1_div_op, i2_div_op, i4_div_op]
 
 
 def convert_tacky_instruction(tacky_instruction: TackyInstruction) -> list[AsmInstructionNode]:

@@ -97,7 +97,13 @@ class AsmAllocateStackNode(AsmASTNode):
 
 
 AsmInstructionNode = Union[
-    AsmMovNode, AsmRetNode, AsmUnaryNode, AsmAllocateStackNode, AsmBinaryNode, AsmIDivNode
+    AsmMovNode,
+    AsmRetNode,
+    AsmUnaryNode,
+    AsmAllocateStackNode,
+    AsmBinaryNode,
+    AsmIDivNode,
+    AsmCdqNode,
 ]
 
 
