@@ -14,8 +14,7 @@ class TestAsmSerde:
         restored = AsmProgramNode.model_validate_json(json_str)
         assert asm_ast == restored
 
-    def test_simple(self):
-        source = "   int main(void) {return ~(    509);}"
+    def _check_from_source(self, source: str) -> None:
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_program(token_tape)
         tg = TackyGenerator()
@@ -26,9 +25,15 @@ class TestAsmSerde:
 
         prr = PseudoRegisterReplacer()
         prr.pseudo_replace(asm_prog)
-
         self._round_trip(asm_prog)
 
         fixup_program_instructions(asm_prog)
-
         self._round_trip(asm_prog)
+
+
+    def test_simple(self):
+        source = "   int main(void) {return ~(    509);}"
+        self._check_from_source(source)
+
+    def test_binary_ops(self):
+        source = "  int main( void ) {return ~1 + 3 - 8/4}"
