@@ -1,5 +1,7 @@
 from ._assembler_ast import (
+    AsmAdd,
     AsmAllocateStackNode,
+    AsmBinaryNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -8,6 +10,7 @@ from ._assembler_ast import (
     AsmProgramNode,
     AsmRegisterNode,
     AsmStackNode,
+    AsmSubtract,
 )
 
 
@@ -37,6 +40,27 @@ def apply_idiv_fixup(instr: AsmIDivNode) -> list[AsmInstructionNode]:
         return [nxt0, nxt1]
     else:
         return [instr]
+
+
+def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
+    match instr.operator:
+        case AsmAdd(), AsmSubtract():
+            if isinstance(instr.src, AsmStackNode):
+                reg = AsmRegisterNode(start_position=instr.start_position, value="r10d")
+                nxt0 = AsmMovNode(
+                    start_position=instr.start_position, source=instr.src, destination=reg
+                )
+                nxt1 = AsmBinaryNode(
+                    start_position=instr.start_position,
+                    operator=instr.operator,
+                    src=nxt0.destination,
+                    dst=instr.dst,
+                )
+                return [nxt0, nxt1]
+            else:
+                return [instr]
+        case _:
+            raise ValueError(f"Unrecognised: {instr}")
 
 
 def fixup_function_instructions(asm_func: AsmFunctionNode):

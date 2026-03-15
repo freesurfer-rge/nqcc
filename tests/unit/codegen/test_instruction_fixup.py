@@ -1,7 +1,10 @@
 import pytest
 
 from nqcc.codegen import (
+    AsmAdd,
     AsmAllocateStackNode,
+    AsmBinaryNode,
+    AsmBinaryOperator,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -10,6 +13,8 @@ from nqcc.codegen import (
     AsmProgramNode,
     AsmRegisterNode,
     AsmStackNode,
+    AsmSubtract,
+    apply_binary_fixup,
     apply_idiv_fixup,
     apply_mov_fixup,
     fixup_function_instructions,
@@ -90,6 +95,21 @@ class TestIDivFixup:
             destination=AsmRegisterNode(start_position=4, value="r10d"),
         )
         assert fixed[1] == AsmIDivNode(start_position=4, src=fixed[0].destination)
+
+
+class TestBinaryFixup:
+    @pytest.mark.parametrize("op", [AsmAdd(start_position=3), AsmSubtract(start_position=3)])
+    def test_addsub_node(self, op: AsmBinaryOperator):
+        src = AsmStackNode(start_position=1, offset=-4)
+        dst = AsmStackNode(start_position=2, offset=-8)
+        target = AsmBinaryNode(start_position=4, operator=op, src=src, dst=dst)
+
+        fixed = apply_binary_fixup(target)
+        assert len(fixed) == 2
+        assert fixed[0] == AsmMovNode(
+            start_position=4, source=src, dst=AsmRegisterNode(start_position=4, value="r10d")
+        )
+        assert fixed[1] == AsmBinaryNode(start_position=4, operator=op, src=fixed[0].dst, dst=dst)
 
 
 class TestFunctionFixup:
