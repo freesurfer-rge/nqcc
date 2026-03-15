@@ -116,6 +116,28 @@ class TestFunctionFixup:
         i2 = target.instructions[2]
         assert i2 == AsmMovNode(start_position=1, source=reg, destination=dst)
 
+    def test_idiv(self):
+        src = AsmImmediateIntNode(start_position=2, value=6)
+        target = AsmFunctionNode(
+            start_position=0,
+            identifier="abc",
+            instructions=[AsmIDivNode(start_position=1, src=src)],
+            stack_size=8,
+        )
+
+        fixup_function_instructions(target)
+
+        assert len(target.instructions) == 3
+        i0 = target.instructions[0]
+        assert i0 == AsmAllocateStackNode(start_position=0, stack_size=8)
+
+        reg = AsmRegisterNode(start_position=1, value="r10d")
+        i1 = target.instructions[1]
+        assert i1 == AsmMovNode(start_position=1, source=src, destination=reg)
+
+        i2 = target.instructions[2]
+        assert i2 == AsmIDivNode(start_position=1, src=reg)
+
 
 class TestProgramFixup:
     def test_simple(self):

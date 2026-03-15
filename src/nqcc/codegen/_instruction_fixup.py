@@ -57,6 +57,9 @@ def fixup_function_instructions(asm_func: AsmFunctionNode):
             case AsmMovNode():
                 nxt_instrs = apply_mov_fixup(instr)
                 fixed_instructions += nxt_instrs
+            case AsmIDivNode():
+                nxt_instrs = apply_idiv_fixup(instr)
+                fixed_instructions += nxt_instrs
             case _:
                 fixed_instructions.append(instr)
     asm_func.instructions = fixed_instructions
