@@ -5,13 +5,14 @@ from nqcc.codegen import (
     AsmAllocateStackNode,
     AsmBinaryNode,
     AsmBinaryOperator,
+    AsmCdqNode,
+    AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
     AsmMovNode,
     AsmMultiply,
     AsmNegOperator,
     AsmNotOperator,
-    AsmIDivNode,
     AsmOperandNode,
     AsmPseudoRegisterNode,
     AsmRegisterNode,
@@ -84,7 +85,11 @@ class TestOperandUpdate:
 class TestInstructionUpdate:
     @pytest.mark.parametrize(
         "instr",
-        [AsmRetNode(start_position=25), AsmAllocateStackNode(start_position=99, stack_size=126)],
+        [
+            AsmRetNode(start_position=25),
+            AsmAllocateStackNode(start_position=99, stack_size=126),
+            AsmCdqNode(start_position=123512),
+        ],
     )
     def test_unchanged_instructions(self, instr: AsmInstructionNode):
         orig_instr = instr.model_copy(deep=True)
@@ -139,7 +144,7 @@ class TestInstructionUpdate:
 
     def test_idiv(self):
         target = PseudoRegisterReplacer()
-        
+
         pseudo_src = AsmPseudoRegisterNode(start_position=129, identifier="temp.0")
         idiv_node = AsmIDivNode(start_position=31, src=pseudo_src)
 
