@@ -87,6 +87,10 @@ class AsmIDivNode(AsmASTNode):
     src: AsmOperandNode
 
 
+class AsmCdqNode(AsmASTNode):
+    node_type: Literal["AsmCdqNode"] = "AsmCdqNode"
+
+
 class AsmAllocateStackNode(AsmASTNode):
     node_type: Literal["AsmAllocateStackNode"] = "AsmAllocateStackNode"
     stack_size: int
