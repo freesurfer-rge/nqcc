@@ -9,11 +9,20 @@ from nqcc.codegen import (
     AsmRegisterNode,
     AsmRetNode,
     AsmUnaryNode,
+    AsmBinaryNode,
+    AsmBinaryOperator,
+    AsmAdd,
+    AsmSubtract,
+    AsmMultiply,
+    AsmIDivNode,
+    AsmCdqNode,
     convert_tacky_function,
     convert_tacky_instruction,
     convert_tacky_operand,
     convert_tacky_program,
     convert_tacky_unary_operator,
+    convert_tacky_binary_operator,
+    convert_tacky_binary_node,
 )
 from nqcc.parser import TokenTape, parse_function, parse_program
 from nqcc.tacky import (
@@ -24,6 +33,10 @@ from nqcc.tacky import (
     TackyReturnNode,
     TackyUnaryNode,
     TackyVarNode,
+    TackyAdd,
+    TackySubtract,
+    TackyMultiply,
+    TackyBinaryNode,
 )
 
 
@@ -55,6 +68,23 @@ class TestUnaryOperators:
         result = convert_tacky_unary_operator(target)
         assert isinstance(result, AsmNotOperator)
         assert result.start_position == target.start_position
+
+
+class TestBinaryOperators:
+    def test_add(self):
+        target = TackyAdd(start_position=283)
+        result = convert_tacky_binary_operator(target)
+        assert result == AsmAdd(start_position=283)
+
+    def test_subtract(self):
+        target = TackySubtract(start_position=2183)
+        result = convert_tacky_binary_operator(target)
+        assert result == AsmSubtract(start_position=2183)
+
+    def test_multiply(self):
+        target = TackyMultiply(start_position=21831)
+        result = convert_tacky_binary_operator(target)
+        assert result == AsmMultiply(start_position=21831)
 
 
 class TestInstructions:
@@ -89,6 +119,29 @@ class TestInstructions:
             start_position=123,
             operator=AsmNotOperator(start_position=1234),
             source=result[0].destination,
+        )
+
+    def test_add(self):
+        target = TackyBinaryNode(
+            start_position=22,
+            operator=TackyAdd(start_position=21),
+            left=TackyVarNode(start_position=12, identifier="left.0"),
+            right=TackyVarNode(start_position=13, identifier="right.0"),
+            dst=TackyVarNode(start_position=14, identifier="dst.0"),
+        )
+
+        result = convert_tacky_instruction(target)
+        assert len(result) == 2
+        assert result[0] == AsmMovNode(
+            start_position=22,
+            source=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
+            destination=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
+        )
+        assert result[1] == AsmBinaryNode(
+            start_position=22,
+            operator=AsmAdd(start_position=21),
+            src=AsmPseudoRegisterNode(start_position=13, identifier="right.0"),
+            dst=result[0].destination,
         )
 
 
