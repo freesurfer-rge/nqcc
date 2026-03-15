@@ -59,7 +59,9 @@ def test_simple_return_values(
 class TestChapter03:
     SUB_DIR = "ch03"
 
-    @pytest.mark.parametrize("c_source_file", ["simple_add.c", "simple_divide.c"])
+    @pytest.mark.parametrize(
+        "c_source_file", ["simple_add.c", "simple_divide.c", "many_operator.c"]
+    )
     def test_direct(self, c_source_file: str):
         target_file = SAMPLE_PROGRAM_DIR / TestChapter03.SUB_DIR / c_source_file
         assert target_file.exists(), f"{target_file} not found"
