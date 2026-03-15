@@ -77,3 +77,15 @@ class TestChapter03:
 
         assert target_file.exists(), f"{target_file} not found"
         _compile_run_check(target_file, macros)
+
+    @pytest.mark.parametrize("v0", [1, 2, 37])
+    @pytest.mark.parametrize("v1", [1, 2, 37])
+    @pytest.mark.parametrize("v2", [1, 2, 37])
+    @pytest.mark.parametrize("op0", ["+", "-", "*", "/", "%"])
+    @pytest.mark.parametrize("op1", ["+", "-", "*", "/", "%"])
+    def test_two_operator_negation(self, v0: int, v1: int, v2: int, op0: str, op1: str):
+        target_file = SAMPLE_PROGRAM_DIR / TestChapter03.SUB_DIR / "two_operator_negation.c"
+        macros = [f"V0={v0}", f"V1={v1}", f"V2={v2}", f"OP0={op0}", f"OP1={op1}"]
+
+        assert target_file.exists(), f"{target_file} not found"
+        _compile_run_check(target_file, macros)
