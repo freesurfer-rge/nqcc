@@ -15,7 +15,7 @@ class AsmImmediateIntNode(AsmASTNode):
 
 class AsmRegisterNode(AsmASTNode):
     node_type: Literal["AsmRegisterNode"] = "AsmRegisterNode"
-    value: Literal["eax", "rbp", "rsp", "r10d"]
+    value: Literal["eax", "edx", "rbp", "rsp", "r10d", "r11d"]
 
 
 class AsmPseudoRegisterNode(AsmASTNode):
@@ -58,12 +58,53 @@ class AsmUnaryNode(AsmASTNode):
     source: AsmOperandNode
 
 
+class AsmAdd(AsmASTNode):
+    node_type: Literal["AsmAdd"] = "AsmAdd"
+
+
+class AsmSubtract(AsmASTNode):
+    node_type: Literal["AsmSubtract"] = "AsmSubtract"
+
+
+class AsmMultiply(AsmASTNode):
+    node_type: Literal["AsmMultiply"] = "AsmMultiply"
+
+
+AsmBinaryOperator = Union[AsmAdd, AsmSubtract, AsmMultiply]
+
+
+class AsmBinaryNode(AsmASTNode):
+    # x86 operators are effecitve +=, -= and *=
+    node_type: Literal["AsmBinaryNode"] = "AsmBinaryNode"
+    operator: AsmBinaryOperator
+    src: AsmOperandNode
+    dst: AsmOperandNode
+
+
+class AsmIDivNode(AsmASTNode):
+    # x86 assembler requires separate handling of divide and modulo
+    node_type: Literal["AsmIDivNode"] = "AsmIDivNode"
+    src: AsmOperandNode
+
+
+class AsmCdqNode(AsmASTNode):
+    node_type: Literal["AsmCdqNode"] = "AsmCdqNode"
+
+
 class AsmAllocateStackNode(AsmASTNode):
     node_type: Literal["AsmAllocateStackNode"] = "AsmAllocateStackNode"
     stack_size: int
 
 
-AsmInstructionNode = Union[AsmMovNode, AsmRetNode, AsmUnaryNode, AsmAllocateStackNode]
+AsmInstructionNode = Union[
+    AsmMovNode,
+    AsmRetNode,
+    AsmUnaryNode,
+    AsmAllocateStackNode,
+    AsmBinaryNode,
+    AsmIDivNode,
+    AsmCdqNode,
+]
 
 
 class AsmFunctionNode(AsmASTNode):

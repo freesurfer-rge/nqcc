@@ -1,10 +1,16 @@
 import pytest
 
 from nqcc.codegen import (
+    AsmAdd,
     AsmAllocateStackNode,
+    AsmBinaryNode,
+    AsmBinaryOperator,
+    AsmCdqNode,
+    AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
     AsmMovNode,
+    AsmMultiply,
     AsmNegOperator,
     AsmNotOperator,
     AsmOperandNode,
@@ -12,6 +18,7 @@ from nqcc.codegen import (
     AsmRegisterNode,
     AsmRetNode,
     AsmStackNode,
+    AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
     PseudoRegisterReplacer,
@@ -78,7 +85,11 @@ class TestOperandUpdate:
 class TestInstructionUpdate:
     @pytest.mark.parametrize(
         "instr",
-        [AsmRetNode(start_position=25), AsmAllocateStackNode(start_position=99, stack_size=126)],
+        [
+            AsmRetNode(start_position=25),
+            AsmAllocateStackNode(start_position=99, stack_size=126),
+            AsmCdqNode(start_position=123512),
+        ],
     )
     def test_unchanged_instructions(self, instr: AsmInstructionNode):
         orig_instr = instr.model_copy(deep=True)
@@ -113,6 +124,34 @@ class TestInstructionUpdate:
         assert unary_node.operator == op
         assert unary_node.source == AsmStackNode(start_position=315, offset=-4)
 
+    @pytest.mark.parametrize(
+        "op",
+        [AsmAdd(start_position=1), AsmSubtract(start_position=1), AsmMultiply(start_position=1)],
+    )
+    def test_binary(self, op: AsmBinaryOperator):
+        target = PseudoRegisterReplacer()
+
+        pseudo_src = AsmPseudoRegisterNode(start_position=314, identifier="temp.0")
+        pseudo_dst = AsmPseudoRegisterNode(start_position=315, identifier="temp.1")
+        binary_node = AsmBinaryNode(start_position=100, operator=op, src=pseudo_src, dst=pseudo_dst)
+
+        target.update_instruction(binary_node)
+        assert binary_node.start_position == 100
+        assert binary_node.operator == op
+        assert binary_node.operator.start_position == 1
+        assert binary_node.src == AsmStackNode(start_position=314, offset=-4)
+        assert binary_node.dst == AsmStackNode(start_position=315, offset=-8)
+
+    def test_idiv(self):
+        target = PseudoRegisterReplacer()
+
+        pseudo_src = AsmPseudoRegisterNode(start_position=129, identifier="temp.0")
+        idiv_node = AsmIDivNode(start_position=31, src=pseudo_src)
+
+        target.update_instruction(idiv_node)
+        assert idiv_node.start_position == 31
+        assert idiv_node.src == AsmStackNode(start_position=129, offset=-4)
+
 
 class TestFunctionUpdate:
     def test_simple(self):
@@ -145,6 +184,45 @@ class TestFunctionUpdate:
         assert i2 == AsmMovNode(
             start_position=19,
             source=i1.source,
+            destination=AsmRegisterNode(start_position=19, value="eax"),
+        )
+
+        i3 = asm_func.instructions[3]
+        assert i3 == AsmRetNode(start_position=19)
+
+    def test_simple_add(self):
+        source = "   int main(void) {return 1 + 4;}"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_function(token_tape)
+        tg = TackyGenerator()
+        tacky_func = tg.emit_function(src_node)
+        asm_func = convert_tacky_function(tacky_func)
+
+        target = PseudoRegisterReplacer()
+
+        target.pseudo_replace_function(asm_func)
+        assert len(asm_func.instructions) == 4
+        assert asm_func.stack_size == 4
+
+        i0 = asm_func.instructions[0]
+        assert i0 == AsmMovNode(
+            start_position=28,
+            source=AsmImmediateIntNode(start_position=26, value=1),
+            destination=AsmStackNode(start_position=28, offset=-4),
+        )
+
+        i1 = asm_func.instructions[1]
+        assert i1 == AsmBinaryNode(
+            start_position=28,
+            operator=AsmAdd(start_position=28),
+            src=AsmImmediateIntNode(start_position=30, value=4),
+            dst=i1.dst,
+        )
+
+        i2 = asm_func.instructions[2]
+        assert i2 == AsmMovNode(
+            start_position=19,
+            source=i1.dst,
             destination=AsmRegisterNode(start_position=19, value="eax"),
         )
 
