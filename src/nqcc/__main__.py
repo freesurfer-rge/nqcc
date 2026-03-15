@@ -50,7 +50,13 @@ def parse_args():
     )
 
     preprocessor_group = parser.add_argument_group(title="Preprocessor arguments")
-    preprocessor_group.add_argument("-D", action="append", dest="define_list", default={})
+    preprocessor_group.add_argument(
+        "-D",
+        action="append",
+        dest="define_list",
+        default=[],
+        help="Preprocessor macros (-D NAME or -D NAME=VALUE). Repeat as many -D values as necessary",
+    )
 
     parser.add_argument("--working-dir", type=pathlib.Path, required=False, help=_WORKING_DIR_DESC)
     parser.add_argument("target", type=pathlib.Path, help="Path to target C file")
