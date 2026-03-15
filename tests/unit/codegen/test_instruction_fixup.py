@@ -14,6 +14,7 @@ from nqcc.codegen import (
     AsmRegisterNode,
     AsmStackNode,
     AsmSubtract,
+    AsmMultiply,
     apply_binary_fixup,
     apply_idiv_fixup,
     apply_mov_fixup,
@@ -107,9 +108,37 @@ class TestBinaryFixup:
         fixed = apply_binary_fixup(target)
         assert len(fixed) == 2
         assert fixed[0] == AsmMovNode(
-            start_position=4, source=src, dst=AsmRegisterNode(start_position=4, value="r10d")
+            start_position=4,
+            source=src,
+            destination=AsmRegisterNode(start_position=4, value="r10d"),
         )
-        assert fixed[1] == AsmBinaryNode(start_position=4, operator=op, src=fixed[0].dst, dst=dst)
+        assert fixed[1] == AsmBinaryNode(
+            start_position=4, operator=op, src=fixed[0].destination, dst=dst
+        )
+
+    def test_mul_node(self):
+        src = AsmImmediateIntNode(start_position=1, value=13)
+        dst = AsmStackNode(start_position=2, offset=-8)
+        target = AsmBinaryNode(
+            start_position=4, operator=AsmMultiply(start_position=3), src=src, dst=dst
+        )
+
+        fixed = apply_binary_fixup(target)
+        assert len(fixed) == 3
+        assert fixed[0] == AsmMovNode(
+            start_position=4,
+            source=dst,
+            destination=AsmRegisterNode(start_position=4, value="r11d"),
+        )
+        assert fixed[1] == AsmBinaryNode(
+            start_position=4,
+            operator=AsmMultiply(start_position=3),
+            src=src,
+            dst=fixed[0].destination,
+        )
+        assert fixed[2] == AsmMovNode(
+            start_position=4, source=fixed[0].destination, destination=dst
+        )
 
 
 class TestFunctionFixup:
