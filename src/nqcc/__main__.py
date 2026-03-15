@@ -49,6 +49,9 @@ def parse_args():
         help="Exit after code generation",
     )
 
+    preprocessor_group = parser.add_argument_group(title="Preprocessor arguments")
+    preprocessor_group.add_argument("-D", action="append", dest="define_list", default={})
+
     parser.add_argument("--working-dir", type=pathlib.Path, required=False, help=_WORKING_DIR_DESC)
     parser.add_argument("target", type=pathlib.Path, help="Path to target C file")
 
@@ -68,6 +71,7 @@ def main(
     exit_after_parse: bool,
     exit_after_tacky: bool,
     exit_after_codegen: bool,
+    preprocessor_defines: list[str],
 ):
 
     assert target.exists(), f"Target {target} does not exist!"
@@ -78,7 +82,9 @@ def main(
     working_dir.mkdir()
 
     _logger.info("Running preprocessor")
-    preprocessed_file_path = preprocess_c_file(target, working_dir)
+    preprocessed_file_path = preprocess_c_file(
+        target, working_dir, macro_defines=preprocessor_defines
+    )
 
     _logger.info("Running lexer")
     all_tokens = lexer_driver(preprocessed_file_path)
@@ -121,6 +127,7 @@ def main(
 
 if __name__ == "__main__":
     args = parse_args()
+
     _ = main(
         target=args.target,
         working_dir=args.working_dir,
@@ -128,4 +135,5 @@ if __name__ == "__main__":
         exit_after_parse=args.parse,
         exit_after_tacky=args.tacky,
         exit_after_codegen=args.codegen,
+        preprocessor_defines=args.define_list,
     )
