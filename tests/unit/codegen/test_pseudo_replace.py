@@ -190,6 +190,45 @@ class TestFunctionUpdate:
         i3 = asm_func.instructions[3]
         assert i3 == AsmRetNode(start_position=19)
 
+    def test_simple_add(self):
+        source = "   int main(void) {return 1 + 4;}"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_function(token_tape)
+        tg = TackyGenerator()
+        tacky_func = tg.emit_function(src_node)
+        asm_func = convert_tacky_function(tacky_func)
+
+        target = PseudoRegisterReplacer()
+
+        target.pseudo_replace_function(asm_func)
+        assert len(asm_func.instructions) == 4
+        assert asm_func.stack_size == 4
+
+        i0 = asm_func.instructions[0]
+        assert i0 == AsmMovNode(
+            start_position=28,
+            source=AsmImmediateIntNode(start_position=26, value=1),
+            destination=AsmStackNode(start_position=28, offset=-4),
+        )
+
+        i1 = asm_func.instructions[1]
+        assert i1 == AsmBinaryNode(
+            start_position=28,
+            operator=AsmAdd(start_position=28),
+            src=AsmImmediateIntNode(start_position=30, value=4),
+            dst=i1.dst,
+        )
+
+        i2 = asm_func.instructions[2]
+        assert i2 == AsmMovNode(
+            start_position=19,
+            source=i1.dst,
+            destination=AsmRegisterNode(start_position=19, value="eax"),
+        )
+
+        i3 = asm_func.instructions[3]
+        assert i3 == AsmRetNode(start_position=19)
+
 
 class TestProgramUpdate:
     def test_simple(self):
