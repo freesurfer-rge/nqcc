@@ -143,6 +143,52 @@ class TestInstructions:
             src=AsmPseudoRegisterNode(start_position=13, identifier="right.0"),
             dst=result[0].destination,
         )
+    
+    def test_subtract(self):
+        target = TackyBinaryNode(
+            start_position=22,
+            operator=TackySubtract(start_position=21),
+            left=TackyVarNode(start_position=12, identifier="left.0"),
+            right=TackyVarNode(start_position=13, identifier="right.0"),
+            dst=TackyVarNode(start_position=14, identifier="dst.0"),
+        )
+
+        result = convert_tacky_instruction(target)
+        assert len(result) == 2
+        assert result[0] == AsmMovNode(
+            start_position=22,
+            source=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
+            destination=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
+        )
+        assert result[1] == AsmBinaryNode(
+            start_position=22,
+            operator=AsmSubtract(start_position=21),
+            src=AsmPseudoRegisterNode(start_position=13, identifier="right.0"),
+            dst=result[0].destination,
+        )
+
+    def test_multiply(self):
+        target = TackyBinaryNode(
+            start_position=22,
+            operator=TackyMultiply(start_position=21),
+            left=TackyVarNode(start_position=12, identifier="left.0"),
+            right=TackyVarNode(start_position=13, identifier="right.0"),
+            dst=TackyVarNode(start_position=14, identifier="dst.0"),
+        )
+
+        result = convert_tacky_instruction(target)
+        assert len(result) == 2
+        assert result[0] == AsmMovNode(
+            start_position=22,
+            source=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
+            destination=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
+        )
+        assert result[1] == AsmBinaryNode(
+            start_position=22,
+            operator=AsmMultiply(start_position=21),
+            src=AsmPseudoRegisterNode(start_position=13, identifier="right.0"),
+            dst=result[0].destination,
+        )
 
 
 class TestFunctions:
