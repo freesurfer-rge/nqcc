@@ -30,10 +30,10 @@ class TestAsmSerde:
         fixup_program_instructions(asm_prog)
         self._round_trip(asm_prog)
 
-
     def test_simple(self):
         source = "   int main(void) {return ~(    509);}"
         self._check_from_source(source)
 
     def test_binary_ops(self):
-        source = "  int main( void ) {return ~1 + 3 - 8/4}"
+        source = "  int main( void ) {return ~1 + 3 - 8/4;}"
+        self._check_from_source(source)
