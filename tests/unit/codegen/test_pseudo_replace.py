@@ -1,17 +1,23 @@
 import pytest
 
 from nqcc.codegen import (
+    AsmAdd,
     AsmAllocateStackNode,
+    AsmBinaryNode,
+    AsmBinaryOperator,
     AsmImmediateIntNode,
     AsmInstructionNode,
     AsmMovNode,
+    AsmMultiply,
     AsmNegOperator,
     AsmNotOperator,
+    AsmIDivNode,
     AsmOperandNode,
     AsmPseudoRegisterNode,
     AsmRegisterNode,
     AsmRetNode,
     AsmStackNode,
+    AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
     PseudoRegisterReplacer,
@@ -112,6 +118,34 @@ class TestInstructionUpdate:
         assert unary_node.start_position == 32
         assert unary_node.operator == op
         assert unary_node.source == AsmStackNode(start_position=315, offset=-4)
+
+    @pytest.mark.parametrize(
+        "op",
+        [AsmAdd(start_position=1), AsmSubtract(start_position=1), AsmMultiply(start_position=1)],
+    )
+    def test_binary(self, op: AsmBinaryOperator):
+        target = PseudoRegisterReplacer()
+
+        pseudo_src = AsmPseudoRegisterNode(start_position=314, identifier="temp.0")
+        pseudo_dst = AsmPseudoRegisterNode(start_position=315, identifier="temp.1")
+        binary_node = AsmBinaryNode(start_position=100, operator=op, src=pseudo_src, dst=pseudo_dst)
+
+        target.update_instruction(binary_node)
+        assert binary_node.start_position == 100
+        assert binary_node.operator == op
+        assert binary_node.operator.start_position == 1
+        assert binary_node.src == AsmStackNode(start_position=314, offset=-4)
+        assert binary_node.dst == AsmStackNode(start_position=315, offset=-8)
+
+    def test_idiv(self):
+        target = PseudoRegisterReplacer()
+        
+        pseudo_src = AsmPseudoRegisterNode(start_position=129, identifier="temp.0")
+        idiv_node = AsmIDivNode(start_position=31, src=pseudo_src)
+
+        target.update_instruction(idiv_node)
+        assert idiv_node.start_position == 31
+        assert idiv_node.src == AsmStackNode(start_position=129, offset=-4)
 
 
 class TestFunctionUpdate:
