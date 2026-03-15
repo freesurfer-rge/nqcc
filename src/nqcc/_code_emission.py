@@ -1,13 +1,17 @@
 import pathlib
 
 from nqcc.codegen import (
+    AsmAdd,
     AsmAllocateStackNode,
+    AsmBinaryNode,
     AsmBinaryOperator,
-    AsmAdd, AsmSubtract, AsmMultiply, AsmBinaryNode, AsmCdqNode, AsmIDivNode,
+    AsmCdqNode,
     AsmFunctionNode,
+    AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
     AsmMovNode,
+    AsmMultiply,
     AsmNegOperator,
     AsmNotOperator,
     AsmOperandNode,
@@ -15,6 +19,7 @@ from nqcc.codegen import (
     AsmRegisterNode,
     AsmRetNode,
     AsmStackNode,
+    AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
 )
@@ -48,7 +53,8 @@ def get_unary_opcode(unary_operator: AsmUnaryOperator) -> str:
             return "notl"
         case _:
             raise ValueError(f"Unrecognised: {unary_operator}")
-        
+
+
 def get_binary_opcode(binary_operator: AsmBinaryOperator) -> str:
     match binary_operator:
         case AsmAdd():
