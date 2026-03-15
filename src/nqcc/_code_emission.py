@@ -1,11 +1,17 @@
 import pathlib
 
 from nqcc.codegen import (
+    AsmAdd,
     AsmAllocateStackNode,
+    AsmBinaryNode,
+    AsmBinaryOperator,
+    AsmCdqNode,
     AsmFunctionNode,
+    AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
     AsmMovNode,
+    AsmMultiply,
     AsmNegOperator,
     AsmNotOperator,
     AsmOperandNode,
@@ -13,6 +19,7 @@ from nqcc.codegen import (
     AsmRegisterNode,
     AsmRetNode,
     AsmStackNode,
+    AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
 )
@@ -48,6 +55,18 @@ def get_unary_opcode(unary_operator: AsmUnaryOperator) -> str:
             raise ValueError(f"Unrecognised: {unary_operator}")
 
 
+def get_binary_opcode(binary_operator: AsmBinaryOperator) -> str:
+    match binary_operator:
+        case AsmAdd():
+            return "addl"
+        case AsmSubtract():
+            return "subl"
+        case AsmMultiply():
+            return "imull"
+        case _:
+            raise ValueError(f"Unrecognised: {binary_operator}")
+
+
 def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:
     match instr_node:
         case AsmAllocateStackNode():
@@ -55,16 +74,27 @@ def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:
             src = f"${instr_node.stack_size}"
             dst = r"%rsp"
             return f"{opcode} {src}, {dst} # Allocate stack"
-        case v if isinstance(v, AsmMovNode):
+        case AsmMovNode():
             opcode = "movl".ljust(_OPCODE_FIELD_WIDTH)
             src = get_operand_assembler(instr_node.source)
             dst = get_operand_assembler(instr_node.destination)
             return f"{opcode} {src}, {dst}"
-        case v if isinstance(v, AsmRetNode):
+        case AsmRetNode():
             return "ret"
+        case AsmBinaryNode():
+            opcode = get_binary_opcode(instr_node.operator).ljust(_OPCODE_FIELD_WIDTH)
+            src = get_operand_assembler(instr_node.src)
+            dst = get_operand_assembler(instr_node.dst)
+            return f"{opcode} {src}, {dst}"
         case AsmUnaryNode():
             opcode = get_unary_opcode(instr_node.operator).ljust(_OPCODE_FIELD_WIDTH)
             src = get_operand_assembler(instr_node.source)
+            return f"{opcode} {src}"
+        case AsmCdqNode():
+            return "cdq"
+        case AsmIDivNode():
+            opcode = "idivl".ljust(_OPCODE_FIELD_WIDTH)
+            src = get_operand_assembler(instr_node.src)
             return f"{opcode} {src}"
         case _:
             raise ValueError(f"Unrecognised: {instr_node}")
