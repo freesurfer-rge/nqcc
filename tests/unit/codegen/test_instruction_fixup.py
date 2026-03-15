@@ -100,6 +100,23 @@ class TestIDivFixup:
 
 class TestBinaryFixup:
     @pytest.mark.parametrize("op", [AsmAdd(start_position=3), AsmSubtract(start_position=3)])
+    @pytest.mark.parametrize(
+        "src",
+        [
+            AsmRegisterNode(start_position=2, value="r10d"),
+            AsmImmediateIntNode(start_position=2, value=1312),
+        ],
+    )
+    def test_addsub_unaffected(self, op: AsmBinaryOperator, src: AsmOperandNode):
+        dst = AsmStackNode(start_position=2, offset=-8)
+        target = AsmBinaryNode(start_position=4, operator=op, src=src, dst=dst)
+        orig = target.model_copy(deep=True)
+
+        fixed = apply_binary_fixup(target)
+        assert len(fixed) == 1
+        assert fixed[0] == orig
+
+    @pytest.mark.parametrize("op", [AsmAdd(start_position=3), AsmSubtract(start_position=3)])
     def test_addsub_node(self, op: AsmBinaryOperator):
         src = AsmStackNode(start_position=1, offset=-4)
         dst = AsmStackNode(start_position=2, offset=-8)
@@ -115,6 +132,18 @@ class TestBinaryFixup:
         assert fixed[1] == AsmBinaryNode(
             start_position=4, operator=op, src=fixed[0].destination, dst=dst
         )
+
+    def test_mul_unaffected(self):
+        src = AsmImmediateIntNode(start_position=1, value=13)
+        dst = AsmRegisterNode(start_position=2, value="r11d")
+        target = AsmBinaryNode(
+            start_position=4, operator=AsmMultiply(start_position=3), src=src, dst=dst
+        )
+        orig = target.model_copy(deep=True)
+
+        fixed = apply_binary_fixup(target)
+        assert len(fixed) == 1
+        assert fixed[0] == orig
 
     def test_mul_node(self):
         src = AsmImmediateIntNode(start_position=1, value=13)
