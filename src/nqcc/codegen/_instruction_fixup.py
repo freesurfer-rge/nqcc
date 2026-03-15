@@ -7,11 +7,11 @@ from ._assembler_ast import (
     AsmImmediateIntNode,
     AsmInstructionNode,
     AsmMovNode,
+    AsmMultiply,
     AsmProgramNode,
     AsmRegisterNode,
     AsmStackNode,
     AsmSubtract,
-    AsmMultiply,
 )
 
 
@@ -104,6 +104,9 @@ def fixup_function_instructions(asm_func: AsmFunctionNode):
                 fixed_instructions += nxt_instrs
             case AsmIDivNode():
                 nxt_instrs = apply_idiv_fixup(instr)
+                fixed_instructions += nxt_instrs
+            case AsmBinaryNode():
+                nxt_instrs = apply_binary_fixup(instr)
                 fixed_instructions += nxt_instrs
             case _:
                 fixed_instructions.append(instr)

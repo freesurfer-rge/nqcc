@@ -9,12 +9,12 @@ from nqcc.codegen import (
     AsmIDivNode,
     AsmImmediateIntNode,
     AsmMovNode,
+    AsmMultiply,
     AsmOperandNode,
     AsmProgramNode,
     AsmRegisterNode,
     AsmStackNode,
     AsmSubtract,
-    AsmMultiply,
     apply_binary_fixup,
     apply_idiv_fixup,
     apply_mov_fixup,
@@ -186,6 +186,62 @@ class TestFunctionFixup:
 
         i2 = target.instructions[2]
         assert i2 == AsmIDivNode(start_position=1, src=reg)
+
+    @pytest.mark.parametrize("op", [AsmAdd(start_position=55), AsmSubtract(start_position=66)])
+    def test_addsub(self, op: AsmBinaryOperator):
+        src = AsmStackNode(start_position=2, offset=-4)
+        dst = AsmStackNode(start_position=3, offset=-8)
+        target = AsmFunctionNode(
+            start_position=0,
+            identifier="abc",
+            instructions=[AsmBinaryNode(start_position=1, operator=op, src=src, dst=dst)],
+            stack_size=8,
+        )
+
+        fixup_function_instructions(target)
+
+        assert len(target.instructions) == 3
+        i0 = target.instructions[0]
+        assert i0 == AsmAllocateStackNode(start_position=0, stack_size=8)
+
+        reg = AsmRegisterNode(start_position=1, value="r10d")
+        i1 = target.instructions[1]
+        assert i1 == AsmMovNode(start_position=1, source=src, destination=reg)
+
+        i2 = target.instructions[2]
+        assert i2 == AsmBinaryNode(start_position=1, operator=op, src=reg, dst=dst)
+
+    def test_mul(self):
+        src = AsmImmediateIntNode(start_position=2, value=3145)
+        dst = AsmStackNode(start_position=3, offset=-8)
+        target = AsmFunctionNode(
+            start_position=0,
+            identifier="abc",
+            instructions=[
+                AsmBinaryNode(
+                    start_position=1, operator=AsmMultiply(start_position=5), src=src, dst=dst
+                )
+            ],
+            stack_size=8,
+        )
+
+        fixup_function_instructions(target)
+
+        assert len(target.instructions) == 4
+        i0 = target.instructions[0]
+        assert i0 == AsmAllocateStackNode(start_position=0, stack_size=8)
+
+        reg = AsmRegisterNode(start_position=1, value="r11d")
+        i1 = target.instructions[1]
+        assert i1 == AsmMovNode(start_position=1, source=dst, destination=reg)
+
+        i2 = target.instructions[2]
+        assert i2 == AsmBinaryNode(
+            start_position=1, operator=AsmMultiply(start_position=5), src=src, dst=reg
+        )
+
+        i3 = target.instructions[3]
+        assert i3 == AsmMovNode(start_position=1, source=reg, destination=dst)
 
 
 class TestProgramFixup:
