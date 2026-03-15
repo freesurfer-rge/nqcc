@@ -24,13 +24,13 @@ from ._assembler_ast import (
     AsmUnaryOperator,
 )
 from ._convert_tacky import (
+    convert_tacky_binary_node,
+    convert_tacky_binary_operator,
     convert_tacky_function,
     convert_tacky_instruction,
     convert_tacky_operand,
     convert_tacky_program,
     convert_tacky_unary_operator,
-    convert_tacky_binary_operator,
-    convert_tacky_binary_node,
 )
 from ._driver import codegen_driver
 from ._instruction_fixup import (
@@ -67,6 +67,8 @@ __all__ = [
     "PseudoRegisterReplacer",
     "apply_mov_fixup",
     "codegen_driver",
+    "convert_tacky_binary_node",
+    "convert_tacky_binary_operator",
     "convert_tacky_function",
     "convert_tacky_instruction",
     "convert_tacky_operand",
@@ -74,6 +76,4 @@ __all__ = [
     "convert_tacky_unary_operator",
     "fixup_function_instructions",
     "fixup_program_instructions",
-    "convert_tacky_binary_operator",
-    "convert_tacky_binary_node",
 ]
