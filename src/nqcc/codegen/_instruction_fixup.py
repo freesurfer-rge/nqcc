@@ -1,6 +1,8 @@
 from ._assembler_ast import (
     AsmAllocateStackNode,
     AsmFunctionNode,
+    AsmIDivNode,
+    AsmImmediateIntNode,
     AsmInstructionNode,
     AsmMovNode,
     AsmProgramNode,
@@ -21,6 +23,17 @@ def apply_mov_fixup(instr: AsmMovNode) -> list[AsmInstructionNode]:
         nxt1 = AsmMovNode(
             start_position=instr.start_position, source=reg, destination=instr.destination
         )
+        return [nxt0, nxt1]
+    else:
+        return [instr]
+
+
+def apply_idiv_fixup(instr: AsmIDivNode) -> list[AsmInstructionNode]:
+    if isinstance(instr.src, AsmImmediateIntNode):
+        # Instruction must act on register
+        reg = AsmRegisterNode(start_position=instr.start_position, value="r10d")
+        nxt0 = AsmMovNode(start_position=instr.start_position, source=instr.src, destination=reg)
+        nxt1 = AsmIDivNode(start_position=instr.start_position, src=reg)
         return [nxt0, nxt1]
     else:
         return [instr]

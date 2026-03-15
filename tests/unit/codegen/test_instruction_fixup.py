@@ -3,11 +3,14 @@ import pytest
 from nqcc.codegen import (
     AsmAllocateStackNode,
     AsmFunctionNode,
+    AsmIDivNode,
+    AsmImmediateIntNode,
     AsmMovNode,
     AsmOperandNode,
     AsmProgramNode,
     AsmRegisterNode,
     AsmStackNode,
+    apply_idiv_fixup,
     apply_mov_fixup,
     fixup_function_instructions,
     fixup_program_instructions,
@@ -57,6 +60,36 @@ class TestMovFixup:
             source=fixed[0].destination,
             destination=dst,
         )
+
+
+class TestIDivFixup:
+    @pytest.mark.parametrize(
+        "src",
+        [
+            AsmRegisterNode(start_position=1, value="r10d"),
+            AsmStackNode(start_position=3, offset=-4),
+        ],
+    )
+    def test_unaffected_node(self, src: AsmOperandNode):
+        target = AsmIDivNode(start_position=31, src=src)
+        orig = target.model_copy(deep=True)
+
+        fixed = apply_idiv_fixup(target)
+        assert len(fixed) == 1
+        assert fixed[0] == orig
+
+    def test_immediate_node(self):
+        val = AsmImmediateIntNode(start_position=3, value=45)
+        target = AsmIDivNode(start_position=4, src=val)
+
+        fixed = apply_idiv_fixup(target)
+        assert len(fixed) == 2
+        assert fixed[0] == AsmMovNode(
+            start_position=4,
+            source=val,
+            destination=AsmRegisterNode(start_position=4, value="r10d"),
+        )
+        assert fixed[1] == AsmIDivNode(start_position=4, src=fixed[0].destination)
 
 
 class TestFunctionFixup:
