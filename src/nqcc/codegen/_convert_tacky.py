@@ -141,6 +141,8 @@ def convert_tacky_instruction(tacky_instruction: TackyInstruction) -> list[AsmIn
             i0_unary = AsmMovNode(start_position=sp, source=src_unary, destination=dst_unary)
             i1_unary = AsmUnaryNode(start_position=sp, operator=op_unary, source=dst_unary)
             return [i0_unary, i1_unary]
+        case TackyBinaryNode():
+            return convert_tacky_binary_node(tacky_instruction)
         case _:
             raise ValueError(f"Unrecognised: {tacky_instruction}")
 
