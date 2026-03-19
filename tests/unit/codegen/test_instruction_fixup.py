@@ -129,9 +129,7 @@ class TestBinaryFixup:
             src=src,
             dst=AsmRegisterNode(start_position=4, value="r10d"),
         )
-        assert fixed[1] == AsmBinaryNode(
-            start_position=4, operator=op, src=fixed[0].dst, dst=dst
-        )
+        assert fixed[1] == AsmBinaryNode(start_position=4, operator=op, src=fixed[0].dst, dst=dst)
 
     def test_mul_unaffected(self):
         src = AsmImmediateIntNode(start_position=1, value=13)
@@ -165,9 +163,7 @@ class TestBinaryFixup:
             src=src,
             dst=fixed[0].dst,
         )
-        assert fixed[2] == AsmMovNode(
-            start_position=4, src=fixed[0].dst, dst=dst
-        )
+        assert fixed[2] == AsmMovNode(start_position=4, src=fixed[0].dst, dst=dst)
 
 
 class TestFunctionFixup:

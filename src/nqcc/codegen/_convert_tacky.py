@@ -89,9 +89,7 @@ def convert_tacky_binary_node(tacky_node: TackyBinaryNode) -> list[AsmInstructio
     match tacky_node.operator:
         case TackyAdd() | TackySubtract() | TackyMultiply():
             asm_bin_op = convert_tacky_binary_operator(tacky_node.operator)
-            i0_bin_op = AsmMovNode(
-                start_position=tacky_node.start_position, src=left, dst=dest
-            )
+            i0_bin_op = AsmMovNode(start_position=tacky_node.start_position, src=left, dst=dest)
             i1_bin_op = AsmBinaryNode(
                 start_position=tacky_node.start_position,
                 operator=asm_bin_op,
