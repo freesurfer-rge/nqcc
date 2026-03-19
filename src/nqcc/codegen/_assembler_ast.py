@@ -55,7 +55,7 @@ AsmUnaryOperator = Union[AsmNotOperator, AsmNegOperator]
 class AsmUnaryNode(AsmASTNode):
     node_type: Literal["AsmUnaryNode"] = "AsmUnaryNode"
     operator: AsmUnaryOperator
-    source: AsmOperandNode
+    src: AsmOperandNode
 
 
 class AsmAdd(AsmASTNode):

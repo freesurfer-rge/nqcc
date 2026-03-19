@@ -139,7 +139,7 @@ def convert_tacky_instruction(tacky_instruction: TackyInstruction) -> list[AsmIn
             src_unary = convert_tacky_operand(tacky_instruction.src)
             dst_unary = convert_tacky_operand(tacky_instruction.dst)
             i0_unary = AsmMovNode(start_position=sp, src=src_unary, dst=dst_unary)
-            i1_unary = AsmUnaryNode(start_position=sp, operator=op_unary, source=dst_unary)
+            i1_unary = AsmUnaryNode(start_position=sp, operator=op_unary, src=dst_unary)
             return [i0_unary, i1_unary]
         case TackyBinaryNode():
             return convert_tacky_binary_node(tacky_instruction)

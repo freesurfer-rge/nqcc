@@ -57,7 +57,7 @@ class PseudoRegisterReplacer:
                 asm_instr.src = self.get_updated_operand(asm_instr.src)
                 asm_instr.dst = self.get_updated_operand(asm_instr.dst)
             case AsmUnaryNode():
-                asm_instr.source = self.get_updated_operand(asm_instr.source)
+                asm_instr.src = self.get_updated_operand(asm_instr.src)
             case AsmBinaryNode():
                 asm_instr.src = self.get_updated_operand(asm_instr.src)
                 asm_instr.dst = self.get_updated_operand(asm_instr.dst)

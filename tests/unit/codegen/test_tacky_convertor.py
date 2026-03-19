@@ -118,7 +118,7 @@ class TestInstructions:
         assert result[1] == AsmUnaryNode(
             start_position=123,
             operator=AsmNotOperator(start_position=1234),
-            source=result[0].dst,
+            src=result[0].dst,
         )
 
     def test_add(self):
@@ -267,7 +267,7 @@ class TestFunctions:
 
         i1 = asm_func.instructions[1]
         assert i1 == AsmUnaryNode(
-            start_position=26, operator=AsmNegOperator(start_position=26), source=i0.dst
+            start_position=26, operator=AsmNegOperator(start_position=26), src=i0.dst
         )
 
         i2 = asm_func.instructions[2]
@@ -347,7 +347,7 @@ class TestPrograms:
 
         i1 = asm_func.instructions[1]
         assert i1 == AsmUnaryNode(
-            start_position=26, operator=AsmNotOperator(start_position=26), source=i0.dst
+            start_position=26, operator=AsmNotOperator(start_position=26), src=i0.dst
         )
 
         i2 = asm_func.instructions[2]

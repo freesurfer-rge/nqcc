@@ -117,12 +117,12 @@ class TestInstructionUpdate:
         target = PseudoRegisterReplacer()
 
         pseudo_op0 = AsmPseudoRegisterNode(start_position=315, identifier="temp.0")
-        unary_node = AsmUnaryNode(start_position=32, operator=op, source=pseudo_op0)
+        unary_node = AsmUnaryNode(start_position=32, operator=op, src=pseudo_op0)
 
         target.update_instruction(unary_node)
         assert unary_node.start_position == 32
         assert unary_node.operator == op
-        assert unary_node.source == AsmStackNode(start_position=315, offset=-4)
+        assert unary_node.src == AsmStackNode(start_position=315, offset=-4)
 
     @pytest.mark.parametrize(
         "op",
@@ -177,7 +177,7 @@ class TestFunctionUpdate:
 
         i1 = asm_func.instructions[1]
         assert i1 == AsmUnaryNode(
-            start_position=26, operator=AsmNegOperator(start_position=26), source=i0.dst
+            start_position=26, operator=AsmNegOperator(start_position=26), src=i0.dst
         )
 
         i2 = asm_func.instructions[2]
@@ -254,7 +254,7 @@ class TestProgramUpdate:
 
         i1 = asm_func.instructions[1]
         assert i1 == AsmUnaryNode(
-            start_position=31, operator=AsmNegOperator(start_position=31), source=i0.dst
+            start_position=31, operator=AsmNegOperator(start_position=31), src=i0.dst
         )
 
         i2 = asm_func.instructions[2]
@@ -268,7 +268,7 @@ class TestProgramUpdate:
         assert i3 == AsmUnaryNode(
             start_position=26,
             operator=AsmNotOperator(start_position=26, source=i2.dst),
-            source=i2.dst,
+            src=i2.dst,
         )
 
         i4 = asm_func.instructions[4]

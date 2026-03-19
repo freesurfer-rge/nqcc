@@ -88,7 +88,7 @@ def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:
             return f"{opcode} {src}, {dst}"
         case AsmUnaryNode():
             opcode = get_unary_opcode(instr_node.operator).ljust(_OPCODE_FIELD_WIDTH)
-            src = get_operand_assembler(instr_node.source)
+            src = get_operand_assembler(instr_node.src)
             return f"{opcode} {src}"
         case AsmCdqNode():
             return "cdq"
