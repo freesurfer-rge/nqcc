@@ -2,19 +2,20 @@ from nqcc.parser import (
     SourceAddOperator,
     SourceBinaryExpressionNode,
     SourceBinaryOperator,
-    SourceComplementNode,
+    SourceComplement,
     SourceConstantIntNode,
     SourceDivideOperator,
     SourceExpressionNode,
     SourceFunctionNode,
     SourceModuloOperator,
     SourceMultiplyOperator,
-    SourceNegateNode,
+    SourceNegate,
     SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
     SourceSubtractOperator,
     SourceUnaryExpressionNode,
+    SourceUnaryOperator
 )
 
 from ._tacky_ast import (
@@ -54,11 +55,11 @@ class TackyGenerator:
         assert isinstance(source, SourceConstantIntNode)
         return TackyConstantIntNode(start_position=source.start_position, value=source.value)
 
-    def convert_unary_operator(self, source: SourceUnaryExpressionNode) -> TackyUnaryOperator:
+    def convert_unary_operator(self, source: SourceUnaryOperator) -> TackyUnaryOperator:
         match source:
-            case SourceComplementNode():
+            case SourceComplement():
                 return TackyComplementNode(start_position=source.start_position)
-            case SourceNegateNode():
+            case SourceNegate():
                 return TackyNegateNode(start_position=source.start_position)
             case _:
                 raise ValueError(f"Unrecognised: {source}")

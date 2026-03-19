@@ -89,7 +89,7 @@ class TestSourceExpressionNode:
         assert node.start_position == 1
         inner_exp = node.expression
         assert isinstance(inner_exp, SourceUnaryExpressionNode)
-        assert node.operator == SourceComplement(start_position=4)
+        assert inner_exp.operator == SourceComplement(start_position=4)
         assert inner_exp.start_position == 4
         assert inner_exp.expression == SourceConstantIntNode(start_position=5, value=12)
 
@@ -186,8 +186,8 @@ class TestSourceExpressionNode:
         r_exp = node.right
         assert isinstance(r_exp, SourceBinaryExpressionNode)
         assert r_exp.operator == SourceMultiplyOperator(start_position=7)
-        assert r_exp.left == SourceNegateNode(
-            start_position=4, expression=SourceConstantIntNode(start_position=5, value=2)
+        assert r_exp.left == SourceUnaryExpressionNode(
+            start_position=4, operator=SourceNegate(start_position=4), expression=SourceConstantIntNode(start_position=5, value=2)
         )
         assert r_exp.right == SourceConstantIntNode(start_position=9, value=3)
 
