@@ -76,8 +76,8 @@ def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:
             return f"{opcode} {src}, {dst} # Allocate stack"
         case AsmMovNode():
             opcode = "movl".ljust(_OPCODE_FIELD_WIDTH)
-            src = get_operand_assembler(instr_node.source)
-            dst = get_operand_assembler(instr_node.destination)
+            src = get_operand_assembler(instr_node.src)
+            dst = get_operand_assembler(instr_node.dst)
             return f"{opcode} {src}, {dst}"
         case AsmRetNode():
             return "ret"

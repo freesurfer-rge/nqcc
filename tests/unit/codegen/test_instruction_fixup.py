@@ -42,7 +42,7 @@ class TestMovFixup:
         ],
     )
     def test_unaffected_node(self, src: AsmOperandNode, dst: AsmOperandNode):
-        target = AsmMovNode(start_position=0, source=src, destination=dst)
+        target = AsmMovNode(start_position=0, src=src, dst=dst)
         orig = target.model_copy(deep=True)
 
         fixed = apply_mov_fixup(target)
@@ -52,19 +52,19 @@ class TestMovFixup:
     def test_stack_stack_node(self):
         src = AsmStackNode(start_position=1, offset=-4)
         dst = AsmStackNode(start_position=2, offset=-8)
-        target = AsmMovNode(start_position=0, source=src, destination=dst)
+        target = AsmMovNode(start_position=0, src=src, dst=dst)
 
         fixed = apply_mov_fixup(target)
         assert len(fixed) == 2
         assert fixed[0] == AsmMovNode(
             start_position=0,
-            source=src,
-            destination=AsmRegisterNode(start_position=0, value="r10d"),
+            src=src,
+            dst=AsmRegisterNode(start_position=0, value="r10d"),
         )
         assert fixed[1] == AsmMovNode(
             start_position=0,
-            source=fixed[0].destination,
-            destination=dst,
+            src=fixed[0].dst,
+            dst=dst,
         )
 
 
@@ -92,10 +92,10 @@ class TestIDivFixup:
         assert len(fixed) == 2
         assert fixed[0] == AsmMovNode(
             start_position=4,
-            source=val,
-            destination=AsmRegisterNode(start_position=4, value="r10d"),
+            src=val,
+            dst=AsmRegisterNode(start_position=4, value="r10d"),
         )
-        assert fixed[1] == AsmIDivNode(start_position=4, src=fixed[0].destination)
+        assert fixed[1] == AsmIDivNode(start_position=4, src=fixed[0].dst)
 
 
 class TestBinaryFixup:
@@ -126,11 +126,11 @@ class TestBinaryFixup:
         assert len(fixed) == 2
         assert fixed[0] == AsmMovNode(
             start_position=4,
-            source=src,
-            destination=AsmRegisterNode(start_position=4, value="r10d"),
+            src=src,
+            dst=AsmRegisterNode(start_position=4, value="r10d"),
         )
         assert fixed[1] == AsmBinaryNode(
-            start_position=4, operator=op, src=fixed[0].destination, dst=dst
+            start_position=4, operator=op, src=fixed[0].dst, dst=dst
         )
 
     def test_mul_unaffected(self):
@@ -156,17 +156,17 @@ class TestBinaryFixup:
         assert len(fixed) == 3
         assert fixed[0] == AsmMovNode(
             start_position=4,
-            source=dst,
-            destination=AsmRegisterNode(start_position=4, value="r11d"),
+            src=dst,
+            dst=AsmRegisterNode(start_position=4, value="r11d"),
         )
         assert fixed[1] == AsmBinaryNode(
             start_position=4,
             operator=AsmMultiply(start_position=3),
             src=src,
-            dst=fixed[0].destination,
+            dst=fixed[0].dst,
         )
         assert fixed[2] == AsmMovNode(
-            start_position=4, source=fixed[0].destination, destination=dst
+            start_position=4, src=fixed[0].dst, dst=dst
         )
 
 
@@ -177,7 +177,7 @@ class TestFunctionFixup:
         target = AsmFunctionNode(
             start_position=0,
             identifier="abc",
-            instructions=[AsmMovNode(start_position=1, source=src, destination=dst)],
+            instructions=[AsmMovNode(start_position=1, src=src, dst=dst)],
             stack_size=8,
         )
 
@@ -189,10 +189,10 @@ class TestFunctionFixup:
 
         reg = AsmRegisterNode(start_position=1, value="r10d")
         i1 = target.instructions[1]
-        assert i1 == AsmMovNode(start_position=1, source=src, destination=reg)
+        assert i1 == AsmMovNode(start_position=1, src=src, dst=reg)
 
         i2 = target.instructions[2]
-        assert i2 == AsmMovNode(start_position=1, source=reg, destination=dst)
+        assert i2 == AsmMovNode(start_position=1, src=reg, dst=dst)
 
     def test_idiv(self):
         src = AsmImmediateIntNode(start_position=2, value=6)
@@ -211,7 +211,7 @@ class TestFunctionFixup:
 
         reg = AsmRegisterNode(start_position=1, value="r10d")
         i1 = target.instructions[1]
-        assert i1 == AsmMovNode(start_position=1, source=src, destination=reg)
+        assert i1 == AsmMovNode(start_position=1, src=src, dst=reg)
 
         i2 = target.instructions[2]
         assert i2 == AsmIDivNode(start_position=1, src=reg)
@@ -235,7 +235,7 @@ class TestFunctionFixup:
 
         reg = AsmRegisterNode(start_position=1, value="r10d")
         i1 = target.instructions[1]
-        assert i1 == AsmMovNode(start_position=1, source=src, destination=reg)
+        assert i1 == AsmMovNode(start_position=1, src=src, dst=reg)
 
         i2 = target.instructions[2]
         assert i2 == AsmBinaryNode(start_position=1, operator=op, src=reg, dst=dst)
@@ -262,7 +262,7 @@ class TestFunctionFixup:
 
         reg = AsmRegisterNode(start_position=1, value="r11d")
         i1 = target.instructions[1]
-        assert i1 == AsmMovNode(start_position=1, source=dst, destination=reg)
+        assert i1 == AsmMovNode(start_position=1, src=dst, dst=reg)
 
         i2 = target.instructions[2]
         assert i2 == AsmBinaryNode(
@@ -270,7 +270,7 @@ class TestFunctionFixup:
         )
 
         i3 = target.instructions[3]
-        assert i3 == AsmMovNode(start_position=1, source=reg, destination=dst)
+        assert i3 == AsmMovNode(start_position=1, src=reg, dst=dst)
 
 
 class TestProgramFixup:
@@ -280,7 +280,7 @@ class TestProgramFixup:
         func = AsmFunctionNode(
             start_position=0,
             identifier="abc",
-            instructions=[AsmMovNode(start_position=1, source=src, destination=dst)],
+            instructions=[AsmMovNode(start_position=1, src=src, dst=dst)],
             stack_size=8,
         )
 

@@ -33,8 +33,8 @@ AsmOperandNode = Union[AsmImmediateIntNode, AsmRegisterNode, AsmPseudoRegisterNo
 
 class AsmMovNode(AsmASTNode):
     node_type: Literal["AsmMovNode"] = "AsmMovNode"
-    source: AsmOperandNode
-    destination: AsmOperandNode
+    src: AsmOperandNode
+    dst: AsmOperandNode
 
 
 class AsmRetNode(AsmASTNode):

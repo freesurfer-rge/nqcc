@@ -103,12 +103,12 @@ class TestInstructionUpdate:
         pseudo_op0 = AsmPseudoRegisterNode(start_position=312, identifier="temp.0")
         pseudo_op1 = AsmPseudoRegisterNode(start_position=313, identifier="temp.1")
 
-        mov_node = AsmMovNode(start_position=31, source=pseudo_op0, destination=pseudo_op1)
+        mov_node = AsmMovNode(start_position=31, src=pseudo_op0, dst=pseudo_op1)
 
         target.update_instruction(mov_node)
         assert mov_node.start_position == 31
-        assert mov_node.source == AsmStackNode(start_position=312, offset=-4)
-        assert mov_node.destination == AsmStackNode(start_position=313, offset=-8)
+        assert mov_node.src == AsmStackNode(start_position=312, offset=-4)
+        assert mov_node.dst == AsmStackNode(start_position=313, offset=-8)
 
     @pytest.mark.parametrize(
         "op", [AsmNotOperator(start_position=13), AsmNegOperator(start_position=14)]
@@ -171,20 +171,20 @@ class TestFunctionUpdate:
         i0 = asm_func.instructions[0]
         assert i0 == AsmMovNode(
             start_position=26,
-            source=AsmImmediateIntNode(start_position=31, value=508),
-            destination=AsmStackNode(start_position=26, offset=-4),
+            src=AsmImmediateIntNode(start_position=31, value=508),
+            dst=AsmStackNode(start_position=26, offset=-4),
         )
 
         i1 = asm_func.instructions[1]
         assert i1 == AsmUnaryNode(
-            start_position=26, operator=AsmNegOperator(start_position=26), source=i0.destination
+            start_position=26, operator=AsmNegOperator(start_position=26), source=i0.dst
         )
 
         i2 = asm_func.instructions[2]
         assert i2 == AsmMovNode(
             start_position=19,
-            source=i1.source,
-            destination=AsmRegisterNode(start_position=19, value="eax"),
+            src=i1.src,
+            dst=AsmRegisterNode(start_position=19, value="eax"),
         )
 
         i3 = asm_func.instructions[3]
@@ -207,8 +207,8 @@ class TestFunctionUpdate:
         i0 = asm_func.instructions[0]
         assert i0 == AsmMovNode(
             start_position=28,
-            source=AsmImmediateIntNode(start_position=26, value=1),
-            destination=AsmStackNode(start_position=28, offset=-4),
+            src=AsmImmediateIntNode(start_position=26, value=1),
+            dst=AsmStackNode(start_position=28, offset=-4),
         )
 
         i1 = asm_func.instructions[1]
@@ -222,8 +222,8 @@ class TestFunctionUpdate:
         i2 = asm_func.instructions[2]
         assert i2 == AsmMovNode(
             start_position=19,
-            source=i1.dst,
-            destination=AsmRegisterNode(start_position=19, value="eax"),
+            src=i1.dst,
+            dst=AsmRegisterNode(start_position=19, value="eax"),
         )
 
         i3 = asm_func.instructions[3]
@@ -248,34 +248,34 @@ class TestProgramUpdate:
         i0 = asm_func.instructions[0]
         assert i0 == AsmMovNode(
             start_position=31,
-            source=AsmImmediateIntNode(start_position=32, value=509),
-            destination=AsmStackNode(start_position=31, offset=-4),
+            src=AsmImmediateIntNode(start_position=32, value=509),
+            dst=AsmStackNode(start_position=31, offset=-4),
         )
 
         i1 = asm_func.instructions[1]
         assert i1 == AsmUnaryNode(
-            start_position=31, operator=AsmNegOperator(start_position=31), source=i0.destination
+            start_position=31, operator=AsmNegOperator(start_position=31), source=i0.dst
         )
 
         i2 = asm_func.instructions[2]
         assert i2 == AsmMovNode(
             start_position=26,
-            source=i1.source,
-            destination=AsmStackNode(start_position=26, offset=-8),
+            src=i1.src,
+            dst=AsmStackNode(start_position=26, offset=-8),
         )
 
         i3 = asm_func.instructions[3]
         assert i3 == AsmUnaryNode(
             start_position=26,
-            operator=AsmNotOperator(start_position=26, source=i2.destination),
-            source=i2.destination,
+            operator=AsmNotOperator(start_position=26, source=i2.dst),
+            source=i2.dst,
         )
 
         i4 = asm_func.instructions[4]
         assert i4 == AsmMovNode(
             start_position=19,
-            source=i3.source,
-            destination=AsmRegisterNode(start_position=19, value="eax"),
+            src=i3.src,
+            dst=AsmRegisterNode(start_position=19, value="eax"),
         )
 
         i5 = asm_func.instructions[5]
