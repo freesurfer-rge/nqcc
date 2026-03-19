@@ -17,7 +17,7 @@ from nqcc.parser import (
     SourceReturnNode,
     SourceStatementNode,
     SourceSubtractOperator,
-    SourceUnaryExpressionNode, SourceUnaryOperator,
+    SourceUnaryExpressionNode,
     TokenTape,
     parse_expression,
     parse_function,
@@ -187,7 +187,9 @@ class TestSourceExpressionNode:
         assert isinstance(r_exp, SourceBinaryExpressionNode)
         assert r_exp.operator == SourceMultiplyOperator(start_position=7)
         assert r_exp.left == SourceUnaryExpressionNode(
-            start_position=4, operator=SourceNegate(start_position=4), expression=SourceConstantIntNode(start_position=5, value=2)
+            start_position=4,
+            operator=SourceNegate(start_position=4),
+            expression=SourceConstantIntNode(start_position=5, value=2),
         )
         assert r_exp.right == SourceConstantIntNode(start_position=9, value=3)
 

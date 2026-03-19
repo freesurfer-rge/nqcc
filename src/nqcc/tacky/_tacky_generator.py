@@ -15,7 +15,7 @@ from nqcc.parser import (
     SourceStatementNode,
     SourceSubtractOperator,
     SourceUnaryExpressionNode,
-    SourceUnaryOperator
+    SourceUnaryOperator,
 )
 
 from ._tacky_ast import (
