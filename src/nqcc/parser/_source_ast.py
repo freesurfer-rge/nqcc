@@ -13,19 +13,21 @@ class SourceConstantIntNode(SourceASTNode):
     value: int
 
 
-class SourceUnaryExpressionNode(SourceASTNode):
-    expression: SourceExpressionNode
-
-
-class SourceComplementNode(SourceUnaryExpressionNode):
+class SourceComplement(SourceASTNode):
     node_type: Literal["SourceComplementNode"] = "SourceComplementNode"
 
 
-class SourceNegateNode(SourceUnaryExpressionNode):
+class SourceNegate(SourceASTNode):
     node_type: Literal["SourceNegateNode"] = "SourceNegateNode"
 
 
-SourceUnaryNode = Union[SourceComplementNode, SourceNegateNode]
+SourceUnaryOperator = Union[SourceComplement, SourceNegate]
+
+
+class SourceUnaryExpressionNode(SourceASTNode):
+    node_type: Literal["SourceUnaryExpressionNode"] = "SourceUnaryExpressionNode"
+    operator: SourceUnaryOperator
+    expression: SourceExpressionNode
 
 
 class SourceBinOp(SourceASTNode):
