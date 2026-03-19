@@ -89,7 +89,7 @@ class TackyGenerator:
                     start_position=source_node.start_position,
                     identifier=self.get_function_temporary(),
                 )
-                tacky_operator = self.convert_unary_operator(source_node)
+                tacky_operator = self.convert_unary_operator(source_node.operator)
                 instr = TackyUnaryNode(
                     start_position=source_node.start_position,
                     operator=tacky_operator,
