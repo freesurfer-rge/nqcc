@@ -75,7 +75,7 @@ class SourceBinaryExpressionNode(SourceASTNode):
     right: SourceExpressionNode
 
 
-SourceExpressionNode = Union[SourceConstantIntNode, SourceUnaryNode, SourceBinaryExpressionNode]
+SourceExpressionNode = Union[SourceConstantIntNode, SourceUnaryExpressionNode, SourceBinaryExpressionNode]
 
 
 class SourceReturnNode(SourceASTNode):
