@@ -25,40 +25,42 @@ from ._source_ast import (
     SourceAddOperator,
     SourceBinaryExpressionNode,
     SourceBinaryOperator,
-    SourceComplementNode,
+    SourceComplement,
     SourceConstantIntNode,
     SourceDivideOperator,
     SourceExpressionNode,
     SourceFunctionNode,
     SourceModuloOperator,
     SourceMultiplyOperator,
-    SourceNegateNode,
+    SourceNegate,
     SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
     SourceSubtractOperator,
-    SourceUnaryNode,
+    SourceUnaryExpressionNode,
+    SourceUnaryOperator,
 )
 from ._token_tape import TokenTape
 
 
-def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryNode:
+def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryExpressionNode:
     op_token = token_tape.expect(get_args(UnaryOperatorToken))
 
-    result: SourceUnaryNode
+    op: SourceUnaryOperator
     match op_token:
         case TildeToken():
-            inner_exp = parse_factor(token_tape)
-            result = SourceComplementNode(
-                start_position=op_token.start_position, expression=inner_exp
-            )
+            op = SourceComplement(start_position=op_token.start_position)
 
         case NegationToken():
-            inner_exp = parse_factor(token_tape)
-            result = SourceNegateNode(start_position=op_token.start_position, expression=inner_exp)
+            op = SourceNegate(start_position=op_token.start_position)
 
         case _:
             raise ValueError(f"Could not match type of {op_token}")
+
+    inner_exp = parse_factor(token_tape)
+    result = SourceUnaryExpressionNode(
+        start_position=op_token.start_position, operator=op, expression=inner_exp
+    )
 
     return result
 
