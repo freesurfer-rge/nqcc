@@ -7,8 +7,8 @@ from nqcc.codegen import (
     AsmImmediateIntNode,
     AsmMovNode,
     AsmMultiply,
-    AsmNegOperator,
-    AsmNotOperator,
+    AsmNeg,
+    AsmNot,
     AsmProgramNode,
     AsmPseudoRegisterNode,
     AsmRegisterNode,
@@ -26,13 +26,13 @@ from nqcc.parser import TokenTape, parse_function, parse_program
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
-    TackyComplementNode,
+    TackyComplement,
     TackyConstantIntNode,
     TackyDivide,
     TackyGenerator,
     TackyModulo,
     TackyMultiply,
-    TackyNegateNode,
+    TackyNegate,
     TackyReturnNode,
     TackySubtract,
     TackyUnaryNode,
@@ -58,15 +58,15 @@ class TestConvertOperands:
 
 class TestUnaryOperators:
     def test_negate(self):
-        target = TackyNegateNode(start_position=462)
+        target = TackyNegate(start_position=462)
         result = convert_tacky_unary_operator(target)
-        assert isinstance(result, AsmNegOperator)
+        assert isinstance(result, AsmNeg)
         assert result.start_position == target.start_position
 
     def test_complement(self):
-        target = TackyComplementNode(start_position=4251)
+        target = TackyComplement(start_position=4251)
         result = convert_tacky_unary_operator(target)
-        assert isinstance(result, AsmNotOperator)
+        assert isinstance(result, AsmNot)
         assert result.start_position == target.start_position
 
 
@@ -96,15 +96,15 @@ class TestInstructions:
         assert len(result) == 2
         assert result[0] == AsmMovNode(
             start_position=345,
-            source=AsmImmediateIntNode(start_position=465, value=10),
-            destination=AsmRegisterNode(start_position=345, value="eax"),
+            src=AsmImmediateIntNode(start_position=465, value=10),
+            dst=AsmRegisterNode(start_position=345, value="eax"),
         )
         assert result[1] == AsmRetNode(start_position=345)
 
     def test_unary(self):
         target = TackyUnaryNode(
             start_position=123,
-            operator=TackyComplementNode(start_position=1234),
+            operator=TackyComplement(start_position=1234),
             src=TackyVarNode(start_position=12345, identifier="tmp.0"),
             dst=TackyVarNode(start_position=123456, identifier="tmp.1"),
         )
@@ -112,13 +112,13 @@ class TestInstructions:
         assert len(result) == 2
         assert result[0] == AsmMovNode(
             start_position=123,
-            source=AsmPseudoRegisterNode(start_position=12345, identifier="tmp.0"),
-            destination=AsmPseudoRegisterNode(start_position=123456, identifier="tmp.1"),
+            src=AsmPseudoRegisterNode(start_position=12345, identifier="tmp.0"),
+            dst=AsmPseudoRegisterNode(start_position=123456, identifier="tmp.1"),
         )
         assert result[1] == AsmUnaryNode(
             start_position=123,
-            operator=AsmNotOperator(start_position=1234),
-            source=result[0].destination,
+            operator=AsmNot(start_position=1234),
+            src=result[0].dst,
         )
 
     def test_add(self):
@@ -134,14 +134,14 @@ class TestInstructions:
         assert len(result) == 2
         assert result[0] == AsmMovNode(
             start_position=22,
-            source=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
-            destination=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
+            src=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
+            dst=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
         )
         assert result[1] == AsmBinaryNode(
             start_position=22,
             operator=AsmAdd(start_position=21),
             src=AsmPseudoRegisterNode(start_position=13, identifier="right.0"),
-            dst=result[0].destination,
+            dst=result[0].dst,
         )
 
     def test_subtract(self):
@@ -157,14 +157,14 @@ class TestInstructions:
         assert len(result) == 2
         assert result[0] == AsmMovNode(
             start_position=22,
-            source=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
-            destination=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
+            src=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
+            dst=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
         )
         assert result[1] == AsmBinaryNode(
             start_position=22,
             operator=AsmSubtract(start_position=21),
             src=AsmPseudoRegisterNode(start_position=13, identifier="right.0"),
-            dst=result[0].destination,
+            dst=result[0].dst,
         )
 
     def test_multiply(self):
@@ -180,14 +180,14 @@ class TestInstructions:
         assert len(result) == 2
         assert result[0] == AsmMovNode(
             start_position=22,
-            source=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
-            destination=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
+            src=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
+            dst=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
         )
         assert result[1] == AsmBinaryNode(
             start_position=22,
             operator=AsmMultiply(start_position=21),
             src=AsmPseudoRegisterNode(start_position=13, identifier="right.0"),
-            dst=result[0].destination,
+            dst=result[0].dst,
         )
 
     def test_divide(self):
@@ -203,8 +203,8 @@ class TestInstructions:
         assert len(result) == 4
         assert result[0] == AsmMovNode(
             start_position=22,
-            source=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
-            destination=AsmRegisterNode(start_position=22, value="eax"),
+            src=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
+            dst=AsmRegisterNode(start_position=22, value="eax"),
         )
         assert result[1] == AsmCdqNode(start_position=22)
         assert result[2] == AsmIDivNode(
@@ -212,8 +212,8 @@ class TestInstructions:
         )
         assert result[3] == AsmMovNode(
             start_position=22,
-            source=AsmRegisterNode(start_position=22, value="eax"),
-            destination=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
+            src=AsmRegisterNode(start_position=22, value="eax"),
+            dst=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
         )
 
     def test_modulo(self):
@@ -229,8 +229,8 @@ class TestInstructions:
         assert len(result) == 4
         assert result[0] == AsmMovNode(
             start_position=22,
-            source=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
-            destination=AsmRegisterNode(start_position=22, value="eax"),
+            src=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
+            dst=AsmRegisterNode(start_position=22, value="eax"),
         )
         assert result[1] == AsmCdqNode(start_position=22)
         assert result[2] == AsmIDivNode(
@@ -238,8 +238,8 @@ class TestInstructions:
         )
         assert result[3] == AsmMovNode(
             start_position=22,
-            source=AsmRegisterNode(start_position=22, value="edx"),
-            destination=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
+            src=AsmRegisterNode(start_position=22, value="edx"),
+            dst=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
         )
 
 
@@ -261,20 +261,18 @@ class TestFunctions:
         i0 = asm_func.instructions[0]
         assert i0 == AsmMovNode(
             start_position=26,
-            source=AsmImmediateIntNode(start_position=31, value=508),
-            destination=AsmPseudoRegisterNode(start_position=26, identifier="tmp.main.0"),
+            src=AsmImmediateIntNode(start_position=31, value=508),
+            dst=AsmPseudoRegisterNode(start_position=26, identifier="tmp.main.0"),
         )
 
         i1 = asm_func.instructions[1]
-        assert i1 == AsmUnaryNode(
-            start_position=26, operator=AsmNegOperator(start_position=26), source=i0.destination
-        )
+        assert i1 == AsmUnaryNode(start_position=26, operator=AsmNeg(start_position=26), src=i0.dst)
 
         i2 = asm_func.instructions[2]
         assert i2 == AsmMovNode(
             start_position=19,
-            source=i1.source,
-            destination=AsmRegisterNode(start_position=19, value="eax"),
+            src=i1.src,
+            dst=AsmRegisterNode(start_position=19, value="eax"),
         )
 
         i3 = asm_func.instructions[3]
@@ -297,8 +295,8 @@ class TestFunctions:
         i0 = asm_func.instructions[0]
         assert i0 == AsmMovNode(
             start_position=28,
-            source=AsmImmediateIntNode(start_position=26, value=1),
-            destination=AsmPseudoRegisterNode(start_position=28, identifier="tmp.main.0"),
+            src=AsmImmediateIntNode(start_position=26, value=1),
+            dst=AsmPseudoRegisterNode(start_position=28, identifier="tmp.main.0"),
         )
 
         i1 = asm_func.instructions[1]
@@ -312,8 +310,8 @@ class TestFunctions:
         i2 = asm_func.instructions[2]
         assert i2 == AsmMovNode(
             start_position=19,
-            source=i1.dst,
-            destination=AsmRegisterNode(start_position=19, value="eax"),
+            src=i1.dst,
+            dst=AsmRegisterNode(start_position=19, value="eax"),
         )
 
         i3 = asm_func.instructions[3]
@@ -341,20 +339,18 @@ class TestPrograms:
         i0 = asm_func.instructions[0]
         assert i0 == AsmMovNode(
             start_position=26,
-            source=AsmImmediateIntNode(start_position=32, value=509),
-            destination=AsmPseudoRegisterNode(start_position=26, identifier="tmp.main.0"),
+            src=AsmImmediateIntNode(start_position=32, value=509),
+            dst=AsmPseudoRegisterNode(start_position=26, identifier="tmp.main.0"),
         )
 
         i1 = asm_func.instructions[1]
-        assert i1 == AsmUnaryNode(
-            start_position=26, operator=AsmNotOperator(start_position=26), source=i0.destination
-        )
+        assert i1 == AsmUnaryNode(start_position=26, operator=AsmNot(start_position=26), src=i0.dst)
 
         i2 = asm_func.instructions[2]
         assert i2 == AsmMovNode(
             start_position=19,
-            source=i1.source,
-            destination=AsmRegisterNode(start_position=19, value="eax"),
+            src=i1.src,
+            dst=AsmRegisterNode(start_position=19, value="eax"),
         )
 
         i3 = asm_func.instructions[3]

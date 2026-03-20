@@ -22,21 +22,21 @@ from nqcc.lexer import (
 
 from ._exceptions import SourceASTBadValueError
 from ._source_ast import (
-    SourceAddOperator,
+    SourceAdd,
     SourceBinaryExpressionNode,
     SourceBinaryOperator,
     SourceComplement,
     SourceConstantIntNode,
-    SourceDivideOperator,
+    SourceDivide,
     SourceExpressionNode,
     SourceFunctionNode,
-    SourceModuloOperator,
-    SourceMultiplyOperator,
+    SourceModulo,
+    SourceMultiply,
     SourceNegate,
     SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
-    SourceSubtractOperator,
+    SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
 )
@@ -68,15 +68,15 @@ def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryExpressionNode:
 def convert_binary_operator(lexer_token: Token) -> SourceBinaryOperator | None:
     match lexer_token:
         case AdditionToken():
-            return SourceAddOperator(start_position=lexer_token.start_position)
+            return SourceAdd(start_position=lexer_token.start_position)
         case NegationToken():
-            return SourceSubtractOperator(start_position=lexer_token.start_position)
+            return SourceSubtract(start_position=lexer_token.start_position)
         case MultiplyToken():
-            return SourceMultiplyOperator(start_position=lexer_token.start_position)
+            return SourceMultiply(start_position=lexer_token.start_position)
         case DivideToken():
-            return SourceDivideOperator(start_position=lexer_token.start_position)
+            return SourceDivide(start_position=lexer_token.start_position)
         case ModuloToken():
-            return SourceModuloOperator(start_position=lexer_token.start_position)
+            return SourceModulo(start_position=lexer_token.start_position)
         case _:
             # Nothing to do
             return None

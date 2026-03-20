@@ -16,17 +16,15 @@ from ._assembler_ast import (
 
 
 def apply_mov_fixup(instr: AsmMovNode) -> list[AsmInstructionNode]:
-    if isinstance(instr.source, AsmStackNode) and isinstance(instr.destination, AsmStackNode):
+    if isinstance(instr.src, AsmStackNode) and isinstance(instr.dst, AsmStackNode):
         # Can't move from stack to stack; use r10d
         reg = AsmRegisterNode(start_position=instr.start_position, value="r10d")
         nxt0 = AsmMovNode(
             start_position=instr.start_position,
-            source=instr.source,
-            destination=reg,
+            src=instr.src,
+            dst=reg,
         )
-        nxt1 = AsmMovNode(
-            start_position=instr.start_position, source=reg, destination=instr.destination
-        )
+        nxt1 = AsmMovNode(start_position=instr.start_position, src=reg, dst=instr.dst)
         return [nxt0, nxt1]
     else:
         return [instr]
@@ -36,7 +34,7 @@ def apply_idiv_fixup(instr: AsmIDivNode) -> list[AsmInstructionNode]:
     if isinstance(instr.src, AsmImmediateIntNode):
         # Instruction must act on register
         reg = AsmRegisterNode(start_position=instr.start_position, value="r10d")
-        nxt0 = AsmMovNode(start_position=instr.start_position, source=instr.src, destination=reg)
+        nxt0 = AsmMovNode(start_position=instr.start_position, src=instr.src, dst=reg)
         nxt1 = AsmIDivNode(start_position=instr.start_position, src=reg)
         return [nxt0, nxt1]
     else:
@@ -49,13 +47,11 @@ def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
             if isinstance(instr.src, AsmStackNode):
                 # src cannot be on the stack
                 reg = AsmRegisterNode(start_position=instr.start_position, value="r10d")
-                nxt0 = AsmMovNode(
-                    start_position=instr.start_position, source=instr.src, destination=reg
-                )
+                nxt0 = AsmMovNode(start_position=instr.start_position, src=instr.src, dst=reg)
                 nxt1 = AsmBinaryNode(
                     start_position=instr.start_position,
                     operator=instr.operator,
-                    src=nxt0.destination,
+                    src=nxt0.dst,
                     dst=instr.dst,
                 )
                 return [nxt0, nxt1]
@@ -65,18 +61,14 @@ def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
             if isinstance(instr.dst, AsmStackNode):
                 # This is a dst fixup (dst cannot be on stack), so use r11d
                 reg = AsmRegisterNode(start_position=instr.start_position, value="r11d")
-                nxt0 = AsmMovNode(
-                    start_position=instr.start_position, source=instr.dst, destination=reg
-                )
+                nxt0 = AsmMovNode(start_position=instr.start_position, src=instr.dst, dst=reg)
                 nxt1 = AsmBinaryNode(
                     start_position=instr.start_position,
                     operator=instr.operator,
                     src=instr.src,
                     dst=reg,
                 )
-                nxt2 = AsmMovNode(
-                    start_position=instr.start_position, source=reg, destination=instr.dst
-                )
+                nxt2 = AsmMovNode(start_position=instr.start_position, src=reg, dst=instr.dst)
                 return [nxt0, nxt1, nxt2]
             else:
                 return [instr]

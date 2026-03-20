@@ -2,21 +2,21 @@ import pytest
 
 from nqcc.lexer import CloseParenToken, ConstantIntegerToken, KeywordToken, SemicolonToken
 from nqcc.parser import (
-    SourceAddOperator,
+    SourceAdd,
     SourceASTBadTypeError,
     SourceASTBadValueError,
     SourceBinaryExpressionNode,
     SourceComplement,
     SourceConstantIntNode,
-    SourceDivideOperator,
+    SourceDivide,
     SourceFunctionNode,
-    SourceModuloOperator,
-    SourceMultiplyOperator,
+    SourceModulo,
+    SourceMultiply,
     SourceNegate,
     SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
-    SourceSubtractOperator,
+    SourceSubtract,
     SourceUnaryExpressionNode,
     TokenTape,
     parse_expression,
@@ -26,11 +26,11 @@ from nqcc.parser import (
 )
 
 _BINARY_EXPRESSION_MAP = {
-    "+": SourceAddOperator,
-    "-": SourceSubtractOperator,
-    "*": SourceMultiplyOperator,
-    "/": SourceDivideOperator,
-    "%": SourceModuloOperator,
+    "+": SourceAdd,
+    "-": SourceSubtract,
+    "*": SourceMultiply,
+    "/": SourceDivide,
+    "%": SourceModulo,
 }
 
 
@@ -119,13 +119,13 @@ class TestSourceExpressionNode:
 
         node = parse_expression(token_tape, min_precedence=0)
         assert isinstance(node, SourceBinaryExpressionNode)
-        assert node.operator == SourceAddOperator(start_position=2)
+        assert node.operator == SourceAdd(start_position=2)
 
         assert node.left == SourceConstantIntNode(start_position=0, value=1)
 
         r_exp = node.right
         assert isinstance(r_exp, SourceBinaryExpressionNode)
-        assert r_exp.operator == SourceMultiplyOperator(start_position=7)
+        assert r_exp.operator == SourceMultiply(start_position=7)
         assert r_exp.left == SourceConstantIntNode(start_position=5, value=2)
         assert r_exp.right == SourceConstantIntNode(start_position=9, value=3)
 
@@ -140,13 +140,13 @@ class TestSourceExpressionNode:
 
         node = parse_expression(token_tape, min_precedence=0)
         assert isinstance(node, SourceBinaryExpressionNode)
-        assert node.operator == SourceAddOperator(start_position=2)
+        assert node.operator == SourceAdd(start_position=2)
 
         assert node.left == SourceConstantIntNode(start_position=0, value=1)
 
         r_exp = node.right
         assert isinstance(r_exp, SourceBinaryExpressionNode)
-        assert r_exp.operator == SourceMultiplyOperator(start_position=6)
+        assert r_exp.operator == SourceMultiply(start_position=6)
         assert r_exp.left == SourceConstantIntNode(start_position=4, value=2)
         assert r_exp.right == SourceConstantIntNode(start_position=8, value=3)
 
@@ -160,10 +160,10 @@ class TestSourceExpressionNode:
 
         node = parse_expression(token_tape, min_precedence=0)
         assert isinstance(node, SourceBinaryExpressionNode)
-        assert node.operator == SourceMultiplyOperator(start_position=5)
+        assert node.operator == SourceMultiply(start_position=5)
 
         assert isinstance(node.left, SourceBinaryExpressionNode)
-        assert node.left.operator == SourceAddOperator(start_position=2)
+        assert node.left.operator == SourceAdd(start_position=2)
         assert node.left.left == SourceConstantIntNode(start_position=1, value=1)
         assert node.left.right == SourceConstantIntNode(start_position=3, value=2)
 
@@ -180,12 +180,12 @@ class TestSourceExpressionNode:
 
         node = parse_expression(token_tape, min_precedence=0)
         assert isinstance(node, SourceBinaryExpressionNode)
-        assert node.operator == SourceAddOperator(start_position=2)
+        assert node.operator == SourceAdd(start_position=2)
 
         assert node.left == SourceConstantIntNode(start_position=0, value=1)
         r_exp = node.right
         assert isinstance(r_exp, SourceBinaryExpressionNode)
-        assert r_exp.operator == SourceMultiplyOperator(start_position=7)
+        assert r_exp.operator == SourceMultiply(start_position=7)
         assert r_exp.left == SourceUnaryExpressionNode(
             start_position=4,
             operator=SourceNegate(start_position=4),

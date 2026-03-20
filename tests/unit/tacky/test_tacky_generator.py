@@ -4,14 +4,14 @@ from nqcc.parser import TokenTape, parse_expression, parse_function, parse_progr
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
-    TackyComplementNode,
+    TackyComplement,
     TackyConstantIntNode,
     TackyDivide,
     TackyFunctionNode,
     TackyGenerator,
     TackyModulo,
     TackyMultiply,
-    TackyNegateNode,
+    TackyNegate,
     TackyProgramNode,
     TackyReturnNode,
     TackySubtract,
@@ -62,7 +62,7 @@ class TestExpressions:
         assert instr.start_position == 0
         assert instr.src == TackyConstantIntNode(start_position=1, value=4)
         assert instr.dst == TackyVarNode(start_position=0, identifier="tmp.test_negation.0")
-        assert instr.operator == TackyNegateNode(start_position=0)
+        assert instr.operator == TackyNegate(start_position=0)
         assert result == instr.dst
 
     def test_complement(self):
@@ -81,7 +81,7 @@ class TestExpressions:
         assert instr.start_position == 0
         assert instr.src == TackyConstantIntNode(start_position=2, value=10)
         assert instr.dst == TackyVarNode(start_position=0, identifier="tmp.test_complement.0")
-        assert instr.operator == TackyComplementNode(start_position=0)
+        assert instr.operator == TackyComplement(start_position=0)
         assert result == instr.dst
 
     def test_simple_nested(self):
@@ -98,14 +98,14 @@ class TestExpressions:
         instr0 = target._current_instructions[0]
         assert instr0 == TackyUnaryNode(
             start_position=4,
-            operator=TackyComplementNode(start_position=4),
+            operator=TackyComplement(start_position=4),
             src=TackyConstantIntNode(start_position=5, value=12),
             dst=TackyVarNode(start_position=4, identifier="tmp.test_simple_nested.0"),
         )
         instr1 = target._current_instructions[1]
         assert instr1 == TackyUnaryNode(
             start_position=1,
-            operator=TackyNegateNode(start_position=1),
+            operator=TackyNegate(start_position=1),
             src=instr0.dst,
             dst=TackyVarNode(start_position=1, identifier="tmp.test_simple_nested.1"),
         )
@@ -183,7 +183,7 @@ class TestStatements:
         instr0 = target._current_instructions[0]
         assert instr0 == TackyUnaryNode(
             start_position=7,
-            operator=TackyComplementNode(start_position=7),
+            operator=TackyComplement(start_position=7),
             src=TackyConstantIntNode(start_position=9, value=162),
             dst=TackyVarNode(start_position=7, identifier="tmp.test_return.0"),
         )
@@ -206,7 +206,7 @@ class TestStatements:
         instr0 = target._current_instructions[0]
         assert instr0 == TackyUnaryNode(
             start_position=10,
-            operator=TackyNegateNode(start_position=10),
+            operator=TackyNegate(start_position=10),
             src=TackyConstantIntNode(start_position=11, value=1),
             dst=TackyVarNode(start_position=10, identifier="tmp.test_return_longer.0"),
         )
@@ -240,7 +240,7 @@ class TestFunctions:
         instr0 = result.instructions[0]
         assert instr0 == TackyUnaryNode(
             start_position=23,
-            operator=TackyNegateNode(start_position=23),
+            operator=TackyNegate(start_position=23),
             src=TackyConstantIntNode(start_position=28, value=508),
             dst=TackyVarNode(start_position=23, identifier="tmp.main.0"),
         )
@@ -270,7 +270,7 @@ class TestPrograms:
         instr0 = main_func.instructions[0]
         assert instr0 == TackyUnaryNode(
             start_position=24,
-            operator=TackyNegateNode(start_position=24),
+            operator=TackyNegate(start_position=24),
             src=TackyConstantIntNode(start_position=29, value=566),
             dst=TackyVarNode(start_position=24, identifier="tmp.main.0"),
         )

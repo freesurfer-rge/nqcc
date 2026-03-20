@@ -33,29 +33,29 @@ AsmOperandNode = Union[AsmImmediateIntNode, AsmRegisterNode, AsmPseudoRegisterNo
 
 class AsmMovNode(AsmASTNode):
     node_type: Literal["AsmMovNode"] = "AsmMovNode"
-    source: AsmOperandNode
-    destination: AsmOperandNode
+    src: AsmOperandNode
+    dst: AsmOperandNode
 
 
 class AsmRetNode(AsmASTNode):
     node_type: Literal["AsmRetNode"] = "AsmRetNode"
 
 
-class AsmNotOperator(AsmASTNode):
-    node_type: Literal["AsmNotOperator"] = "AsmNotOperator"
+class AsmNot(AsmASTNode):
+    node_type: Literal["AsmNot"] = "AsmNot"
 
 
-class AsmNegOperator(AsmASTNode):
-    node_type: Literal["AsmNegOperator"] = "AsmNegOperator"
+class AsmNeg(AsmASTNode):
+    node_type: Literal["AsmNeg"] = "AsmNeg"
 
 
-AsmUnaryOperator = Union[AsmNotOperator, AsmNegOperator]
+AsmUnaryOperator = Union[AsmNot, AsmNeg]
 
 
 class AsmUnaryNode(AsmASTNode):
     node_type: Literal["AsmUnaryNode"] = "AsmUnaryNode"
     operator: AsmUnaryOperator
-    source: AsmOperandNode
+    src: AsmOperandNode
 
 
 class AsmAdd(AsmASTNode):

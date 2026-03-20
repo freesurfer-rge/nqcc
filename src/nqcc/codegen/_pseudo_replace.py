@@ -54,10 +54,10 @@ class PseudoRegisterReplacer:
     def update_instruction(self, asm_instr: AsmInstructionNode):
         match asm_instr:
             case AsmMovNode():
-                asm_instr.source = self.get_updated_operand(asm_instr.source)
-                asm_instr.destination = self.get_updated_operand(asm_instr.destination)
+                asm_instr.src = self.get_updated_operand(asm_instr.src)
+                asm_instr.dst = self.get_updated_operand(asm_instr.dst)
             case AsmUnaryNode():
-                asm_instr.source = self.get_updated_operand(asm_instr.source)
+                asm_instr.src = self.get_updated_operand(asm_instr.src)
             case AsmBinaryNode():
                 asm_instr.src = self.get_updated_operand(asm_instr.src)
                 asm_instr.dst = self.get_updated_operand(asm_instr.dst)
