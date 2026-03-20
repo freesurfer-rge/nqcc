@@ -11,8 +11,8 @@ from nqcc.codegen import (
     AsmInstructionNode,
     AsmMovNode,
     AsmMultiply,
-    AsmNegOperator,
-    AsmNotOperator,
+    AsmNeg,
+    AsmNot,
     AsmOperandNode,
     AsmPseudoRegisterNode,
     AsmRegisterNode,
@@ -111,7 +111,7 @@ class TestInstructionUpdate:
         assert mov_node.dst == AsmStackNode(start_position=313, offset=-8)
 
     @pytest.mark.parametrize(
-        "op", [AsmNotOperator(start_position=13), AsmNegOperator(start_position=14)]
+        "op", [AsmNot(start_position=13), AsmNeg(start_position=14)]
     )
     def test_unary(self, op: AsmUnaryOperator):
         target = PseudoRegisterReplacer()
@@ -177,7 +177,7 @@ class TestFunctionUpdate:
 
         i1 = asm_func.instructions[1]
         assert i1 == AsmUnaryNode(
-            start_position=26, operator=AsmNegOperator(start_position=26), src=i0.dst
+            start_position=26, operator=AsmNeg(start_position=26), src=i0.dst
         )
 
         i2 = asm_func.instructions[2]
@@ -254,7 +254,7 @@ class TestProgramUpdate:
 
         i1 = asm_func.instructions[1]
         assert i1 == AsmUnaryNode(
-            start_position=31, operator=AsmNegOperator(start_position=31), src=i0.dst
+            start_position=31, operator=AsmNeg(start_position=31), src=i0.dst
         )
 
         i2 = asm_func.instructions[2]
@@ -267,7 +267,7 @@ class TestProgramUpdate:
         i3 = asm_func.instructions[3]
         assert i3 == AsmUnaryNode(
             start_position=26,
-            operator=AsmNotOperator(start_position=26, source=i2.dst),
+            operator=AsmNot(start_position=26, source=i2.dst),
             src=i2.dst,
         )
 

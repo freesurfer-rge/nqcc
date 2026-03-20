@@ -30,8 +30,8 @@ from ._assembler_ast import (
     AsmInstructionNode,
     AsmMovNode,
     AsmMultiply,
-    AsmNegOperator,
-    AsmNotOperator,
+    AsmNeg,
+    AsmNot,
     AsmOperandNode,
     AsmProgramNode,
     AsmPseudoRegisterNode,
@@ -60,9 +60,9 @@ def convert_tacky_operand(tacky_value: TackyValue) -> AsmOperandNode:
 def convert_tacky_unary_operator(tacky_operator: TackyUnaryOperator) -> AsmUnaryOperator:
     match tacky_operator:
         case v if isinstance(v, TackyComplementNode):
-            return AsmNotOperator(start_position=tacky_operator.start_position)
+            return AsmNot(start_position=tacky_operator.start_position)
         case v if isinstance(v, TackyNegateNode):
-            return AsmNegOperator(start_position=tacky_operator.start_position)
+            return AsmNeg(start_position=tacky_operator.start_position)
         case _:
             raise ValueError(f"Unrecognised: {tacky_operator}")
 

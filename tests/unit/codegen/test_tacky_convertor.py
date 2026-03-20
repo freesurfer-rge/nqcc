@@ -7,8 +7,8 @@ from nqcc.codegen import (
     AsmImmediateIntNode,
     AsmMovNode,
     AsmMultiply,
-    AsmNegOperator,
-    AsmNotOperator,
+    AsmNeg,
+    AsmNot,
     AsmProgramNode,
     AsmPseudoRegisterNode,
     AsmRegisterNode,
@@ -60,13 +60,13 @@ class TestUnaryOperators:
     def test_negate(self):
         target = TackyNegateNode(start_position=462)
         result = convert_tacky_unary_operator(target)
-        assert isinstance(result, AsmNegOperator)
+        assert isinstance(result, AsmNeg)
         assert result.start_position == target.start_position
 
     def test_complement(self):
         target = TackyComplementNode(start_position=4251)
         result = convert_tacky_unary_operator(target)
-        assert isinstance(result, AsmNotOperator)
+        assert isinstance(result, AsmNot)
         assert result.start_position == target.start_position
 
 
@@ -117,7 +117,7 @@ class TestInstructions:
         )
         assert result[1] == AsmUnaryNode(
             start_position=123,
-            operator=AsmNotOperator(start_position=1234),
+            operator=AsmNot(start_position=1234),
             src=result[0].dst,
         )
 
@@ -267,7 +267,7 @@ class TestFunctions:
 
         i1 = asm_func.instructions[1]
         assert i1 == AsmUnaryNode(
-            start_position=26, operator=AsmNegOperator(start_position=26), src=i0.dst
+            start_position=26, operator=AsmNeg(start_position=26), src=i0.dst
         )
 
         i2 = asm_func.instructions[2]
@@ -347,7 +347,7 @@ class TestPrograms:
 
         i1 = asm_func.instructions[1]
         assert i1 == AsmUnaryNode(
-            start_position=26, operator=AsmNotOperator(start_position=26), src=i0.dst
+            start_position=26, operator=AsmNot(start_position=26), src=i0.dst
         )
 
         i2 = asm_func.instructions[2]

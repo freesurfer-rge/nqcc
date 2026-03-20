@@ -12,8 +12,8 @@ from nqcc.codegen import (
     AsmInstructionNode,
     AsmMovNode,
     AsmMultiply,
-    AsmNegOperator,
-    AsmNotOperator,
+    AsmNeg,
+    AsmNot,
     AsmOperandNode,
     AsmProgramNode,
     AsmRegisterNode,
@@ -47,9 +47,9 @@ def get_operand_assembler(operand_node: AsmOperandNode) -> str:
 
 def get_unary_opcode(unary_operator: AsmUnaryOperator) -> str:
     match unary_operator:
-        case AsmNegOperator():
+        case AsmNeg():
             return "negl"
-        case AsmNotOperator():
+        case AsmNot():
             return "notl"
         case _:
             raise ValueError(f"Unrecognised: {unary_operator}")
