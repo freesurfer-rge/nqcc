@@ -187,7 +187,7 @@ class BitwiseOr(Token):
 
     @classmethod
     def re(cls) -> str:
-        return "|"
+        return "[|]"
 
 
 class BitwiseXor(Token):
@@ -200,7 +200,7 @@ class BitwiseXor(Token):
 
     @classmethod
     def re(cls) -> str:
-        return "^"
+        return "\\^"
 
 
 class LeftShift(Token):
@@ -311,6 +311,11 @@ TokenTypes: list[type] = [
     OpenParenToken,
     SemicolonToken,
     TildeToken,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXor,
+    LeftShift,
+    RightShift,
 ]
 
 UnaryOperatorToken = Union[DecrementToken, IncrementToken, NegationToken, TildeToken]

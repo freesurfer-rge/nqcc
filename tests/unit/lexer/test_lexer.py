@@ -2,6 +2,9 @@ import pytest
 
 from nqcc.lexer import (
     AdditionToken,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXor,
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
@@ -148,6 +151,27 @@ class TestExtractTokens:
 
         assert len(toks) == 1
         assert toks[0] == ModuloToken(start_position=idx, value="%")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_bitwiseand(self, idx):
+        toks = extract_tokens("&", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == BitwiseAnd(start_position=idx, value="&")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_bitwiseor(self, idx):
+        toks = extract_tokens("|", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == BitwiseOr(start_position=idx, value="|")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_bitwisexor(self, idx):
+        toks = extract_tokens("^", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == BitwiseXor(start_position=idx, value="^")
 
 
 class TestPickToken:
