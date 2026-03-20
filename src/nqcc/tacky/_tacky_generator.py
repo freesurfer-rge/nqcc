@@ -1,19 +1,19 @@
 from nqcc.parser import (
-    SourceAddOperator,
+    SourceAdd,
     SourceBinaryExpressionNode,
     SourceBinaryOperator,
     SourceComplement,
     SourceConstantIntNode,
-    SourceDivideOperator,
+    SourceDivide,
     SourceExpressionNode,
     SourceFunctionNode,
-    SourceModuloOperator,
-    SourceMultiplyOperator,
+    SourceModulo,
+    SourceMultiply,
     SourceNegate,
     SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
-    SourceSubtractOperator,
+    SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
 )
@@ -66,15 +66,15 @@ class TackyGenerator:
 
     def convert_binary_operator(self, source: SourceBinaryOperator) -> TackyBinaryOperator:
         match source:
-            case SourceAddOperator():
+            case SourceAdd():
                 return TackyAdd(start_position=source.start_position)
-            case SourceSubtractOperator():
+            case SourceSubtract():
                 return TackySubtract(start_position=source.start_position)
-            case SourceMultiplyOperator():
+            case SourceMultiply():
                 return TackyMultiply(start_position=source.start_position)
-            case SourceDivideOperator():
+            case SourceDivide():
                 return TackyDivide(start_position=source.start_position)
-            case SourceModuloOperator():
+            case SourceModulo():
                 return TackyModulo(start_position=source.start_position)
             case _:
                 raise ValueError(f"Unrecognised: {source}")

@@ -34,37 +34,37 @@ class SourceBinOp(SourceASTNode):
     precedence: int
 
 
-class SourceAddOperator(SourceBinOp):
-    node_type: Literal["SourceAddOperator"] = "SourceAddOperator"
+class SourceAdd(SourceBinOp):
+    node_type: Literal["SourceAdd"] = "SourceAdd"
     precedence: Literal[45] = 45
 
 
-class SourceSubtractOperator(SourceBinOp):
-    node_type: Literal["SourceSubtractOperator"] = "SourceSubtractOperator"
+class SourceSubtract(SourceBinOp):
+    node_type: Literal["SourceSubtract"] = "SourceSubtract"
     precedence: Literal[45] = 45
 
 
-class SourceMultiplyOperator(SourceBinOp):
-    node_type: Literal["SourceMultiplyOperator"] = "SourceMultiplyOperator"
+class SourceMultiply(SourceBinOp):
+    node_type: Literal["SourceMultiply"] = "SourceMultiply"
     precedence: Literal[50] = 50
 
 
-class SourceDivideOperator(SourceBinOp):
-    node_type: Literal["SourceDivideOperator"] = "SourceDivideOperator"
+class SourceDivide(SourceBinOp):
+    node_type: Literal["SourceDivide"] = "SourceDivide"
     precedence: Literal[50] = 50
 
 
-class SourceModuloOperator(SourceBinOp):
-    node_type: Literal["SourceModuloOperator"] = "SourceModuloOperator"
+class SourceModulo(SourceBinOp):
+    node_type: Literal["SourceModulo"] = "SourceModulo"
     precedence: Literal[50] = 50
 
 
 SourceBinaryOperator = Union[
-    SourceAddOperator,
-    SourceSubtractOperator,
-    SourceMultiplyOperator,
-    SourceDivideOperator,
-    SourceModuloOperator,
+    SourceAdd,
+    SourceSubtract,
+    SourceMultiply,
+    SourceDivide,
+    SourceModulo,
 ]
 
 
