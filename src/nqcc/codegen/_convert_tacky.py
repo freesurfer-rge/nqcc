@@ -2,14 +2,14 @@ from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
     TackyBinaryOperator,
-    TackyComplementNode,
+    TackyComplement,
     TackyConstantIntNode,
     TackyDivide,
     TackyFunctionNode,
     TackyInstruction,
     TackyModulo,
     TackyMultiply,
-    TackyNegateNode,
+    TackyNegate,
     TackyProgramNode,
     TackyReturnNode,
     TackySubtract,
@@ -59,9 +59,9 @@ def convert_tacky_operand(tacky_value: TackyValue) -> AsmOperandNode:
 
 def convert_tacky_unary_operator(tacky_operator: TackyUnaryOperator) -> AsmUnaryOperator:
     match tacky_operator:
-        case v if isinstance(v, TackyComplementNode):
+        case v if isinstance(v, TackyComplement):
             return AsmNot(start_position=tacky_operator.start_position)
-        case v if isinstance(v, TackyNegateNode):
+        case v if isinstance(v, TackyNegate):
             return AsmNeg(start_position=tacky_operator.start_position)
         case _:
             raise ValueError(f"Unrecognised: {tacky_operator}")

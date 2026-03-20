@@ -21,15 +21,15 @@ class TackyVarNode(TackyASTNode):
 TackyValue = Union[TackyConstantIntNode, TackyVarNode]
 
 
-class TackyComplementNode(TackyASTNode):
-    node_type: Literal["TackyComplementNode"] = "TackyComplementNode"
+class TackyComplement(TackyASTNode):
+    node_type: Literal["TackyComplement"] = "TackyComplement"
 
 
-class TackyNegateNode(TackyASTNode):
-    node_type: Literal["TackyNegateNode"] = "TackyNegateNode"
+class TackyNegate(TackyASTNode):
+    node_type: Literal["TackyNegate"] = "TackyNegate"
 
 
-TackyUnaryOperator = Union[TackyComplementNode, TackyNegateNode]
+TackyUnaryOperator = Union[TackyComplement, TackyNegate]
 
 
 class TackyAdd(TackyASTNode):

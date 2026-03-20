@@ -26,13 +26,13 @@ from nqcc.parser import TokenTape, parse_function, parse_program
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
-    TackyComplementNode,
+    TackyComplement,
     TackyConstantIntNode,
     TackyDivide,
     TackyGenerator,
     TackyModulo,
     TackyMultiply,
-    TackyNegateNode,
+    TackyNegate,
     TackyReturnNode,
     TackySubtract,
     TackyUnaryNode,
@@ -58,13 +58,13 @@ class TestConvertOperands:
 
 class TestUnaryOperators:
     def test_negate(self):
-        target = TackyNegateNode(start_position=462)
+        target = TackyNegate(start_position=462)
         result = convert_tacky_unary_operator(target)
         assert isinstance(result, AsmNeg)
         assert result.start_position == target.start_position
 
     def test_complement(self):
-        target = TackyComplementNode(start_position=4251)
+        target = TackyComplement(start_position=4251)
         result = convert_tacky_unary_operator(target)
         assert isinstance(result, AsmNot)
         assert result.start_position == target.start_position
@@ -104,7 +104,7 @@ class TestInstructions:
     def test_unary(self):
         target = TackyUnaryNode(
             start_position=123,
-            operator=TackyComplementNode(start_position=1234),
+            operator=TackyComplement(start_position=1234),
             src=TackyVarNode(start_position=12345, identifier="tmp.0"),
             dst=TackyVarNode(start_position=123456, identifier="tmp.1"),
         )
@@ -266,9 +266,7 @@ class TestFunctions:
         )
 
         i1 = asm_func.instructions[1]
-        assert i1 == AsmUnaryNode(
-            start_position=26, operator=AsmNeg(start_position=26), src=i0.dst
-        )
+        assert i1 == AsmUnaryNode(start_position=26, operator=AsmNeg(start_position=26), src=i0.dst)
 
         i2 = asm_func.instructions[2]
         assert i2 == AsmMovNode(
@@ -346,9 +344,7 @@ class TestPrograms:
         )
 
         i1 = asm_func.instructions[1]
-        assert i1 == AsmUnaryNode(
-            start_position=26, operator=AsmNot(start_position=26), src=i0.dst
-        )
+        assert i1 == AsmUnaryNode(start_position=26, operator=AsmNot(start_position=26), src=i0.dst)
 
         i2 = asm_func.instructions[2]
         assert i2 == AsmMovNode(

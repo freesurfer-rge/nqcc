@@ -110,9 +110,7 @@ class TestInstructionUpdate:
         assert mov_node.src == AsmStackNode(start_position=312, offset=-4)
         assert mov_node.dst == AsmStackNode(start_position=313, offset=-8)
 
-    @pytest.mark.parametrize(
-        "op", [AsmNot(start_position=13), AsmNeg(start_position=14)]
-    )
+    @pytest.mark.parametrize("op", [AsmNot(start_position=13), AsmNeg(start_position=14)])
     def test_unary(self, op: AsmUnaryOperator):
         target = PseudoRegisterReplacer()
 
@@ -176,9 +174,7 @@ class TestFunctionUpdate:
         )
 
         i1 = asm_func.instructions[1]
-        assert i1 == AsmUnaryNode(
-            start_position=26, operator=AsmNeg(start_position=26), src=i0.dst
-        )
+        assert i1 == AsmUnaryNode(start_position=26, operator=AsmNeg(start_position=26), src=i0.dst)
 
         i2 = asm_func.instructions[2]
         assert i2 == AsmMovNode(
@@ -253,9 +249,7 @@ class TestProgramUpdate:
         )
 
         i1 = asm_func.instructions[1]
-        assert i1 == AsmUnaryNode(
-            start_position=31, operator=AsmNeg(start_position=31), src=i0.dst
-        )
+        assert i1 == AsmUnaryNode(start_position=31, operator=AsmNeg(start_position=31), src=i0.dst)
 
         i2 = asm_func.instructions[2]
         assert i2 == AsmMovNode(

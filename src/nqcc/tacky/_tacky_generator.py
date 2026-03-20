@@ -22,14 +22,14 @@ from ._tacky_ast import (
     TackyAdd,
     TackyBinaryNode,
     TackyBinaryOperator,
-    TackyComplementNode,
+    TackyComplement,
     TackyConstantIntNode,
     TackyDivide,
     TackyFunctionNode,
     TackyInstruction,
     TackyModulo,
     TackyMultiply,
-    TackyNegateNode,
+    TackyNegate,
     TackyProgramNode,
     TackyReturnNode,
     TackySubtract,
@@ -58,9 +58,9 @@ class TackyGenerator:
     def convert_unary_operator(self, source: SourceUnaryOperator) -> TackyUnaryOperator:
         match source:
             case SourceComplement():
-                return TackyComplementNode(start_position=source.start_position)
+                return TackyComplement(start_position=source.start_position)
             case SourceNegate():
-                return TackyNegateNode(start_position=source.start_position)
+                return TackyNegate(start_position=source.start_position)
             case _:
                 raise ValueError(f"Unrecognised: {source}")
 
