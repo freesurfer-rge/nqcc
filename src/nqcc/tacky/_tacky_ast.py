@@ -52,7 +52,38 @@ class TackyModulo(TackyASTNode):
     node_type: Literal["TackyModulo"] = "TackyModulo"
 
 
-TackyBinaryOperator = Union[TackyAdd, TackySubtract, TackyMultiply, TackyDivide, TackyModulo]
+class TackyBitwiseAnd(TackyASTNode):
+    node_type: Literal["TackyBitwiseAnd"] = "TackyBitwiseAnd"
+
+
+class TackyBitwiseOr(TackyASTNode):
+    node_type: Literal["TackyBitwiseOr"] = "TackyBitwiseOr"
+
+
+class TackyBitwiseXor(TackyASTNode):
+    node_type: Literal["TackyBitwiseXor"] = "TackyBitwiseXor"
+
+
+class TackyLeftShift(TackyASTNode):
+    node_type: Literal["TackyLeftShift"] = "TackyLeftShift"
+
+
+class TackyRightShift(TackyASTNode):
+    node_type: Literal["TackyRightShift"] = "TackyRightShift"
+
+
+TackyBinaryOperator = Union[
+    TackyAdd,
+    TackySubtract,
+    TackyMultiply,
+    TackyDivide,
+    TackyModulo,
+    TackyBitwiseAnd,
+    TackyBitwiseOr,
+    TackyBitwiseXor,
+    TackyLeftShift,
+    TackyRightShift,
+]
 
 
 class TackyReturnNode(TackyASTNode):
