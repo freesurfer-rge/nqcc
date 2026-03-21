@@ -4,16 +4,21 @@ from nqcc.parser import TokenTape, parse_expression, parse_function, parse_progr
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
+    TackyBitwiseAnd,
+    TackyBitwiseOr,
+    TackyBitwiseXor,
     TackyComplement,
     TackyConstantIntNode,
     TackyDivide,
     TackyFunctionNode,
     TackyGenerator,
+    TackyLeftShift,
     TackyModulo,
     TackyMultiply,
     TackyNegate,
     TackyProgramNode,
     TackyReturnNode,
+    TackyRightShift,
     TackySubtract,
     TackyUnaryNode,
     TackyVarNode,
@@ -27,6 +32,11 @@ _BINARY_EXPRESSION_MAP = {
     "*": TackyMultiply,
     "/": TackyDivide,
     "%": TackyModulo,
+    "&": TackyBitwiseAnd,
+    "|": TackyBitwiseOr,
+    "^": TackyBitwiseXor,
+    "<<": TackyLeftShift,
+    ">>": TackyRightShift,
 }
 
 
@@ -111,7 +121,7 @@ class TestExpressions:
         )
         assert result == instr1.dst
 
-    @pytest.mark.parametrize("operator", ["+", "-", "*", "/", "%"])
+    @pytest.mark.parametrize("operator", ["+", "-", "*", "/", "%", "&", "|", "^", "<<", ">>"])
     def test_simple_binary(self, operator: str):
         source = f"14 {operator} 10;"
         token_tape = TokenTape.from_c_source(source)
@@ -130,7 +140,7 @@ class TestExpressions:
         assert instr0.start_position == 3
         assert instr0.operator == _BINARY_EXPRESSION_MAP[operator](start_position=3)
         assert instr0.left == TackyConstantIntNode(start_position=0, value=14)
-        assert instr0.right == TackyConstantIntNode(start_position=5, value=10)
+        assert instr0.right == TackyConstantIntNode(start_position=4 + len(operator), value=10)
         assert instr0.dst == result
 
         # The expression doesn't consume the semicolon
