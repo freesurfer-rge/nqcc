@@ -21,5 +21,5 @@ class TestTackySerde:
         self._round_trip(source)
 
     def test_binary(self):
-        source = "int main  (void ) { return 3- -5 * ~9 % 8;}"
+        source = "int main  (void ) { return 3- -5 * ~9 % 8 ^ 11 >> 12 | 13 & 1 << 2;}"
         self._round_trip(source)
