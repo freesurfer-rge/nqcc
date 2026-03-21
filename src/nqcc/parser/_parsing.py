@@ -75,7 +75,7 @@ def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryExpressionNode:
     return result
 
 
-def convert_binary_operator(lexer_token: Token) -> SourceBinaryOperator | None:
+def convert_binary_operator(lexer_token: Token) -> SourceBinaryOperator | None:  # noqa: C901
     match lexer_token:
         case AdditionToken():
             return SourceAdd(start_position=lexer_token.start_position)
