@@ -117,6 +117,8 @@ def convert_tacky_binary_node(tacky_node: TackyBinaryNode) -> list[AsmInstructio
                 start_position=tacky_node.start_position, src=result_register, dst=dest
             )
             return [i0_div_op, i1_div_op, i2_div_op, i4_div_op]
+        case _:
+            raise ValueError(f"Unrecognised: {tacky_node.operator}")
 
 
 def convert_tacky_instruction(tacky_instruction: TackyInstruction) -> list[AsmInstructionNode]:
