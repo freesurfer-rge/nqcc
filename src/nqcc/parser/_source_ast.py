@@ -90,6 +90,11 @@ SourceBinaryOperator = Union[
     SourceMultiply,
     SourceDivide,
     SourceModulo,
+    SourceBitwiseXor,
+    SourceBitwiseAnd,
+    SourceBitwiseOr,
+    SourceLeftShift,
+    SourceRightShift,
 ]
 
 

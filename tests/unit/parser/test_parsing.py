@@ -6,15 +6,20 @@ from nqcc.parser import (
     SourceASTBadTypeError,
     SourceASTBadValueError,
     SourceBinaryExpressionNode,
+    SourceBitwiseAnd,
+    SourceBitwiseOr,
+    SourceBitwiseXor,
     SourceComplement,
     SourceConstantIntNode,
     SourceDivide,
     SourceFunctionNode,
+    SourceLeftShift,
     SourceModulo,
     SourceMultiply,
     SourceNegate,
     SourceProgramNode,
     SourceReturnNode,
+    SourceRightShift,
     SourceStatementNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
@@ -31,6 +36,11 @@ _BINARY_EXPRESSION_MAP = {
     "*": SourceMultiply,
     "/": SourceDivide,
     "%": SourceModulo,
+    "&": SourceBitwiseAnd,
+    "|": SourceBitwiseOr,
+    "^": SourceBitwiseXor,
+    "<<": SourceLeftShift,
+    ">>": SourceRightShift,
 }
 
 
@@ -96,7 +106,7 @@ class TestSourceExpressionNode:
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
 
-    @pytest.mark.parametrize("operator", ["+", "-", "*", "/", "%"])
+    @pytest.mark.parametrize("operator", ["+", "-", "*", "/", "%", "|", "&", "^", "<<", ">>"])
     def test_simple_binary(self, operator: str):
         source = f"14 {operator} 10;"
         token_tape = TokenTape.from_c_source(source)

@@ -16,6 +16,7 @@ from nqcc.lexer import (
     OpenParenToken,
     SemicolonToken,
     TildeToken,
+    BitwiseAnd, BitwiseOr, BitwiseXor, LeftShift, RightShift,
     Token,
     UnaryOperatorToken,
 )
@@ -38,6 +39,7 @@ from ._source_ast import (
     SourceStatementNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
+    SourceBitwiseAnd, SourceBitwiseOr, SourceBitwiseXor, SourceLeftShift, SourceRightShift,
     SourceUnaryOperator,
 )
 from ._token_tape import TokenTape
@@ -77,6 +79,16 @@ def convert_binary_operator(lexer_token: Token) -> SourceBinaryOperator | None:
             return SourceDivide(start_position=lexer_token.start_position)
         case ModuloToken():
             return SourceModulo(start_position=lexer_token.start_position)
+        case BitwiseAnd():
+            return SourceBitwiseAnd(start_position=lexer_token.start_position)
+        case BitwiseOr():
+            return SourceBitwiseOr(start_position=lexer_token.start_position)
+        case BitwiseXor():
+            return SourceBitwiseXor(start_position=lexer_token.start_position)
+        case LeftShift():
+            return SourceLeftShift(start_position=lexer_token.start_position)
+        case RightShift():
+            return SourceRightShift(start_position=lexer_token.start_position)
         case _:
             # Nothing to do
             return None
