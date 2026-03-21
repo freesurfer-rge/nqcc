@@ -117,7 +117,7 @@ class TestSourceExpressionNode:
         assert node.operator == _BINARY_EXPRESSION_MAP[operator](start_position=3)
 
         assert node.left == SourceConstantIntNode(start_position=0, value=14)
-        assert node.right == SourceConstantIntNode(start_position=5, value=10)
+        assert node.right == SourceConstantIntNode(start_position=4 + len(operator), value=10)
 
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
@@ -222,6 +222,11 @@ class TestSourceExpressionNode:
             (" 1/2 *3;", "(1/2)*3;"),
             (" 1*2 %3;", "(1*2)%3;"),
             (" 1%2 *3;", "(1%2)*3;"),
+            (" 1^ 2*3;", " 1^(2*3);"),
+            (" 1& 2*3;", " 1&(2*3);"),
+            (" 1| 2*3;", " 1|(2*3);"),
+            (" 1| 2<<3;", " 1|(2<<3);"),
+            (" 1| 2>>3;", " 1|(2>>3);"),
         ],
     )
     def test_paired_expressions(self, a_str: str, b_str: str):

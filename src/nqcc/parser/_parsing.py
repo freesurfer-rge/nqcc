@@ -16,7 +16,11 @@ from nqcc.lexer import (
     OpenParenToken,
     SemicolonToken,
     TildeToken,
-    BitwiseAnd, BitwiseOr, BitwiseXor, LeftShift, RightShift,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXor,
+    LeftShift,
+    RightShift,
     Token,
     UnaryOperatorToken,
 )
@@ -39,7 +43,11 @@ from ._source_ast import (
     SourceStatementNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
-    SourceBitwiseAnd, SourceBitwiseOr, SourceBitwiseXor, SourceLeftShift, SourceRightShift,
+    SourceBitwiseAnd,
+    SourceBitwiseOr,
+    SourceBitwiseXor,
+    SourceLeftShift,
+    SourceRightShift,
     SourceUnaryOperator,
 )
 from ._token_tape import TokenTape
