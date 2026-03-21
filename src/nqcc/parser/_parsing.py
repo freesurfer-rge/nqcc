@@ -3,17 +3,22 @@ from typing import get_args
 from nqcc.lexer import (
     AdditionToken,
     BinaryOperatorToken,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXor,
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,
     DivideToken,
     IdentifierToken,
     KeywordToken,
+    LeftShift,
     ModuloToken,
     MultiplyToken,
     NegationToken,
     OpenBraceToken,
     OpenParenToken,
+    RightShift,
     SemicolonToken,
     TildeToken,
     Token,
@@ -25,16 +30,21 @@ from ._source_ast import (
     SourceAdd,
     SourceBinaryExpressionNode,
     SourceBinaryOperator,
+    SourceBitwiseAnd,
+    SourceBitwiseOr,
+    SourceBitwiseXor,
     SourceComplement,
     SourceConstantIntNode,
     SourceDivide,
     SourceExpressionNode,
     SourceFunctionNode,
+    SourceLeftShift,
     SourceModulo,
     SourceMultiply,
     SourceNegate,
     SourceProgramNode,
     SourceReturnNode,
+    SourceRightShift,
     SourceStatementNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
@@ -65,7 +75,7 @@ def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryExpressionNode:
     return result
 
 
-def convert_binary_operator(lexer_token: Token) -> SourceBinaryOperator | None:
+def convert_binary_operator(lexer_token: Token) -> SourceBinaryOperator | None:  # noqa: C901
     match lexer_token:
         case AdditionToken():
             return SourceAdd(start_position=lexer_token.start_position)
@@ -77,6 +87,16 @@ def convert_binary_operator(lexer_token: Token) -> SourceBinaryOperator | None:
             return SourceDivide(start_position=lexer_token.start_position)
         case ModuloToken():
             return SourceModulo(start_position=lexer_token.start_position)
+        case BitwiseAnd():
+            return SourceBitwiseAnd(start_position=lexer_token.start_position)
+        case BitwiseOr():
+            return SourceBitwiseOr(start_position=lexer_token.start_position)
+        case BitwiseXor():
+            return SourceBitwiseXor(start_position=lexer_token.start_position)
+        case LeftShift():
+            return SourceLeftShift(start_position=lexer_token.start_position)
+        case RightShift():
+            return SourceRightShift(start_position=lexer_token.start_position)
         case _:
             # Nothing to do
             return None

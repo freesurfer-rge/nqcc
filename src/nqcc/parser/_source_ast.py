@@ -34,6 +34,31 @@ class SourceBinOp(SourceASTNode):
     precedence: int
 
 
+class SourceBitwiseOr(SourceBinOp):
+    node_type: Literal["SourceBitwiseOr"] = "SourceBitwiseOr"
+    precedence: Literal[15] = 15
+
+
+class SourceBitwiseXor(SourceBinOp):
+    node_type: Literal["SourceBitwiseXor"] = "SourceBitwiseXor"
+    precedence: Literal[20] = 20
+
+
+class SourceBitwiseAnd(SourceBinOp):
+    node_type: Literal["SourceBitwiseAnd"] = "SourceBitwiseAnd"
+    precedence: Literal[25] = 25
+
+
+class SourceLeftShift(SourceBinOp):
+    node_type: Literal["SourceLeftShift"] = "SourceLeftShift"
+    precedence: Literal[40] = 40
+
+
+class SourceRightShift(SourceBinOp):
+    node_type: Literal["SourceRightShift"] = "SourceRightShift"
+    precedence: Literal[40] = 40
+
+
 class SourceAdd(SourceBinOp):
     node_type: Literal["SourceAdd"] = "SourceAdd"
     precedence: Literal[45] = 45
@@ -65,6 +90,11 @@ SourceBinaryOperator = Union[
     SourceMultiply,
     SourceDivide,
     SourceModulo,
+    SourceBitwiseXor,
+    SourceBitwiseAnd,
+    SourceBitwiseOr,
+    SourceLeftShift,
+    SourceRightShift,
 ]
 
 

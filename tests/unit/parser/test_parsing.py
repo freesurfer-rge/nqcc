@@ -6,15 +6,20 @@ from nqcc.parser import (
     SourceASTBadTypeError,
     SourceASTBadValueError,
     SourceBinaryExpressionNode,
+    SourceBitwiseAnd,
+    SourceBitwiseOr,
+    SourceBitwiseXor,
     SourceComplement,
     SourceConstantIntNode,
     SourceDivide,
     SourceFunctionNode,
+    SourceLeftShift,
     SourceModulo,
     SourceMultiply,
     SourceNegate,
     SourceProgramNode,
     SourceReturnNode,
+    SourceRightShift,
     SourceStatementNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
@@ -31,6 +36,11 @@ _BINARY_EXPRESSION_MAP = {
     "*": SourceMultiply,
     "/": SourceDivide,
     "%": SourceModulo,
+    "&": SourceBitwiseAnd,
+    "|": SourceBitwiseOr,
+    "^": SourceBitwiseXor,
+    "<<": SourceLeftShift,
+    ">>": SourceRightShift,
 }
 
 
@@ -96,7 +106,7 @@ class TestSourceExpressionNode:
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
 
-    @pytest.mark.parametrize("operator", ["+", "-", "*", "/", "%"])
+    @pytest.mark.parametrize("operator", ["+", "-", "*", "/", "%", "|", "&", "^", "<<", ">>"])
     def test_simple_binary(self, operator: str):
         source = f"14 {operator} 10;"
         token_tape = TokenTape.from_c_source(source)
@@ -107,7 +117,7 @@ class TestSourceExpressionNode:
         assert node.operator == _BINARY_EXPRESSION_MAP[operator](start_position=3)
 
         assert node.left == SourceConstantIntNode(start_position=0, value=14)
-        assert node.right == SourceConstantIntNode(start_position=5, value=10)
+        assert node.right == SourceConstantIntNode(start_position=4 + len(operator), value=10)
 
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
@@ -212,6 +222,11 @@ class TestSourceExpressionNode:
             (" 1/2 *3;", "(1/2)*3;"),
             (" 1*2 %3;", "(1*2)%3;"),
             (" 1%2 *3;", "(1%2)*3;"),
+            (" 1^ 2*3;", " 1^(2*3);"),
+            (" 1& 2*3;", " 1&(2*3);"),
+            (" 1| 2*3;", " 1|(2*3);"),
+            (" 1| 2<<3;", " 1|(2<<3);"),
+            (" 1| 2>>3;", " 1|(2>>3);"),
         ],
     )
     def test_paired_expressions(self, a_str: str, b_str: str):

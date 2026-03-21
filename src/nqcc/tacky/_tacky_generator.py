@@ -2,16 +2,21 @@ from nqcc.parser import (
     SourceAdd,
     SourceBinaryExpressionNode,
     SourceBinaryOperator,
+    SourceBitwiseAnd,
+    SourceBitwiseOr,
+    SourceBitwiseXor,
     SourceComplement,
     SourceConstantIntNode,
     SourceDivide,
     SourceExpressionNode,
     SourceFunctionNode,
+    SourceLeftShift,
     SourceModulo,
     SourceMultiply,
     SourceNegate,
     SourceProgramNode,
     SourceReturnNode,
+    SourceRightShift,
     SourceStatementNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
@@ -22,16 +27,21 @@ from ._tacky_ast import (
     TackyAdd,
     TackyBinaryNode,
     TackyBinaryOperator,
+    TackyBitwiseAnd,
+    TackyBitwiseOr,
+    TackyBitwiseXor,
     TackyComplement,
     TackyConstantIntNode,
     TackyDivide,
     TackyFunctionNode,
     TackyInstruction,
+    TackyLeftShift,
     TackyModulo,
     TackyMultiply,
     TackyNegate,
     TackyProgramNode,
     TackyReturnNode,
+    TackyRightShift,
     TackySubtract,
     TackyUnaryNode,
     TackyUnaryOperator,
@@ -64,7 +74,7 @@ class TackyGenerator:
             case _:
                 raise ValueError(f"Unrecognised: {source}")
 
-    def convert_binary_operator(self, source: SourceBinaryOperator) -> TackyBinaryOperator:
+    def convert_binary_operator(self, source: SourceBinaryOperator) -> TackyBinaryOperator:  # noqa: C901
         match source:
             case SourceAdd():
                 return TackyAdd(start_position=source.start_position)
@@ -76,6 +86,16 @@ class TackyGenerator:
                 return TackyDivide(start_position=source.start_position)
             case SourceModulo():
                 return TackyModulo(start_position=source.start_position)
+            case SourceBitwiseAnd():
+                return TackyBitwiseAnd(start_position=source.start_position)
+            case SourceBitwiseOr():
+                return TackyBitwiseOr(start_position=source.start_position)
+            case SourceBitwiseXor():
+                return TackyBitwiseXor(start_position=source.start_position)
+            case SourceLeftShift():
+                return TackyLeftShift(start_position=source.start_position)
+            case SourceRightShift():
+                return TackyRightShift(start_position=source.start_position)
             case _:
                 raise ValueError(f"Unrecognised: {source}")
 

@@ -164,6 +164,71 @@ class ModuloToken(Token):
         return "%"
 
 
+class BitwiseAnd(Token):
+    token_type: Literal["BitwiseAnd"] = "BitwiseAnd"
+    value: Literal["&"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "&"
+
+
+class BitwiseOr(Token):
+    token_type: Literal["BitwiseOr"] = "BitwiseOr"
+    value: Literal["|"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "[|]"
+
+
+class BitwiseXor(Token):
+    token_type: Literal["BitwiseXor"] = "BitwiseXor"
+    value: Literal["^"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "\\^"
+
+
+class LeftShift(Token):
+    token_type: Literal["LeftShift"] = "LeftShift"
+    value: Literal["<<"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "<<"
+
+
+class RightShift(Token):
+    token_type: Literal["RightShift"] = "RightShift"
+    value: Literal[">>"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return ">>"
+
+
 class OpenParenToken(Token):
     token_type: Literal["OpenParenToken"] = "OpenParenToken"
     value: Literal["("] = "("
@@ -246,7 +311,23 @@ TokenTypes: list[type] = [
     OpenParenToken,
     SemicolonToken,
     TildeToken,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXor,
+    LeftShift,
+    RightShift,
 ]
 
 UnaryOperatorToken = Union[DecrementToken, IncrementToken, NegationToken, TildeToken]
-BinaryOperatorToken = Union[AdditionToken, NegationToken, MultiplyToken, DivideToken, ModuloToken]
+BinaryOperatorToken = Union[
+    AdditionToken,
+    NegationToken,
+    MultiplyToken,
+    DivideToken,
+    ModuloToken,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXor,
+    LeftShift,
+    RightShift,
+]
