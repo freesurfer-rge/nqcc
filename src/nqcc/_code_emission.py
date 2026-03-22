@@ -13,6 +13,7 @@ from nqcc.codegen import (
     AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
+    AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
     AsmNeg,
@@ -21,11 +22,11 @@ from nqcc.codegen import (
     AsmProgramNode,
     AsmRegisterNode,
     AsmRetNode,
+    AsmRightShift,
     AsmStackNode,
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
-    AsmLeftShift, AsmRightShift
 )
 
 ASSEMBLY_EXTENSION = ".s"
