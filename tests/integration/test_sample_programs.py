@@ -60,7 +60,7 @@ class TestChapter03:
     SUB_DIR = "ch03"
 
     @pytest.mark.parametrize(
-        "c_source_file", ["simple_add.c", "simple_divide.c", "many_operator.c"]
+        "c_source_file", ["simple_add.c", "simple_divide.c", "many_operator.c", "bitwise_precedence.c"]
     )
     def test_direct(self, c_source_file: str):
         target_file = SAMPLE_PROGRAM_DIR / TestChapter03.SUB_DIR / c_source_file

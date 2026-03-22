@@ -70,6 +70,21 @@ def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
                 return [nxt0, nxt1]
             else:
                 return [instr]
+        case AsmLeftShift() | AsmRightShift():
+            # Have to use CL/ECX for number of places to shift
+            if not isinstance(instr.src, AsmImmediateIntNode):
+                reg = AsmRegisterNode(start_position=instr.start_position, value="ecx")
+                sub_reg = AsmRegisterNode(start_position=instr.start_position, value="cl")
+                nxt0 = AsmMovNode(start_position=instr.start_position, src=instr.src, dst=reg)
+                nxt1 = AsmBinaryNode(
+                    start_position=instr.start_position,
+                    operator=instr.operator,
+                    src=sub_reg,
+                    dst=instr.dst,
+                )
+                return [nxt0, nxt1]
+            else:
+                return [instr]
         case AsmMultiply():
             if isinstance(instr.dst, AsmStackNode):
                 # This is a dst fixup (dst cannot be on stack), so use r11d

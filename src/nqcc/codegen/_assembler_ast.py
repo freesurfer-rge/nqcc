@@ -15,7 +15,7 @@ class AsmImmediateIntNode(AsmASTNode):
 
 class AsmRegisterNode(AsmASTNode):
     node_type: Literal["AsmRegisterNode"] = "AsmRegisterNode"
-    value: Literal["eax", "edx", "rbp", "rsp", "r10d", "r11d"]
+    value: Literal["eax", "ecx", "cl", "edx", "rbp", "rsp", "r10d", "r11d"]
 
 
 class AsmPseudoRegisterNode(AsmASTNode):
