@@ -10,6 +10,7 @@ from nqcc.codegen import (
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
+    AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
     AsmNeg,
@@ -18,9 +19,9 @@ from nqcc.codegen import (
     AsmPseudoRegisterNode,
     AsmRegisterNode,
     AsmRetNode,
+    AsmRightShift,
     AsmSubtract,
     AsmUnaryNode,
-    AsmLeftShift, AsmRightShift,
     convert_tacky_binary_operator,
     convert_tacky_function,
     convert_tacky_instruction,
@@ -39,14 +40,15 @@ from nqcc.tacky import (
     TackyConstantIntNode,
     TackyDivide,
     TackyGenerator,
+    TackyLeftShift,
     TackyModulo,
     TackyMultiply,
     TackyNegate,
     TackyReturnNode,
+    TackyRightShift,
     TackySubtract,
     TackyUnaryNode,
     TackyVarNode,
-    TackyLeftShift, TackyRightShift
 )
 
 
@@ -111,13 +113,11 @@ class TestBinaryOperators:
         result = convert_tacky_binary_operator(target)
         assert result == AsmBitwiseXor(start_position=1623)
 
-    
     def test_leftshift(self):
         target = TackyLeftShift(start_position=11623)
         result = convert_tacky_binary_operator(target)
         assert result == AsmLeftShift(start_position=11623)
 
-    
     def test_rightshift(self):
         target = TackyRightShift(start_position=11623)
         result = convert_tacky_binary_operator(target)
@@ -254,9 +254,15 @@ class TestInstructions:
         )
 
     @pytest.mark.parametrize("operation", ["<<", ">>"])
-    def test_bitwise(self, operation):
-        _TACKY_OP = {"<<": TackyLeftShift, ">>": TackyRightShift,}
-        _ASM_OP = {"<<": AsmLeftShift, ">>": AsmRightShift,}
+    def test_shift(self, operation):
+        _TACKY_OP = {
+            "<<": TackyLeftShift,
+            ">>": TackyRightShift,
+        }
+        _ASM_OP = {
+            "<<": AsmLeftShift,
+            ">>": AsmRightShift,
+        }
         target = TackyBinaryNode(
             start_position=22,
             operator=_TACKY_OP[operation](start_position=21),

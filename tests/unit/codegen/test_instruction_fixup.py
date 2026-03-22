@@ -11,11 +11,13 @@ from nqcc.codegen import (
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
+    AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
     AsmOperandNode,
     AsmProgramNode,
     AsmRegisterNode,
+    AsmRightShift,
     AsmStackNode,
     AsmSubtract,
     apply_binary_fixup,
@@ -110,6 +112,8 @@ class TestBinaryFixup:
             AsmBitwiseAnd(start_position=3),
             AsmBitwiseOr(start_position=3),
             AsmBitwiseXor(start_position=3),
+            AsmLeftShift(start_position=3),
+            AsmRightShift(start_position=3),
         ],
     )
     @pytest.mark.parametrize(
@@ -136,6 +140,8 @@ class TestBinaryFixup:
             AsmBitwiseAnd(start_position=3),
             AsmBitwiseOr(start_position=3),
             AsmBitwiseXor(start_position=3),
+            AsmLeftShift(start_position=3),
+            AsmRightShift(start_position=3),
         ],
     )
     def test_binopsrcfixup_node(self, op: AsmBinaryOperator):

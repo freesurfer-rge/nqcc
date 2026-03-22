@@ -10,17 +10,18 @@ from nqcc.tacky import (
     TackyDivide,
     TackyFunctionNode,
     TackyInstruction,
+    TackyLeftShift,
     TackyModulo,
     TackyMultiply,
     TackyNegate,
     TackyProgramNode,
     TackyReturnNode,
+    TackyRightShift,
     TackySubtract,
     TackyUnaryNode,
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
-    TackyLeftShift, TackyRightShift
 )
 
 from ._assembler_ast import (
@@ -35,6 +36,7 @@ from ._assembler_ast import (
     AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
+    AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
     AsmNeg,
@@ -44,10 +46,10 @@ from ._assembler_ast import (
     AsmPseudoRegisterNode,
     AsmRegisterNode,
     AsmRetNode,
+    AsmRightShift,
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
-    AsmLeftShift, AsmRightShift,
 )
 
 

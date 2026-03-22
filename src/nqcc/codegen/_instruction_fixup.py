@@ -9,10 +9,12 @@ from ._assembler_ast import (
     AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
+    AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
     AsmProgramNode,
     AsmRegisterNode,
+    AsmRightShift,
     AsmStackNode,
     AsmSubtract,
 )
@@ -46,7 +48,15 @@ def apply_idiv_fixup(instr: AsmIDivNode) -> list[AsmInstructionNode]:
 
 def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
     match instr.operator:
-        case AsmAdd() | AsmSubtract() | AsmBitwiseAnd() | AsmBitwiseOr() | AsmBitwiseXor():
+        case (
+            AsmAdd()
+            | AsmSubtract()
+            | AsmBitwiseAnd()
+            | AsmBitwiseOr()
+            | AsmBitwiseXor()
+            | AsmLeftShift()
+            | AsmRightShift()
+        ):
             if isinstance(instr.src, AsmStackNode):
                 # src cannot be on the stack
                 reg = AsmRegisterNode(start_position=instr.start_position, value="r10d")
