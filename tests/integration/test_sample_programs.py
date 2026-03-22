@@ -70,7 +70,7 @@ class TestChapter03:
 
     @pytest.mark.parametrize("v0", [2, 3, 4, 127])
     @pytest.mark.parametrize("v1", [2, 3, 4, 127])
-    @pytest.mark.parametrize("op", ["+", "-", "*", "/", "%", "&", "|", "^"])
+    @pytest.mark.parametrize("op", ["+", "-", "*", "/", "%", "&", "|", "^", "<<", ">>"])
     def test_single_binary_operators(self, v0: int, v1: int, op: str):
         target_file = SAMPLE_PROGRAM_DIR / TestChapter03.SUB_DIR / "binary_operators.c"
         macros = [f"V0={v0}", f"V1={v1}", f"OP={op}"]
