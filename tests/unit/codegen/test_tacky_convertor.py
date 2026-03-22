@@ -1,6 +1,9 @@
 from nqcc.codegen import (
     AsmAdd,
     AsmBinaryNode,
+    AsmBitwiseAnd,
+    AsmBitwiseOr,
+    AsmBitwiseXor,
     AsmCdqNode,
     AsmFunctionNode,
     AsmIDivNode,
@@ -26,6 +29,9 @@ from nqcc.parser import TokenTape, parse_function, parse_program
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
+    TackyBitwiseAnd,
+    TackyBitwiseOr,
+    TackyBitwiseXor,
     TackyComplement,
     TackyConstantIntNode,
     TackyDivide,
@@ -85,6 +91,21 @@ class TestBinaryOperators:
         target = TackyMultiply(start_position=21831)
         result = convert_tacky_binary_operator(target)
         assert result == AsmMultiply(start_position=21831)
+
+    def test_bitwiseand(self):
+        target = TackyBitwiseAnd(start_position=623)
+        result = convert_tacky_binary_operator(target)
+        assert result == AsmBitwiseAnd(start_position=623)
+
+    def test_bitwiseor(self):
+        target = TackyBitwiseOr(start_position=6213)
+        result = convert_tacky_binary_operator(target)
+        assert result == AsmBitwiseOr(start_position=6213)
+
+    def test_bitwisexor(self):
+        target = TackyBitwiseXor(start_position=1623)
+        result = convert_tacky_binary_operator(target)
+        assert result == AsmBitwiseXor(start_position=123)
 
 
 class TestInstructions:

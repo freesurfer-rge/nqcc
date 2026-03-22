@@ -70,7 +70,21 @@ class AsmMultiply(AsmASTNode):
     node_type: Literal["AsmMultiply"] = "AsmMultiply"
 
 
-AsmBinaryOperator = Union[AsmAdd, AsmSubtract, AsmMultiply]
+class AsmBitwiseAnd(AsmASTNode):
+    node_type: Literal["AsmBitwiseAnd"] = "AsmBitwiseAnd"
+
+
+class AsmBitwiseOr(AsmASTNode):
+    node_type: Literal["AsmBitwiseOr"] = "AsmBitwiseOr"
+
+
+class AsmBitwiseXor(AsmASTNode):
+    node_type: Literal["AsmBitwiseXor"] = "AsmBitwiseXor"
+
+
+AsmBinaryOperator = Union[
+    AsmAdd, AsmSubtract, AsmMultiply, AsmBitwiseAnd, AsmBitwiseOr, AsmBitwiseXor
+]
 
 
 class AsmBinaryNode(AsmASTNode):
