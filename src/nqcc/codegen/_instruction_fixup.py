@@ -48,15 +48,7 @@ def apply_idiv_fixup(instr: AsmIDivNode) -> list[AsmInstructionNode]:
 
 def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
     match instr.operator:
-        case (
-            AsmAdd()
-            | AsmSubtract()
-            | AsmBitwiseAnd()
-            | AsmBitwiseOr()
-            | AsmBitwiseXor()
-            | AsmLeftShift()
-            | AsmRightShift()
-        ):
+        case AsmAdd() | AsmSubtract() | AsmBitwiseAnd() | AsmBitwiseOr() | AsmBitwiseXor():
             if isinstance(instr.src, AsmStackNode):
                 # src cannot be on the stack
                 reg = AsmRegisterNode(start_position=instr.start_position, value="r10d")
@@ -71,8 +63,9 @@ def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
             else:
                 return [instr]
         case AsmLeftShift() | AsmRightShift():
-            # Have to use CL/ECX for number of places to shift
             if not isinstance(instr.src, AsmImmediateIntNode):
+                # Have to use CL/ECX for number of places to shift
+                # Note that CL is the least significant byte of ECX
                 reg = AsmRegisterNode(start_position=instr.start_position, value="ecx")
                 sub_reg = AsmRegisterNode(start_position=instr.start_position, value="cl")
                 nxt0 = AsmMovNode(start_position=instr.start_position, src=instr.src, dst=reg)
