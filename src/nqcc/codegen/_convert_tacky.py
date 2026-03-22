@@ -20,6 +20,7 @@ from nqcc.tacky import (
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
+    TackyLeftShift, TackyRightShift
 )
 
 from ._assembler_ast import (
@@ -46,6 +47,7 @@ from ._assembler_ast import (
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
+    AsmLeftShift, AsmRightShift,
 )
 
 
@@ -87,6 +89,10 @@ def convert_tacky_binary_operator(tacky_operator: TackyBinaryOperator) -> AsmBin
             return AsmBitwiseOr(start_position=tacky_operator.start_position)
         case TackyBitwiseXor():
             return AsmBitwiseXor(start_position=tacky_operator.start_position)
+        case TackyLeftShift():
+            return AsmLeftShift(start_position=tacky_operator.start_position)
+        case TackyRightShift():
+            return AsmRightShift(start_position=tacky_operator.start_position)
         case _:
             # Div and Modulo handled separately
             raise ValueError(f"Unrecognised: {tacky_operator}")

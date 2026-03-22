@@ -20,6 +20,7 @@ from nqcc.codegen import (
     AsmRetNode,
     AsmSubtract,
     AsmUnaryNode,
+    AsmLeftShift, AsmRightShift,
     convert_tacky_binary_operator,
     convert_tacky_function,
     convert_tacky_instruction,
@@ -45,6 +46,7 @@ from nqcc.tacky import (
     TackySubtract,
     TackyUnaryNode,
     TackyVarNode,
+    TackyLeftShift, TackyRightShift
 )
 
 
@@ -108,6 +110,18 @@ class TestBinaryOperators:
         target = TackyBitwiseXor(start_position=1623)
         result = convert_tacky_binary_operator(target)
         assert result == AsmBitwiseXor(start_position=1623)
+
+    
+    def test_leftshift(self):
+        target = TackyLeftShift(start_position=11623)
+        result = convert_tacky_binary_operator(target)
+        assert result == AsmLeftShift(start_position=11623)
+
+    
+    def test_rightshift(self):
+        target = TackyRightShift(start_position=11623)
+        result = convert_tacky_binary_operator(target)
+        assert result == AsmRightShift(start_position=11623)
 
 
 class TestInstructions:
