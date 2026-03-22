@@ -22,6 +22,7 @@ from nqcc.codegen import (
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
+    AsmBitwiseAnd, AsmBitwiseOr, AsmBitwiseXor,
 )
 
 ASSEMBLY_EXTENSION = ".s"
@@ -63,6 +64,12 @@ def get_binary_opcode(binary_operator: AsmBinaryOperator) -> str:
             return "subl"
         case AsmMultiply():
             return "imull"
+        case AsmBitwiseAnd():
+            return "andl"
+        case AsmBitwiseOr():
+            return "orl"
+        case AsmBitwiseXor():
+            return "xorl"
         case _:
             raise ValueError(f"Unrecognised: {binary_operator}")
 
