@@ -187,7 +187,7 @@ class TestBinaryFixup:
         "src",
         [
             AsmStackNode(start_position=2, offset=-4),
-            AsmRegisterNode(start_position=2, value="r10d")
+            AsmRegisterNode(start_position=2, value="r10d"),
         ],
     )
     def test_shift_fixup(self, op: AsmBinaryOperator, src: AsmOperandNode):
@@ -196,7 +196,9 @@ class TestBinaryFixup:
 
         fixed = apply_binary_fixup(target)
         assert len(fixed) == 2
-        assert fixed[0] == AsmMovNode(start_position=4, src=src, dst=AsmRegisterNode(start_position=4, value="ecx"))
+        assert fixed[0] == AsmMovNode(
+            start_position=4, src=src, dst=AsmRegisterNode(start_position=4, value="ecx")
+        )
         assert fixed[1] == AsmBinaryNode(start_position=4, operator=op, src=fixed[0].dst, dst=dst)
 
     def test_mul_unaffected(self):
