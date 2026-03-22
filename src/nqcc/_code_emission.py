@@ -5,11 +5,15 @@ from nqcc.codegen import (
     AsmAllocateStackNode,
     AsmBinaryNode,
     AsmBinaryOperator,
+    AsmBitwiseAnd,
+    AsmBitwiseOr,
+    AsmBitwiseXor,
     AsmCdqNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
+    AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
     AsmNeg,
@@ -18,6 +22,7 @@ from nqcc.codegen import (
     AsmProgramNode,
     AsmRegisterNode,
     AsmRetNode,
+    AsmRightShift,
     AsmStackNode,
     AsmSubtract,
     AsmUnaryNode,
@@ -63,6 +68,18 @@ def get_binary_opcode(binary_operator: AsmBinaryOperator) -> str:
             return "subl"
         case AsmMultiply():
             return "imull"
+        case AsmBitwiseAnd():
+            return "andl"
+        case AsmBitwiseOr():
+            return "orl"
+        case AsmBitwiseXor():
+            return "xorl"
+        case AsmLeftShift():
+            # Use arithmetic shift to preserve sign
+            return "sall"
+        case AsmRightShift():
+            # Use arithmetic shift to preserve sign
+            return "sarl"
         case _:
             raise ValueError(f"Unrecognised: {binary_operator}")
 

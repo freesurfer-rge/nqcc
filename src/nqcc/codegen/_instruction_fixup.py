@@ -2,14 +2,19 @@ from ._assembler_ast import (
     AsmAdd,
     AsmAllocateStackNode,
     AsmBinaryNode,
+    AsmBitwiseAnd,
+    AsmBitwiseOr,
+    AsmBitwiseXor,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
+    AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
     AsmProgramNode,
     AsmRegisterNode,
+    AsmRightShift,
     AsmStackNode,
     AsmSubtract,
 )
@@ -43,7 +48,7 @@ def apply_idiv_fixup(instr: AsmIDivNode) -> list[AsmInstructionNode]:
 
 def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
     match instr.operator:
-        case AsmAdd() | AsmSubtract():
+        case AsmAdd() | AsmSubtract() | AsmBitwiseAnd() | AsmBitwiseOr() | AsmBitwiseXor():
             if isinstance(instr.src, AsmStackNode):
                 # src cannot be on the stack
                 reg = AsmRegisterNode(start_position=instr.start_position, value="r10d")
@@ -52,6 +57,21 @@ def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
                     start_position=instr.start_position,
                     operator=instr.operator,
                     src=nxt0.dst,
+                    dst=instr.dst,
+                )
+                return [nxt0, nxt1]
+            else:
+                return [instr]
+        case AsmLeftShift() | AsmRightShift():
+            if not isinstance(instr.src, AsmImmediateIntNode):
+                # Have to use CL/ECX for number of places to shift
+                # Note that CL is the least significant byte of ECX
+                reg = AsmRegisterNode(start_position=instr.start_position, value="ecx")
+                nxt0 = AsmMovNode(start_position=instr.start_position, src=instr.src, dst=reg)
+                nxt1 = AsmBinaryNode(
+                    start_position=instr.start_position,
+                    operator=instr.operator,
+                    src=reg,
                     dst=instr.dst,
                 )
                 return [nxt0, nxt1]

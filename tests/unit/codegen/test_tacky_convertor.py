@@ -1,10 +1,16 @@
+import pytest
+
 from nqcc.codegen import (
     AsmAdd,
     AsmBinaryNode,
+    AsmBitwiseAnd,
+    AsmBitwiseOr,
+    AsmBitwiseXor,
     AsmCdqNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
+    AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
     AsmNeg,
@@ -13,6 +19,7 @@ from nqcc.codegen import (
     AsmPseudoRegisterNode,
     AsmRegisterNode,
     AsmRetNode,
+    AsmRightShift,
     AsmSubtract,
     AsmUnaryNode,
     convert_tacky_binary_operator,
@@ -26,14 +33,19 @@ from nqcc.parser import TokenTape, parse_function, parse_program
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
+    TackyBitwiseAnd,
+    TackyBitwiseOr,
+    TackyBitwiseXor,
     TackyComplement,
     TackyConstantIntNode,
     TackyDivide,
     TackyGenerator,
+    TackyLeftShift,
     TackyModulo,
     TackyMultiply,
     TackyNegate,
     TackyReturnNode,
+    TackyRightShift,
     TackySubtract,
     TackyUnaryNode,
     TackyVarNode,
@@ -85,6 +97,31 @@ class TestBinaryOperators:
         target = TackyMultiply(start_position=21831)
         result = convert_tacky_binary_operator(target)
         assert result == AsmMultiply(start_position=21831)
+
+    def test_bitwiseand(self):
+        target = TackyBitwiseAnd(start_position=623)
+        result = convert_tacky_binary_operator(target)
+        assert result == AsmBitwiseAnd(start_position=623)
+
+    def test_bitwiseor(self):
+        target = TackyBitwiseOr(start_position=6213)
+        result = convert_tacky_binary_operator(target)
+        assert result == AsmBitwiseOr(start_position=6213)
+
+    def test_bitwisexor(self):
+        target = TackyBitwiseXor(start_position=1623)
+        result = convert_tacky_binary_operator(target)
+        assert result == AsmBitwiseXor(start_position=1623)
+
+    def test_leftshift(self):
+        target = TackyLeftShift(start_position=11623)
+        result = convert_tacky_binary_operator(target)
+        assert result == AsmLeftShift(start_position=11623)
+
+    def test_rightshift(self):
+        target = TackyRightShift(start_position=11623)
+        result = convert_tacky_binary_operator(target)
+        assert result == AsmRightShift(start_position=11623)
 
 
 class TestInstructions:
@@ -186,6 +223,64 @@ class TestInstructions:
         assert result[1] == AsmBinaryNode(
             start_position=22,
             operator=AsmMultiply(start_position=21),
+            src=AsmPseudoRegisterNode(start_position=13, identifier="right.0"),
+            dst=result[0].dst,
+        )
+
+    @pytest.mark.parametrize("operation", ["&", "|", "^"])
+    def test_bitwise(self, operation):
+        _TACKY_OP = {"&": TackyBitwiseAnd, "|": TackyBitwiseOr, "^": TackyBitwiseXor}
+        _ASM_OP = {"&": AsmBitwiseAnd, "|": AsmBitwiseOr, "^": AsmBitwiseXor}
+        target = TackyBinaryNode(
+            start_position=22,
+            operator=_TACKY_OP[operation](start_position=21),
+            left=TackyVarNode(start_position=12, identifier="left.0"),
+            right=TackyVarNode(start_position=13, identifier="right.0"),
+            dst=TackyVarNode(start_position=14, identifier="dst.0"),
+        )
+
+        result = convert_tacky_instruction(target)
+        assert len(result) == 2
+        assert result[0] == AsmMovNode(
+            start_position=22,
+            src=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
+            dst=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
+        )
+        assert result[1] == AsmBinaryNode(
+            start_position=22,
+            operator=_ASM_OP[operation](start_position=21),
+            src=AsmPseudoRegisterNode(start_position=13, identifier="right.0"),
+            dst=result[0].dst,
+        )
+
+    @pytest.mark.parametrize("operation", ["<<", ">>"])
+    def test_shift(self, operation):
+        _TACKY_OP = {
+            "<<": TackyLeftShift,
+            ">>": TackyRightShift,
+        }
+        _ASM_OP = {
+            "<<": AsmLeftShift,
+            ">>": AsmRightShift,
+        }
+        target = TackyBinaryNode(
+            start_position=22,
+            operator=_TACKY_OP[operation](start_position=21),
+            left=TackyVarNode(start_position=12, identifier="left.0"),
+            right=TackyVarNode(start_position=13, identifier="right.0"),
+            dst=TackyVarNode(start_position=14, identifier="dst.0"),
+        )
+
+        result = convert_tacky_instruction(target)
+        assert len(result) == 2
+        assert result[0] == AsmMovNode(
+            start_position=22,
+            src=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
+            dst=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
+        )
+        assert result[1] == AsmBinaryNode(
+            start_position=22,
+            operator=_ASM_OP[operation](start_position=21),
             src=AsmPseudoRegisterNode(start_position=13, identifier="right.0"),
             dst=result[0].dst,
         )

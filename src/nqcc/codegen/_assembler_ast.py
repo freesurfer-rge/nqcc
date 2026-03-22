@@ -15,7 +15,7 @@ class AsmImmediateIntNode(AsmASTNode):
 
 class AsmRegisterNode(AsmASTNode):
     node_type: Literal["AsmRegisterNode"] = "AsmRegisterNode"
-    value: Literal["eax", "edx", "rbp", "rsp", "r10d", "r11d"]
+    value: Literal["eax", "ecx", "cl", "edx", "rbp", "rsp", "r10d", "r11d"]
 
 
 class AsmPseudoRegisterNode(AsmASTNode):
@@ -70,7 +70,36 @@ class AsmMultiply(AsmASTNode):
     node_type: Literal["AsmMultiply"] = "AsmMultiply"
 
 
-AsmBinaryOperator = Union[AsmAdd, AsmSubtract, AsmMultiply]
+class AsmBitwiseAnd(AsmASTNode):
+    node_type: Literal["AsmBitwiseAnd"] = "AsmBitwiseAnd"
+
+
+class AsmBitwiseOr(AsmASTNode):
+    node_type: Literal["AsmBitwiseOr"] = "AsmBitwiseOr"
+
+
+class AsmBitwiseXor(AsmASTNode):
+    node_type: Literal["AsmBitwiseXor"] = "AsmBitwiseXor"
+
+
+class AsmLeftShift(AsmASTNode):
+    node_type: Literal["AsmLeftShift"] = "AsmLeftShift"
+
+
+class AsmRightShift(AsmASTNode):
+    node_type: Literal["AsmRightShift"] = "AsmRightShift"
+
+
+AsmBinaryOperator = Union[
+    AsmAdd,
+    AsmSubtract,
+    AsmMultiply,
+    AsmBitwiseAnd,
+    AsmBitwiseOr,
+    AsmBitwiseXor,
+    AsmLeftShift,
+    AsmRightShift,
+]
 
 
 class AsmBinaryNode(AsmASTNode):

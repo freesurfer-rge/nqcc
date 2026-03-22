@@ -5,14 +5,19 @@ from nqcc.codegen import (
     AsmAllocateStackNode,
     AsmBinaryNode,
     AsmBinaryOperator,
+    AsmBitwiseAnd,
+    AsmBitwiseOr,
+    AsmBitwiseXor,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
+    AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
     AsmOperandNode,
     AsmProgramNode,
     AsmRegisterNode,
+    AsmRightShift,
     AsmStackNode,
     AsmSubtract,
     apply_binary_fixup,
@@ -99,7 +104,16 @@ class TestIDivFixup:
 
 
 class TestBinaryFixup:
-    @pytest.mark.parametrize("op", [AsmAdd(start_position=3), AsmSubtract(start_position=3)])
+    @pytest.mark.parametrize(
+        "op",
+        [
+            AsmAdd(start_position=3),
+            AsmSubtract(start_position=3),
+            AsmBitwiseAnd(start_position=3),
+            AsmBitwiseOr(start_position=3),
+            AsmBitwiseXor(start_position=3),
+        ],
+    )
     @pytest.mark.parametrize(
         "src",
         [
@@ -107,7 +121,7 @@ class TestBinaryFixup:
             AsmImmediateIntNode(start_position=2, value=1312),
         ],
     )
-    def test_addsub_unaffected(self, op: AsmBinaryOperator, src: AsmOperandNode):
+    def test_binopsrcfixup_unaffected(self, op: AsmBinaryOperator, src: AsmOperandNode):
         dst = AsmStackNode(start_position=2, offset=-8)
         target = AsmBinaryNode(start_position=4, operator=op, src=src, dst=dst)
         orig = target.model_copy(deep=True)
@@ -116,8 +130,17 @@ class TestBinaryFixup:
         assert len(fixed) == 1
         assert fixed[0] == orig
 
-    @pytest.mark.parametrize("op", [AsmAdd(start_position=3), AsmSubtract(start_position=3)])
-    def test_addsub_node(self, op: AsmBinaryOperator):
+    @pytest.mark.parametrize(
+        "op",
+        [
+            AsmAdd(start_position=3),
+            AsmSubtract(start_position=3),
+            AsmBitwiseAnd(start_position=3),
+            AsmBitwiseOr(start_position=3),
+            AsmBitwiseXor(start_position=3),
+        ],
+    )
+    def test_binopsrcfixup_node(self, op: AsmBinaryOperator):
         src = AsmStackNode(start_position=1, offset=-4)
         dst = AsmStackNode(start_position=2, offset=-8)
         target = AsmBinaryNode(start_position=4, operator=op, src=src, dst=dst)
@@ -128,6 +151,53 @@ class TestBinaryFixup:
             start_position=4,
             src=src,
             dst=AsmRegisterNode(start_position=4, value="r10d"),
+        )
+        assert fixed[1] == AsmBinaryNode(start_position=4, operator=op, src=fixed[0].dst, dst=dst)
+
+    @pytest.mark.parametrize(
+        "op",
+        [
+            AsmLeftShift(start_position=3),
+            AsmRightShift(start_position=3),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "src",
+        [
+            AsmImmediateIntNode(start_position=2, value=1312),
+        ],
+    )
+    def test_shift_unaffected(self, op: AsmBinaryOperator, src: AsmOperandNode):
+        dst = AsmStackNode(start_position=2, offset=-8)
+        target = AsmBinaryNode(start_position=4, operator=op, src=src, dst=dst)
+        orig = target.model_copy(deep=True)
+
+        fixed = apply_binary_fixup(target)
+        assert len(fixed) == 1
+        assert fixed[0] == orig
+
+    @pytest.mark.parametrize(
+        "op",
+        [
+            AsmLeftShift(start_position=3),
+            AsmRightShift(start_position=3),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "src",
+        [
+            AsmStackNode(start_position=2, offset=-4),
+            AsmRegisterNode(start_position=2, value="r10d"),
+        ],
+    )
+    def test_shift_fixup(self, op: AsmBinaryOperator, src: AsmOperandNode):
+        dst = AsmStackNode(start_position=2, offset=-8)
+        target = AsmBinaryNode(start_position=4, operator=op, src=src, dst=dst)
+
+        fixed = apply_binary_fixup(target)
+        assert len(fixed) == 2
+        assert fixed[0] == AsmMovNode(
+            start_position=4, src=src, dst=AsmRegisterNode(start_position=4, value="ecx")
         )
         assert fixed[1] == AsmBinaryNode(start_position=4, operator=op, src=fixed[0].dst, dst=dst)
 
