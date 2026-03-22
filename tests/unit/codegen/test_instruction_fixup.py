@@ -112,8 +112,6 @@ class TestBinaryFixup:
             AsmBitwiseAnd(start_position=3),
             AsmBitwiseOr(start_position=3),
             AsmBitwiseXor(start_position=3),
-            AsmLeftShift(start_position=3),
-            AsmRightShift(start_position=3),
         ],
     )
     @pytest.mark.parametrize(
@@ -140,8 +138,6 @@ class TestBinaryFixup:
             AsmBitwiseAnd(start_position=3),
             AsmBitwiseOr(start_position=3),
             AsmBitwiseXor(start_position=3),
-            AsmLeftShift(start_position=3),
-            AsmRightShift(start_position=3),
         ],
     )
     def test_binopsrcfixup_node(self, op: AsmBinaryOperator):
@@ -156,6 +152,51 @@ class TestBinaryFixup:
             src=src,
             dst=AsmRegisterNode(start_position=4, value="r10d"),
         )
+        assert fixed[1] == AsmBinaryNode(start_position=4, operator=op, src=fixed[0].dst, dst=dst)
+
+    @pytest.mark.parametrize(
+        "op",
+        [
+            AsmLeftShift(start_position=3),
+            AsmRightShift(start_position=3),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "src",
+        [
+            AsmImmediateIntNode(start_position=2, value=1312),
+        ],
+    )
+    def test_shift_unaffected(self, op: AsmBinaryOperator, src: AsmOperandNode):
+        dst = AsmStackNode(start_position=2, offset=-8)
+        target = AsmBinaryNode(start_position=4, operator=op, src=src, dst=dst)
+        orig = target.model_copy(deep=True)
+
+        fixed = apply_binary_fixup(target)
+        assert len(fixed) == 1
+        assert fixed[0] == orig
+
+    @pytest.mark.parametrize(
+        "op",
+        [
+            AsmLeftShift(start_position=3),
+            AsmRightShift(start_position=3),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "src",
+        [
+            AsmStackNode(start_position=2, offset=-4),
+            AsmRegisterNode(start_position=2, value="r10d")
+        ],
+    )
+    def test_shift_fixup(self, op: AsmBinaryOperator, src: AsmOperandNode):
+        dst = AsmStackNode(start_position=2, offset=-8)
+        target = AsmBinaryNode(start_position=4, operator=op, src=src, dst=dst)
+
+        fixed = apply_binary_fixup(target)
+        assert len(fixed) == 2
+        assert fixed[0] == AsmMovNode(start_position=4, src=src, dst=AsmRegisterNode(start_position=4, value="ecx"))
         assert fixed[1] == AsmBinaryNode(start_position=4, operator=op, src=fixed[0].dst, dst=dst)
 
     def test_mul_unaffected(self):

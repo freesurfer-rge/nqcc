@@ -67,12 +67,11 @@ def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
                 # Have to use CL/ECX for number of places to shift
                 # Note that CL is the least significant byte of ECX
                 reg = AsmRegisterNode(start_position=instr.start_position, value="ecx")
-                sub_reg = AsmRegisterNode(start_position=instr.start_position, value="cl")
                 nxt0 = AsmMovNode(start_position=instr.start_position, src=instr.src, dst=reg)
                 nxt1 = AsmBinaryNode(
                     start_position=instr.start_position,
                     operator=instr.operator,
-                    src=sub_reg,
+                    src=reg,
                     dst=instr.dst,
                 )
                 return [nxt0, nxt1]
