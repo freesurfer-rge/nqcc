@@ -112,6 +112,8 @@ def convert_tacky_binary_node(tacky_node: TackyBinaryNode) -> list[AsmInstructio
             | TackyBitwiseAnd()
             | TackyBitwiseOr()
             | TackyBitwiseXor()
+            | TackyLeftShift()
+            | TackyRightShift()
         ):
             asm_bin_op = convert_tacky_binary_operator(tacky_node.operator)
             i0_bin_op = AsmMovNode(start_position=tacky_node.start_position, src=left, dst=dest)

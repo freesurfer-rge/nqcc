@@ -253,6 +253,32 @@ class TestInstructions:
             dst=result[0].dst,
         )
 
+    @pytest.mark.parametrize("operation", ["<<", ">>"])
+    def test_bitwise(self, operation):
+        _TACKY_OP = {"<<": TackyLeftShift, ">>": TackyRightShift,}
+        _ASM_OP = {"<<": AsmLeftShift, ">>": AsmRightShift,}
+        target = TackyBinaryNode(
+            start_position=22,
+            operator=_TACKY_OP[operation](start_position=21),
+            left=TackyVarNode(start_position=12, identifier="left.0"),
+            right=TackyVarNode(start_position=13, identifier="right.0"),
+            dst=TackyVarNode(start_position=14, identifier="dst.0"),
+        )
+
+        result = convert_tacky_instruction(target)
+        assert len(result) == 2
+        assert result[0] == AsmMovNode(
+            start_position=22,
+            src=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
+            dst=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
+        )
+        assert result[1] == AsmBinaryNode(
+            start_position=22,
+            operator=_ASM_OP[operation](start_position=21),
+            src=AsmPseudoRegisterNode(start_position=13, identifier="right.0"),
+            dst=result[0].dst,
+        )
+
     def test_divide(self):
         target = TackyBinaryNode(
             start_position=22,
