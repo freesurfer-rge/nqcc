@@ -5,6 +5,9 @@ from nqcc.codegen import (
     AsmAllocateStackNode,
     AsmBinaryNode,
     AsmBinaryOperator,
+    AsmBitwiseAnd,
+    AsmBitwiseOr,
+    AsmBitwiseXor,
     AsmCdqNode,
     AsmFunctionNode,
     AsmIDivNode,
@@ -22,7 +25,6 @@ from nqcc.codegen import (
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
-    AsmBitwiseAnd, AsmBitwiseOr, AsmBitwiseXor,
 )
 
 ASSEMBLY_EXTENSION = ".s"

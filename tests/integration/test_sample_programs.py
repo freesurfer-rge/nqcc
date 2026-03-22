@@ -68,8 +68,8 @@ class TestChapter03:
 
         _compile_run_check(target_file, macros=[])
 
-    @pytest.mark.parametrize("v0", [2, 3, 4, 15])
-    @pytest.mark.parametrize("v1", [2, 3, 4, 15])
+    @pytest.mark.parametrize("v0", [2, 3, 4, 127])
+    @pytest.mark.parametrize("v1", [2, 3, 4, 127])
     @pytest.mark.parametrize("op", ["+", "-", "*", "/", "%", "&", "|", "^"])
     def test_single_binary_operators(self, v0: int, v1: int, op: str):
         target_file = SAMPLE_PROGRAM_DIR / TestChapter03.SUB_DIR / "binary_operators.c"
@@ -77,12 +77,11 @@ class TestChapter03:
         assert target_file.exists(), f"{target_file} not found"
         _compile_run_check(target_file, macros)
 
-
-    @pytest.mark.parametrize("v0", [2, 3, 37])
-    @pytest.mark.parametrize("v1", [2, 3, 37])
-    @pytest.mark.parametrize("v2", [2, 3, 37])
-    @pytest.mark.parametrize("op0", ["+", "-", "*", "/", "%"])
-    @pytest.mark.parametrize("op1", ["+", "-", "*", "/", "%"])
+    @pytest.mark.parametrize("v0", [2, 3, 31])
+    @pytest.mark.parametrize("v1", [2, 3, 31])
+    @pytest.mark.parametrize("v2", [2, 3, 31])
+    @pytest.mark.parametrize("op0", ["+", "-", "*", "/", "%", "&", "|", "^"])
+    @pytest.mark.parametrize("op1", ["+", "-", "*", "/", "%", "&", "|", "^"])
     def test_two_operator(self, v0: int, v1: int, v2: int, op0: str, op1: str):
         target_file = SAMPLE_PROGRAM_DIR / TestChapter03.SUB_DIR / "two_operator.c"
         macros = [f"V0={v0}", f"V1={v1}", f"V2={v2}", f"OP0={op0}", f"OP1={op1}"]
