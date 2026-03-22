@@ -2,6 +2,9 @@ from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
     TackyBinaryOperator,
+    TackyBitwiseAnd,
+    TackyBitwiseOr,
+    TackyBitwiseXor,
     TackyComplement,
     TackyConstantIntNode,
     TackyDivide,
@@ -23,6 +26,9 @@ from ._assembler_ast import (
     AsmAdd,
     AsmBinaryNode,
     AsmBinaryOperator,
+    AsmBitwiseAnd,
+    AsmBitwiseOr,
+    AsmBitwiseXor,
     AsmCdqNode,
     AsmFunctionNode,
     AsmIDivNode,
@@ -75,6 +81,12 @@ def convert_tacky_binary_operator(tacky_operator: TackyBinaryOperator) -> AsmBin
             return AsmSubtract(start_position=tacky_operator.start_position)
         case TackyMultiply():
             return AsmMultiply(start_position=tacky_operator.start_position)
+        case TackyBitwiseAnd():
+            return AsmBitwiseAnd(start_position=tacky_operator.start_position)
+        case TackyBitwiseOr():
+            return AsmBitwiseOr(start_position=tacky_operator.start_position)
+        case TackyBitwiseXor():
+            return AsmBitwiseXor(start_position=tacky_operator.start_position)
         case _:
             # Div and Modulo handled separately
             raise ValueError(f"Unrecognised: {tacky_operator}")
@@ -87,7 +99,14 @@ def convert_tacky_binary_node(tacky_node: TackyBinaryNode) -> list[AsmInstructio
     right = convert_tacky_operand(tacky_node.right)
     dest = convert_tacky_operand(tacky_node.dst)
     match tacky_node.operator:
-        case TackyAdd() | TackySubtract() | TackyMultiply():
+        case (
+            TackyAdd()
+            | TackySubtract()
+            | TackyMultiply()
+            | TackyBitwiseAnd()
+            | TackyBitwiseOr()
+            | TackyBitwiseXor()
+        ):
             asm_bin_op = convert_tacky_binary_operator(tacky_node.operator)
             i0_bin_op = AsmMovNode(start_position=tacky_node.start_position, src=left, dst=dest)
             i1_bin_op = AsmBinaryNode(
