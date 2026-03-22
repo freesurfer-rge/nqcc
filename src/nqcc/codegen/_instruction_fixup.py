@@ -2,6 +2,9 @@ from ._assembler_ast import (
     AsmAdd,
     AsmAllocateStackNode,
     AsmBinaryNode,
+    AsmBitwiseAnd,
+    AsmBitwiseOr,
+    AsmBitwiseXor,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -43,7 +46,7 @@ def apply_idiv_fixup(instr: AsmIDivNode) -> list[AsmInstructionNode]:
 
 def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
     match instr.operator:
-        case AsmAdd() | AsmSubtract():
+        case AsmAdd() | AsmSubtract() | AsmBitwiseAnd() | AsmBitwiseOr() | AsmBitwiseXor():
             if isinstance(instr.src, AsmStackNode):
                 # src cannot be on the stack
                 reg = AsmRegisterNode(start_position=instr.start_position, value="r10d")

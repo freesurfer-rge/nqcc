@@ -5,6 +5,9 @@ from nqcc.codegen import (
     AsmAllocateStackNode,
     AsmBinaryNode,
     AsmBinaryOperator,
+    AsmBitwiseAnd,
+    AsmBitwiseOr,
+    AsmBitwiseXor,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -99,7 +102,16 @@ class TestIDivFixup:
 
 
 class TestBinaryFixup:
-    @pytest.mark.parametrize("op", [AsmAdd(start_position=3), AsmSubtract(start_position=3)])
+    @pytest.mark.parametrize(
+        "op",
+        [
+            AsmAdd(start_position=3),
+            AsmSubtract(start_position=3),
+            AsmBitwiseAnd(start_position=3),
+            AsmBitwiseOr(start_position=3),
+            AsmBitwiseXor(start_position=3),
+        ],
+    )
     @pytest.mark.parametrize(
         "src",
         [
@@ -107,7 +119,7 @@ class TestBinaryFixup:
             AsmImmediateIntNode(start_position=2, value=1312),
         ],
     )
-    def test_addsub_unaffected(self, op: AsmBinaryOperator, src: AsmOperandNode):
+    def test_binopsrcfixup_unaffected(self, op: AsmBinaryOperator, src: AsmOperandNode):
         dst = AsmStackNode(start_position=2, offset=-8)
         target = AsmBinaryNode(start_position=4, operator=op, src=src, dst=dst)
         orig = target.model_copy(deep=True)
@@ -116,8 +128,17 @@ class TestBinaryFixup:
         assert len(fixed) == 1
         assert fixed[0] == orig
 
-    @pytest.mark.parametrize("op", [AsmAdd(start_position=3), AsmSubtract(start_position=3)])
-    def test_addsub_node(self, op: AsmBinaryOperator):
+    @pytest.mark.parametrize(
+        "op",
+        [
+            AsmAdd(start_position=3),
+            AsmSubtract(start_position=3),
+            AsmBitwiseAnd(start_position=3),
+            AsmBitwiseOr(start_position=3),
+            AsmBitwiseXor(start_position=3),
+        ],
+    )
+    def test_binopsrcfixup_node(self, op: AsmBinaryOperator):
         src = AsmStackNode(start_position=1, offset=-4)
         dst = AsmStackNode(start_position=2, offset=-8)
         target = AsmBinaryNode(start_position=4, operator=op, src=src, dst=dst)
