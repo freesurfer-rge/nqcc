@@ -82,8 +82,23 @@ class AsmBitwiseXor(AsmASTNode):
     node_type: Literal["AsmBitwiseXor"] = "AsmBitwiseXor"
 
 
+class AsmLeftShift(AsmASTNode):
+    node_type: Literal["AsmLeftShift"] = "AsmLeftShift"
+
+
+class AsmRightShift(AsmASTNode):
+    node_type: Literal["AsmRightShift"] = "AsmRightShift"
+
+
 AsmBinaryOperator = Union[
-    AsmAdd, AsmSubtract, AsmMultiply, AsmBitwiseAnd, AsmBitwiseOr, AsmBitwiseXor
+    AsmAdd,
+    AsmSubtract,
+    AsmMultiply,
+    AsmBitwiseAnd,
+    AsmBitwiseOr,
+    AsmBitwiseXor,
+    AsmLeftShift,
+    AsmRightShift,
 ]
 
 
