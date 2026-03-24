@@ -11,6 +11,8 @@ from nqcc.lexer import (
     DecrementToken,
     DivideToken,
     EqualTo,
+    GreaterThan,
+    GreaterThanOrEqual,
     IdentifierToken,
     IncrementToken,
     KeywordToken,
@@ -234,6 +236,21 @@ class TestExtractTokens:
         assert toks[0] == LessThan(start_position=idx)
         assert toks[1] == LessThanOrEqual(start_position=idx)
 
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_greaterthan(self, idx):
+        toks = extract_tokens(">", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == GreaterThan(start_position=idx)
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_greaterthanorequal(self, idx):
+        toks = extract_tokens(">=", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == GreaterThan(start_position=idx)
+        assert toks[1] == GreaterThanOrEqual(start_position=idx)
+
 
 class TestPickToken:
     def test_identifier_vs_keyword(self):
@@ -253,6 +270,7 @@ class TestPickToken:
             (BitwiseOr(value="|"), LogicalOr(value="||")),
             (LogicalNot(value="!"), NotEqualTo(value="!=")),
             (LessThan(), LessThanOrEqual()),
+            (GreaterThan(), GreaterThanOrEqual()),
         ],
     )
     def test_operators_with_substring(self, shorter: Token, longer: Token):
@@ -313,6 +331,8 @@ class TestLexString:
         "!=": NotEqualTo,
         "<": LessThan,
         "<=": LessThanOrEqual,
+        ">": GreaterThan,
+        ">=": GreaterThanOrEqual,
     }
 
     @pytest.mark.parametrize("op", ["&&", "||", "==", "!=", "<", ">", "<=", ">="])
@@ -322,5 +342,5 @@ class TestLexString:
         toks = lex_string(sample)
         assert len(toks) == 3
         assert toks[0] == ConstantIntegerToken(start_position=0, value="1")
-        assert toks[1] == self._COMP_MAP[op](start_position=2, value=op)
+        assert toks[1] == self._COMP_MAP[op](start_position=2)
         assert toks[2] == ConstantIntegerToken(start_position=3 + len(op), value="3")

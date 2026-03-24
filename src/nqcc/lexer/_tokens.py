@@ -231,7 +231,7 @@ class RightShift(Token):
 
 class LogicalNot(Token):
     token_type: Literal["LogicalNot"] = "LogicalNot"
-    value: Literal["!"]
+    value: Literal["!"] = "!"
 
     @property
     def precedence(self) -> int:
@@ -244,7 +244,7 @@ class LogicalNot(Token):
 
 class LogicalAnd(Token):
     token_type: Literal["LogicalAnd"] = "LogicalAnd"
-    value: Literal["&&"]
+    value: Literal["&&"] = "&&"
 
     @property
     def precedence(self) -> int:
@@ -257,7 +257,7 @@ class LogicalAnd(Token):
 
 class LogicalOr(Token):
     token_type: Literal["LogicalOr"] = "LogicalOr"
-    value: Literal["||"]
+    value: Literal["||"] = "||"
 
     @property
     def precedence(self) -> int:
@@ -270,7 +270,7 @@ class LogicalOr(Token):
 
 class EqualTo(Token):
     token_type: Literal["EqualTo"] = "EqualTo"
-    value: Literal["=="]
+    value: Literal["=="] = "=="
 
     @property
     def precedence(self) -> int:
@@ -283,7 +283,7 @@ class EqualTo(Token):
 
 class NotEqualTo(Token):
     token_type: Literal["NotEqualTo"] = "NotEqualTo"
-    value: Literal["!="]
+    value: Literal["!="] = "!="
 
     @property
     def precedence(self) -> int:
@@ -318,6 +318,32 @@ class LessThanOrEqual(Token):
     @classmethod
     def re(cls) -> str:
         return "<="
+
+
+class GreaterThan(Token):
+    token_type: Literal["GreaterThan"] = "GreaterThan"
+    value: Literal[">"] = ">"
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return ">"
+
+
+class GreaterThanOrEqual(Token):
+    token_type: Literal["GreaterThanOrEqual"] = "GreaterThanOrEqual"
+    value: Literal[">="] = ">="
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return ">="
 
 
 class OpenParenToken(Token):
@@ -414,6 +440,8 @@ TokenTypes: list[type] = [
     NotEqualTo,
     LessThan,
     LessThanOrEqual,
+    GreaterThan,
+    GreaterThanOrEqual,
 ]
 
 UnaryOperatorToken = Union[DecrementToken, IncrementToken, NegationToken, TildeToken, LogicalNot]
@@ -434,4 +462,6 @@ BinaryOperatorToken = Union[
     NotEqualTo,
     LessThan,
     LessThanOrEqual,
+    GreaterThan,
+    GreaterThanOrEqual,
 ]
