@@ -30,6 +30,7 @@ from ._source_ast import (
     SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
+    SourceLogicalNot,
 )
 from ._token_tape import TokenTape
 
@@ -65,4 +66,5 @@ __all__ = [
     "parse_program",
     "parse_statement",
     "parser_driver",
+    "SourceLogicalNot"
 ]

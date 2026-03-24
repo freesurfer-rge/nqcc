@@ -23,6 +23,7 @@ from nqcc.lexer import (
     TildeToken,
     Token,
     UnaryOperatorToken,
+    LogicalNot,
 )
 
 from ._exceptions import SourceASTBadValueError
@@ -49,6 +50,7 @@ from ._source_ast import (
     SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
+    SourceLogicalNot,
 )
 from ._token_tape import TokenTape
 
@@ -63,6 +65,9 @@ def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryExpressionNode:
 
         case NegationToken():
             op = SourceNegate(start_position=op_token.start_position)
+
+        case LogicalNot():
+            op = SourceLogicalNot(start_position=op_token.start_position)
 
         case _:
             raise ValueError(f"Could not match type of {op_token}")

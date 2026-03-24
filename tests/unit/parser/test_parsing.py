@@ -23,6 +23,7 @@ from nqcc.parser import (
     SourceStatementNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
+    SourceLogicalNot,
     TokenTape,
     parse_expression,
     parse_function,
@@ -82,6 +83,20 @@ class TestSourceExpressionNode:
         node = parse_expression(token_tape, min_precedence=0)
         assert isinstance(node, SourceUnaryExpressionNode)
         assert node.operator == SourceNegate(start_position=2)
+        assert node.start_position == 2
+        assert node.expression == SourceConstantIntNode(start_position=3, value=3)
+
+        # The expression doesn't consume the semicolon
+        assert token_tape.tokens_remaining == 1
+
+    def test_logicalnot_integer(self):
+        source = "  !3;"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 3
+
+        node = parse_expression(token_tape, min_precedence=0)
+        assert isinstance(node, SourceUnaryExpressionNode)
+        assert node.operator == SourceLogicalNot(start_position=2)
         assert node.start_position == 2
         assert node.expression == SourceConstantIntNode(start_position=3, value=3)
 

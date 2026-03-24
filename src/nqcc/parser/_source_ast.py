@@ -20,8 +20,11 @@ class SourceComplement(SourceASTNode):
 class SourceNegate(SourceASTNode):
     node_type: Literal["SourceNegateNode"] = "SourceNegateNode"
 
+class SourceLogicalNot(SourceASTNode):
+    node_type: Literal["SourceLogicalNot"] = "SourceLogicalNot"
 
-SourceUnaryOperator = Union[SourceComplement, SourceNegate]
+
+SourceUnaryOperator = Union[SourceComplement, SourceNegate, SourceLogicalNot]
 
 
 class SourceUnaryExpressionNode(SourceASTNode):
