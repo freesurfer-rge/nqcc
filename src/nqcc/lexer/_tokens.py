@@ -229,6 +229,45 @@ class RightShift(Token):
         return ">>"
 
 
+class LogicalNot(Token):
+    token_type: Literal["LogicalNot"] = "LogicalNot"
+    value: Literal["!"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "!"
+
+
+class LogicalAnd(Token):
+    token_type: Literal["LogicalAnd"] = "LogicalAnd"
+    value: Literal["&&"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "&&"
+
+
+class LogicalOr(Token):
+    token_type: Literal["LogicalAnd"] = "LogicalAnd"
+    value: Literal["||"]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "[|][|]"
+
+
 class OpenParenToken(Token):
     token_type: Literal["OpenParenToken"] = "OpenParenToken"
     value: Literal["("] = "("
@@ -316,9 +355,12 @@ TokenTypes: list[type] = [
     BitwiseXor,
     LeftShift,
     RightShift,
+    LogicalAnd,
+    LogicalNot,
+    LogicalOr,
 ]
 
-UnaryOperatorToken = Union[DecrementToken, IncrementToken, NegationToken, TildeToken]
+UnaryOperatorToken = Union[DecrementToken, IncrementToken, NegationToken, TildeToken, LogicalNot]
 BinaryOperatorToken = Union[
     AdditionToken,
     NegationToken,
@@ -330,4 +372,6 @@ BinaryOperatorToken = Union[
     BitwiseXor,
     LeftShift,
     RightShift,
+    LogicalAnd,
+    LogicalOr,
 ]
