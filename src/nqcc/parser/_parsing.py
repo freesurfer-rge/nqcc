@@ -13,6 +13,7 @@ from nqcc.lexer import (
     IdentifierToken,
     KeywordToken,
     LeftShift,
+    LogicalNot,
     ModuloToken,
     MultiplyToken,
     NegationToken,
@@ -23,7 +24,6 @@ from nqcc.lexer import (
     TildeToken,
     Token,
     UnaryOperatorToken,
-    LogicalNot,
 )
 
 from ._exceptions import SourceASTBadValueError
@@ -40,6 +40,7 @@ from ._source_ast import (
     SourceExpressionNode,
     SourceFunctionNode,
     SourceLeftShift,
+    SourceLogicalNot,
     SourceModulo,
     SourceMultiply,
     SourceNegate,
@@ -50,7 +51,6 @@ from ._source_ast import (
     SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
-    SourceLogicalNot,
 )
 from ._token_tape import TokenTape
 

@@ -14,6 +14,7 @@ from nqcc.parser import (
     SourceDivide,
     SourceFunctionNode,
     SourceLeftShift,
+    SourceLogicalNot,
     SourceModulo,
     SourceMultiply,
     SourceNegate,
@@ -23,7 +24,6 @@ from nqcc.parser import (
     SourceStatementNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
-    SourceLogicalNot,
     TokenTape,
     parse_expression,
     parse_function,
@@ -121,7 +121,10 @@ class TestSourceExpressionNode:
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
 
-    @pytest.mark.parametrize("operator", ["+", "-", "*", "/", "%", "|", "&", "^", "<<", ">>"])
+    @pytest.mark.parametrize(
+        "operator",
+        ["+", "-", "*", "/", "%", "|", "&", "^", "<<", ">>", "==", "!=", "<", "<=", ">", ">="],
+    )
     def test_simple_binary(self, operator: str):
         source = f"14 {operator} 10;"
         token_tape = TokenTape.from_c_source(source)
