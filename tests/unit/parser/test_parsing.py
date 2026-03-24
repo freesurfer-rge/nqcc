@@ -12,12 +12,20 @@ from nqcc.parser import (
     SourceComplement,
     SourceConstantIntNode,
     SourceDivide,
+    SourceEqualTo,
     SourceFunctionNode,
+    SourceGreaterThan,
+    SourceGreaterThanOrEqual,
     SourceLeftShift,
+    SourceLessThan,
+    SourceLessThanOrEqual,
+    SourceLogicalAnd,
     SourceLogicalNot,
+    SourceLogicalOr,
     SourceModulo,
     SourceMultiply,
     SourceNegate,
+    SourceNotEqualTo,
     SourceProgramNode,
     SourceReturnNode,
     SourceRightShift,
@@ -42,6 +50,14 @@ _BINARY_EXPRESSION_MAP = {
     "^": SourceBitwiseXor,
     "<<": SourceLeftShift,
     ">>": SourceRightShift,
+    "&&": SourceLogicalAnd,
+    "||": SourceLogicalOr,
+    "==": SourceEqualTo,
+    "!=": SourceNotEqualTo,
+    "<": SourceLessThan,
+    "<=": SourceLessThanOrEqual,
+    ">": SourceGreaterThan,
+    ">=": SourceGreaterThanOrEqual,
 }
 
 
@@ -123,7 +139,26 @@ class TestSourceExpressionNode:
 
     @pytest.mark.parametrize(
         "operator",
-        ["+", "-", "*", "/", "%", "|", "&", "^", "<<", ">>", "==", "!=", "<", "<=", ">", ">="],
+        [
+            "+",
+            "-",
+            "*",
+            "/",
+            "%",
+            "|",
+            "&",
+            "^",
+            "<<",
+            ">>",
+            "&&",
+            "||",
+            "==",
+            "!=",
+            "<",
+            "<=",
+            ">",
+            ">=",
+        ],
     )
     def test_simple_binary(self, operator: str):
         source = f"14 {operator} 10;"
@@ -245,6 +280,7 @@ class TestSourceExpressionNode:
             (" 1| 2*3;", " 1|(2*3);"),
             (" 1| 2<<3;", " 1|(2<<3);"),
             (" 1| 2>>3;", " 1|(2>>3);"),
+            (" 1|| 2==2;", " 1||(2==2);"),
         ],
     )
     def test_paired_expressions(self, a_str: str, b_str: str):

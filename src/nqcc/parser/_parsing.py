@@ -10,13 +10,21 @@ from nqcc.lexer import (
     CloseParenToken,
     ConstantIntegerToken,
     DivideToken,
+    EqualTo,
+    GreaterThan,
+    GreaterThanOrEqual,
     IdentifierToken,
     KeywordToken,
     LeftShift,
+    LessThan,
+    LessThanOrEqual,
+    LogicalAnd,
     LogicalNot,
+    LogicalOr,
     ModuloToken,
     MultiplyToken,
     NegationToken,
+    NotEqualTo,
     OpenBraceToken,
     OpenParenToken,
     RightShift,
@@ -37,13 +45,21 @@ from ._source_ast import (
     SourceComplement,
     SourceConstantIntNode,
     SourceDivide,
+    SourceEqualTo,
     SourceExpressionNode,
     SourceFunctionNode,
+    SourceGreaterThan,
+    SourceGreaterThanOrEqual,
     SourceLeftShift,
+    SourceLessThan,
+    SourceLessThanOrEqual,
+    SourceLogicalAnd,
     SourceLogicalNot,
+    SourceLogicalOr,
     SourceModulo,
     SourceMultiply,
     SourceNegate,
+    SourceNotEqualTo,
     SourceProgramNode,
     SourceReturnNode,
     SourceRightShift,
@@ -102,6 +118,22 @@ def convert_binary_operator(lexer_token: Token) -> SourceBinaryOperator | None: 
             return SourceLeftShift(start_position=lexer_token.start_position)
         case RightShift():
             return SourceRightShift(start_position=lexer_token.start_position)
+        case LogicalAnd():
+            return SourceLogicalAnd(start_position=lexer_token.start_position)
+        case LogicalOr():
+            return SourceLogicalOr(start_position=lexer_token.start_position)
+        case EqualTo():
+            return SourceEqualTo(start_position=lexer_token.start_position)
+        case NotEqualTo():
+            return SourceNotEqualTo(start_position=lexer_token.start_position)
+        case LessThan():
+            return SourceLessThan(start_position=lexer_token.start_position)
+        case LessThanOrEqual():
+            return SourceLessThanOrEqual(start_position=lexer_token.start_position)
+        case GreaterThan():
+            return SourceGreaterThan(start_position=lexer_token.start_position)
+        case GreaterThanOrEqual():
+            return SourceGreaterThanOrEqual(start_position=lexer_token.start_position)
         case _:
             # Nothing to do
             return None
