@@ -256,7 +256,7 @@ class LogicalAnd(Token):
 
 
 class LogicalOr(Token):
-    token_type: Literal["LogicalAnd"] = "LogicalAnd"
+    token_type: Literal["LogicalOr"] = "LogicalOr"
     value: Literal["||"]
 
     @property
@@ -266,6 +266,58 @@ class LogicalOr(Token):
     @classmethod
     def re(cls) -> str:
         return "[|][|]"
+
+
+class EqualTo(Token):
+    token_type: Literal["EqualTo"] = "EqualTo"
+    value: Literal["=="]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "=="
+
+
+class NotEqualTo(Token):
+    token_type: Literal["NotEqualTo"] = "NotEqualTo"
+    value: Literal["!="]
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "!="
+
+
+class LessThan(Token):
+    token_type: Literal["LessThan"] = "LessThan"
+    value: Literal["<"] = "<"
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "<"
+
+
+class LessThanOrEqual(Token):
+    token_type: Literal["LessThanOrEqual"] = "LessThanOrEqual"
+    value: Literal["<="] = "<="
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "<="
 
 
 class OpenParenToken(Token):
@@ -358,6 +410,10 @@ TokenTypes: list[type] = [
     LogicalAnd,
     LogicalNot,
     LogicalOr,
+    EqualTo,
+    NotEqualTo,
+    LessThan,
+    LessThanOrEqual,
 ]
 
 UnaryOperatorToken = Union[DecrementToken, IncrementToken, NegationToken, TildeToken, LogicalNot]
@@ -374,4 +430,8 @@ BinaryOperatorToken = Union[
     RightShift,
     LogicalAnd,
     LogicalOr,
+    EqualTo,
+    NotEqualTo,
+    LessThan,
+    LessThanOrEqual,
 ]
