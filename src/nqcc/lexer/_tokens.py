@@ -229,6 +229,123 @@ class RightShift(Token):
         return ">>"
 
 
+class LogicalNot(Token):
+    token_type: Literal["LogicalNot"] = "LogicalNot"
+    value: Literal["!"] = "!"
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "!"
+
+
+class LogicalAnd(Token):
+    token_type: Literal["LogicalAnd"] = "LogicalAnd"
+    value: Literal["&&"] = "&&"
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "&&"
+
+
+class LogicalOr(Token):
+    token_type: Literal["LogicalOr"] = "LogicalOr"
+    value: Literal["||"] = "||"
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "[|][|]"
+
+
+class EqualTo(Token):
+    token_type: Literal["EqualTo"] = "EqualTo"
+    value: Literal["=="] = "=="
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "=="
+
+
+class NotEqualTo(Token):
+    token_type: Literal["NotEqualTo"] = "NotEqualTo"
+    value: Literal["!="] = "!="
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "!="
+
+
+class LessThan(Token):
+    token_type: Literal["LessThan"] = "LessThan"
+    value: Literal["<"] = "<"
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "<"
+
+
+class LessThanOrEqual(Token):
+    token_type: Literal["LessThanOrEqual"] = "LessThanOrEqual"
+    value: Literal["<="] = "<="
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "<="
+
+
+class GreaterThan(Token):
+    token_type: Literal["GreaterThan"] = "GreaterThan"
+    value: Literal[">"] = ">"
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return ">"
+
+
+class GreaterThanOrEqual(Token):
+    token_type: Literal["GreaterThanOrEqual"] = "GreaterThanOrEqual"
+    value: Literal[">="] = ">="
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return ">="
+
+
 class OpenParenToken(Token):
     token_type: Literal["OpenParenToken"] = "OpenParenToken"
     value: Literal["("] = "("
@@ -316,9 +433,18 @@ TokenTypes: list[type] = [
     BitwiseXor,
     LeftShift,
     RightShift,
+    LogicalAnd,
+    LogicalNot,
+    LogicalOr,
+    EqualTo,
+    NotEqualTo,
+    LessThan,
+    LessThanOrEqual,
+    GreaterThan,
+    GreaterThanOrEqual,
 ]
 
-UnaryOperatorToken = Union[DecrementToken, IncrementToken, NegationToken, TildeToken]
+UnaryOperatorToken = Union[DecrementToken, IncrementToken, NegationToken, TildeToken, LogicalNot]
 BinaryOperatorToken = Union[
     AdditionToken,
     NegationToken,
@@ -330,4 +456,12 @@ BinaryOperatorToken = Union[
     BitwiseXor,
     LeftShift,
     RightShift,
+    LogicalAnd,
+    LogicalOr,
+    EqualTo,
+    NotEqualTo,
+    LessThan,
+    LessThanOrEqual,
+    GreaterThan,
+    GreaterThanOrEqual,
 ]

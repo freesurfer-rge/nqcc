@@ -12,11 +12,20 @@ from nqcc.parser import (
     SourceComplement,
     SourceConstantIntNode,
     SourceDivide,
+    SourceEqualTo,
     SourceFunctionNode,
+    SourceGreaterThan,
+    SourceGreaterThanOrEqual,
     SourceLeftShift,
+    SourceLessThan,
+    SourceLessThanOrEqual,
+    SourceLogicalAnd,
+    SourceLogicalNot,
+    SourceLogicalOr,
     SourceModulo,
     SourceMultiply,
     SourceNegate,
+    SourceNotEqualTo,
     SourceProgramNode,
     SourceReturnNode,
     SourceRightShift,
@@ -41,6 +50,14 @@ _BINARY_EXPRESSION_MAP = {
     "^": SourceBitwiseXor,
     "<<": SourceLeftShift,
     ">>": SourceRightShift,
+    "&&": SourceLogicalAnd,
+    "||": SourceLogicalOr,
+    "==": SourceEqualTo,
+    "!=": SourceNotEqualTo,
+    "<": SourceLessThan,
+    "<=": SourceLessThanOrEqual,
+    ">": SourceGreaterThan,
+    ">=": SourceGreaterThanOrEqual,
 }
 
 
@@ -88,6 +105,20 @@ class TestSourceExpressionNode:
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
 
+    def test_logicalnot_integer(self):
+        source = "  !3;"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 3
+
+        node = parse_expression(token_tape, min_precedence=0)
+        assert isinstance(node, SourceUnaryExpressionNode)
+        assert node.operator == SourceLogicalNot(start_position=2)
+        assert node.start_position == 2
+        assert node.expression == SourceConstantIntNode(start_position=3, value=3)
+
+        # The expression doesn't consume the semicolon
+        assert token_tape.tokens_remaining == 1
+
     def test_parens_integer(self):
         source = "(-((~12)));"
         token_tape = TokenTape.from_c_source(source)
@@ -106,7 +137,29 @@ class TestSourceExpressionNode:
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
 
-    @pytest.mark.parametrize("operator", ["+", "-", "*", "/", "%", "|", "&", "^", "<<", ">>"])
+    @pytest.mark.parametrize(
+        "operator",
+        [
+            "+",
+            "-",
+            "*",
+            "/",
+            "%",
+            "|",
+            "&",
+            "^",
+            "<<",
+            ">>",
+            "&&",
+            "||",
+            "==",
+            "!=",
+            "<",
+            "<=",
+            ">",
+            ">=",
+        ],
+    )
     def test_simple_binary(self, operator: str):
         source = f"14 {operator} 10;"
         token_tape = TokenTape.from_c_source(source)
@@ -227,6 +280,7 @@ class TestSourceExpressionNode:
             (" 1| 2*3;", " 1|(2*3);"),
             (" 1| 2<<3;", " 1|(2<<3);"),
             (" 1| 2>>3;", " 1|(2>>3);"),
+            (" 1|| 2==2;", " 1||(2==2);"),
         ],
     )
     def test_paired_expressions(self, a_str: str, b_str: str):

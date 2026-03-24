@@ -23,3 +23,10 @@ class TestParserSerde:
         }
         """
         _check_round_trip(source)
+
+    def test_comparisons(self):
+        source = """ int main(void) {
+        return ! 3 && 2 || 1 < 4 > 1 == 5 != 3 <= 4 >= 10;
+        }
+        """
+        _check_round_trip(source)

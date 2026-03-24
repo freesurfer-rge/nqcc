@@ -10,17 +10,27 @@ from nqcc.lexer import (
     ConstantIntegerToken,
     DecrementToken,
     DivideToken,
+    EqualTo,
+    GreaterThan,
+    GreaterThanOrEqual,
     IdentifierToken,
     IncrementToken,
     KeywordToken,
+    LessThan,
+    LessThanOrEqual,
     LexerMatchError,
+    LogicalAnd,
+    LogicalNot,
+    LogicalOr,
     ModuloToken,
     MultiplyToken,
     NegationToken,
+    NotEqualTo,
     OpenBraceToken,
     OpenParenToken,
     SemicolonToken,
     TildeToken,
+    Token,
     extract_tokens,
     lex_string,
     pick_token,
@@ -173,6 +183,74 @@ class TestExtractTokens:
         assert len(toks) == 1
         assert toks[0] == BitwiseXor(start_position=idx, value="^")
 
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_logicalnot(self, idx):
+        toks = extract_tokens("!", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == LogicalNot(start_position=idx, value="!")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_logicaland(self, idx):
+        toks = extract_tokens("&&", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == BitwiseAnd(start_position=idx, value="&")
+        assert toks[1] == LogicalAnd(start_position=idx, value="&&")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_logicalor(self, idx):
+        toks = extract_tokens("||", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == BitwiseOr(start_position=idx, value="|")
+        assert toks[1] == LogicalOr(start_position=idx, value="||")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_equalto(self, idx):
+        toks = extract_tokens("==", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == EqualTo(start_position=idx, value="==")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_notequalto(self, idx):
+        toks = extract_tokens("!=", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == LogicalNot(start_position=idx, value="!")
+        assert toks[1] == NotEqualTo(start_position=idx, value="!=")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_lessthan(self, idx):
+        toks = extract_tokens("<", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == LessThan(start_position=idx)
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_lessthanorequal(self, idx):
+        toks = extract_tokens("<=", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == LessThan(start_position=idx)
+        assert toks[1] == LessThanOrEqual(start_position=idx)
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_greaterthan(self, idx):
+        toks = extract_tokens(">", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == GreaterThan(start_position=idx)
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_greaterthanorequal(self, idx):
+        toks = extract_tokens(">=", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == GreaterThan(start_position=idx)
+        assert toks[1] == GreaterThanOrEqual(start_position=idx)
+
 
 class TestPickToken:
     def test_identifier_vs_keyword(self):
@@ -184,6 +262,20 @@ class TestPickToken:
         toks = [DecrementToken(value="--"), NegationToken(value="-")]
 
         assert pick_token(toks) == DecrementToken(value="--")
+
+    @pytest.mark.parametrize(
+        ["shorter", "longer"],
+        [
+            (BitwiseAnd(value="&"), LogicalAnd(value="&&")),
+            (BitwiseOr(value="|"), LogicalOr(value="||")),
+            (LogicalNot(value="!"), NotEqualTo(value="!=")),
+            (LessThan(), LessThanOrEqual()),
+            (GreaterThan(), GreaterThanOrEqual()),
+        ],
+    )
+    def test_operators_with_substring(self, shorter: Token, longer: Token):
+        toks = [shorter, longer]
+        assert pick_token(toks) == longer
 
 
 class TestLexString:
@@ -231,3 +323,24 @@ class TestLexString:
         assert toks[6] == ConstantIntegerToken(start_position=6, value="4")
         assert toks[7] == ModuloToken(start_position=7, value="%")
         assert toks[8] == ConstantIntegerToken(start_position=8, value="2")
+
+    _COMP_MAP = {
+        "&&": LogicalAnd,
+        "||": LogicalOr,
+        "==": EqualTo,
+        "!=": NotEqualTo,
+        "<": LessThan,
+        "<=": LessThanOrEqual,
+        ">": GreaterThan,
+        ">=": GreaterThanOrEqual,
+    }
+
+    @pytest.mark.parametrize("op", ["&&", "||", "==", "!=", "<", ">", "<=", ">="])
+    def test_comparison_expression(self, op: str):
+        sample = f"1 {op} 3"
+
+        toks = lex_string(sample)
+        assert len(toks) == 3
+        assert toks[0] == ConstantIntegerToken(start_position=0, value="1")
+        assert toks[1] == self._COMP_MAP[op](start_position=2)
+        assert toks[2] == ConstantIntegerToken(start_position=3 + len(op), value="3")

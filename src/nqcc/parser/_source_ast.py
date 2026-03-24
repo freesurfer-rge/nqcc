@@ -21,7 +21,11 @@ class SourceNegate(SourceASTNode):
     node_type: Literal["SourceNegateNode"] = "SourceNegateNode"
 
 
-SourceUnaryOperator = Union[SourceComplement, SourceNegate]
+class SourceLogicalNot(SourceASTNode):
+    node_type: Literal["SourceLogicalNot"] = "SourceLogicalNot"
+
+
+SourceUnaryOperator = Union[SourceComplement, SourceNegate, SourceLogicalNot]
 
 
 class SourceUnaryExpressionNode(SourceASTNode):
@@ -32,6 +36,16 @@ class SourceUnaryExpressionNode(SourceASTNode):
 
 class SourceBinOp(SourceASTNode):
     precedence: int
+
+
+class SourceLogicalOr(SourceBinOp):
+    node_type: Literal["SourceLogicalOr"] = "SourceLogicalOr"
+    precedence: Literal[5] = 5
+
+
+class SourceLogicalAnd(SourceBinOp):
+    node_type: Literal["SourceLogicalAnd"] = "SourceLogicalAnd"
+    precedence: Literal[10] = 10
 
 
 class SourceBitwiseOr(SourceBinOp):
@@ -47,6 +61,36 @@ class SourceBitwiseXor(SourceBinOp):
 class SourceBitwiseAnd(SourceBinOp):
     node_type: Literal["SourceBitwiseAnd"] = "SourceBitwiseAnd"
     precedence: Literal[25] = 25
+
+
+class SourceEqualTo(SourceBinOp):
+    node_type: Literal["SourceEqualTo"] = "SourceEqualTo"
+    precedence: Literal[30] = 30
+
+
+class SourceNotEqualTo(SourceBinOp):
+    node_type: Literal["SourceNotEqualTo"] = "SourceNotEqualTo"
+    precedence: Literal[30] = 30
+
+
+class SourceLessThan(SourceBinOp):
+    node_type: Literal["SourceLessThan"] = "SourceLessThan"
+    precedence: Literal[35] = 35
+
+
+class SourceLessThanOrEqual(SourceBinOp):
+    node_type: Literal["SourceLessThanOrEqual"] = "SourceLessThanOrEqual"
+    precedence: Literal[35] = 35
+
+
+class SourceGreaterThan(SourceBinOp):
+    node_type: Literal["SourceGreaterThan"] = "SourceGreaterThan"
+    precedence: Literal[35] = 35
+
+
+class SourceGreaterThanOrEqual(SourceBinOp):
+    node_type: Literal["SourceGreaterThanOrEqual"] = "SourceGreaterThanOrEqual"
+    precedence: Literal[35] = 35
 
 
 class SourceLeftShift(SourceBinOp):
@@ -95,6 +139,14 @@ SourceBinaryOperator = Union[
     SourceBitwiseOr,
     SourceLeftShift,
     SourceRightShift,
+    SourceEqualTo,
+    SourceNotEqualTo,
+    SourceLessThan,
+    SourceLessThanOrEqual,
+    SourceGreaterThan,
+    SourceGreaterThanOrEqual,
+    SourceLogicalAnd,
+    SourceLogicalOr,
 ]
 
 
