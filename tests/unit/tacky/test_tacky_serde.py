@@ -27,3 +27,7 @@ class TestTackySerde:
     def test_logical_and(self):
         source = "int main (void) { return (1-3) && (3-2); }"
         self._round_trip(source)
+
+    def test_logical_or(self):
+        source = "int main (void) { return (1-3) || (3-2); }"
+        self._round_trip(source)
