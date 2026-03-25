@@ -22,6 +22,12 @@ from nqcc.tacky import (
     TackySubtract,
     TackyUnaryNode,
     TackyVarNode,
+    TackyEqualTo,
+    TackyNotEqualTo,
+    TackyLessThan,
+    TackyLessThanOrEqual,
+    TackyGreaterThan,
+    TackyGreaterThanOrEqual,
 )
 
 # These tests access internals of the TackyGenerator
@@ -37,6 +43,12 @@ _BINARY_EXPRESSION_MAP = {
     "^": TackyBitwiseXor,
     "<<": TackyLeftShift,
     ">>": TackyRightShift,
+    "==": TackyEqualTo,
+    "!=": TackyNotEqualTo,
+    "<": TackyLessThan,
+    "<=": TackyLessThanOrEqual,
+    ">": TackyGreaterThan,
+    ">=": TackyGreaterThanOrEqual,
 }
 
 
@@ -121,7 +133,10 @@ class TestExpressions:
         )
         assert result == instr1.dst
 
-    @pytest.mark.parametrize("operator", ["+", "-", "*", "/", "%", "&", "|", "^", "<<", ">>"])
+    @pytest.mark.parametrize(
+        "operator",
+        ["+", "-", "*", "/", "%", "&", "|", "^", "<<", ">>", "==", "!=", "<", "<=", ">", ">="],
+    )
     def test_simple_binary(self, operator: str):
         source = f"14 {operator} 10;"
         token_tape = TokenTape.from_c_source(source)

@@ -53,12 +53,18 @@ from ._tacky_ast import (
 class TackyGenerator:
     def __init__(self) -> None:
         self._nxt_tmp = 0
+        self._nxt_lbl = 0
         self._curr_function = ""
         self._current_instructions: list[TackyInstruction] = []
 
     def get_function_temporary(self) -> str:
         result = f"tmp.{self._curr_function}.{self._nxt_tmp}"
         self._nxt_tmp += 1
+        return result
+
+    def get_function_label(self) -> str:
+        result = f"label.{self._curr_function}.{self._nxt_lbl}"
+        self._nxt_lbl += 1
         return result
 
     def convert_constant_int(self, source: SourceConstantIntNode) -> TackyConstantIntNode:
