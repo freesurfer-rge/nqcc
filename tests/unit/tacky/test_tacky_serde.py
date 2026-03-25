@@ -23,3 +23,7 @@ class TestTackySerde:
     def test_binary(self):
         source = "int main  (void ) { return 3- -5 * ~9 % 8 ^ 11 >> 12 | 13 & 1 << 2;}"
         self._round_trip(source)
+
+    def test_logical_and(self):
+        source = "int main (void) { return (1-3) && (3-2); }"
+        self._round_trip(source)
