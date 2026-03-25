@@ -22,6 +22,12 @@ from nqcc.parser import (
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceLogicalNot,
+    SourceEqualTo,
+    SourceNotEqualTo,
+    SourceLessThan,
+    SourceLessThanOrEqual,
+    SourceGreaterThan,
+    SourceGreaterThanOrEqual,
 )
 
 from ._tacky_ast import (
@@ -49,6 +55,12 @@ from ._tacky_ast import (
     TackyValue,
     TackyVarNode,
     TackyLogicalNot,
+    TackyEqualTo,
+    TackyNotEqualTo,
+    TackyLessThan,
+    TackyLessThanOrEqual,
+    TackyGreaterThan,
+    TackyGreaterThanOrEqual,
 )
 
 
@@ -106,6 +118,18 @@ class TackyGenerator:
                 return TackyLeftShift(start_position=source.start_position)
             case SourceRightShift():
                 return TackyRightShift(start_position=source.start_position)
+            case SourceEqualTo():
+                return TackyEqualTo(start_position=source.start_position)
+            case SourceNotEqualTo():
+                return TackyNotEqualTo(start_position=source.start_position)
+            case SourceLessThan():
+                return TackyLessThan(start_position=source.start_position)
+            case SourceLessThanOrEqual():
+                return TackyLessThanOrEqual(start_position=source.start_position)
+            case SourceGreaterThan():
+                return TackyGreaterThan(start_position=source.start_position)
+            case SourceGreaterThanOrEqual():
+                return TackyGreaterThanOrEqual(start_position=source.start_position)
             case _:
                 raise ValueError(f"Unrecognised: {source}")
 
