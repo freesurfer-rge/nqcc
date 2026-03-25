@@ -28,6 +28,7 @@ from nqcc.tacky import (
     TackyLessThanOrEqual,
     TackyGreaterThan,
     TackyGreaterThanOrEqual,
+    TackyLogicalNot,
 )
 
 # These tests access internals of the TackyGenerator
@@ -104,6 +105,25 @@ class TestExpressions:
         assert instr.src == TackyConstantIntNode(start_position=2, value=10)
         assert instr.dst == TackyVarNode(start_position=0, identifier="tmp.test_complement.0")
         assert instr.operator == TackyComplement(start_position=0)
+        assert result == instr.dst
+
+    def test_logical_not(self):
+        source = "!4;"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_expression(token_tape, min_precedence=0)
+
+        target = TackyGenerator()
+        target._curr_function = "test_negation"
+
+        result = target.emit_expression(src_node)
+        assert target._nxt_tmp == 1, "Should have a temporary for result"
+        assert len(target._current_instructions) == 1, "Should emit negation instructions"
+        instr = target._current_instructions[0]
+        assert isinstance(instr, TackyUnaryNode)
+        assert instr.start_position == 0
+        assert instr.src == TackyConstantIntNode(start_position=1, value=4)
+        assert instr.dst == TackyVarNode(start_position=0, identifier="tmp.test_negation.0")
+        assert instr.operator == TackyLogicalNot(start_position=0)
         assert result == instr.dst
 
     def test_simple_nested(self):

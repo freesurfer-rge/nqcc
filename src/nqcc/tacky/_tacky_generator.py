@@ -21,6 +21,7 @@ from nqcc.parser import (
     SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
+    SourceLogicalNot,
 )
 
 from ._tacky_ast import (
@@ -47,6 +48,7 @@ from ._tacky_ast import (
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
+    TackyLogicalNot,
 )
 
 
@@ -77,6 +79,8 @@ class TackyGenerator:
                 return TackyComplement(start_position=source.start_position)
             case SourceNegate():
                 return TackyNegate(start_position=source.start_position)
+            case SourceLogicalNot():
+                return TackyLogicalNot(start_position=source.start_position)
             case _:
                 raise ValueError(f"Unrecognised: {source}")
 
