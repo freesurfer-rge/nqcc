@@ -211,6 +211,50 @@ class TestExpressions:
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
 
+    @pytest.mark.parametrize(
+        "operator",
+        ["+", "-", "*", "/", "%", "&", "|", "^", "<<", ">>", "==", "!=", "<", "<=", ">", ">="],
+    )
+    def test_nested_binary(self, operator: str):
+        source = f"(!1) {operator} (~4);"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 10
+        src_node = parse_expression(token_tape, min_precedence=0)
+
+        target = TackyGenerator()
+        target._curr_function = "test_nested_binary"
+
+        result = target.emit_expression(src_node)
+        assert result == TackyVarNode(start_position=5, identifier="tmp.test_nested_binary.2")
+
+        assert len(target._current_instructions) == 3
+
+        instr0 = target._current_instructions[0]
+        assert isinstance(instr0, TackyUnaryNode)
+        assert instr0.start_position == 1
+        assert instr0.operator == TackyLogicalNot(start_position=1)
+        assert instr0.src == TackyConstantIntNode(start_position=2, value=1)
+        assert instr0.dst == TackyVarNode(start_position=1, identifier="tmp.test_nested_binary.0")
+
+        instr1 = target._current_instructions[1]
+        assert isinstance(instr1, TackyUnaryNode)
+        assert instr1.start_position == 7 + len(operator)
+        assert instr1.operator == TackyComplement(start_position=7 + len(operator))
+        assert instr1.src == TackyConstantIntNode(start_position=8 + len(operator), value=4)
+        assert instr1.dst == TackyVarNode(
+            start_position=7 + len(operator), identifier="tmp.test_nested_binary.1"
+        )
+
+        instr2 = target._current_instructions[2]
+        assert instr2.start_position == 5
+        assert instr2.operator == _BINARY_EXPRESSION_MAP[operator](start_position=5)
+        assert instr2.left == instr0.dst
+        assert instr2.right == instr1.dst
+        assert instr2.dst == result
+
+        # The expression doesn't consume the semicolon
+        assert token_tape.tokens_remaining == 1
+
 
 class TestStatements:
     def test_return(self):
