@@ -24,6 +24,7 @@ from ._tacky_ast import (
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
+    TackyLogicalNot
 )
 from ._tacky_generator import TackyGenerator
 
@@ -54,4 +55,5 @@ __all__ = [
     "TackyValue",
     "TackyVarNode",
     "tacky_driver",
+    "TackyLogicalNot"
 ]

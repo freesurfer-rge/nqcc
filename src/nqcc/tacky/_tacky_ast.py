@@ -28,8 +28,11 @@ class TackyComplement(TackyASTNode):
 class TackyNegate(TackyASTNode):
     node_type: Literal["TackyNegate"] = "TackyNegate"
 
+class TackyLogicalNot(TackyASTNode):
+    node_type: Literal["TackyLogicalNot"] = "TackyLogicalNot"
 
-TackyUnaryOperator = Union[TackyComplement, TackyNegate]
+
+TackyUnaryOperator = Union[TackyComplement, TackyNegate, TackyLogicalNot]
 
 
 class TackyAdd(TackyASTNode):
