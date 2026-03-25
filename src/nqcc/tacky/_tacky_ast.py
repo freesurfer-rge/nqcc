@@ -29,7 +29,11 @@ class TackyNegate(TackyASTNode):
     node_type: Literal["TackyNegate"] = "TackyNegate"
 
 
-TackyUnaryOperator = Union[TackyComplement, TackyNegate]
+class TackyLogicalNot(TackyASTNode):
+    node_type: Literal["TackyLogicalNot"] = "TackyLogicalNot"
+
+
+TackyUnaryOperator = Union[TackyComplement, TackyNegate, TackyLogicalNot]
 
 
 class TackyAdd(TackyASTNode):
@@ -72,6 +76,30 @@ class TackyRightShift(TackyASTNode):
     node_type: Literal["TackyRightShift"] = "TackyRightShift"
 
 
+class TackyEqualTo(TackyASTNode):
+    node_type: Literal["TackyEqualTo"] = "TackyEqualTo"
+
+
+class TackyNotEqualTo(TackyASTNode):
+    node_type: Literal["TackyNotEqualTo"] = "TackyNotEqualTo"
+
+
+class TackyLessThan(TackyASTNode):
+    node_type: Literal["TackyLessThan"] = "TackyLessThan"
+
+
+class TackyLessThanOrEqual(TackyASTNode):
+    node_type: Literal["TackyLessThanOrEqual"] = "TackyLessThanOrEqual"
+
+
+class TackyGreaterThan(TackyASTNode):
+    node_type: Literal["TackyGreaterThan"] = "TackyGreaterThan"
+
+
+class TackyGreaterThanOrEqual(TackyASTNode):
+    node_type: Literal["TackyGreaterThanOrEqual"] = "TackyGreaterThanOrEqual"
+
+
 TackyBinaryOperator = Union[
     TackyAdd,
     TackySubtract,
@@ -83,6 +111,12 @@ TackyBinaryOperator = Union[
     TackyBitwiseXor,
     TackyLeftShift,
     TackyRightShift,
+    TackyEqualTo,
+    TackyNotEqualTo,
+    TackyLessThan,
+    TackyLessThanOrEqual,
+    TackyGreaterThan,
+    TackyGreaterThanOrEqual,
 ]
 
 
@@ -106,7 +140,44 @@ class TackyBinaryNode(TackyASTNode):
     dst: TackyValue
 
 
-TackyInstruction = Union[TackyReturnNode, TackyUnaryNode, TackyBinaryNode]
+class TackyCopyNode(TackyASTNode):
+    node_type: Literal["TackyCopyNode"] = "TackyCopyNode"
+    src: TackyValue
+    dst: TackyValue
+
+
+class TackyJumpNode(TackyASTNode):
+    node_type: Literal["TackyJumpNode"] = "TackyJumpNode"
+    target: str
+
+
+class TackyJumpIfZeroNode(TackyASTNode):
+    node_type: Literal["TackyJumpIfZeroNode"] = "TackyJumpIfZeroNode"
+    target: str
+    condition: TackyValue
+
+
+class TackyJumpIfNotZeroNode(TackyASTNode):
+    node_type: Literal["TackyJumpIfNotZeroNode"] = "TackyJumpIfNotZeroNode"
+    target: str
+    condition: TackyValue
+
+
+class TackyLabelNode(TackyASTNode):
+    node_type: Literal["TackyLabelNode"] = "TackyLabelNode"
+    identifier: str
+
+
+TackyInstruction = Union[
+    TackyReturnNode,
+    TackyUnaryNode,
+    TackyBinaryNode,
+    TackyCopyNode,
+    TackyJumpNode,
+    TackyJumpIfZeroNode,
+    TackyJumpIfNotZeroNode,
+    TackyLabelNode,
+]
 
 
 class TackyFunctionNode(TackyASTNode):

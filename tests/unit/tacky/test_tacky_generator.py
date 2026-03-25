@@ -9,13 +9,25 @@ from nqcc.tacky import (
     TackyBitwiseXor,
     TackyComplement,
     TackyConstantIntNode,
+    TackyCopyNode,
     TackyDivide,
+    TackyEqualTo,
     TackyFunctionNode,
     TackyGenerator,
+    TackyGreaterThan,
+    TackyGreaterThanOrEqual,
+    TackyJumpIfNotZeroNode,
+    TackyJumpIfZeroNode,
+    TackyJumpNode,
+    TackyLabelNode,
     TackyLeftShift,
+    TackyLessThan,
+    TackyLessThanOrEqual,
+    TackyLogicalNot,
     TackyModulo,
     TackyMultiply,
     TackyNegate,
+    TackyNotEqualTo,
     TackyProgramNode,
     TackyReturnNode,
     TackyRightShift,
@@ -37,6 +49,12 @@ _BINARY_EXPRESSION_MAP = {
     "^": TackyBitwiseXor,
     "<<": TackyLeftShift,
     ">>": TackyRightShift,
+    "==": TackyEqualTo,
+    "!=": TackyNotEqualTo,
+    "<": TackyLessThan,
+    "<=": TackyLessThanOrEqual,
+    ">": TackyGreaterThan,
+    ">=": TackyGreaterThanOrEqual,
 }
 
 
@@ -94,6 +112,25 @@ class TestExpressions:
         assert instr.operator == TackyComplement(start_position=0)
         assert result == instr.dst
 
+    def test_logical_not(self):
+        source = "!4;"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_expression(token_tape, min_precedence=0)
+
+        target = TackyGenerator()
+        target._curr_function = "test_logical_not"
+
+        result = target.emit_expression(src_node)
+        assert target._nxt_tmp == 1, "Should have a temporary for result"
+        assert len(target._current_instructions) == 1
+        instr = target._current_instructions[0]
+        assert isinstance(instr, TackyUnaryNode)
+        assert instr.start_position == 0
+        assert instr.src == TackyConstantIntNode(start_position=1, value=4)
+        assert instr.dst == TackyVarNode(start_position=0, identifier="tmp.test_logical_not.0")
+        assert instr.operator == TackyLogicalNot(start_position=0)
+        assert result == instr.dst
+
     def test_simple_nested(self):
         source = "(-((~12)));"
         token_tape = TokenTape.from_c_source(source)
@@ -121,7 +158,10 @@ class TestExpressions:
         )
         assert result == instr1.dst
 
-    @pytest.mark.parametrize("operator", ["+", "-", "*", "/", "%", "&", "|", "^", "<<", ">>"])
+    @pytest.mark.parametrize(
+        "operator",
+        ["+", "-", "*", "/", "%", "&", "|", "^", "<<", ">>", "==", "!=", "<", "<=", ">", ">="],
+    )
     def test_simple_binary(self, operator: str):
         source = f"14 {operator} 10;"
         token_tape = TokenTape.from_c_source(source)
@@ -144,6 +184,172 @@ class TestExpressions:
         assert instr0.dst == result
 
         # The expression doesn't consume the semicolon
+        assert token_tape.tokens_remaining == 1
+
+    def test_logical_and(self):
+        source = "(1+2) && (3+4);"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 12
+        src_node = parse_expression(token_tape, min_precedence=0)
+
+        target = TackyGenerator()
+        target._curr_function = "test_logical_and"
+
+        result = target.emit_expression(src_node)
+        assert result == TackyVarNode(start_position=6, identifier="tmp.test_logical_and.0")
+
+        assert len(target._current_instructions) == 9
+
+        instr0 = target._current_instructions[0]
+        assert isinstance(instr0, TackyBinaryNode)
+        assert instr0 == TackyBinaryNode(
+            start_position=2,
+            operator=TackyAdd(start_position=2),
+            left=TackyConstantIntNode(start_position=1, value=1),
+            right=TackyConstantIntNode(start_position=3, value=2),
+            dst=TackyVarNode(start_position=2, identifier="tmp.test_logical_and.1"),
+        )
+
+        instr1 = target._current_instructions[1]
+        assert isinstance(instr1, TackyJumpIfZeroNode)
+        assert instr1 == TackyJumpIfZeroNode(
+            start_position=6,
+            target="label.test_logical_and.logicalandfalse.0",
+            condition=instr0.dst,
+        )
+
+        instr2 = target._current_instructions[2]
+        assert isinstance(instr2, TackyBinaryNode)
+        assert instr2 == TackyBinaryNode(
+            start_position=11,
+            operator=TackyAdd(start_position=11),
+            left=TackyConstantIntNode(start_position=10, value=3),
+            right=TackyConstantIntNode(start_position=12, value=4),
+            dst=TackyVarNode(start_position=11, identifier="tmp.test_logical_and.2"),
+        )
+
+        instr3 = target._current_instructions[3]
+        assert isinstance(instr3, TackyJumpIfZeroNode)
+        assert instr3 == TackyJumpIfZeroNode(
+            start_position=6,
+            target="label.test_logical_and.logicalandfalse.0",
+            condition=instr2.dst,
+        )
+
+        instr4 = target._current_instructions[4]
+        assert isinstance(instr4, TackyCopyNode)
+        assert instr4 == TackyCopyNode(
+            start_position=6, src=TackyConstantIntNode(start_position=6, value=1), dst=result
+        )
+
+        instr5 = target._current_instructions[5]
+        assert isinstance(instr5, TackyJumpNode)
+        assert instr5 == TackyJumpNode(
+            start_position=6, target="label.test_logical_and.logicalandend.1"
+        )
+
+        instr6 = target._current_instructions[6]
+        assert isinstance(instr6, TackyLabelNode)
+        assert instr6 == TackyLabelNode(
+            start_position=6, identifier="label.test_logical_and.logicalandfalse.0"
+        )
+
+        instr7 = target._current_instructions[7]
+        assert isinstance(instr4, TackyCopyNode)
+        assert instr7 == TackyCopyNode(
+            start_position=6, src=TackyConstantIntNode(start_position=6, value=0), dst=result
+        )
+
+        instr8 = target._current_instructions[8]
+        assert isinstance(instr8, TackyLabelNode)
+        assert instr8 == TackyLabelNode(
+            start_position=6, identifier="label.test_logical_and.logicalandend.1"
+        )
+
+        # And the semi colon should remain
+        assert token_tape.tokens_remaining == 1
+
+    def test_logical_or(self):
+        source = "(9+8) || (7+6);"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 12
+        src_node = parse_expression(token_tape, min_precedence=0)
+
+        target = TackyGenerator()
+        target._curr_function = "test_logical_or"
+
+        result = target.emit_expression(src_node)
+        assert result == TackyVarNode(start_position=6, identifier="tmp.test_logical_or.0")
+
+        assert len(target._current_instructions) == 9
+
+        instr0 = target._current_instructions[0]
+        assert isinstance(instr0, TackyBinaryNode)
+        assert instr0 == TackyBinaryNode(
+            start_position=2,
+            operator=TackyAdd(start_position=2),
+            left=TackyConstantIntNode(start_position=1, value=9),
+            right=TackyConstantIntNode(start_position=3, value=8),
+            dst=TackyVarNode(start_position=2, identifier="tmp.test_logical_or.1"),
+        )
+
+        instr1 = target._current_instructions[1]
+        assert isinstance(instr1, TackyJumpIfNotZeroNode)
+        assert instr1 == TackyJumpIfNotZeroNode(
+            start_position=6,
+            target="label.test_logical_or.logicalortrue.0",
+            condition=instr0.dst,
+        )
+
+        instr2 = target._current_instructions[2]
+        assert isinstance(instr2, TackyBinaryNode)
+        assert instr2 == TackyBinaryNode(
+            start_position=11,
+            operator=TackyAdd(start_position=11),
+            left=TackyConstantIntNode(start_position=10, value=7),
+            right=TackyConstantIntNode(start_position=12, value=6),
+            dst=TackyVarNode(start_position=11, identifier="tmp.test_logical_or.2"),
+        )
+
+        instr3 = target._current_instructions[3]
+        assert isinstance(instr3, TackyJumpIfNotZeroNode)
+        assert instr3 == TackyJumpIfNotZeroNode(
+            start_position=6,
+            target="label.test_logical_or.logicalortrue.0",
+            condition=instr2.dst,
+        )
+
+        instr4 = target._current_instructions[4]
+        assert isinstance(instr4, TackyCopyNode)
+        assert instr4 == TackyCopyNode(
+            start_position=6, src=TackyConstantIntNode(start_position=6, value=0), dst=result
+        )
+
+        instr5 = target._current_instructions[5]
+        assert isinstance(instr5, TackyJumpNode)
+        assert instr5 == TackyJumpNode(
+            start_position=6, target="label.test_logical_or.logicalorend.1"
+        )
+
+        instr6 = target._current_instructions[6]
+        assert isinstance(instr6, TackyLabelNode)
+        assert instr6 == TackyLabelNode(
+            start_position=6, identifier="label.test_logical_or.logicalortrue.0"
+        )
+
+        instr7 = target._current_instructions[7]
+        assert isinstance(instr4, TackyCopyNode)
+        assert instr7 == TackyCopyNode(
+            start_position=6, src=TackyConstantIntNode(start_position=6, value=1), dst=result
+        )
+
+        instr8 = target._current_instructions[8]
+        assert isinstance(instr8, TackyLabelNode)
+        assert instr8 == TackyLabelNode(
+            start_position=6, identifier="label.test_logical_or.logicalorend.1"
+        )
+
+        # And the semi colon should remain
         assert token_tape.tokens_remaining == 1
 
     def test_multiple_binary(self):
@@ -172,6 +378,50 @@ class TestExpressions:
         assert instr1.left == TackyConstantIntNode(start_position=0, value=1)
         assert instr1.right == instr0.dst
         assert instr1.dst == result
+
+        # The expression doesn't consume the semicolon
+        assert token_tape.tokens_remaining == 1
+
+    @pytest.mark.parametrize(
+        "operator",
+        ["+", "-", "*", "/", "%", "&", "|", "^", "<<", ">>", "==", "!=", "<", "<=", ">", ">="],
+    )
+    def test_nested_binary(self, operator: str):
+        source = f"(!1) {operator} (~4);"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 10
+        src_node = parse_expression(token_tape, min_precedence=0)
+
+        target = TackyGenerator()
+        target._curr_function = "test_nested_binary"
+
+        result = target.emit_expression(src_node)
+        assert result == TackyVarNode(start_position=5, identifier="tmp.test_nested_binary.2")
+
+        assert len(target._current_instructions) == 3
+
+        instr0 = target._current_instructions[0]
+        assert isinstance(instr0, TackyUnaryNode)
+        assert instr0.start_position == 1
+        assert instr0.operator == TackyLogicalNot(start_position=1)
+        assert instr0.src == TackyConstantIntNode(start_position=2, value=1)
+        assert instr0.dst == TackyVarNode(start_position=1, identifier="tmp.test_nested_binary.0")
+
+        instr1 = target._current_instructions[1]
+        assert isinstance(instr1, TackyUnaryNode)
+        assert instr1.start_position == 7 + len(operator)
+        assert instr1.operator == TackyComplement(start_position=7 + len(operator))
+        assert instr1.src == TackyConstantIntNode(start_position=8 + len(operator), value=4)
+        assert instr1.dst == TackyVarNode(
+            start_position=7 + len(operator), identifier="tmp.test_nested_binary.1"
+        )
+
+        instr2 = target._current_instructions[2]
+        assert instr2.start_position == 5
+        assert instr2.operator == _BINARY_EXPRESSION_MAP[operator](start_position=5)
+        assert instr2.left == instr0.dst
+        assert instr2.right == instr1.dst
+        assert instr2.dst == result
 
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
