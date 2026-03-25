@@ -140,7 +140,44 @@ class TackyBinaryNode(TackyASTNode):
     dst: TackyValue
 
 
-TackyInstruction = Union[TackyReturnNode, TackyUnaryNode, TackyBinaryNode]
+class TackyCopyNode(TackyASTNode):
+    node_type: Literal["TackyCopyNode"] = "TackyCopyNode"
+    src: TackyValue
+    dst: TackyValue
+
+
+class TackyJumpNode(TackyASTNode):
+    node_type: Literal["TackyJumpNode"] = "TackyJumpNode"
+    target: str
+
+
+class TackyJumpIfZeroNode(TackyASTNode):
+    node_type: Literal["TackyJumpIfZeroNode"] = "TackyJumpIfZeroNode"
+    target: str
+    condition: TackyValue
+
+
+class TackyJumpIfNotZeroNode(TackyASTNode):
+    node_type: Literal["TackyJumpIfNotZeroNode"] = "TackyJumpIfNotZeroNode"
+    target: str
+    condition: TackyValue
+
+
+class TackyLabelNode(TackyASTNode):
+    node_type: Literal["TackyLabelNode"] = "TackyLabelNode"
+    identifier: str
+
+
+TackyInstruction = Union[
+    TackyReturnNode,
+    TackyUnaryNode,
+    TackyBinaryNode,
+    TackyCopyNode,
+    TackyJumpNode,
+    TackyJumpIfZeroNode,
+    TackyJumpIfNotZeroNode,
+    TackyLabelNode,
+]
 
 
 class TackyFunctionNode(TackyASTNode):
