@@ -8,12 +8,20 @@ from nqcc.parser import (
     SourceComplement,
     SourceConstantIntNode,
     SourceDivide,
+    SourceEqualTo,
     SourceExpressionNode,
     SourceFunctionNode,
+    SourceGreaterThan,
+    SourceGreaterThanOrEqual,
     SourceLeftShift,
+    SourceLessThan,
+    SourceLessThanOrEqual,
+    SourceLogicalAnd,
+    SourceLogicalNot,
     SourceModulo,
     SourceMultiply,
     SourceNegate,
+    SourceNotEqualTo,
     SourceProgramNode,
     SourceReturnNode,
     SourceRightShift,
@@ -21,13 +29,6 @@ from nqcc.parser import (
     SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
-    SourceLogicalNot,
-    SourceEqualTo,
-    SourceNotEqualTo,
-    SourceLessThan,
-    SourceLessThanOrEqual,
-    SourceGreaterThan,
-    SourceGreaterThanOrEqual,
 )
 
 from ._tacky_ast import (
@@ -39,13 +40,24 @@ from ._tacky_ast import (
     TackyBitwiseXor,
     TackyComplement,
     TackyConstantIntNode,
+    TackyCopyNode,
     TackyDivide,
+    TackyEqualTo,
     TackyFunctionNode,
+    TackyGreaterThan,
+    TackyGreaterThanOrEqual,
     TackyInstruction,
+    TackyJumpIfZeroNode,
+    TackyJumpNode,
+    TackyLabelNode,
     TackyLeftShift,
+    TackyLessThan,
+    TackyLessThanOrEqual,
+    TackyLogicalNot,
     TackyModulo,
     TackyMultiply,
     TackyNegate,
+    TackyNotEqualTo,
     TackyProgramNode,
     TackyReturnNode,
     TackyRightShift,
@@ -54,13 +66,6 @@ from ._tacky_ast import (
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
-    TackyLogicalNot,
-    TackyEqualTo,
-    TackyNotEqualTo,
-    TackyLessThan,
-    TackyLessThanOrEqual,
-    TackyGreaterThan,
-    TackyGreaterThanOrEqual,
 )
 
 
@@ -76,8 +81,8 @@ class TackyGenerator:
         self._nxt_tmp += 1
         return result
 
-    def get_function_label(self) -> str:
-        result = f"label.{self._curr_function}.{self._nxt_lbl}"
+    def get_function_label(self, source_reference: str) -> str:
+        result = f"label.{self._curr_function}.{source_reference}.{self._nxt_lbl}"
         self._nxt_lbl += 1
         return result
 
@@ -133,6 +138,65 @@ class TackyGenerator:
             case _:
                 raise ValueError(f"Unrecognised: {source}")
 
+    def emit_logical_and(self, source_node: SourceBinaryExpressionNode) -> TackyValue:
+        assert isinstance(source_node, SourceBinaryExpressionNode)
+        assert isinstance(source_node.operator, SourceLogicalAnd)
+        FALSE_LABEL = "logicalandfalse"
+        END_LABEL = "logicalandend"
+        false_label = TackyLabelNode(
+            start_position=source_node.start_position,
+            identifier=self.get_function_label(FALSE_LABEL),
+        )
+        end_label = TackyLabelNode(
+            start_position=source_node.start_position, identifier=self.get_function_label(END_LABEL)
+        )
+        result_var = TackyVarNode(
+            start_position=source_node.start_position,
+            identifier=self.get_function_temporary(),
+        )
+
+        # Evaluate left and short circuit
+        l_val = self.emit_expression(source_node.left)
+        jmp0 = TackyJumpIfZeroNode(
+            start_position=source_node.start_position,
+            target=false_label.identifier,
+            condition=l_val,
+        )
+        self._current_instructions.append(jmp0)
+
+        # Evaluate right, and jump to fail if needed
+        r_val = self.emit_expression(source_node.right)
+        jmp1 = TackyJumpIfZeroNode(
+            start_position=source_node.start_position,
+            target=false_label.identifier,
+            condition=r_val,
+        )
+        self._current_instructions.append(jmp1)
+
+        # If we get here, && evaluated to True
+        copy_success = TackyCopyNode(
+            start_position=source_node.start_position,
+            src=TackyConstantIntNode(start_position=source_node.start_position, value=1),
+            dst=result_var,
+        )
+        self._current_instructions.append(copy_success)
+        jmp_end = TackyJumpNode(
+            start_position=source_node.start_position, target=end_label.identifier
+        )
+        self._current_instructions.append(jmp_end)
+
+        # Now handle the case where && evaluated to false
+        self._current_instructions.append(false_label)
+        copy_fail = TackyCopyNode(
+            start_position=source_node.start_position,
+            src=TackyConstantIntNode(start_position=source_node.start_position, value=0),
+            dst=result_var,
+        )
+        self._current_instructions.append(copy_fail)
+
+        self._current_instructions.append(end_label)
+        return result_var
+
     def emit_expression(self, source_node: SourceExpressionNode) -> TackyValue:
         match source_node:
             case SourceConstantIntNode():
@@ -153,6 +217,11 @@ class TackyGenerator:
                 self._current_instructions.append(instr)
                 return dst
             case SourceBinaryExpressionNode():
+                # First check for short circuiting
+                if isinstance(source_node.operator, SourceLogicalAnd):
+                    return self.emit_logical_and(source_node)
+
+                # If we get to this point, we have a 'regular' operator
                 # Note that the C standard does not guarantee
                 # ordering here
                 l_val = self.emit_expression(source_node.left)
