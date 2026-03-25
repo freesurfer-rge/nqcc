@@ -118,16 +118,16 @@ class TestExpressions:
         src_node = parse_expression(token_tape, min_precedence=0)
 
         target = TackyGenerator()
-        target._curr_function = "test_negation"
+        target._curr_function = "test_logical_not"
 
         result = target.emit_expression(src_node)
         assert target._nxt_tmp == 1, "Should have a temporary for result"
-        assert len(target._current_instructions) == 1, "Should emit negation instructions"
+        assert len(target._current_instructions) == 1
         instr = target._current_instructions[0]
         assert isinstance(instr, TackyUnaryNode)
         assert instr.start_position == 0
         assert instr.src == TackyConstantIntNode(start_position=1, value=4)
-        assert instr.dst == TackyVarNode(start_position=0, identifier="tmp.test_negation.0")
+        assert instr.dst == TackyVarNode(start_position=0, identifier="tmp.test_logical_not.0")
         assert instr.operator == TackyLogicalNot(start_position=0)
         assert result == instr.dst
 
