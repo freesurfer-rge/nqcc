@@ -166,7 +166,7 @@ class TackyGenerator:
         )
         self._current_instructions.append(jmp0)
 
-        # Evaluate right, and jump to fail if needed
+        # Evaluate right, and jump if needed
         r_val = self.emit_expression(source_node.right)
         jmp1 = TackyJumpIfZeroNode(
             start_position=source_node.start_position,
@@ -216,7 +216,7 @@ class TackyGenerator:
             identifier=self.get_function_temporary(),
         )
 
-        # Evaluate left and short circuit
+        # Evaluate left and short circuit if we can
         l_val = self.emit_expression(source_node.left)
         jmp0 = TackyJumpIfNotZeroNode(
             start_position=source_node.start_position,
@@ -225,7 +225,7 @@ class TackyGenerator:
         )
         self._current_instructions.append(jmp0)
 
-        # Evaluate right, and jump to fail if needed
+        # Evaluate right, and jump if needed
         r_val = self.emit_expression(source_node.right)
         jmp1 = TackyJumpIfNotZeroNode(
             start_position=source_node.start_position,
