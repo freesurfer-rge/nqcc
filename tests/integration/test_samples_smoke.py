@@ -1,4 +1,3 @@
-
 import pytest
 
 from .utils import SAMPLE_PROGRAM_DIR, compile_run_check
@@ -20,4 +19,3 @@ def test_simple_return_values(
     assert target_file.exists(), f"{target_file} not found"
 
     compile_run_check(target_file, macros=[])
-

@@ -2,6 +2,7 @@ import pytest
 
 from .utils import SAMPLE_PROGRAM_DIR, compile_run_check
 
+
 class TestChapter03:
     SUB_DIR = "ch03"
 

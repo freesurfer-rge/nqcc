@@ -65,35 +65,35 @@ class TestExtractTokens:
         toks = extract_tokens(";", idx)
 
         assert len(toks) == 1
-        assert toks[0] == SemicolonToken(start_position=idx, value=";")
+        assert toks[0] == SemicolonToken(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_open_paren(self, idx):
         toks = extract_tokens("(", idx)
 
         assert len(toks) == 1
-        assert toks[0] == OpenParenToken(start_position=idx, value="(")
+        assert toks[0] == OpenParenToken(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_open_brace(self, idx):
         toks = extract_tokens("{", idx)
 
         assert len(toks) == 1
-        assert toks[0] == OpenBraceToken(start_position=idx, value="{")
+        assert toks[0] == OpenBraceToken(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_close_paren(self, idx):
         toks = extract_tokens(")", idx)
 
         assert len(toks) == 1
-        assert toks[0] == CloseParenToken(start_position=idx, value=")")
+        assert toks[0] == CloseParenToken(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_close_brace(self, idx):
         toks = extract_tokens("}", idx)
 
         assert len(toks) == 1
-        assert toks[0] == CloseBraceToken(start_position=idx, value="}")
+        assert toks[0] == CloseBraceToken(start_position=idx)
 
     @pytest.mark.parametrize("bad_target", ["2int", "\\", "@", "`"])
     def test_bad_strings(self, bad_target: str):
@@ -106,94 +106,94 @@ class TestExtractTokens:
         toks = extract_tokens("~", idx)
 
         assert len(toks) == 1
-        assert toks[0] == TildeToken(start_position=idx, value="~")
+        assert toks[0] == TildeToken(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_negation(self, idx):
         toks = extract_tokens("-", idx)
 
         assert len(toks) == 1
-        assert toks[0] == NegationToken(start_position=idx, value="-")
+        assert toks[0] == NegationToken(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_decrement(self, idx):
         toks = extract_tokens("--", idx)
 
         assert len(toks) == 2
-        assert toks[0] == DecrementToken(start_position=idx, value="--")
-        assert toks[1] == NegationToken(start_position=idx, value="-")
+        assert toks[0] == DecrementToken(start_position=idx)
+        assert toks[1] == NegationToken(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_addition(self, idx):
         toks = extract_tokens("+", idx)
 
         assert len(toks) == 1
-        assert toks[0] == AdditionToken(start_position=idx, value="+")
+        assert toks[0] == AdditionToken(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_increment(self, idx):
         toks = extract_tokens("++", idx)
 
         assert len(toks) == 2
-        assert toks[0] == AdditionToken(start_position=idx, value="+")
-        assert toks[1] == IncrementToken(start_position=idx, value="++")
+        assert toks[0] == AdditionToken(start_position=idx)
+        assert toks[1] == IncrementToken(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_multiply(self, idx):
         toks = extract_tokens("*", idx)
 
         assert len(toks) == 1
-        assert toks[0] == MultiplyToken(start_position=idx, value="*")
+        assert toks[0] == MultiplyToken(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_divide(self, idx):
         toks = extract_tokens("/", idx)
 
         assert len(toks) == 1
-        assert toks[0] == DivideToken(start_position=idx, value="/")
+        assert toks[0] == DivideToken(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_modulo(self, idx):
         toks = extract_tokens("%", idx)
 
         assert len(toks) == 1
-        assert toks[0] == ModuloToken(start_position=idx, value="%")
+        assert toks[0] == ModuloToken(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_bitwiseand(self, idx):
         toks = extract_tokens("&", idx)
 
         assert len(toks) == 1
-        assert toks[0] == BitwiseAnd(start_position=idx, value="&")
+        assert toks[0] == BitwiseAnd(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_bitwiseor(self, idx):
         toks = extract_tokens("|", idx)
 
         assert len(toks) == 1
-        assert toks[0] == BitwiseOr(start_position=idx, value="|")
+        assert toks[0] == BitwiseOr(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_bitwisexor(self, idx):
         toks = extract_tokens("^", idx)
 
         assert len(toks) == 1
-        assert toks[0] == BitwiseXor(start_position=idx, value="^")
+        assert toks[0] == BitwiseXor(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_logicalnot(self, idx):
         toks = extract_tokens("!", idx)
 
         assert len(toks) == 1
-        assert toks[0] == LogicalNot(start_position=idx, value="!")
+        assert toks[0] == LogicalNot(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_logicaland(self, idx):
         toks = extract_tokens("&&", idx)
 
         assert len(toks) == 2
-        assert toks[0] == BitwiseAnd(start_position=idx, value="&")
-        assert toks[1] == LogicalAnd(start_position=idx, value="&&")
+        assert toks[0] == BitwiseAnd(start_position=idx)
+        assert toks[1] == LogicalAnd(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_logicalor(self, idx):
