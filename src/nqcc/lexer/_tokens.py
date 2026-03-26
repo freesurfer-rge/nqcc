@@ -62,7 +62,7 @@ class KeywordToken(Token):
 
 class TildeToken(Token):
     token_type: Literal["TildeToken"] = "TildeToken"
-    value: Literal["~"]
+    value: Literal["~"] = "~"
 
     @property
     def precedence(self) -> int:
@@ -75,7 +75,7 @@ class TildeToken(Token):
 
 class NegationToken(Token):
     token_type: Literal["NegationToken"] = "NegationToken"
-    value: Literal["-"]
+    value: Literal["-"] = "-"
 
     @property
     def precedence(self) -> int:
@@ -88,7 +88,7 @@ class NegationToken(Token):
 
 class AdditionToken(Token):
     token_type: Literal["AdditionToken"] = "AdditionToken"
-    value: Literal["+"]
+    value: Literal["+"] = "+"
 
     @property
     def precedence(self) -> int:
@@ -101,7 +101,7 @@ class AdditionToken(Token):
 
 class DecrementToken(Token):
     token_type: Literal["DecrementToken"] = "DecrementToken"
-    value: Literal["--"]
+    value: Literal["--"] = "--"
 
     @property
     def precedence(self) -> int:
@@ -114,7 +114,7 @@ class DecrementToken(Token):
 
 class IncrementToken(Token):
     token_type: Literal["IncrementToken"] = "IncrementToken"
-    value: Literal["++"]
+    value: Literal["++"] = "++"
 
     @property
     def precedence(self) -> int:
@@ -127,7 +127,7 @@ class IncrementToken(Token):
 
 class MultiplyToken(Token):
     token_type: Literal["MultiplyToken"] = "MultiplyToken"
-    value: Literal["*"]
+    value: Literal["*"] = "*"
 
     @property
     def precedence(self) -> int:
@@ -140,7 +140,7 @@ class MultiplyToken(Token):
 
 class DivideToken(Token):
     token_type: Literal["DivideToken"] = "DivideToken"
-    value: Literal["/"]
+    value: Literal["/"] = "/"
 
     @property
     def precedence(self) -> int:
@@ -153,7 +153,7 @@ class DivideToken(Token):
 
 class ModuloToken(Token):
     token_type: Literal["ModuloToken"] = "ModuloToken"
-    value: Literal["%"]
+    value: Literal["%"] = "%"
 
     @property
     def precedence(self) -> int:
@@ -166,7 +166,7 @@ class ModuloToken(Token):
 
 class BitwiseAnd(Token):
     token_type: Literal["BitwiseAnd"] = "BitwiseAnd"
-    value: Literal["&"]
+    value: Literal["&"] = "&"
 
     @property
     def precedence(self) -> int:
@@ -179,7 +179,7 @@ class BitwiseAnd(Token):
 
 class BitwiseOr(Token):
     token_type: Literal["BitwiseOr"] = "BitwiseOr"
-    value: Literal["|"]
+    value: Literal["|"] = "|"
 
     @property
     def precedence(self) -> int:
@@ -192,7 +192,7 @@ class BitwiseOr(Token):
 
 class BitwiseXor(Token):
     token_type: Literal["BitwiseXor"] = "BitwiseXor"
-    value: Literal["^"]
+    value: Literal["^"] = "^"
 
     @property
     def precedence(self) -> int:
@@ -205,7 +205,7 @@ class BitwiseXor(Token):
 
 class LeftShift(Token):
     token_type: Literal["LeftShift"] = "LeftShift"
-    value: Literal["<<"]
+    value: Literal["<<"] = "<<"
 
     @property
     def precedence(self) -> int:
@@ -218,7 +218,7 @@ class LeftShift(Token):
 
 class RightShift(Token):
     token_type: Literal["RightShift"] = "RightShift"
-    value: Literal[">>"]
+    value: Literal[">>"] = ">>"
 
     @property
     def precedence(self) -> int:

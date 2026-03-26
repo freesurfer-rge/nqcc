@@ -1,4 +1,4 @@
-from typing import get_args
+from typing import Type, get_args
 
 from nqcc.lexer import (
     AdditionToken,
@@ -70,23 +70,43 @@ from ._source_ast import (
 )
 from ._token_tape import TokenTape
 
+_UNARY_OPERATOR_MAP: dict[Type, Type] = {
+    TildeToken: SourceComplement,
+    NegationToken: SourceNegate,
+    LogicalNot: SourceLogicalNot,
+}
+
+_BINARY_OPERATOR_MAP: dict[Type, Type] = {
+    AdditionToken: SourceAdd,
+    NegationToken: SourceSubtract,
+    MultiplyToken: SourceMultiply,
+    DivideToken: SourceDivide,
+    ModuloToken: SourceModulo,
+    BitwiseAnd: SourceBitwiseAnd,
+    BitwiseOr: SourceBitwiseOr,
+    BitwiseXor: SourceBitwiseXor,
+    LeftShift: SourceLeftShift,
+    RightShift: SourceRightShift,
+    LogicalAnd: SourceLogicalAnd,
+    LogicalOr: SourceLogicalOr,
+    EqualTo: SourceEqualTo,
+    NotEqualTo: SourceNotEqualTo,
+    LessThan: SourceLessThan,
+    LessThanOrEqual: SourceLessThanOrEqual,
+    GreaterThan: SourceGreaterThan,
+    GreaterThanOrEqual: SourceGreaterThanOrEqual,
+}
+
 
 def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryExpressionNode:
     op_token = token_tape.expect(get_args(UnaryOperatorToken))
 
-    op: SourceUnaryOperator
-    match op_token:
-        case TildeToken():
-            op = SourceComplement(start_position=op_token.start_position)
+    if type(op_token) not in _UNARY_OPERATOR_MAP:
+        raise ValueError(f"Could not match type of {op_token}")
 
-        case NegationToken():
-            op = SourceNegate(start_position=op_token.start_position)
-
-        case LogicalNot():
-            op = SourceLogicalNot(start_position=op_token.start_position)
-
-        case _:
-            raise ValueError(f"Could not match type of {op_token}")
+    op: SourceUnaryOperator = _UNARY_OPERATOR_MAP[type(op_token)](
+        start_position=op_token.start_position
+    )
 
     inner_exp = parse_factor(token_tape)
     result = SourceUnaryExpressionNode(
@@ -96,47 +116,11 @@ def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryExpressionNode:
     return result
 
 
-def convert_binary_operator(lexer_token: Token) -> SourceBinaryOperator | None:  # noqa: C901
-    match lexer_token:
-        case AdditionToken():
-            return SourceAdd(start_position=lexer_token.start_position)
-        case NegationToken():
-            return SourceSubtract(start_position=lexer_token.start_position)
-        case MultiplyToken():
-            return SourceMultiply(start_position=lexer_token.start_position)
-        case DivideToken():
-            return SourceDivide(start_position=lexer_token.start_position)
-        case ModuloToken():
-            return SourceModulo(start_position=lexer_token.start_position)
-        case BitwiseAnd():
-            return SourceBitwiseAnd(start_position=lexer_token.start_position)
-        case BitwiseOr():
-            return SourceBitwiseOr(start_position=lexer_token.start_position)
-        case BitwiseXor():
-            return SourceBitwiseXor(start_position=lexer_token.start_position)
-        case LeftShift():
-            return SourceLeftShift(start_position=lexer_token.start_position)
-        case RightShift():
-            return SourceRightShift(start_position=lexer_token.start_position)
-        case LogicalAnd():
-            return SourceLogicalAnd(start_position=lexer_token.start_position)
-        case LogicalOr():
-            return SourceLogicalOr(start_position=lexer_token.start_position)
-        case EqualTo():
-            return SourceEqualTo(start_position=lexer_token.start_position)
-        case NotEqualTo():
-            return SourceNotEqualTo(start_position=lexer_token.start_position)
-        case LessThan():
-            return SourceLessThan(start_position=lexer_token.start_position)
-        case LessThanOrEqual():
-            return SourceLessThanOrEqual(start_position=lexer_token.start_position)
-        case GreaterThan():
-            return SourceGreaterThan(start_position=lexer_token.start_position)
-        case GreaterThanOrEqual():
-            return SourceGreaterThanOrEqual(start_position=lexer_token.start_position)
-        case _:
-            # Nothing to do
-            return None
+def convert_binary_operator(lexer_token: Token) -> SourceBinaryOperator | None:
+    if type(lexer_token) not in _BINARY_OPERATOR_MAP:
+        return None
+    result_type = _BINARY_OPERATOR_MAP[type(lexer_token)]
+    return result_type(start_position=lexer_token.start_position)
 
 
 def parse_factor(token_tape: TokenTape) -> SourceExpressionNode:
