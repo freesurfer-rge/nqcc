@@ -116,7 +116,7 @@ def parse_unary_operator(token_tape: TokenTape) -> SourceUnaryExpressionNode:
     return result
 
 
-def convert_binary_operator(lexer_token: Token) -> SourceBinaryOperator | None:  # noqa: C901
+def convert_binary_operator(lexer_token: Token) -> SourceBinaryOperator | None:
     if type(lexer_token) not in _BINARY_OPERATOR_MAP:
         return None
     result_type = _BINARY_OPERATOR_MAP[type(lexer_token)]
