@@ -78,7 +78,7 @@ _UNARY_OPERATOR_MAP: dict[Type, Type] = {
     SourceLogicalNot: TackyLogicalNot,
 }
 
-_BINARY_OPERATOR_MAP: dict[Type,Type] = {
+_BINARY_OPERATOR_MAP: dict[Type, Type] = {
     SourceAdd: TackyAdd,
     SourceSubtract: TackySubtract,
     SourceMultiply: TackyMultiply,
@@ -129,7 +129,7 @@ class TackyGenerator:
     def convert_binary_operator(self, source: SourceBinaryOperator) -> TackyBinaryOperator:
         if type(source) not in _BINARY_OPERATOR_MAP:
             raise ValueError(f"Unrecognised binary: {source}")
-        
+
         op_type = _BINARY_OPERATOR_MAP[type(source)]
         return op_type(start_position=source.start_position)
 
