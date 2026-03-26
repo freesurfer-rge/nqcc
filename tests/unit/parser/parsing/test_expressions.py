@@ -1,10 +1,8 @@
 import pytest
 
-from nqcc.lexer import CloseParenToken, ConstantIntegerToken, KeywordToken, SemicolonToken
+from nqcc.lexer import ConstantIntegerToken, SemicolonToken
 from nqcc.parser import (
     SourceAdd,
-    SourceASTBadTypeError,
-    SourceASTBadValueError,
     SourceBinaryExpressionNode,
     SourceBitwiseAnd,
     SourceBitwiseOr,
@@ -13,7 +11,6 @@ from nqcc.parser import (
     SourceConstantIntNode,
     SourceDivide,
     SourceEqualTo,
-    SourceFunctionNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
     SourceLeftShift,
@@ -26,17 +23,11 @@ from nqcc.parser import (
     SourceMultiply,
     SourceNegate,
     SourceNotEqualTo,
-    SourceProgramNode,
-    SourceReturnNode,
     SourceRightShift,
-    SourceStatementNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
     TokenTape,
     parse_expression,
-    parse_function,
-    parse_program,
-    parse_statement,
 )
 
 _BINARY_EXPRESSION_MAP = {
