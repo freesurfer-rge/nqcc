@@ -1,4 +1,3 @@
-
 from nqcc.parser import TokenTape, parse_function, parse_program, parse_statement
 from nqcc.tacky import (
     TackyBinaryNode,
