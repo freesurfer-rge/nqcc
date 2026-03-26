@@ -78,6 +78,25 @@ _UNARY_OPERATOR_MAP: dict[Type, Type] = {
     SourceLogicalNot: TackyLogicalNot,
 }
 
+_BINARY_OPERATOR_MAP: dict[Type,Type] = {
+    SourceAdd: TackyAdd,
+    SourceSubtract: TackySubtract,
+    SourceMultiply: TackyMultiply,
+    SourceDivide: TackyDivide,
+    SourceModulo: TackyModulo,
+    SourceBitwiseAnd: TackyBitwiseAnd,
+    SourceBitwiseOr: TackyBitwiseOr,
+    SourceBitwiseXor: TackyBitwiseXor,
+    SourceLeftShift: TackyLeftShift,
+    SourceRightShift: TackyRightShift,
+    SourceEqualTo: TackyEqualTo,
+    SourceNotEqualTo: TackyNotEqualTo,
+    SourceLessThan: TackyLessThan,
+    SourceLessThanOrEqual: TackyLessThanOrEqual,
+    SourceGreaterThan: TackyGreaterThan,
+    SourceGreaterThanOrEqual: TackyGreaterThanOrEqual,
+}
+
 
 class TackyGenerator:
     def __init__(self) -> None:
@@ -102,47 +121,17 @@ class TackyGenerator:
 
     def convert_unary_operator(self, source: SourceUnaryOperator) -> TackyUnaryOperator:
         if type(source) not in _UNARY_OPERATOR_MAP:
-            raise ValueError(f"Unrecognised: {source}")
+            raise ValueError(f"Unrecognised unary: {source}")
 
         op_type = _UNARY_OPERATOR_MAP[type(source)]
         return op_type(start_position=source.start_position)
 
     def convert_binary_operator(self, source: SourceBinaryOperator) -> TackyBinaryOperator:
-        match source:
-            case SourceAdd():
-                return TackyAdd(start_position=source.start_position)
-            case SourceSubtract():
-                return TackySubtract(start_position=source.start_position)
-            case SourceMultiply():
-                return TackyMultiply(start_position=source.start_position)
-            case SourceDivide():
-                return TackyDivide(start_position=source.start_position)
-            case SourceModulo():
-                return TackyModulo(start_position=source.start_position)
-            case SourceBitwiseAnd():
-                return TackyBitwiseAnd(start_position=source.start_position)
-            case SourceBitwiseOr():
-                return TackyBitwiseOr(start_position=source.start_position)
-            case SourceBitwiseXor():
-                return TackyBitwiseXor(start_position=source.start_position)
-            case SourceLeftShift():
-                return TackyLeftShift(start_position=source.start_position)
-            case SourceRightShift():
-                return TackyRightShift(start_position=source.start_position)
-            case SourceEqualTo():
-                return TackyEqualTo(start_position=source.start_position)
-            case SourceNotEqualTo():
-                return TackyNotEqualTo(start_position=source.start_position)
-            case SourceLessThan():
-                return TackyLessThan(start_position=source.start_position)
-            case SourceLessThanOrEqual():
-                return TackyLessThanOrEqual(start_position=source.start_position)
-            case SourceGreaterThan():
-                return TackyGreaterThan(start_position=source.start_position)
-            case SourceGreaterThanOrEqual():
-                return TackyGreaterThanOrEqual(start_position=source.start_position)
-            case _:
-                raise ValueError(f"Unrecognised: {source}")
+        if type(source) not in _BINARY_OPERATOR_MAP:
+            raise ValueError(f"Unrecognised binary: {source}")
+        
+        op_type = _BINARY_OPERATOR_MAP[type(source)]
+        return op_type(start_position=source.start_position)
 
     def emit_logical_and(self, source_node: SourceBinaryExpressionNode) -> TackyValue:
         assert isinstance(source_node, SourceBinaryExpressionNode)
