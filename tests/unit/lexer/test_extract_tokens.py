@@ -30,11 +30,9 @@ from nqcc.lexer import (
     OpenParenToken,
     SemicolonToken,
     TildeToken,
-    Token,
     extract_tokens,
-    lex_string,
-    pick_token,
 )
+
 
 class TestExtractTokens:
     @pytest.mark.parametrize("target", ["int", "void", "return"])

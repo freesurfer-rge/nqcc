@@ -4,9 +4,6 @@ from nqcc.lexer import (
     AdditionToken,
     BitwiseAnd,
     BitwiseOr,
-    BitwiseXor,
-    CloseBraceToken,
-    CloseParenToken,
     ConstantIntegerToken,
     DecrementToken,
     DivideToken,
@@ -14,11 +11,9 @@ from nqcc.lexer import (
     GreaterThan,
     GreaterThanOrEqual,
     IdentifierToken,
-    IncrementToken,
     KeywordToken,
     LessThan,
     LessThanOrEqual,
-    LexerMatchError,
     LogicalAnd,
     LogicalNot,
     LogicalOr,
@@ -26,16 +21,12 @@ from nqcc.lexer import (
     MultiplyToken,
     NegationToken,
     NotEqualTo,
-    OpenBraceToken,
-    OpenParenToken,
     SemicolonToken,
     TildeToken,
     Token,
-    extract_tokens,
     lex_string,
     pick_token,
 )
-
 
 
 class TestPickToken:
