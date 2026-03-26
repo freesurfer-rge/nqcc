@@ -1,3 +1,5 @@
+from typing import Type
+
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
@@ -52,14 +54,30 @@ from ._assembler_ast import (
     AsmUnaryOperator,
 )
 
+_UNARY_OPERATOR_MAP: dict[Type, Type] = {
+    TackyComplement: AsmNot,
+    TackyNegate: AsmNeg,
+}
+
+_BINARY_OPERATOR_MAP: dict[Type, Type] = {
+    TackyAdd: AsmAdd,
+    TackySubtract: AsmSubtract,
+    TackyMultiply: AsmMultiply,
+    TackyBitwiseAnd: AsmBitwiseAnd,
+    TackyBitwiseOr: AsmBitwiseOr,
+    TackyBitwiseXor: AsmBitwiseXor,
+    TackyLeftShift: AsmLeftShift,
+    TackyRightShift: AsmRightShift,
+}
+
 
 def convert_tacky_operand(tacky_value: TackyValue) -> AsmOperandNode:
     match tacky_value:
-        case v if isinstance(v, TackyConstantIntNode):
+        case TackyConstantIntNode():
             return AsmImmediateIntNode(
                 start_position=tacky_value.start_position, value=tacky_value.value
             )
-        case v if isinstance(v, TackyVarNode):
+        case TackyVarNode():
             return AsmPseudoRegisterNode(
                 start_position=tacky_value.start_position, identifier=tacky_value.identifier
             )
@@ -68,36 +86,20 @@ def convert_tacky_operand(tacky_value: TackyValue) -> AsmOperandNode:
 
 
 def convert_tacky_unary_operator(tacky_operator: TackyUnaryOperator) -> AsmUnaryOperator:
-    match tacky_operator:
-        case v if isinstance(v, TackyComplement):
-            return AsmNot(start_position=tacky_operator.start_position)
-        case v if isinstance(v, TackyNegate):
-            return AsmNeg(start_position=tacky_operator.start_position)
-        case _:
-            raise ValueError(f"Unrecognised: {tacky_operator}")
+    if type(tacky_operator) not in _UNARY_OPERATOR_MAP:
+        raise ValueError(f"Unrecognised unary: {tacky_operator}")
+
+    op_type = _UNARY_OPERATOR_MAP[type(tacky_operator)]
+    return op_type(start_position=tacky_operator.start_position)
 
 
 def convert_tacky_binary_operator(tacky_operator: TackyBinaryOperator) -> AsmBinaryOperator:
-    match tacky_operator:
-        case TackyAdd():
-            return AsmAdd(start_position=tacky_operator.start_position)
-        case TackySubtract():
-            return AsmSubtract(start_position=tacky_operator.start_position)
-        case TackyMultiply():
-            return AsmMultiply(start_position=tacky_operator.start_position)
-        case TackyBitwiseAnd():
-            return AsmBitwiseAnd(start_position=tacky_operator.start_position)
-        case TackyBitwiseOr():
-            return AsmBitwiseOr(start_position=tacky_operator.start_position)
-        case TackyBitwiseXor():
-            return AsmBitwiseXor(start_position=tacky_operator.start_position)
-        case TackyLeftShift():
-            return AsmLeftShift(start_position=tacky_operator.start_position)
-        case TackyRightShift():
-            return AsmRightShift(start_position=tacky_operator.start_position)
-        case _:
-            # Div and Modulo handled separately
-            raise ValueError(f"Unrecognised: {tacky_operator}")
+    if type(tacky_operator) not in _BINARY_OPERATOR_MAP:
+        # Div and Modulo handled separately
+        raise ValueError(f"Unrecognised binary: {tacky_operator}")
+
+    op_type = _BINARY_OPERATOR_MAP[type(tacky_operator)]
+    return op_type(start_position=tacky_operator.start_position)
 
 
 def convert_tacky_binary_node(tacky_node: TackyBinaryNode) -> list[AsmInstructionNode]:
