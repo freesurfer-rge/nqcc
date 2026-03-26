@@ -1,3 +1,5 @@
+from typing import Type
+
 from nqcc.parser import (
     SourceAdd,
     SourceBinaryExpressionNode,
@@ -70,6 +72,12 @@ from ._tacky_ast import (
     TackyVarNode,
 )
 
+_UNARY_OPERATOR_MAP: dict[Type, Type] = {
+    SourceComplement: TackyComplement,
+    SourceNegate: TackyNegate,
+    SourceLogicalNot: TackyLogicalNot,
+}
+
 
 class TackyGenerator:
     def __init__(self) -> None:
@@ -93,17 +101,13 @@ class TackyGenerator:
         return TackyConstantIntNode(start_position=source.start_position, value=source.value)
 
     def convert_unary_operator(self, source: SourceUnaryOperator) -> TackyUnaryOperator:
-        match source:
-            case SourceComplement():
-                return TackyComplement(start_position=source.start_position)
-            case SourceNegate():
-                return TackyNegate(start_position=source.start_position)
-            case SourceLogicalNot():
-                return TackyLogicalNot(start_position=source.start_position)
-            case _:
-                raise ValueError(f"Unrecognised: {source}")
+        if type(source) not in _UNARY_OPERATOR_MAP:
+            raise ValueError(f"Unrecognised: {source}")
 
-    def convert_binary_operator(self, source: SourceBinaryOperator) -> TackyBinaryOperator:  # noqa: C901
+        op_type = _UNARY_OPERATOR_MAP[type(source)]
+        return op_type(start_position=source.start_position)
+
+    def convert_binary_operator(self, source: SourceBinaryOperator) -> TackyBinaryOperator:
         match source:
             case SourceAdd():
                 return TackyAdd(start_position=source.start_position)
