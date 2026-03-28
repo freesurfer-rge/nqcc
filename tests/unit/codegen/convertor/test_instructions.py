@@ -51,7 +51,7 @@ class TestInstructions:
         assert result[0] == AsmMovNode(
             start_position=345,
             src=AsmImmediateIntNode(start_position=465, value=10),
-            dst=AsmRegisterNode(start_position=345, value="eax"),
+            dst=AsmRegisterNode(start_position=345, value="AX"),
         )
         assert result[1] == AsmRetNode(start_position=345)
 
@@ -216,7 +216,7 @@ class TestInstructions:
         assert result[0] == AsmMovNode(
             start_position=22,
             src=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
-            dst=AsmRegisterNode(start_position=22, value="eax"),
+            dst=AsmRegisterNode(start_position=22, value="AX"),
         )
         assert result[1] == AsmCdqNode(start_position=22)
         assert result[2] == AsmIDivNode(
@@ -224,7 +224,7 @@ class TestInstructions:
         )
         assert result[3] == AsmMovNode(
             start_position=22,
-            src=AsmRegisterNode(start_position=22, value="eax"),
+            src=AsmRegisterNode(start_position=22, value="AX"),
             dst=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
         )
 
@@ -242,7 +242,7 @@ class TestInstructions:
         assert result[0] == AsmMovNode(
             start_position=22,
             src=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
-            dst=AsmRegisterNode(start_position=22, value="eax"),
+            dst=AsmRegisterNode(start_position=22, value="AX"),
         )
         assert result[1] == AsmCdqNode(start_position=22)
         assert result[2] == AsmIDivNode(
@@ -250,6 +250,6 @@ class TestInstructions:
         )
         assert result[3] == AsmMovNode(
             start_position=22,
-            src=AsmRegisterNode(start_position=22, value="edx"),
+            src=AsmRegisterNode(start_position=22, value="DX"),
             dst=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
         )

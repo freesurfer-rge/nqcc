@@ -129,7 +129,7 @@ def convert_tacky_binary_node(tacky_node: TackyBinaryNode) -> list[AsmInstructio
             )
             return [i0_bin_op, i1_bin_op]
         case TackyDivide() | TackyModulo():
-            div_eax = AsmRegisterNode(start_position=tacky_node.start_position, value="eax")
+            div_eax = AsmRegisterNode(start_position=tacky_node.start_position, value="AX")
             i0_div_op = AsmMovNode(
                 start_position=tacky_node.start_position,
                 src=left,
@@ -142,7 +142,7 @@ def convert_tacky_binary_node(tacky_node: TackyBinaryNode) -> list[AsmInstructio
             else:
                 # Modulo
                 result_register = AsmRegisterNode(
-                    start_position=tacky_node.start_position, value="edx"
+                    start_position=tacky_node.start_position, value="DX"
                 )
             i4_div_op = AsmMovNode(
                 start_position=tacky_node.start_position, src=result_register, dst=dest
@@ -157,7 +157,7 @@ def convert_tacky_instruction(tacky_instruction: TackyInstruction) -> list[AsmIn
     match tacky_instruction:
         case TackyReturnNode():
             src_ret = convert_tacky_operand(tacky_instruction.value)
-            dst_ret = AsmRegisterNode(start_position=sp, value="eax")
+            dst_ret = AsmRegisterNode(start_position=sp, value="AX")
             i0_ret = AsmMovNode(
                 start_position=sp,
                 src=src_ret,

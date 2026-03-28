@@ -2,6 +2,7 @@ from typing import Literal, Union
 
 from pydantic import BaseModel, Field
 
+AsmRegName = Literal["AX", "CX", "DX", "R10", "R11"]
 AsmCondCode = Literal["E", "NE", "G", "GE", "L", "LE"]
 
 
@@ -17,7 +18,7 @@ class AsmImmediateIntNode(AsmASTNode):
 
 class AsmRegisterNode(AsmASTNode):
     node_type: Literal["AsmRegisterNode"] = "AsmRegisterNode"
-    value: Literal["eax", "ecx", "cl", "edx", "rbp", "rsp", "r10d", "r11d"]
+    value: AsmRegName
 
 
 class AsmPseudoRegisterNode(AsmASTNode):

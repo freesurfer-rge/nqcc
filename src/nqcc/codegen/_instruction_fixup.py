@@ -22,8 +22,8 @@ from ._assembler_ast import (
 
 def apply_mov_fixup(instr: AsmMovNode) -> list[AsmInstructionNode]:
     if isinstance(instr.src, AsmStackNode) and isinstance(instr.dst, AsmStackNode):
-        # Can't move from stack to stack; use r10d
-        reg = AsmRegisterNode(start_position=instr.start_position, value="r10d")
+        # Can't move from stack to stack; use R10
+        reg = AsmRegisterNode(start_position=instr.start_position, value="R10")
         nxt0 = AsmMovNode(
             start_position=instr.start_position,
             src=instr.src,
@@ -38,7 +38,7 @@ def apply_mov_fixup(instr: AsmMovNode) -> list[AsmInstructionNode]:
 def apply_idiv_fixup(instr: AsmIDivNode) -> list[AsmInstructionNode]:
     if isinstance(instr.src, AsmImmediateIntNode):
         # Instruction must act on register
-        reg = AsmRegisterNode(start_position=instr.start_position, value="r10d")
+        reg = AsmRegisterNode(start_position=instr.start_position, value="R10")
         nxt0 = AsmMovNode(start_position=instr.start_position, src=instr.src, dst=reg)
         nxt1 = AsmIDivNode(start_position=instr.start_position, src=reg)
         return [nxt0, nxt1]
@@ -51,7 +51,7 @@ def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
         case AsmAdd() | AsmSubtract() | AsmBitwiseAnd() | AsmBitwiseOr() | AsmBitwiseXor():
             if isinstance(instr.src, AsmStackNode):
                 # src cannot be on the stack
-                reg = AsmRegisterNode(start_position=instr.start_position, value="r10d")
+                reg = AsmRegisterNode(start_position=instr.start_position, value="R10")
                 nxt0 = AsmMovNode(start_position=instr.start_position, src=instr.src, dst=reg)
                 nxt1 = AsmBinaryNode(
                     start_position=instr.start_position,
@@ -66,7 +66,7 @@ def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
             if not isinstance(instr.src, AsmImmediateIntNode):
                 # Have to use CL/ECX for number of places to shift
                 # Note that CL is the least significant byte of ECX
-                reg = AsmRegisterNode(start_position=instr.start_position, value="ecx")
+                reg = AsmRegisterNode(start_position=instr.start_position, value="CX")
                 nxt0 = AsmMovNode(start_position=instr.start_position, src=instr.src, dst=reg)
                 nxt1 = AsmBinaryNode(
                     start_position=instr.start_position,
@@ -79,8 +79,8 @@ def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
                 return [instr]
         case AsmMultiply():
             if isinstance(instr.dst, AsmStackNode):
-                # This is a dst fixup (dst cannot be on stack), so use r11d
-                reg = AsmRegisterNode(start_position=instr.start_position, value="r11d")
+                # This is a dst fixup (dst cannot be on stack), so use R11
+                reg = AsmRegisterNode(start_position=instr.start_position, value="R11")
                 nxt0 = AsmMovNode(start_position=instr.start_position, src=instr.dst, dst=reg)
                 nxt1 = AsmBinaryNode(
                     start_position=instr.start_position,
