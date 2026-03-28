@@ -1,5 +1,4 @@
 import pathlib
-
 from typing import Literal
 
 from nqcc.codegen import (
@@ -23,13 +22,13 @@ from nqcc.codegen import (
     AsmOperandNode,
     AsmProgramNode,
     AsmRegisterNode,
+    AsmRegName,
     AsmRetNode,
     AsmRightShift,
     AsmStackNode,
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
-    AsmRegName,
 )
 
 ASSEMBLY_EXTENSION = ".s"
@@ -42,7 +41,7 @@ _SEP_CHAR = "="
 
 SubRegister = Literal["L8", "4B"]
 
-_REG_MAP: dict[AsmRegName, dict[SubRegister:str]] = {
+_REG_MAP: dict[AsmRegName, dict[SubRegister, str]] = {
     "AX": {"4B": "eax"},
     "CX": {"4B": "ecx"},
     "DX": {"4B": "edx"},
@@ -54,10 +53,10 @@ _REG_MAP: dict[AsmRegName, dict[SubRegister:str]] = {
 def get_register(reg_name: AsmRegName, target: SubRegister) -> str:
     if reg_name not in _REG_MAP:
         raise ValueError(f"Unrecognised: {reg_name}")
-    map = _REG_MAP[reg_name]
-    if target not in map:
+    name_map = _REG_MAP[reg_name]
+    if target not in name_map:
         raise ValueError(f"Unrecognised {reg_name} {target}")
-    return map[target]
+    return name_map[target]
 
 
 def get_operand_assembler(operand_node: AsmOperandNode, target: SubRegister) -> str:
