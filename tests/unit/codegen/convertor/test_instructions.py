@@ -7,18 +7,22 @@ from nqcc.codegen import (
     AsmBitwiseOr,
     AsmBitwiseXor,
     AsmCdqNode,
+    AsmCmpNode,
     AsmIDivNode,
     AsmImmediateIntNode,
     AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
+    AsmNeg,
     AsmNot,
     AsmPseudoRegisterNode,
     AsmRegisterNode,
     AsmRetNode,
     AsmRightShift,
+    AsmSetCCNode,
     AsmSubtract,
     AsmUnaryNode,
+    AsmUnaryOperator,
     convert_tacky_instruction,
 )
 from nqcc.tacky import (
@@ -31,14 +35,65 @@ from nqcc.tacky import (
     TackyConstantIntNode,
     TackyDivide,
     TackyLeftShift,
+    TackyLogicalNot,
     TackyModulo,
     TackyMultiply,
+    TackyNegate,
     TackyReturnNode,
     TackyRightShift,
     TackySubtract,
     TackyUnaryNode,
+    TackyUnaryOperator,
     TackyVarNode,
 )
+
+
+class TestUnaryInstructions:
+    @pytest.mark.parametrize(
+        ("tacky_operator", "asm_operator"), [(TackyComplement, AsmNot), (TackyNegate, AsmNeg)]
+    )
+    def test_unary_arithmetic(
+        self, tacky_operator: TackyUnaryOperator, asm_operator: AsmUnaryOperator
+    ):
+        target = TackyUnaryNode(
+            start_position=123,
+            operator=tacky_operator(start_position=1234),
+            src=TackyVarNode(start_position=12345, identifier="tmp.0"),
+            dst=TackyVarNode(start_position=123456, identifier="tmp.1"),
+        )
+        result = convert_tacky_instruction(target)
+        assert len(result) == 2
+        assert result[0] == AsmMovNode(
+            start_position=123,
+            src=AsmPseudoRegisterNode(start_position=12345, identifier="tmp.0"),
+            dst=AsmPseudoRegisterNode(start_position=123456, identifier="tmp.1"),
+        )
+        assert result[1] == AsmUnaryNode(
+            start_position=123,
+            operator=asm_operator(start_position=1234),
+            src=result[0].dst,
+        )
+
+    def test_unary_logical_not(self):
+        target = TackyUnaryNode(
+            start_position=123,
+            operator=TackyLogicalNot(start_position=1234),
+            src=TackyVarNode(start_position=12345, identifier="tmp.0"),
+            dst=TackyVarNode(start_position=123456, identifier="tmp.1"),
+        )
+        result = convert_tacky_instruction(target)
+        assert len(result) == 3
+        assert result[0] == AsmCmpNode(
+            start_position=123,
+            src=AsmImmediateIntNode(start_position=123, value=0),
+            dst=AsmPseudoRegisterNode(start_position=12345, identifier="tmp.0"),
+        )
+        assert result[1] == AsmMovNode(
+            start_position=123,
+            src=AsmImmediateIntNode(start_position=123, value=0),
+            dst=AsmPseudoRegisterNode(start_position=123456, identifier="tmp.1"),
+        )
+        assert result[2] == AsmSetCCNode(start_position=123, src=result[1].dst, cond_code="E")
 
 
 class TestInstructions:
@@ -54,26 +109,6 @@ class TestInstructions:
             dst=AsmRegisterNode(start_position=345, value="AX"),
         )
         assert result[1] == AsmRetNode(start_position=345)
-
-    def test_unary(self):
-        target = TackyUnaryNode(
-            start_position=123,
-            operator=TackyComplement(start_position=1234),
-            src=TackyVarNode(start_position=12345, identifier="tmp.0"),
-            dst=TackyVarNode(start_position=123456, identifier="tmp.1"),
-        )
-        result = convert_tacky_instruction(target)
-        assert len(result) == 2
-        assert result[0] == AsmMovNode(
-            start_position=123,
-            src=AsmPseudoRegisterNode(start_position=12345, identifier="tmp.0"),
-            dst=AsmPseudoRegisterNode(start_position=123456, identifier="tmp.1"),
-        )
-        assert result[1] == AsmUnaryNode(
-            start_position=123,
-            operator=AsmNot(start_position=1234),
-            src=result[0].dst,
-        )
 
     def test_add(self):
         target = TackyBinaryNode(

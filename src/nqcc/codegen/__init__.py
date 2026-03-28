@@ -25,6 +25,7 @@ from ._assembler_ast import (
     AsmProgramNode,
     AsmPseudoRegisterNode,
     AsmRegisterNode,
+    AsmRegName,
     AsmRetNode,
     AsmRightShift,
     AsmSetCCNode,
@@ -32,7 +33,6 @@ from ._assembler_ast import (
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
-    AsmRegName,
 )
 from ._convert_tacky import (
     convert_tacky_binary_node,
@@ -56,7 +56,6 @@ from ._pseudo_replace import PseudoRegisterReplacer
 __all__ = [
     "AsmASTNode",
     "AsmAdd",
-    "AsmRegName",
     "AsmAllocateStackNode",
     "AsmBinaryNode",
     "AsmBinaryOperator",
@@ -84,6 +83,7 @@ __all__ = [
     "AsmOperandNode",
     "AsmProgramNode",
     "AsmPseudoRegisterNode",
+    "AsmRegName",
     "AsmRegisterNode",
     "AsmRetNode",
     "AsmRightShift",

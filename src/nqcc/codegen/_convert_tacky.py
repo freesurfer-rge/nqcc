@@ -13,6 +13,7 @@ from nqcc.tacky import (
     TackyFunctionNode,
     TackyInstruction,
     TackyLeftShift,
+    TackyLogicalNot,
     TackyModulo,
     TackyMultiply,
     TackyNegate,
@@ -34,6 +35,7 @@ from ._assembler_ast import (
     AsmBitwiseOr,
     AsmBitwiseXor,
     AsmCdqNode,
+    AsmCmpNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -49,6 +51,7 @@ from ._assembler_ast import (
     AsmRegisterNode,
     AsmRetNode,
     AsmRightShift,
+    AsmSetCCNode,
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
@@ -91,6 +94,26 @@ def convert_tacky_unary_operator(tacky_operator: TackyUnaryOperator) -> AsmUnary
 
     op_type = _UNARY_OPERATOR_MAP[type(tacky_operator)]
     return op_type(start_position=tacky_operator.start_position)
+
+
+def convert_tacky_unary_node(tacky_node: TackyUnaryNode) -> list[AsmInstructionNode]:
+    sp = tacky_node.start_position
+    src_unary = convert_tacky_operand(tacky_node.src)
+    dst_unary = convert_tacky_operand(tacky_node.dst)
+    if isinstance(tacky_node.operator, TackyLogicalNot):
+        i0 = AsmCmpNode(
+            start_position=sp, src=AsmImmediateIntNode(start_position=sp, value=0), dst=src_unary
+        )
+        i1 = AsmMovNode(
+            start_position=sp, src=AsmImmediateIntNode(start_position=sp, value=0), dst=dst_unary
+        )
+        i2 = AsmSetCCNode(start_position=sp, src=dst_unary, cond_code="E")
+        return [i0, i1, i2]
+    else:
+        op_unary = convert_tacky_unary_operator(tacky_node.operator)
+        i0_unary = AsmMovNode(start_position=sp, src=src_unary, dst=dst_unary)
+        i1_unary = AsmUnaryNode(start_position=sp, operator=op_unary, src=dst_unary)
+        return [i0_unary, i1_unary]
 
 
 def convert_tacky_binary_operator(tacky_operator: TackyBinaryOperator) -> AsmBinaryOperator:
@@ -166,12 +189,7 @@ def convert_tacky_instruction(tacky_instruction: TackyInstruction) -> list[AsmIn
             i1_ret = AsmRetNode(start_position=sp)
             return [i0_ret, i1_ret]
         case TackyUnaryNode():
-            op_unary = convert_tacky_unary_operator(tacky_instruction.operator)
-            src_unary = convert_tacky_operand(tacky_instruction.src)
-            dst_unary = convert_tacky_operand(tacky_instruction.dst)
-            i0_unary = AsmMovNode(start_position=sp, src=src_unary, dst=dst_unary)
-            i1_unary = AsmUnaryNode(start_position=sp, operator=op_unary, src=dst_unary)
-            return [i0_unary, i1_unary]
+            return convert_tacky_unary_node(tacky_instruction)
         case TackyBinaryNode():
             return convert_tacky_binary_node(tacky_instruction)
         case _:
