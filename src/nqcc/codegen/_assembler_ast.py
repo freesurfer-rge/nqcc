@@ -2,6 +2,8 @@ from typing import Literal, Union
 
 from pydantic import BaseModel, Field
 
+AsmCondCode = Literal["E", "NE", "G", "GE", "L", "LE"]
+
 
 class AsmASTNode(BaseModel):
     node_type: str
@@ -116,6 +118,12 @@ class AsmIDivNode(AsmASTNode):
     src: AsmOperandNode
 
 
+class AsmCmpNode(AsmASTNode):
+    node_type: Literal["AsmCmpNode"] = "AsmCmpNode"
+    src: AsmOperandNode
+    dst: AsmOperandNode
+
+
 class AsmCdqNode(AsmASTNode):
     node_type: Literal["AsmCdqNode"] = "AsmCdqNode"
 
@@ -123,6 +131,23 @@ class AsmCdqNode(AsmASTNode):
 class AsmAllocateStackNode(AsmASTNode):
     node_type: Literal["AsmAllocateStackNode"] = "AsmAllocateStackNode"
     stack_size: int
+
+
+class AsmJmpNode(AsmASTNode):
+    node_type: Literal["AsmJmpNode"] = "AsmJmpNode"
+    identifier: str
+
+
+class AsmJmpCCNode(AsmASTNode):
+    node_type: Literal["AsmJmpCCNode"] = "AsmJmpCCNode"
+    identifier: str
+    cond_code: AsmCondCode
+
+
+class AsmSetCCNode(AsmASTNode):
+    node_type: Literal["AsmSetCCNode"] = "AsmSetCCNode"
+    src: AsmOperandNode
+    cond_code: AsmCondCode
 
 
 AsmInstructionNode = Union[
@@ -133,6 +158,10 @@ AsmInstructionNode = Union[
     AsmBinaryNode,
     AsmIDivNode,
     AsmCdqNode,
+    AsmCmpNode,
+    AsmJmpNode,
+    AsmJmpCCNode,
+    AsmSetCCNode,
 ]
 
 
