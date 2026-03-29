@@ -6,6 +6,7 @@ from nqcc.parser import TokenTape, parse_expression
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
+    TackyBinaryOperator,
     TackyBitwiseAnd,
     TackyBitwiseOr,
     TackyBitwiseXor,
@@ -32,7 +33,7 @@ from nqcc.tacky import (
     TackyRightShift,
     TackySubtract,
     TackyUnaryNode,
-    TackyVarNode,TackyBinaryOperator
+    TackyVarNode,
 )
 
 _BINARY_EXPRESSION_MAP: dict[str, Type[TackyBinaryOperator]] = {

@@ -34,6 +34,7 @@ from nqcc.codegen import (
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
+    TackyBinaryOperator,
     TackyBitwiseAnd,
     TackyBitwiseOr,
     TackyBitwiseXor,
@@ -61,7 +62,7 @@ from nqcc.tacky import (
     TackySubtract,
     TackyUnaryNode,
     TackyUnaryOperator,
-    TackyVarNode,TackyBinaryOperator
+    TackyVarNode,
 )
 
 _COND_CODE_MAP: dict[Type[TackyBinaryOperator], AsmCondCode] = {
