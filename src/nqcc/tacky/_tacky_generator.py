@@ -312,6 +312,7 @@ class TackyGenerator:
 
         # Set up internal state
         self._nxt_tmp = 0
+        self._nxt_lbl = 0
         self._curr_function = source_node.identifier
         self._current_instructions = []
 
