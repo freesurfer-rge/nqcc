@@ -39,7 +39,7 @@ jobs:
               args: check .
 
           - name: Run mypy
-            run: mypy src/nqcc
+            run: mypy .
 
           - name: Run tests
             run: python -m pytest tests/
