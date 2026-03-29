@@ -166,6 +166,11 @@ AsmInstructionNode = Union[
 ]
 
 
+class AsmLabelNode(AsmASTNode):
+    node_type: Literal["AsmLabelNode"] = "AsmLabelNode"
+    identifier: str
+
+
 class AsmFunctionNode(AsmASTNode):
     node_type: Literal["AsmFunctionNode"] = "AsmFunctionNode"
     identifier: str

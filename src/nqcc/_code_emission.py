@@ -10,6 +10,7 @@ from nqcc.codegen import (
     AsmBitwiseOr,
     AsmBitwiseXor,
     AsmCdqNode,
+    AsmCmpNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -130,6 +131,10 @@ def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:
             return f"{opcode} {src}"
         case AsmCdqNode():
             return "cdq"
+        case AsmCmpNode():
+            src = get_operand_assembler(instr_node.src, "4B")
+            dst = get_operand_assembler(instr_node.dst, "4B")
+            return f"cmpl {src}, {dst}"
         case AsmIDivNode():
             opcode = "idivl".ljust(_OPCODE_FIELD_WIDTH)
             src = get_operand_assembler(instr_node.src, "4B")
