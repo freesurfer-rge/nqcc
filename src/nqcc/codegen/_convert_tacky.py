@@ -15,6 +15,7 @@ from nqcc.tacky import (
     TackyGreaterThan,
     TackyGreaterThanOrEqual,
     TackyInstruction,
+    TackyJumpIfNotZeroNode,
     TackyJumpIfZeroNode,
     TackyJumpNode,
     TackyLeftShift,
@@ -234,15 +235,19 @@ def convert_tacky_instruction(tacky_instruction: TackyInstruction) -> list[AsmIn
             return convert_tacky_binary_node(tacky_instruction)
         case TackyJumpNode():
             return [AsmJmpNode(start_position=sp, target=tacky_instruction.target)]
-        case TackyJumpIfZeroNode():
+        case TackyJumpIfZeroNode() | TackyJumpIfNotZeroNode():
             cond_jmpzero = convert_tacky_operand(tacky_instruction.condition)
             i0_jmpzero = AsmCmpNode(
                 start_position=sp,
                 src=AsmImmediateIntNode(start_position=sp, value=0),
                 dst=cond_jmpzero,
             )
+            cond_code: AsmCondCode = "E"
+            if isinstance(tacky_instruction, TackyJumpIfNotZeroNode):
+                cond_code = "NE"
+
             i1_jmpzero = AsmJmpCCNode(
-                start_position=sp, target=tacky_instruction.target, cond_code="E"
+                start_position=sp, target=tacky_instruction.target, cond_code=cond_code
             )
             return [i0_jmpzero, i1_jmpzero]
         case _:

@@ -42,6 +42,7 @@ from nqcc.tacky import (
     TackyEqualTo,
     TackyGreaterThan,
     TackyGreaterThanOrEqual,
+    TackyJumpIfNotZeroNode,
     TackyJumpIfZeroNode,
     TackyJumpNode,
     TackyLeftShift,
@@ -156,6 +157,22 @@ class TestJumpInstructions:
             dst=AsmPseudoRegisterNode(start_position=1245, identifier="tmp.0"),
         )
         assert result[1] == AsmJmpCCNode(start_position=23, target="jmp_zero.0", cond_code="E")
+
+    def test_jmp_notzero(self):
+        target = TackyJumpIfNotZeroNode(
+            start_position=23,
+            target="jmp_notzero.0",
+            condition=TackyVarNode(start_position=1245, identifier="tmp.0"),
+        )
+
+        result = convert_tacky_instruction(target)
+        assert len(result) == 2
+        assert result[0] == AsmCmpNode(
+            start_position=23,
+            src=AsmImmediateIntNode(start_position=23, value=0),
+            dst=AsmPseudoRegisterNode(start_position=1245, identifier="tmp.0"),
+        )
+        assert result[1] == AsmJmpCCNode(start_position=23, target="jmp_notzero.0", cond_code="NE")
 
 
 class TestBinaryInstructions:
