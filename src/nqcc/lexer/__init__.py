@@ -34,6 +34,7 @@ from ._tokens import (
     TildeToken,
     Token,
     UnaryOperatorToken,
+    AssignmentToken
 )
 
 __all__ = [
@@ -75,4 +76,5 @@ __all__ = [
     "lex_string",
     "lexer_driver",
     "pick_token",
+    "AssignmentToken"
 ]
