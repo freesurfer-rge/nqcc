@@ -38,7 +38,7 @@ from ._source_ast import (
     SourceStatementNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
-    SourceUnaryOperator,
+    SourceUnaryOperator,SourceVarNode
 )
 from ._token_tape import TokenTape
 
@@ -82,5 +82,5 @@ __all__ = [
     "parse_function",
     "parse_program",
     "parse_statement",
-    "parser_driver",
+    "parser_driver","SourceVarNode"
 ]
