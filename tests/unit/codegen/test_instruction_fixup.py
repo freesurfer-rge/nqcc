@@ -8,6 +8,7 @@ from nqcc.codegen import (
     AsmBitwiseAnd,
     AsmBitwiseOr,
     AsmBitwiseXor,
+    AsmCmpNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -21,6 +22,7 @@ from nqcc.codegen import (
     AsmStackNode,
     AsmSubtract,
     apply_binary_fixup,
+    apply_cmp_fixup,
     apply_idiv_fixup,
     apply_mov_fixup,
     fixup_function_instructions,
@@ -70,6 +72,44 @@ class TestMovFixup:
             start_position=0,
             src=fixed[0].dst,
             dst=dst,
+        )
+
+
+class TestCmpFixup:
+    def test_both_stackvar(self):
+        src = AsmStackNode(start_position=1, offset=-4)
+        dst = AsmStackNode(start_position=2, offset=-8)
+        target = AsmCmpNode(start_position=0, src=src, dst=dst)
+
+        fixed = apply_cmp_fixup(target)
+        assert len(fixed) == 2
+        assert fixed[0] == AsmMovNode(
+            start_position=0,
+            src=src,
+            dst=AsmRegisterNode(start_position=0, value="R10"),
+        )
+        assert fixed[1] == AsmCmpNode(
+            start_position=0,
+            src=fixed[0].dst,
+            dst=dst,
+        )
+
+    def test_dst_cmp(self):
+        src = AsmRegisterNode(start_position=1, value="AX")
+        dst = AsmImmediateIntNode(start_position=2, value=5)
+        target = AsmCmpNode(start_position=0, src=src, dst=dst)
+
+        fixed = apply_cmp_fixup(target)
+        assert len(fixed) == 2
+        assert fixed[0] == AsmMovNode(
+            start_position=0,
+            src=dst,
+            dst=AsmRegisterNode(start_position=0, value="R11"),
+        )
+        assert fixed[1] == AsmCmpNode(
+            start_position=0,
+            src=src,
+            dst=fixed[0].dst,
         )
 
 

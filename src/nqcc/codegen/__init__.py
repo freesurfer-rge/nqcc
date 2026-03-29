@@ -47,6 +47,7 @@ from ._convert_tacky import (
 from ._driver import codegen_driver
 from ._instruction_fixup import (
     apply_binary_fixup,
+    apply_cmp_fixup,
     apply_idiv_fixup,
     apply_mov_fixup,
     fixup_function_instructions,
@@ -96,6 +97,7 @@ __all__ = [
     "AsmUnaryOperator",
     "PseudoRegisterReplacer",
     "apply_binary_fixup",
+    "apply_cmp_fixup",
     "apply_idiv_fixup",
     "apply_mov_fixup",
     "codegen_driver",

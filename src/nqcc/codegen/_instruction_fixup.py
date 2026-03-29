@@ -5,6 +5,7 @@ from ._assembler_ast import (
     AsmBitwiseAnd,
     AsmBitwiseOr,
     AsmBitwiseXor,
+    AsmCmpNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -31,6 +32,27 @@ def apply_mov_fixup(instr: AsmMovNode) -> list[AsmInstructionNode]:
         )
         nxt1 = AsmMovNode(start_position=instr.start_position, src=reg, dst=instr.dst)
         return [nxt0, nxt1]
+    else:
+        return [instr]
+
+
+def apply_cmp_fixup(instr: AsmCmpNode) -> list[AsmInstructionNode]:
+    if isinstance(instr.src, AsmStackNode) and isinstance(instr.dst, AsmStackNode):
+        # Can't have two stack operands; use R10
+        reg = AsmRegisterNode(start_position=instr.start_position, value="R10")
+        nxt0 = AsmMovNode(
+            start_position=instr.start_position,
+            src=instr.src,
+            dst=reg,
+        )
+        nxt1 = AsmCmpNode(start_position=instr.start_position, src=reg, dst=instr.dst)
+        return [nxt0, nxt1]
+    elif isinstance(instr.dst, AsmImmediateIntNode):
+        # 'dst' operand can't be a constant (this is effectively a subtract)
+        reg = AsmRegisterNode(start_position=instr.start_position, value="R11")
+        i_0 = AsmMovNode(start_position=instr.start_position, src=instr.dst, dst=reg)
+        i_1 = AsmCmpNode(start_position=instr.start_position, src=instr.src, dst=reg)
+        return [i_0, i_1]
     else:
         return [instr]
 
