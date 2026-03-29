@@ -12,9 +12,11 @@ class SourceConstantIntNode(SourceASTNode):
     node_type: Literal["SourceConstantIntNode"] = "SourceConstantIntNode"
     value: int
 
+
 class SourceVarNode(SourceASTNode):
     node_type: Literal["SourceVarNode"] = "SourceVarNode"
     identifier: str
+
 
 class SourceComplement(SourceASTNode):
     node_type: Literal["SourceComplementNode"] = "SourceComplementNode"
@@ -159,8 +161,19 @@ class SourceBinaryExpressionNode(SourceASTNode):
     left: SourceExpressionNode
     right: SourceExpressionNode
 
+
+class SourceAssignmentNode(SourceASTNode):
+    node_type: Literal["SourceAssignmentNode"] = "SourceAssignmentNode"
+    left: SourceExpressionNode
+    right: SourceExpressionNode
+
+
 SourceExpressionNode = Union[
-    SourceConstantIntNode, SourceVarNode, SourceUnaryExpressionNode, SourceBinaryExpressionNode
+    SourceConstantIntNode,
+    SourceVarNode,
+    SourceUnaryExpressionNode,
+    SourceBinaryExpressionNode,
+    SourceAssignmentNode,
 ]
 
 

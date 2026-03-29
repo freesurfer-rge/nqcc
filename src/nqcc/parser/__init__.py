@@ -8,6 +8,7 @@ from ._parsing import (
 )
 from ._source_ast import (
     SourceAdd,
+    SourceAssignmentNode,
     SourceASTNode,
     SourceBinaryExpressionNode,
     SourceBinaryOperator,
@@ -38,7 +39,8 @@ from ._source_ast import (
     SourceStatementNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
-    SourceUnaryOperator,SourceVarNode
+    SourceUnaryOperator,
+    SourceVarNode,
 )
 from ._token_tape import TokenTape
 
@@ -47,6 +49,7 @@ __all__ = [
     "SourceASTBadValueError",
     "SourceASTNode",
     "SourceAdd",
+    "SourceAssignmentNode",
     "SourceBinaryExpressionNode",
     "SourceBinaryOperator",
     "SourceBitwiseAnd",
@@ -77,10 +80,11 @@ __all__ = [
     "SourceSubtract",
     "SourceUnaryExpressionNode",
     "SourceUnaryOperator",
+    "SourceVarNode",
     "TokenTape",
     "parse_expression",
     "parse_function",
     "parse_program",
     "parse_statement",
-    "parser_driver","SourceVarNode"
+    "parser_driver",
 ]
