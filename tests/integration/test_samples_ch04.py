@@ -24,7 +24,7 @@ class TestChapter04:
         compile_run_check(target_file, macros=macros)
 
     @pytest.mark.parametrize("v0", [-1, 0, 1])
-    @pytest.mark.parametrize("v1", [ -1, 0, 1] )
+    @pytest.mark.parametrize("v1", [-1, 0, 1])
     @pytest.mark.parametrize("op", ["&&", "||"])
     def test_logical_boolean(self, v0: int, v1: int, op: str):
         target_file = SAMPLE_PROGRAM_DIR / TestChapter04.SUB_DIR / "return_logical_compare.c"

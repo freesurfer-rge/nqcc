@@ -15,6 +15,9 @@ from nqcc.codegen import (
     AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
+    AsmJmpCCNode,
+    AsmJmpNode,
+    AsmLabelNode,
     AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
@@ -31,7 +34,6 @@ from nqcc.codegen import (
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
-    AsmLabelNode, AsmJmpCCNode, AsmJmpNode
 )
 
 ASSEMBLY_EXTENSION = ".s"
@@ -109,7 +111,7 @@ def get_binary_opcode(binary_operator: AsmBinaryOperator) -> str:
             raise ValueError(f"Unrecognised: {binary_operator}")
 
 
-def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:
+def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:  # noqa: C901
     match instr_node:
         case AsmAllocateStackNode():
             opcode = "subq".ljust(_OPCODE_FIELD_WIDTH)
