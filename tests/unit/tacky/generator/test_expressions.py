@@ -1,9 +1,12 @@
+from typing import Type
+
 import pytest
 
 from nqcc.parser import TokenTape, parse_expression
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
+    TackyBinaryOperator,
     TackyBitwiseAnd,
     TackyBitwiseOr,
     TackyBitwiseXor,
@@ -33,7 +36,7 @@ from nqcc.tacky import (
     TackyVarNode,
 )
 
-_BINARY_EXPRESSION_MAP = {
+_BINARY_EXPRESSION_MAP: dict[str, Type[TackyBinaryOperator]] = {
     "+": TackyAdd,
     "-": TackySubtract,
     "*": TackyMultiply,
@@ -415,6 +418,7 @@ class TestExpressions:
         )
 
         instr2 = target._current_instructions[2]
+        assert isinstance(instr2, TackyBinaryNode)
         assert instr2.start_position == 5
         assert instr2.operator == _BINARY_EXPRESSION_MAP[operator](start_position=5)
         assert instr2.left == instr0.dst

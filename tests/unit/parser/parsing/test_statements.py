@@ -25,9 +25,8 @@ class TestSourceStatementNode:
         assert isinstance(node, SourceReturnNode)
         assert node.start_position == 0
         assert isinstance(node.value, SourceConstantIntNode)
-        sen: SourceConstantIntNode = node.value
-        assert sen.start_position == 1
-        assert sen.value == 321
+        assert node.value.start_position == 1
+        assert node.value.value == 321
 
         assert token_tape.tokens_remaining == 0
 
