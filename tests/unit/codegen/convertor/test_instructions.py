@@ -61,10 +61,10 @@ from nqcc.tacky import (
     TackySubtract,
     TackyUnaryNode,
     TackyUnaryOperator,
-    TackyVarNode,
+    TackyVarNode,TackyBinaryOperator
 )
 
-_COND_CODE_MAP: dict[Type, AsmCondCode] = {
+_COND_CODE_MAP: dict[Type[TackyBinaryOperator], AsmCondCode] = {
     TackyEqualTo: "E",
     TackyNotEqualTo: "NE",
     TackyGreaterThan: "G",
@@ -79,7 +79,7 @@ class TestUnaryInstructions:
         ("tacky_operator", "asm_operator"), [(TackyComplement, AsmNot), (TackyNegate, AsmNeg)]
     )
     def test_unary_arithmetic(
-        self, tacky_operator: TackyUnaryOperator, asm_operator: AsmUnaryOperator
+        self, tacky_operator: Type[TackyUnaryOperator], asm_operator: Type[AsmUnaryOperator]
     ):
         target = TackyUnaryNode(
             start_position=123,
@@ -89,6 +89,7 @@ class TestUnaryInstructions:
         )
         result = convert_tacky_instruction(target)
         assert len(result) == 2
+        assert isinstance(result[0], AsmMovNode)
         assert result[0] == AsmMovNode(
             start_position=123,
             src=AsmPseudoRegisterNode(start_position=12345, identifier="tmp.0"),
@@ -114,6 +115,7 @@ class TestUnaryInstructions:
             src=AsmImmediateIntNode(start_position=123, value=0),
             dst=AsmPseudoRegisterNode(start_position=12345, identifier="tmp.0"),
         )
+        assert isinstance(result[1], AsmMovNode)
         assert result[1] == AsmMovNode(
             start_position=123,
             src=AsmImmediateIntNode(start_position=123, value=0),
@@ -378,6 +380,7 @@ class TestBinaryInstructions:
             src=AsmPseudoRegisterNode(start_position=13, identifier="right.0"),
             dst=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
         )
+        assert isinstance(result[1], AsmMovNode)
         assert result[1] == AsmMovNode(
             start_position=23,
             src=AsmImmediateIntNode(start_position=23, value=0),
