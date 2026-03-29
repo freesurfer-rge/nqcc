@@ -15,6 +15,8 @@ from nqcc.tacky import (
     TackyGreaterThan,
     TackyGreaterThanOrEqual,
     TackyInstruction,
+    TackyJumpIfZeroNode,
+    TackyJumpNode,
     TackyLeftShift,
     TackyLessThan,
     TackyLessThanOrEqual,
@@ -31,7 +33,6 @@ from nqcc.tacky import (
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
-    TackyJumpNode,
 )
 
 from ._assembler_ast import (
@@ -48,6 +49,8 @@ from ._assembler_ast import (
     AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
+    AsmJmpCCNode,
+    AsmJmpNode,
     AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
@@ -63,7 +66,6 @@ from ._assembler_ast import (
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
-    AsmJmpNode,
 )
 
 _UNARY_OPERATOR_MAP: dict[Type, Type] = {
@@ -232,6 +234,17 @@ def convert_tacky_instruction(tacky_instruction: TackyInstruction) -> list[AsmIn
             return convert_tacky_binary_node(tacky_instruction)
         case TackyJumpNode():
             return [AsmJmpNode(start_position=sp, target=tacky_instruction.target)]
+        case TackyJumpIfZeroNode():
+            cond_jmpzero = convert_tacky_operand(tacky_instruction.condition)
+            i0_jmpzero = AsmCmpNode(
+                start_position=sp,
+                src=AsmImmediateIntNode(start_position=sp, value=0),
+                dst=cond_jmpzero,
+            )
+            i1_jmpzero = AsmJmpCCNode(
+                start_position=sp, target=tacky_instruction.target, cond_code="E"
+            )
+            return [i0_jmpzero, i1_jmpzero]
         case _:
             raise ValueError(f"Unrecognised: {tacky_instruction}")
 

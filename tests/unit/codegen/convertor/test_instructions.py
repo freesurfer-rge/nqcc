@@ -13,6 +13,8 @@ from nqcc.codegen import (
     AsmCondCode,
     AsmIDivNode,
     AsmImmediateIntNode,
+    AsmJmpCCNode,
+    AsmJmpNode,
     AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
@@ -26,7 +28,6 @@ from nqcc.codegen import (
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
-    AsmJmpNode,
     convert_tacky_instruction,
 )
 from nqcc.tacky import (
@@ -41,6 +42,8 @@ from nqcc.tacky import (
     TackyEqualTo,
     TackyGreaterThan,
     TackyGreaterThanOrEqual,
+    TackyJumpIfZeroNode,
+    TackyJumpNode,
     TackyLeftShift,
     TackyLessThan,
     TackyLessThanOrEqual,
@@ -55,7 +58,6 @@ from nqcc.tacky import (
     TackyUnaryNode,
     TackyUnaryOperator,
     TackyVarNode,
-    TackyJumpNode,
 )
 
 _COND_CODE_MAP: dict[Type, AsmCondCode] = {
@@ -138,6 +140,22 @@ class TestJumpInstructions:
         result = convert_tacky_instruction(target)
         assert len(result) == 1
         assert result[0] == AsmJmpNode(start_position=123, target="jump.0")
+
+    def test_jmp_zero(self):
+        target = TackyJumpIfZeroNode(
+            start_position=23,
+            target="jmp_zero.0",
+            condition=TackyVarNode(start_position=1245, identifier="tmp.0"),
+        )
+
+        result = convert_tacky_instruction(target)
+        assert len(result) == 2
+        assert result[0] == AsmCmpNode(
+            start_position=23,
+            src=AsmImmediateIntNode(start_position=23, value=0),
+            dst=AsmPseudoRegisterNode(start_position=1245, identifier="tmp.0"),
+        )
+        assert result[1] == AsmJmpCCNode(start_position=23, target="jmp_zero.0", cond_code="E")
 
 
 class TestBinaryInstructions:
