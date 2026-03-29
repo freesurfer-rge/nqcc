@@ -23,12 +23,6 @@ from nqcc.tacky import (
     TackyNegate,
     TackyRightShift,
     TackySubtract,
-    TackyEqualTo,
-    TackyNotEqualTo,
-    TackyGreaterThan,
-    TackyGreaterThanOrEqual,
-    TackyLessThan,
-    TackyLessThanOrEqual,
 )
 
 

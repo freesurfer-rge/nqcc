@@ -10,13 +10,19 @@ from nqcc.tacky import (
     TackyComplement,
     TackyConstantIntNode,
     TackyDivide,
+    TackyEqualTo,
     TackyFunctionNode,
+    TackyGreaterThan,
+    TackyGreaterThanOrEqual,
     TackyInstruction,
     TackyLeftShift,
+    TackyLessThan,
+    TackyLessThanOrEqual,
     TackyLogicalNot,
     TackyModulo,
     TackyMultiply,
     TackyNegate,
+    TackyNotEqualTo,
     TackyProgramNode,
     TackyReturnNode,
     TackyRightShift,
@@ -25,12 +31,6 @@ from nqcc.tacky import (
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
-    TackyEqualTo,
-    TackyNotEqualTo,
-    TackyGreaterThan,
-    TackyGreaterThanOrEqual,
-    TackyLessThan,
-    TackyLessThanOrEqual,
 )
 
 from ._assembler_ast import (
@@ -42,6 +42,7 @@ from ._assembler_ast import (
     AsmBitwiseXor,
     AsmCdqNode,
     AsmCmpNode,
+    AsmCondCode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -77,6 +78,15 @@ _BINARY_OPERATOR_MAP: dict[Type, Type] = {
     TackyBitwiseXor: AsmBitwiseXor,
     TackyLeftShift: AsmLeftShift,
     TackyRightShift: AsmRightShift,
+}
+
+_COND_CODE_MAP: dict[Type, AsmCondCode] = {
+    TackyEqualTo: "E",
+    TackyNotEqualTo: "NE",
+    TackyGreaterThan: "G",
+    TackyGreaterThanOrEqual: "GE",
+    TackyLessThan: "L",
+    TackyLessThanOrEqual: "LE",
 }
 
 
@@ -177,6 +187,26 @@ def convert_tacky_binary_node(tacky_node: TackyBinaryNode) -> list[AsmInstructio
                 start_position=tacky_node.start_position, src=result_register, dst=dest
             )
             return [i0_div_op, i1_div_op, i2_div_op, i4_div_op]
+        case (
+            TackyEqualTo()
+            | TackyNotEqualTo()
+            | TackyGreaterThan()
+            | TackyGreaterThanOrEqual()
+            | TackyLessThan()
+            | TackyLessThanOrEqual()
+        ):
+            i0_cmp_op = AsmCmpNode(start_position=tacky_node.start_position, src=right, dst=left)
+            i1_cmp_op = AsmMovNode(
+                start_position=tacky_node.start_position,
+                src=AsmImmediateIntNode(start_position=tacky_node.start_position, value=0),
+                dst=dest,
+            )
+            i2_cmp_op = AsmSetCCNode(
+                start_position=tacky_node.start_position,
+                src=dest,
+                cond_code=_COND_CODE_MAP[type(tacky_node.operator)],
+            )
+            return [i0_cmp_op, i1_cmp_op, i2_cmp_op]
         case _:
             raise ValueError(f"Unrecognised: {tacky_node.operator}")
 
