@@ -15,6 +15,7 @@ from nqcc.codegen import (
     AsmImmediateIntNode,
     AsmJmpCCNode,
     AsmJmpNode,
+    AsmLabelNode,
     AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
@@ -38,6 +39,7 @@ from nqcc.tacky import (
     TackyBitwiseXor,
     TackyComplement,
     TackyConstantIntNode,
+    TackyCopyNode,
     TackyDivide,
     TackyEqualTo,
     TackyGreaterThan,
@@ -45,6 +47,7 @@ from nqcc.tacky import (
     TackyJumpIfNotZeroNode,
     TackyJumpIfZeroNode,
     TackyJumpNode,
+    TackyLabelNode,
     TackyLeftShift,
     TackyLessThan,
     TackyLessThanOrEqual,
@@ -119,21 +122,6 @@ class TestUnaryInstructions:
         assert result[2] == AsmSetCCNode(start_position=123, src=result[1].dst, cond_code="E")
 
 
-class TestInstructions:
-    def test_return(self):
-        target = TackyReturnNode(
-            start_position=345, value=TackyConstantIntNode(start_position=465, value=10)
-        )
-        result = convert_tacky_instruction(target)
-        assert len(result) == 2
-        assert result[0] == AsmMovNode(
-            start_position=345,
-            src=AsmImmediateIntNode(start_position=465, value=10),
-            dst=AsmRegisterNode(start_position=345, value="AX"),
-        )
-        assert result[1] == AsmRetNode(start_position=345)
-
-
 class TestJumpInstructions:
     def test_jump(self):
         target = TackyJumpNode(start_position=123, target="jump.0")
@@ -173,6 +161,13 @@ class TestJumpInstructions:
             dst=AsmPseudoRegisterNode(start_position=1245, identifier="tmp.0"),
         )
         assert result[1] == AsmJmpCCNode(start_position=23, target="jmp_notzero.0", cond_code="NE")
+
+    def test_label(self):
+        target = TackyLabelNode(start_position=138, identifier="something.or.other")
+
+        result = convert_tacky_instruction(target)
+        assert len(result) == 1
+        assert result[0] == AsmLabelNode(start_position=138, identifier="something.or.other")
 
 
 class TestBinaryInstructions:
@@ -390,4 +385,34 @@ class TestBinaryInstructions:
         )
         assert result[2] == AsmSetCCNode(
             start_position=23, src=result[1].dst, cond_code=_COND_CODE_MAP[op]
+        )
+
+
+class TestInstructions:
+    def test_return(self):
+        target = TackyReturnNode(
+            start_position=345, value=TackyConstantIntNode(start_position=465, value=10)
+        )
+        result = convert_tacky_instruction(target)
+        assert len(result) == 2
+        assert result[0] == AsmMovNode(
+            start_position=345,
+            src=AsmImmediateIntNode(start_position=465, value=10),
+            dst=AsmRegisterNode(start_position=345, value="AX"),
+        )
+        assert result[1] == AsmRetNode(start_position=345)
+
+    def test_copy(self):
+        target = TackyCopyNode(
+            start_position=132,
+            src=TackyVarNode(start_position=12, identifier="src.0"),
+            dst=TackyVarNode(start_position=13, identifier="dst.0"),
+        )
+
+        result = convert_tacky_instruction(target)
+        assert len(result) == 1
+        assert result[0] == AsmMovNode(
+            start_position=132,
+            src=AsmPseudoRegisterNode(start_position=12, identifier="src.0"),
+            dst=AsmPseudoRegisterNode(start_position=13, identifier="dst.0"),
         )

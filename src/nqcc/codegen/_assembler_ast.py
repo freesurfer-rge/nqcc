@@ -151,6 +151,11 @@ class AsmSetCCNode(AsmASTNode):
     cond_code: AsmCondCode
 
 
+class AsmLabelNode(AsmASTNode):
+    node_type: Literal["AsmLabelNode"] = "AsmLabelNode"
+    identifier: str
+
+
 AsmInstructionNode = Union[
     AsmMovNode,
     AsmRetNode,
@@ -163,12 +168,8 @@ AsmInstructionNode = Union[
     AsmJmpNode,
     AsmJmpCCNode,
     AsmSetCCNode,
+    AsmLabelNode,
 ]
-
-
-class AsmLabelNode(AsmASTNode):
-    node_type: Literal["AsmLabelNode"] = "AsmLabelNode"
-    identifier: str
 
 
 class AsmFunctionNode(AsmASTNode):

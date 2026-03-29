@@ -9,6 +9,7 @@ from nqcc.tacky import (
     TackyBitwiseXor,
     TackyComplement,
     TackyConstantIntNode,
+    TackyCopyNode,
     TackyDivide,
     TackyEqualTo,
     TackyFunctionNode,
@@ -18,6 +19,7 @@ from nqcc.tacky import (
     TackyJumpIfNotZeroNode,
     TackyJumpIfZeroNode,
     TackyJumpNode,
+    TackyLabelNode,
     TackyLeftShift,
     TackyLessThan,
     TackyLessThanOrEqual,
@@ -52,6 +54,7 @@ from ._assembler_ast import (
     AsmInstructionNode,
     AsmJmpCCNode,
     AsmJmpNode,
+    AsmLabelNode,
     AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
@@ -242,6 +245,7 @@ def convert_tacky_instruction(tacky_instruction: TackyInstruction) -> list[AsmIn
                 src=AsmImmediateIntNode(start_position=sp, value=0),
                 dst=cond_jmpzero,
             )
+
             cond_code: AsmCondCode = "E"
             if isinstance(tacky_instruction, TackyJumpIfNotZeroNode):
                 cond_code = "NE"
@@ -250,6 +254,12 @@ def convert_tacky_instruction(tacky_instruction: TackyInstruction) -> list[AsmIn
                 start_position=sp, target=tacky_instruction.target, cond_code=cond_code
             )
             return [i0_jmpzero, i1_jmpzero]
+        case TackyLabelNode():
+            return [AsmLabelNode(start_position=sp, identifier=tacky_instruction.identifier)]
+        case TackyCopyNode():
+            copy_src = convert_tacky_operand(tacky_instruction.src)
+            copy_dst = convert_tacky_operand(tacky_instruction.dst)
+            return [AsmMovNode(start_position=sp, src=copy_src, dst=copy_dst)]
         case _:
             raise ValueError(f"Unrecognised: {tacky_instruction}")
 
