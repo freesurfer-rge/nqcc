@@ -142,6 +142,9 @@ def fixup_function_instructions(asm_func: AsmFunctionNode):
             case AsmBinaryNode():
                 nxt_instrs = apply_binary_fixup(instr)
                 fixed_instructions += nxt_instrs
+            case AsmCmpNode():
+                nxt_instrs = apply_cmp_fixup(instr)
+                fixed_instructions += nxt_instrs
             case _:
                 fixed_instructions.append(instr)
     asm_func.instructions = fixed_instructions
