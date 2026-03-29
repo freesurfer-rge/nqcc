@@ -60,6 +60,19 @@ class KeywordToken(Token):
         return f"({keyword_alternatives})\\b"
 
 
+class AssignmentToken(Token):
+    token_type: Literal["AssignmentToken"] = "AssignmentToken"
+    value: Literal["="] = "="
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "="
+
+
 class TildeToken(Token):
     token_type: Literal["TildeToken"] = "TildeToken"
     value: Literal["~"] = "~"
@@ -413,6 +426,7 @@ class SemicolonToken(Token):
 
 TokenTypes: list[type] = [
     AdditionToken,
+    AssignmentToken,
     CloseBraceToken,
     CloseParenToken,
     ConstantIntegerToken,

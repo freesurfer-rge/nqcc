@@ -2,6 +2,7 @@ import pytest
 
 from nqcc.lexer import (
     AdditionToken,
+    AssignmentToken,
     BitwiseAnd,
     BitwiseOr,
     ConstantIntegerToken,
@@ -36,18 +37,19 @@ class TestPickToken:
         assert pick_token(toks) == KeywordToken(value="int")
 
     def test_decrement_vs_negation(self):
-        toks = [DecrementToken(value="--"), NegationToken(value="-")]
+        toks = [DecrementToken(), NegationToken()]
 
-        assert pick_token(toks) == DecrementToken(value="--")
+        assert pick_token(toks) == DecrementToken()
 
     @pytest.mark.parametrize(
         ["shorter", "longer"],
         [
-            (BitwiseAnd(value="&"), LogicalAnd(value="&&")),
-            (BitwiseOr(value="|"), LogicalOr(value="||")),
-            (LogicalNot(value="!"), NotEqualTo(value="!=")),
+            (BitwiseAnd(), LogicalAnd()),
+            (BitwiseOr(), LogicalOr()),
+            (LogicalNot(), NotEqualTo()),
             (LessThan(), LessThanOrEqual()),
             (GreaterThan(), GreaterThanOrEqual()),
+            (AssignmentToken(), EqualTo()),
         ],
     )
     def test_operators_with_substring(self, shorter: Token, longer: Token):
@@ -121,3 +123,12 @@ class TestLexString:
         assert toks[0] == ConstantIntegerToken(start_position=0, value="1")
         assert toks[1] == self._COMP_MAP[op](start_position=2)
         assert toks[2] == ConstantIntegerToken(start_position=3 + len(op), value="3")
+
+    def test_assignment(self):
+        sample = "a = 2"
+
+        toks = lex_string(sample)
+        assert len(toks) == 3
+        assert toks[0] == IdentifierToken(start_position=0, value="a")
+        assert toks[1] == AssignmentToken(start_position=2)
+        assert toks[2] == ConstantIntegerToken(start_position=4, value="2")

@@ -2,6 +2,7 @@ import pytest
 
 from nqcc.lexer import (
     AdditionToken,
+    AssignmentToken,
     BitwiseAnd,
     BitwiseOr,
     BitwiseXor,
@@ -51,6 +52,14 @@ class TestExtractTokens:
 
         assert len(toks) == 1
         assert toks[0] == IdentifierToken(start_position=idx, value=target)
+
+    @pytest.mark.parametrize("idx", [11, 12])
+    def test_assignment(self, idx: int):
+        target = "="
+        toks = extract_tokens(target, idx)
+
+        assert len(toks) == 1
+        assert toks[0] == AssignmentToken(start_position=idx)
 
     @pytest.mark.parametrize("target", ["000", "010", "100", "1234567890"])
     @pytest.mark.parametrize("idx", [121, 130])
@@ -200,23 +209,24 @@ class TestExtractTokens:
         toks = extract_tokens("||", idx)
 
         assert len(toks) == 2
-        assert toks[0] == BitwiseOr(start_position=idx, value="|")
-        assert toks[1] == LogicalOr(start_position=idx, value="||")
+        assert toks[0] == BitwiseOr(start_position=idx)
+        assert toks[1] == LogicalOr(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_equalto(self, idx):
         toks = extract_tokens("==", idx)
 
-        assert len(toks) == 1
-        assert toks[0] == EqualTo(start_position=idx, value="==")
+        assert len(toks) == 2
+        assert toks[0] == AssignmentToken(start_position=idx)
+        assert toks[1] == EqualTo(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_notequalto(self, idx):
         toks = extract_tokens("!=", idx)
 
         assert len(toks) == 2
-        assert toks[0] == LogicalNot(start_position=idx, value="!")
-        assert toks[1] == NotEqualTo(start_position=idx, value="!=")
+        assert toks[0] == LogicalNot(start_position=idx)
+        assert toks[1] == NotEqualTo(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_lessthan(self, idx):
