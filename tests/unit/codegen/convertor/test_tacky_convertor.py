@@ -68,7 +68,7 @@ class TestFunctions:
         assert i2 == AsmMovNode(
             start_position=19,
             src=i1.src,
-            dst=AsmRegisterNode(start_position=19, value="eax"),
+            dst=AsmRegisterNode(start_position=19, value="AX"),
         )
 
         i3 = asm_func.instructions[3]
@@ -107,7 +107,7 @@ class TestFunctions:
         assert i2 == AsmMovNode(
             start_position=19,
             src=i1.dst,
-            dst=AsmRegisterNode(start_position=19, value="eax"),
+            dst=AsmRegisterNode(start_position=19, value="AX"),
         )
 
         i3 = asm_func.instructions[3]
@@ -146,7 +146,7 @@ class TestPrograms:
         assert i2 == AsmMovNode(
             start_position=19,
             src=i1.src,
-            dst=AsmRegisterNode(start_position=19, value="eax"),
+            dst=AsmRegisterNode(start_position=19, value="AX"),
         )
 
         i3 = asm_func.instructions[3]

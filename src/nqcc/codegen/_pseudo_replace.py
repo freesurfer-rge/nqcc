@@ -4,16 +4,21 @@ from ._assembler_ast import (
     AsmAllocateStackNode,
     AsmBinaryNode,
     AsmCdqNode,
+    AsmCmpNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
+    AsmJmpCCNode,
+    AsmJmpNode,
+    AsmLabelNode,
     AsmMovNode,
     AsmOperandNode,
     AsmProgramNode,
     AsmPseudoRegisterNode,
     AsmRegisterNode,
     AsmRetNode,
+    AsmSetCCNode,
     AsmStackNode,
     AsmUnaryNode,
 )
@@ -63,7 +68,12 @@ class PseudoRegisterReplacer:
                 asm_instr.dst = self.get_updated_operand(asm_instr.dst)
             case AsmIDivNode():
                 asm_instr.src = self.get_updated_operand(asm_instr.src)
-            case AsmRetNode() | AsmCdqNode():
+            case AsmCmpNode():
+                asm_instr.src = self.get_updated_operand(asm_instr.src)
+                asm_instr.dst = self.get_updated_operand(asm_instr.dst)
+            case AsmSetCCNode():
+                asm_instr.src = self.get_updated_operand(asm_instr.src)
+            case AsmRetNode() | AsmCdqNode() | AsmJmpCCNode() | AsmJmpNode() | AsmLabelNode():
                 return
             case AsmAllocateStackNode():
                 # Another possible place to log a warning

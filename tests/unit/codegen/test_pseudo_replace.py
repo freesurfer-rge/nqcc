@@ -6,6 +6,7 @@ from nqcc.codegen import (
     AsmBinaryNode,
     AsmBinaryOperator,
     AsmCdqNode,
+    AsmCmpNode,
     AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
@@ -17,6 +18,7 @@ from nqcc.codegen import (
     AsmPseudoRegisterNode,
     AsmRegisterNode,
     AsmRetNode,
+    AsmSetCCNode,
     AsmStackNode,
     AsmSubtract,
     AsmUnaryNode,
@@ -34,7 +36,7 @@ class TestOperandUpdate:
         "operand",
         [
             AsmImmediateIntNode(start_position=12, value=2),
-            AsmRegisterNode(start_position=3, value="eax"),
+            AsmRegisterNode(start_position=3, value="AX"),
             AsmStackNode(start_position=32, offset=-4),
         ],
     )
@@ -140,6 +142,29 @@ class TestInstructionUpdate:
         assert binary_node.src == AsmStackNode(start_position=314, offset=-4)
         assert binary_node.dst == AsmStackNode(start_position=315, offset=-8)
 
+    def test_cmp(self):
+        target = PseudoRegisterReplacer()
+
+        pseudo_src = AsmPseudoRegisterNode(start_position=314, identifier="temp.0")
+        pseudo_dst = AsmPseudoRegisterNode(start_position=315, identifier="temp.1")
+        asm_cmp_node = AsmCmpNode(start_position=200, src=pseudo_src, dst=pseudo_dst)
+
+        target.update_instruction(asm_cmp_node)
+        assert asm_cmp_node.start_position == 200
+        assert asm_cmp_node.src == AsmStackNode(start_position=314, offset=-4)
+        assert asm_cmp_node.dst == AsmStackNode(start_position=315, offset=-8)
+
+    def test_setcc(self):
+        target = PseudoRegisterReplacer()
+
+        pseudo_src = AsmPseudoRegisterNode(start_position=314, identifier="temp.0")
+        asm_setcc_node = AsmSetCCNode(start_position=200, src=pseudo_src, cond_code="E")
+
+        target.update_instruction(asm_setcc_node)
+        assert asm_setcc_node.start_position == 200
+        assert asm_setcc_node.src == AsmStackNode(start_position=314, offset=-4)
+        assert asm_setcc_node.cond_code == "E"
+
     def test_idiv(self):
         target = PseudoRegisterReplacer()
 
@@ -180,7 +205,7 @@ class TestFunctionUpdate:
         assert i2 == AsmMovNode(
             start_position=19,
             src=i1.src,
-            dst=AsmRegisterNode(start_position=19, value="eax"),
+            dst=AsmRegisterNode(start_position=19, value="AX"),
         )
 
         i3 = asm_func.instructions[3]
@@ -219,7 +244,7 @@ class TestFunctionUpdate:
         assert i2 == AsmMovNode(
             start_position=19,
             src=i1.dst,
-            dst=AsmRegisterNode(start_position=19, value="eax"),
+            dst=AsmRegisterNode(start_position=19, value="AX"),
         )
 
         i3 = asm_func.instructions[3]
@@ -269,7 +294,7 @@ class TestProgramUpdate:
         assert i4 == AsmMovNode(
             start_position=19,
             src=i3.src,
-            dst=AsmRegisterNode(start_position=19, value="eax"),
+            dst=AsmRegisterNode(start_position=19, value="AX"),
         )
 
         i5 = asm_func.instructions[5]

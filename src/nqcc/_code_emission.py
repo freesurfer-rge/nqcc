@@ -1,4 +1,5 @@
 import pathlib
+from typing import Literal
 
 from nqcc.codegen import (
     AsmAdd,
@@ -9,10 +10,14 @@ from nqcc.codegen import (
     AsmBitwiseOr,
     AsmBitwiseXor,
     AsmCdqNode,
+    AsmCmpNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
+    AsmJmpCCNode,
+    AsmJmpNode,
+    AsmLabelNode,
     AsmLeftShift,
     AsmMovNode,
     AsmMultiply,
@@ -21,8 +26,10 @@ from nqcc.codegen import (
     AsmOperandNode,
     AsmProgramNode,
     AsmRegisterNode,
+    AsmRegName,
     AsmRetNode,
     AsmRightShift,
+    AsmSetCCNode,
     AsmStackNode,
     AsmSubtract,
     AsmUnaryNode,
@@ -33,18 +40,38 @@ ASSEMBLY_EXTENSION = ".s"
 
 
 _INSTRUCTION_INDENT = "    "
+_LOCAL_LABEL_INDENT = "  "
 _OPCODE_FIELD_WIDTH = 8
 _SEP_WIDTH = 70
 _SEP_CHAR = "="
 
+SubRegister = Literal["L8", "4B"]
 
-def get_operand_assembler(operand_node: AsmOperandNode) -> str:
+_REG_MAP: dict[AsmRegName, dict[SubRegister, str]] = {
+    "AX": {"4B": "eax", "L8": "al"},
+    "CX": {"4B": "ecx", "L8": "cl"},
+    "DX": {"4B": "edx", "L8": "dl"},
+    "R10": {"4B": "r10d", "L8": "r10b"},
+    "R11": {"4B": "r11d", "L8": "r11b"},
+}
+
+
+def get_register(reg_name: AsmRegName, target: SubRegister) -> str:
+    if reg_name not in _REG_MAP:
+        raise ValueError(f"Unrecognised: {reg_name}")
+    name_map = _REG_MAP[reg_name]
+    if target not in name_map:
+        raise ValueError(f"Unrecognised {reg_name} {target}")
+    return name_map[target]
+
+
+def get_operand_assembler(operand_node: AsmOperandNode, target: SubRegister) -> str:
     match operand_node:
-        case v if isinstance(v, AsmImmediateIntNode):
+        case AsmImmediateIntNode():
             return f"${operand_node.value}"
-        case v if isinstance(v, AsmRegisterNode):
-            return f"%{operand_node.value}"
-        case v if isinstance(v, AsmStackNode):
+        case AsmRegisterNode():
+            return f"%{get_register(operand_node.value, target)}"
+        case AsmStackNode():
             return f"{operand_node.offset}(%rbp)"
         case _:
             raise ValueError(f"Unrecognised: {operand_node}")
@@ -84,7 +111,7 @@ def get_binary_opcode(binary_operator: AsmBinaryOperator) -> str:
             raise ValueError(f"Unrecognised: {binary_operator}")
 
 
-def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:
+def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:  # noqa: C901
     match instr_node:
         case AsmAllocateStackNode():
             opcode = "subq".ljust(_OPCODE_FIELD_WIDTH)
@@ -93,26 +120,42 @@ def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:
             return f"{opcode} {src}, {dst} # Allocate stack"
         case AsmMovNode():
             opcode = "movl".ljust(_OPCODE_FIELD_WIDTH)
-            src = get_operand_assembler(instr_node.src)
-            dst = get_operand_assembler(instr_node.dst)
+            src = get_operand_assembler(instr_node.src, "4B")
+            dst = get_operand_assembler(instr_node.dst, "4B")
             return f"{opcode} {src}, {dst}"
         case AsmRetNode():
             return "ret"
         case AsmBinaryNode():
             opcode = get_binary_opcode(instr_node.operator).ljust(_OPCODE_FIELD_WIDTH)
-            src = get_operand_assembler(instr_node.src)
-            dst = get_operand_assembler(instr_node.dst)
+            src = get_operand_assembler(instr_node.src, "4B")
+            dst = get_operand_assembler(instr_node.dst, "4B")
             return f"{opcode} {src}, {dst}"
         case AsmUnaryNode():
             opcode = get_unary_opcode(instr_node.operator).ljust(_OPCODE_FIELD_WIDTH)
-            src = get_operand_assembler(instr_node.src)
+            src = get_operand_assembler(instr_node.src, "4B")
             return f"{opcode} {src}"
         case AsmCdqNode():
             return "cdq"
+        case AsmCmpNode():
+            src = get_operand_assembler(instr_node.src, "4B")
+            dst = get_operand_assembler(instr_node.dst, "4B")
+            return f"cmpl {src}, {dst}"
         case AsmIDivNode():
             opcode = "idivl".ljust(_OPCODE_FIELD_WIDTH)
-            src = get_operand_assembler(instr_node.src)
+            src = get_operand_assembler(instr_node.src, "4B")
             return f"{opcode} {src}"
+        case AsmSetCCNode():
+            opcode = f"set{instr_node.cond_code.lower()}".ljust(_OPCODE_FIELD_WIDTH)
+            src = get_operand_assembler(instr_node.src, "L8")
+            return f"{opcode} {src}"
+        case AsmLabelNode():
+            return f".L{instr_node.identifier}:"
+        case AsmJmpNode():
+            opcode = "jmp".ljust(_OPCODE_FIELD_WIDTH)
+            return f"{opcode} .L{instr_node.target}"
+        case AsmJmpCCNode():
+            opcode = f"j{instr_node.cond_code.lower()}".ljust(_OPCODE_FIELD_WIDTH)
+            return f"{opcode} .L{instr_node.target}"
         case _:
             raise ValueError(f"Unrecognised: {instr_node}")
 
@@ -150,7 +193,11 @@ def get_function_assembler(func_node: AsmFunctionNode) -> list[str]:
         if nxt == "ret":
             # This could get troublesome if 'ret' isn't the last thing
             result += stack_teardown()
-        result.append(f"{_INSTRUCTION_INDENT}{nxt}")
+        if nxt.startswith(".L"):
+            # Don't indent labels so much
+            result.append(f"{_LOCAL_LABEL_INDENT}{nxt}")
+        else:
+            result.append(f"{_INSTRUCTION_INDENT}{nxt}")
     return result
 
 
