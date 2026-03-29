@@ -44,11 +44,11 @@ _SEP_CHAR = "="
 SubRegister = Literal["L8", "4B"]
 
 _REG_MAP: dict[AsmRegName, dict[SubRegister, str]] = {
-    "AX": {"4B": "eax", "L8":"al"},
+    "AX": {"4B": "eax", "L8": "al"},
     "CX": {"4B": "ecx", "L8": "cl"},
-    "DX": {"4B": "edx", "L8":"dl"},
-    "R10": {"4B": "r10d", "L8":"r10b"},
-    "R11": {"4B": "r11d", "L8":"r11b"},
+    "DX": {"4B": "edx", "L8": "dl"},
+    "R10": {"4B": "r10d", "L8": "r10b"},
+    "R11": {"4B": "r11d", "L8": "r11b"},
 }
 
 

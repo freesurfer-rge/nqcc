@@ -1,3 +1,5 @@
+from typing import Type
+
 import pytest
 
 from nqcc.codegen import (
@@ -24,6 +26,7 @@ from nqcc.codegen import (
     AsmUnaryNode,
     AsmUnaryOperator,
     convert_tacky_instruction,
+    AsmCondCode,
 )
 from nqcc.tacky import (
     TackyAdd,
@@ -45,7 +48,23 @@ from nqcc.tacky import (
     TackyUnaryNode,
     TackyUnaryOperator,
     TackyVarNode,
+    TackyEqualTo,
+    TackyNotEqualTo,
+    TackyGreaterThan,
+    TackyGreaterThanOrEqual,
+    TackyLessThan,
+    TackyLessThanOrEqual,
+    TackyBinaryOperator,
 )
+
+_COND_CODE_MAP: dict[Type, AsmCondCode] = {
+    TackyEqualTo: "E",
+    TackyNotEqualTo: "NE",
+    TackyGreaterThan: "G",
+    TackyGreaterThanOrEqual: "GE",
+    TackyLessThan: "L",
+    TackyLessThanOrEqual: "LE",
+}
 
 
 class TestUnaryInstructions:
@@ -287,4 +306,41 @@ class TestInstructions:
             start_position=22,
             src=AsmRegisterNode(start_position=22, value="DX"),
             dst=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
+        )
+
+    @pytest.mark.parametrize(
+        "op",
+        [
+            TackyEqualTo,
+            TackyNotEqualTo,
+            TackyGreaterThan,
+            TackyGreaterThanOrEqual,
+            TackyLessThan,
+            TackyLessThanOrEqual,
+        ],
+    )
+    def test_comparisons(self, op: Type):
+        target = TackyBinaryNode(
+            start_position=23,
+            operator=op(start_position=24),
+            left=TackyVarNode(start_position=12, identifier="left.0"),
+            right=TackyVarNode(start_position=13, identifier="right.0"),
+            dst=TackyVarNode(start_position=14, identifier="dst.0"),
+        )
+
+        result = convert_tacky_instruction(target)
+        assert len(result) == 3
+
+        assert result[0] == AsmCmpNode(
+            start_position=23,
+            src=AsmPseudoRegisterNode(start_position=13, identifier="right.0"),
+            dst=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
+        )
+        assert result[1] == AsmMovNode(
+            start_position=23,
+            src=AsmImmediateIntNode(start_position=23, value=0),
+            dst=AsmPseudoRegisterNode(start_position=14, identifier="dst.0"),
+        )
+        assert result[2] == AsmSetCCNode(
+            start_position=23, src=result[1].dst, cond_code=_COND_CODE_MAP[op]
         )

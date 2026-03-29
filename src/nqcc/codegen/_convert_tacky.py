@@ -25,6 +25,12 @@ from nqcc.tacky import (
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
+    TackyEqualTo,
+    TackyNotEqualTo,
+    TackyGreaterThan,
+    TackyGreaterThanOrEqual,
+    TackyLessThan,
+    TackyLessThanOrEqual,
 )
 
 from ._assembler_ast import (
