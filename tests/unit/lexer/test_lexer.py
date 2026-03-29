@@ -44,9 +44,9 @@ class TestPickToken:
     @pytest.mark.parametrize(
         ["shorter", "longer"],
         [
-            (BitwiseAnd(value="&"), LogicalAnd(value="&&")),
-            (BitwiseOr(value="|"), LogicalOr(value="||")),
-            (LogicalNot(value="!"), NotEqualTo(value="!=")),
+            (BitwiseAnd(), LogicalAnd()),
+            (BitwiseOr(), LogicalOr()),
+            (LogicalNot(), NotEqualTo()),
             (LessThan(), LessThanOrEqual()),
             (GreaterThan(), GreaterThanOrEqual()),
             (AssignmentToken(), EqualTo()),
