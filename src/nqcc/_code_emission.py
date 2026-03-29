@@ -11,6 +11,7 @@ from nqcc.codegen import (
     AsmBitwiseXor,
     AsmCdqNode,
     AsmCmpNode,
+    AsmSetCCNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -43,11 +44,11 @@ _SEP_CHAR = "="
 SubRegister = Literal["L8", "4B"]
 
 _REG_MAP: dict[AsmRegName, dict[SubRegister, str]] = {
-    "AX": {"4B": "eax"},
-    "CX": {"4B": "ecx"},
-    "DX": {"4B": "edx"},
-    "R10": {"4B": "r10d"},
-    "R11": {"4B": "r11d"},
+    "AX": {"4B": "eax", "L8":"al"},
+    "CX": {"4B": "ecx", "L8": "cl"},
+    "DX": {"4B": "edx", "L8":"dl"},
+    "R10": {"4B": "r10d", "L8":"r10b"},
+    "R11": {"4B": "r11d", "L8":"r11b"},
 }
 
 
@@ -138,6 +139,10 @@ def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:
         case AsmIDivNode():
             opcode = "idivl".ljust(_OPCODE_FIELD_WIDTH)
             src = get_operand_assembler(instr_node.src, "4B")
+            return f"{opcode} {src}"
+        case AsmSetCCNode():
+            opcode = f"set{instr_node.cond_code.lower()}".ljust(_OPCODE_FIELD_WIDTH)
+            src = get_operand_assembler(instr_node.src, "L8")
             return f"{opcode} {src}"
         case _:
             raise ValueError(f"Unrecognised: {instr_node}")
