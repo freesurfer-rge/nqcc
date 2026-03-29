@@ -2,6 +2,7 @@ import pytest
 
 from nqcc.lexer import (
     AdditionToken,
+    AssignmentToken,
     BitwiseAnd,
     BitwiseOr,
     ConstantIntegerToken,
@@ -48,6 +49,7 @@ class TestPickToken:
             (LogicalNot(value="!"), NotEqualTo(value="!=")),
             (LessThan(), LessThanOrEqual()),
             (GreaterThan(), GreaterThanOrEqual()),
+            (AssignmentToken(), EqualTo()),
         ],
     )
     def test_operators_with_substring(self, shorter: Token, longer: Token):
