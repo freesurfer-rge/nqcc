@@ -72,12 +72,12 @@ from ._assembler_ast import (
     AsmUnaryOperator,
 )
 
-_UNARY_OPERATOR_MAP: dict[Type, Type] = {
+_UNARY_OPERATOR_MAP: dict[Type[TackyUnaryOperator], Type] = {
     TackyComplement: AsmNot,
     TackyNegate: AsmNeg,
 }
 
-_BINARY_OPERATOR_MAP: dict[Type, Type] = {
+_BINARY_OPERATOR_MAP: dict[Type[TackyBinaryOperator], Type] = {
     TackyAdd: AsmAdd,
     TackySubtract: AsmSubtract,
     TackyMultiply: AsmMultiply,
@@ -88,7 +88,7 @@ _BINARY_OPERATOR_MAP: dict[Type, Type] = {
     TackyRightShift: AsmRightShift,
 }
 
-_COND_CODE_MAP: dict[Type, AsmCondCode] = {
+_COND_CODE_MAP: dict[Type[TackyBinaryOperator], AsmCondCode] = {
     TackyEqualTo: "E",
     TackyNotEqualTo: "NE",
     TackyGreaterThan: "G",
