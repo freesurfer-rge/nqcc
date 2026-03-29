@@ -187,6 +187,7 @@ class TestBinaryFixup:
 
         fixed = apply_binary_fixup(target)
         assert len(fixed) == 2
+        assert isinstance(fixed[0], AsmMovNode)
         assert fixed[0] == AsmMovNode(
             start_position=4,
             src=src,
@@ -236,6 +237,7 @@ class TestBinaryFixup:
 
         fixed = apply_binary_fixup(target)
         assert len(fixed) == 2
+        assert isinstance(fixed[0], AsmMovNode)
         assert fixed[0] == AsmMovNode(
             start_position=4, src=src, dst=AsmRegisterNode(start_position=4, value="CX")
         )
