@@ -209,8 +209,8 @@ class TestExtractTokens:
         toks = extract_tokens("||", idx)
 
         assert len(toks) == 2
-        assert toks[0] == BitwiseOr(start_position=idx, value="|")
-        assert toks[1] == LogicalOr(start_position=idx, value="||")
+        assert toks[0] == BitwiseOr(start_position=idx)
+        assert toks[1] == LogicalOr(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_equalto(self, idx):
@@ -225,8 +225,8 @@ class TestExtractTokens:
         toks = extract_tokens("!=", idx)
 
         assert len(toks) == 2
-        assert toks[0] == LogicalNot(start_position=idx, value="!")
-        assert toks[1] == NotEqualTo(start_position=idx, value="!=")
+        assert toks[0] == LogicalNot(start_position=idx)
+        assert toks[1] == NotEqualTo(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_lessthan(self, idx):
