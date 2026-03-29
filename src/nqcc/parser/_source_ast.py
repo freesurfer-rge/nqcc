@@ -182,7 +182,18 @@ class SourceReturnNode(SourceASTNode):
     value: SourceExpressionNode
 
 
-SourceStatementNode = Union[SourceReturnNode]
+class SourceExpressionStatementNode(SourceASTNode):
+    node_type: Literal["SourceExpressionStatementNode"] = "SourceExpressionStatementNode"
+    value: SourceExpressionNode
+
+
+class SourceNullStatementNode(SourceASTNode):
+    node_type: Literal["SourceNullStatementNode"] = "SourceNullStatementNode"
+
+
+SourceStatementNode = Union[
+    SourceReturnNode, SourceExpressionStatementNode, SourceNullStatementNode
+]
 
 
 class SourceFunctionNode(SourceASTNode):
