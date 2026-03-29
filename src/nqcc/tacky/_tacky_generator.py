@@ -72,13 +72,13 @@ from ._tacky_ast import (
     TackyVarNode,
 )
 
-_UNARY_OPERATOR_MAP: dict[Type, Type] = {
+_UNARY_OPERATOR_MAP: dict[Type[SourceUnaryOperator], Type[TackyUnaryOperator]] = {
     SourceComplement: TackyComplement,
     SourceNegate: TackyNegate,
     SourceLogicalNot: TackyLogicalNot,
 }
 
-_BINARY_OPERATOR_MAP: dict[Type, Type] = {
+_BINARY_OPERATOR_MAP: dict[Type[SourceBinaryOperator], Type[TackyBinaryOperator]] = {
     SourceAdd: TackyAdd,
     SourceSubtract: TackySubtract,
     SourceMultiply: TackyMultiply,
