@@ -22,3 +22,13 @@ class TestChapter04:
 
         macros = [f"V0={v0}", f"V1={v1}", f"OP={op}"]
         compile_run_check(target_file, macros=macros)
+
+    @pytest.mark.parametrize("v0", [-1, 0, 1])
+    @pytest.mark.parametrize("v1", [ -1, 0, 1] )
+    @pytest.mark.parametrize("op", ["&&", "||"])
+    def test_logical_boolean(self, v0: int, v1: int, op: str):
+        target_file = SAMPLE_PROGRAM_DIR / TestChapter04.SUB_DIR / "return_logical_compare.c"
+        assert target_file.exists(), f"{target_file} not found"
+
+        macros = [f"V0={v0}", f"V1={v1}", f"OP={op}"]
+        compile_run_check(target_file, macros=macros)

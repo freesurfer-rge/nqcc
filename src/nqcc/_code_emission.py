@@ -31,12 +31,14 @@ from nqcc.codegen import (
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
+    AsmLabelNode, AsmJmpCCNode, AsmJmpNode
 )
 
 ASSEMBLY_EXTENSION = ".s"
 
 
 _INSTRUCTION_INDENT = "    "
+_LOCAL_LABEL_INDENT = "  "
 _OPCODE_FIELD_WIDTH = 8
 _SEP_WIDTH = 70
 _SEP_CHAR = "="
@@ -144,6 +146,14 @@ def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:
             opcode = f"set{instr_node.cond_code.lower()}".ljust(_OPCODE_FIELD_WIDTH)
             src = get_operand_assembler(instr_node.src, "L8")
             return f"{opcode} {src}"
+        case AsmLabelNode():
+            return f".L{instr_node.identifier}:"
+        case AsmJmpNode():
+            opcode = "jmp".ljust(_OPCODE_FIELD_WIDTH)
+            return f"{opcode} .L{instr_node.target}"
+        case AsmJmpCCNode():
+            opcode = f"j{instr_node.cond_code.lower()}".ljust(_OPCODE_FIELD_WIDTH)
+            return f"{opcode} .L{instr_node.target}"
         case _:
             raise ValueError(f"Unrecognised: {instr_node}")
 
@@ -181,7 +191,11 @@ def get_function_assembler(func_node: AsmFunctionNode) -> list[str]:
         if nxt == "ret":
             # This could get troublesome if 'ret' isn't the last thing
             result += stack_teardown()
-        result.append(f"{_INSTRUCTION_INDENT}{nxt}")
+        if nxt.startswith(".L"):
+            # Don't indent labels so much
+            result.append(f"{_LOCAL_LABEL_INDENT}{nxt}")
+        else:
+            result.append(f"{_INSTRUCTION_INDENT}{nxt}")
     return result
 
 
