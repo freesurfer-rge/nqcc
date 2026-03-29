@@ -26,6 +26,7 @@ from nqcc.codegen import (
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
+    AsmJmpNode,
     convert_tacky_instruction,
 )
 from nqcc.tacky import (
@@ -54,6 +55,7 @@ from nqcc.tacky import (
     TackyUnaryNode,
     TackyUnaryOperator,
     TackyVarNode,
+    TackyJumpNode,
 )
 
 _COND_CODE_MAP: dict[Type, AsmCondCode] = {
@@ -128,6 +130,17 @@ class TestInstructions:
         )
         assert result[1] == AsmRetNode(start_position=345)
 
+
+class TestJumpInstructions:
+    def test_jump(self):
+        target = TackyJumpNode(start_position=123, target="jump.0")
+
+        result = convert_tacky_instruction(target)
+        assert len(result) == 1
+        assert result[0] == AsmJmpNode(start_position=123, target="jump.0")
+
+
+class TestBinaryInstructions:
     def test_add(self):
         target = TackyBinaryNode(
             start_position=22,

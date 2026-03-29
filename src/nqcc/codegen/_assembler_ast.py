@@ -136,12 +136,12 @@ class AsmAllocateStackNode(AsmASTNode):
 
 class AsmJmpNode(AsmASTNode):
     node_type: Literal["AsmJmpNode"] = "AsmJmpNode"
-    identifier: str
+    target: str
 
 
 class AsmJmpCCNode(AsmASTNode):
     node_type: Literal["AsmJmpCCNode"] = "AsmJmpCCNode"
-    identifier: str
+    target: str
     cond_code: AsmCondCode
 
 
