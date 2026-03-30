@@ -2,11 +2,12 @@ import pytest
 
 from nqcc.lexer import ConstantIntegerToken, KeywordToken, SemicolonToken
 from nqcc.parser import (
-    SourceASTBadValueError,
-    SourceConstantIntNode,
-    SourceReturnNode,
-    SourceBinaryExpressionNode,
     SourceAdd,
+    SourceASTBadValueError,
+    SourceBinaryExpressionNode,
+    SourceConstantIntNode,
+    SourceExpressionStatementNode,
+    SourceReturnNode,
     SourceVarNode,
     TokenTape,
     parse_statement,
@@ -64,6 +65,8 @@ class TestSourceStatementNode:
         assert token_tape.tokens_remaining == 10
 
         node = parse_statement(token_tape)
+        assert isinstance(node, SourceExpressionStatementNode)
+        raise NotImplementedError("Need to finish")
 
     def test_return_addition(self):
         c_str = "return a + b;"

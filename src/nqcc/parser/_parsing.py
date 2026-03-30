@@ -52,6 +52,7 @@ from ._source_ast import (
     SourceDivide,
     SourceEqualTo,
     SourceExpressionNode,
+    SourceExpressionStatementNode,
     SourceFunctionNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
@@ -187,14 +188,21 @@ def parse_expression(token_tape: TokenTape, *, min_precedence: int) -> SourceExp
 
 
 def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
-    return_token = token_tape.expect(KeywordToken)
-    if return_token.value != "return":
-        raise SourceASTBadValueError(
-            expected_value="return", actual_token=return_token, message="Unexpected keyword"
-        )
-    return_value = parse_expression(token_tape, min_precedence=0)
-    _ = token_tape.expect(SemicolonToken)
-    return SourceReturnNode(start_position=return_token.start_position, value=return_value)
+    first_token = token_tape.peek()
+
+    if isinstance(first_token, KeywordToken):
+        return_token = token_tape.expect(KeywordToken)
+        if return_token.value != "return":
+            raise SourceASTBadValueError(
+                expected_value="return", actual_token=return_token, message="Unexpected keyword"
+            )
+        return_value = parse_expression(token_tape, min_precedence=0)
+        _ = token_tape.expect(SemicolonToken)
+        return SourceReturnNode(start_position=return_token.start_position, value=return_value)
+    else:
+        expr = parse_expression(token_tape, min_precedence=0)
+        _ = token_tape.expect(SemicolonToken)
+        return SourceExpressionStatementNode(start_position=expr.start_position, value=expr)
 
 
 def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:

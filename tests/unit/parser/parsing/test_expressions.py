@@ -3,6 +3,7 @@ import pytest
 from nqcc.lexer import ConstantIntegerToken, SemicolonToken
 from nqcc.parser import (
     SourceAdd,
+    SourceAssignmentNode,
     SourceBinaryExpressionNode,
     SourceBitwiseAnd,
     SourceBitwiseOr,
@@ -26,7 +27,6 @@ from nqcc.parser import (
     SourceRightShift,
     SourceSubtract,
     SourceUnaryExpressionNode,
-    SourceAssignmentNode,
     SourceVarNode,
     TokenTape,
     parse_expression,
