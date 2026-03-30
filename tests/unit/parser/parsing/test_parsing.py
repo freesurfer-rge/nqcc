@@ -2,20 +2,19 @@ import pytest
 
 from nqcc.lexer import CloseParenToken
 from nqcc.parser import (
+    SourceAdd,
     SourceASTBadTypeError,
+    SourceBinaryExpressionNode,
     SourceConstantIntNode,
+    SourceDeclarationNode,
     SourceFunctionNode,
     SourceProgramNode,
     SourceReturnNode,
-    SourceDeclarationNode,
     SourceVarNode,
-    SourceBinaryExpressionNode,
-    SourceAdd,
     TokenTape,
+    parse_declaration,
     parse_function,
     parse_program,
-    parse_declaration,
-    parse_block,
 )
 
 

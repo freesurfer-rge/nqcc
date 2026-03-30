@@ -1,15 +1,16 @@
 from ._driver import parser_driver
 from ._exceptions import SourceASTBadTypeError, SourceASTBadValueError
 from ._parsing import (
+    parse_block,
+    parse_declaration,
     parse_expression,
     parse_function,
     parse_program,
     parse_statement,
-    parse_declaration,
-    parse_block,
 )
 from ._source_ast import (
     SourceAdd,
+    SourceAssignment,
     SourceAssignmentNode,
     SourceASTNode,
     SourceBinaryExpressionNode,
@@ -46,7 +47,6 @@ from ._source_ast import (
     SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
-    SourceAssignment,
     SourceVarNode,
 )
 from ._token_tape import TokenTape
@@ -56,6 +56,7 @@ __all__ = [
     "SourceASTBadValueError",
     "SourceASTNode",
     "SourceAdd",
+    "SourceAssignment",
     "SourceAssignmentNode",
     "SourceBinaryExpressionNode",
     "SourceBinaryOperator",
@@ -95,12 +96,11 @@ __all__ = [
     "SourceUnaryOperator",
     "SourceVarNode",
     "TokenTape",
+    "parse_block",
+    "parse_declaration",
     "parse_expression",
     "parse_function",
     "parse_program",
     "parse_statement",
     "parser_driver",
-    "parse_declaration",
-    "parse_block",
-    "SourceAssignment",
 ]

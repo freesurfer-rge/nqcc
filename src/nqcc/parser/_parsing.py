@@ -2,6 +2,7 @@ from typing import Type, get_args
 
 from nqcc.lexer import (
     AdditionToken,
+    AssignmentToken,
     BinaryOperatorToken,
     BitwiseAnd,
     BitwiseOr,
@@ -32,7 +33,6 @@ from nqcc.lexer import (
     TildeToken,
     Token,
     UnaryOperatorToken,
-    AssignmentToken,
 )
 
 from ._exceptions import SourceASTBadValueError
@@ -48,6 +48,7 @@ from ._source_ast import (
     SourceBlockItemNode,
     SourceComplement,
     SourceConstantIntNode,
+    SourceDeclarationNode,
     SourceDivide,
     SourceEqualTo,
     SourceExpressionNode,
@@ -68,12 +69,10 @@ from ._source_ast import (
     SourceReturnNode,
     SourceRightShift,
     SourceStatementNode,
-    SourceDeclarationNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
-    SourceAssignmentNode,
 )
 from ._token_tape import TokenTape
 
@@ -157,7 +156,7 @@ def parse_factor(token_tape: TokenTape) -> SourceExpressionNode:
 
         case IdentifierToken():
             id_token = token_tape.take()
-            return SourceVarNode(start_positino=id_token.start_position, identifier=id_token.value)
+            return SourceVarNode(start_position=id_token.start_position, identifier=id_token.value)
 
         case _:
             raise ValueError(f"Could not match type of {token}")

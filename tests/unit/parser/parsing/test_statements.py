@@ -5,7 +5,6 @@ from nqcc.parser import (
     SourceASTBadValueError,
     SourceConstantIntNode,
     SourceReturnNode,
-    SourceStatementNode,
     TokenTape,
     parse_statement,
 )
