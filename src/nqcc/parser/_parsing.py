@@ -170,7 +170,7 @@ def parse_expression(token_tape: TokenTape, *, min_precedence: int) -> SourceExp
     while operator is not None and operator.precedence >= min_precedence:
         # First thing, actually consume the token
         op = token_tape.expect(get_args(BinaryOperatorToken))
-        if isinstance(op, SourceAssignment):
+        if isinstance(op, AssignmentToken):
             right_assign = parse_expression(token_tape, min_precedence=op.precedence)
             left = SourceAssignmentNode(
                 start_position=op.start_position, left=left, right=right_assign

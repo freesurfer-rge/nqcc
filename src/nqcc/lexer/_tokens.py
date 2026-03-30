@@ -461,6 +461,7 @@ TokenTypes: list[type] = [
 UnaryOperatorToken = Union[DecrementToken, IncrementToken, NegationToken, TildeToken, LogicalNot]
 BinaryOperatorToken = Union[
     AdditionToken,
+    AssignmentToken,
     NegationToken,
     MultiplyToken,
     DivideToken,
