@@ -5,6 +5,9 @@ from nqcc.parser import (
     SourceASTBadValueError,
     SourceConstantIntNode,
     SourceReturnNode,
+    SourceBinaryExpressionNode,
+    SourceAdd,
+    SourceVarNode,
     TokenTape,
     parse_statement,
 )
@@ -54,3 +57,22 @@ class TestSourceStatementNode:
             _ = parse_statement(token_tape)
         assert sabve.value.message == "Unexpected keyword"
         assert sabve.value.actual_token == tokens[0]
+
+    def test_complex_statement(self):
+        c_str = "a = 3 * (b = a);"
+        token_tape = TokenTape.from_c_source(c_str)
+        assert token_tape.tokens_remaining == 10
+
+        node = parse_statement(token_tape)
+
+    def test_return_addition(self):
+        c_str = "return a + b;"
+        token_tape = TokenTape.from_c_source(c_str)
+        assert token_tape.tokens_remaining == 5
+
+        node = parse_statement(token_tape)
+        assert isinstance(node, SourceReturnNode)
+        assert isinstance(node.value, SourceBinaryExpressionNode)
+        assert node.value.operator == SourceAdd(start_position=9)
+        assert node.value.left == SourceVarNode(start_position=7, identifier="a")
+        assert node.value.right == SourceVarNode(start_position=11, identifier="b")

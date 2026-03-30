@@ -25,7 +25,9 @@ from nqcc.parser import (
     SourceNotEqualTo,
     SourceRightShift,
     SourceSubtract,
-    SourceUnaryExpressionNode,SourceAssignmentNode,SourceVarNode,
+    SourceUnaryExpressionNode,
+    SourceAssignmentNode,
+    SourceVarNode,
     TokenTape,
     parse_expression,
 )
@@ -257,11 +259,10 @@ class TestSourceExpressionNode:
 
         node = parse_expression(token_tape, min_precedence=0)
         assert isinstance(node, SourceAssignmentNode)
-        assert node.left==SourceVarNode(start_position=0, identifier="a")
-        assert node.right==SourceConstantIntNode(start_position=4, value=2)
+        assert node.left == SourceVarNode(start_position=0, identifier="a")
+        assert node.right == SourceConstantIntNode(start_position=4, value=2)
         # We are using the semi colon to mark the end of the expression
         assert token_tape.tokens_remaining == 1
-
 
     @pytest.mark.parametrize(
         ["a_str", "b_str"],
@@ -286,7 +287,7 @@ class TestSourceExpressionNode:
             (" 1| 2<<3;", " 1|(2<<3);"),
             (" 1| 2>>3;", " 1|(2>>3);"),
             (" 1|| 2==2;", " 1||(2==2);"),
-            ("a= b=c ;", "a=(b=c);")
+            ("a= b=c ;", "a=(b=c);"),
         ],
     )
     def test_paired_expressions(self, a_str: str, b_str: str):
