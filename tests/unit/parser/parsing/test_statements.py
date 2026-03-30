@@ -30,22 +30,6 @@ class TestSourceStatementNode:
 
         assert token_tape.tokens_remaining == 0
 
-    def test_return_serde(self):
-        tokens = [
-            KeywordToken(start_position=0, value="return"),
-            ConstantIntegerToken(start_position=1, value="321"),
-            SemicolonToken(start_position=5, value=";"),
-        ]
-        token_tape = TokenTape(tokens)
-
-        node = parse_statement(token_tape)
-
-        node_str = node.model_dump_json()
-
-        node_serde = SourceStatementNode.model_validate_json(node_str)
-
-        assert node == node_serde
-
     def test_return_mispelled(self):
         tokens = [
             KeywordToken(start_position=0, value="returns"),

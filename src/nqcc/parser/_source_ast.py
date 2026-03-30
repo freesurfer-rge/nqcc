@@ -208,7 +208,7 @@ SourceBlockItemNode = Union[SourceDeclarationNode, SourceStatementNode]
 class SourceFunctionNode(SourceASTNode):
     node_type: Literal["SourceFunctionNode"] = "SourceFunctionNode"
     identifier: str
-    body: SourceStatementNode
+    body: list[SourceBlockItemNode]
 
 
 class SourceProgramNode(SourceASTNode):

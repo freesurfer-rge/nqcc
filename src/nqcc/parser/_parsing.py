@@ -42,6 +42,7 @@ from ._source_ast import (
     SourceBitwiseAnd,
     SourceBitwiseOr,
     SourceBitwiseXor,
+    SourceBlockItemNode,
     SourceComplement,
     SourceConstantIntNode,
     SourceDivide,
@@ -181,6 +182,16 @@ def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
     return SourceReturnNode(start_position=return_token.start_position, value=return_value)
 
 
+def parse_block(token_tape: TokenTape) -> SourceBlockItemNode:
+    peeked = token_tape.peek()
+
+    # Only support 'int' declarations right now
+    if isinstance(peeked, KeywordToken) and peeked.value == "int":
+        raise NotImplementedError("need parse_declaration")
+
+    return parse_statement(token_tape)
+
+
 def parse_function(token_tape: TokenTape) -> SourceFunctionNode:
     type_token = token_tape.expect(KeywordToken)
     if type_token.value != "int":
@@ -198,12 +209,16 @@ def parse_function(token_tape: TokenTape) -> SourceFunctionNode:
     _ = token_tape.expect(CloseParenToken)
 
     _ = token_tape.expect(OpenBraceToken)
-    body_statement = parse_statement(token_tape)
+    body_block: list[SourceBlockItemNode] = []
+    while not isinstance(token_tape.peek(), CloseBraceToken):
+        nxt_block = parse_block(token_tape)
+        body_block.append(nxt_block)
+
     _ = token_tape.expect(CloseBraceToken)
 
     return SourceFunctionNode(
         identifier=function_name_token.value,
-        body=body_statement,
+        body=body_block,
         start_position=type_token.start_position,
     )
 

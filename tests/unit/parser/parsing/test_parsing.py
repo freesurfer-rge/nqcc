@@ -14,7 +14,7 @@ from nqcc.parser import (
 
 
 class TestSourceFunctionNode:
-    def test_function(self):
+    def test_function_simple(self):
         program_str = "int main( void ) { return 2;}"
 
         token_tape = TokenTape.from_c_source(program_str)
@@ -25,11 +25,12 @@ class TestSourceFunctionNode:
         assert node.start_position == program_str.find("int")
         assert node.identifier == "main"
 
-        body_node = node.body
-        assert isinstance(body_node, SourceReturnNode)
-        assert body_node.start_position == program_str.find("return")
+        assert isinstance(node.body, list)
+        assert len(node.body) == 1
+        assert isinstance(node.body[0] , SourceReturnNode)
+        assert node.body[0].start_position == program_str.find("return")
 
-        return_value_node = body_node.value
+        return_value_node = node.body[0].value
         assert isinstance(return_value_node, SourceConstantIntNode)
         assert return_value_node.start_position == program_str.find("2")
 
@@ -79,11 +80,12 @@ class TestSourceProgramNode:
 
         assert func_node.identifier == "main"
 
-        body_node = func_node.body
-        assert isinstance(body_node, SourceReturnNode)
-        assert body_node.start_position == program_str.find("return")
+        assert isinstance(func_node.body, list)
+        assert len(func_node.body) == 1
+        assert isinstance(func_node.body[0], SourceReturnNode)
+        assert func_node.body[0].start_position == program_str.find("return")
 
-        return_value_node = body_node.value
+        return_value_node = func_node.body[0].value
         assert isinstance(return_value_node, SourceConstantIntNode)
         assert return_value_node.start_position == program_str.find("2")
 
