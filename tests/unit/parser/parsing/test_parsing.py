@@ -27,7 +27,7 @@ class TestSourceFunctionNode:
 
         assert isinstance(node.body, list)
         assert len(node.body) == 1
-        assert isinstance(node.body[0] , SourceReturnNode)
+        assert isinstance(node.body[0], SourceReturnNode)
         assert node.body[0].start_position == program_str.find("return")
 
         return_value_node = node.body[0].value

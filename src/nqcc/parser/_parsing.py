@@ -32,6 +32,7 @@ from nqcc.lexer import (
     TildeToken,
     Token,
     UnaryOperatorToken,
+    AssignmentToken,
 )
 
 from ._exceptions import SourceASTBadValueError
@@ -65,9 +66,12 @@ from ._source_ast import (
     SourceReturnNode,
     SourceRightShift,
     SourceStatementNode,
+    SourceDeclarationNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
+    SourceVarNode,
+    SourceAssignmentNode,
 )
 from ._token_tape import TokenTape
 
@@ -182,12 +186,30 @@ def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
     return SourceReturnNode(start_position=return_token.start_position, value=return_value)
 
 
+def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:
+    type_token = token_tape.expect(KeywordToken)
+    assert type_token.value == "int", "Can only handle int declarations!"
+
+    name_token = token_tape.expect(IdentifierToken)
+    assert isinstance(name_token, IdentifierToken), "Expected variable name!"
+    var = SourceVarNode(start_position=name_token.start_position, identifier=name_token.value)
+
+    initialiser: SourceExpressionNode | None = None
+    if not isinstance(token_tape.peek(), SemicolonToken):
+        initialiser = parse_expression(token_tape, min_precedence=0)
+    _ = token_tape.expect(SemicolonToken)
+
+    return SourceDeclarationNode(
+        start_position=type_token.start_position, identifier=var, initial=initialiser
+    )
+
+
 def parse_block(token_tape: TokenTape) -> SourceBlockItemNode:
     peeked = token_tape.peek()
 
     # Only support 'int' declarations right now
     if isinstance(peeked, KeywordToken) and peeked.value == "int":
-        raise NotImplementedError("need parse_declaration")
+        return parse_declaration(token_tape)
 
     return parse_statement(token_tape)
 

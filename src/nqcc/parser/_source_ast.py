@@ -198,8 +198,8 @@ SourceStatementNode = Union[
 
 class SourceDeclarationNode(SourceASTNode):
     node_type: Literal["SourceDeclarationNode"] = "SourceDeclarationNode"
-    identifier: str
-    initial: str | None
+    identifier: SourceVarNode
+    initial: SourceExpressionNode | None
 
 
 SourceBlockItemNode = Union[SourceDeclarationNode, SourceStatementNode]
