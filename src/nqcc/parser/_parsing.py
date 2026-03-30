@@ -38,6 +38,8 @@ from nqcc.lexer import (
 from ._exceptions import SourceASTBadValueError
 from ._source_ast import (
     SourceAdd,
+    SourceAssignment,
+    SourceAssignmentNode,
     SourceBinaryExpressionNode,
     SourceBinaryOperator,
     SourceBitwiseAnd,
@@ -82,6 +84,7 @@ _UNARY_OPERATOR_MAP: dict[Type, Type] = {
 }
 
 _BINARY_OPERATOR_MAP: dict[Type, Type] = {
+    AssignmentToken: SourceAssignment,
     AdditionToken: SourceAdd,
     NegationToken: SourceSubtract,
     MultiplyToken: SourceMultiply,
@@ -152,6 +155,10 @@ def parse_factor(token_tape: TokenTape) -> SourceExpressionNode:
             result = parse_expression(token_tape, min_precedence=0)
             _ = token_tape.expect(CloseParenToken)
 
+        case IdentifierToken():
+            id_token = token_tape.take()
+            return SourceVarNode(start_positino=id_token.start_position, identifier=id_token.value)
+
         case _:
             raise ValueError(f"Could not match type of {token}")
     return result
@@ -163,12 +170,17 @@ def parse_expression(token_tape: TokenTape, *, min_precedence: int) -> SourceExp
     operator = convert_binary_operator(token_tape.peek())
     while operator is not None and operator.precedence >= min_precedence:
         # First thing, actually consume the token
-        _ = token_tape.expect(get_args(BinaryOperatorToken))
-
-        right = parse_expression(token_tape, min_precedence=1 + operator.precedence)
-        left = SourceBinaryExpressionNode(
-            start_position=operator.start_position, operator=operator, left=left, right=right
-        )
+        op = token_tape.expect(get_args(BinaryOperatorToken))
+        if isinstance(op, SourceAssignment):
+            right_assign = parse_expression(token_tape, min_precedence=op.precedence)
+            left = SourceAssignmentNode(
+                start_position=op.start_position, left=left, right=right_assign
+            )
+        else:
+            right = parse_expression(token_tape, min_precedence=1 + operator.precedence)
+            left = SourceBinaryExpressionNode(
+                start_position=operator.start_position, operator=operator, left=left, right=right
+            )
 
         # Set up for next iteration
         operator = convert_binary_operator(token_tape.peek())
@@ -196,6 +208,7 @@ def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:
 
     initialiser: SourceExpressionNode | None = None
     if not isinstance(token_tape.peek(), SemicolonToken):
+        _ = token_tape.expect(AssignmentToken)
         initialiser = parse_expression(token_tape, min_precedence=0)
     _ = token_tape.expect(SemicolonToken)
 

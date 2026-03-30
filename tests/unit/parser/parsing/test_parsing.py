@@ -7,10 +7,59 @@ from nqcc.parser import (
     SourceFunctionNode,
     SourceProgramNode,
     SourceReturnNode,
+    SourceDeclarationNode,
+    SourceVarNode,
+    SourceBinaryExpressionNode,
+    SourceAdd,
     TokenTape,
     parse_function,
     parse_program,
+    parse_declaration,
+    parse_block,
 )
+
+
+class TestSourceDeclarationNode:
+    def test_no_initial(self):
+        cdecl_str = "int a;"
+        token_tape = TokenTape.from_c_source(cdecl_str)
+
+        node = parse_declaration(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        assert isinstance(node, SourceDeclarationNode)
+        assert node.start_position == 0
+        assert node.identifier == SourceVarNode(start_position=4, identifier="a")
+        assert not node.initial
+
+    def test_constant_initial(self):
+        cdecl_str = "int a=1;"
+        token_tape = TokenTape.from_c_source(cdecl_str)
+
+        node = parse_declaration(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        assert isinstance(node, SourceDeclarationNode)
+        assert node.start_position == 0
+        assert node.identifier == SourceVarNode(start_position=4, identifier="a")
+        assert node.initial == SourceConstantIntNode(start_position=6, value=1)
+
+    def test_expressions_initial(self):
+        cdecl_str = "int a=1+2;"
+        token_tape = TokenTape.from_c_source(cdecl_str)
+
+        node = parse_declaration(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        assert isinstance(node, SourceDeclarationNode)
+        assert node.start_position == 0
+        assert node.identifier == SourceVarNode(start_position=4, identifier="a")
+        assert node.initial == SourceBinaryExpressionNode(
+            start_position=7,
+            operator=SourceAdd(start_position=7),
+            left=SourceConstantIntNode(start_position=6, value=1),
+            right=SourceConstantIntNode(start_position=8, value=2),
+        )
 
 
 class TestSourceFunctionNode:

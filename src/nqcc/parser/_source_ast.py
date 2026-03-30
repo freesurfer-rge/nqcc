@@ -43,6 +43,12 @@ class SourceBinOp(SourceASTNode):
     precedence: int
 
 
+class SourceAssignment(SourceBinOp):
+    # Note this is distinct from an assignment in a declaration
+    node_type: Literal["SourceAssignment"] = "SourceAssignment"
+    precedence: Literal[1] = 1
+
+
 class SourceLogicalOr(SourceBinOp):
     node_type: Literal["SourceLogicalOr"] = "SourceLogicalOr"
     precedence: Literal[5] = 5
@@ -134,6 +140,7 @@ class SourceModulo(SourceBinOp):
 
 
 SourceBinaryOperator = Union[
+    SourceAssignment,
     SourceAdd,
     SourceSubtract,
     SourceMultiply,

@@ -5,6 +5,8 @@ from ._parsing import (
     parse_function,
     parse_program,
     parse_statement,
+    parse_declaration,
+    parse_block,
 )
 from ._source_ast import (
     SourceAdd,
@@ -44,6 +46,7 @@ from ._source_ast import (
     SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
+    SourceAssignment,
     SourceVarNode,
 )
 from ._token_tape import TokenTape
@@ -97,4 +100,7 @@ __all__ = [
     "parse_program",
     "parse_statement",
     "parser_driver",
+    "parse_declaration",
+    "parse_block",
+    "SourceAssignment",
 ]
