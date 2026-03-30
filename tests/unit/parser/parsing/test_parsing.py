@@ -82,6 +82,27 @@ class TestSourceFunctionNode:
         assert isinstance(return_value_node, SourceConstantIntNode)
         assert return_value_node.start_position == program_str.find("2")
 
+    def test_function_two_statement(self):
+        program_str = "int main(void){int a=11; return a;}"
+        token_tape = TokenTape.from_c_source(program_str)
+
+        node = parse_function(token_tape)
+
+        assert isinstance(node, SourceFunctionNode)
+        assert node.start_position == program_str.find("int")
+        assert node.identifier == "main"
+
+        assert isinstance(node.body, list)
+        assert len(node.body) == 2
+        assert node.body[0] == SourceDeclarationNode(
+            start_position=15,
+            identifier=SourceVarNode(start_position=19, identifier="a"),
+            initial=SourceConstantIntNode(start_position=21, value=11),
+        )
+        assert node.body[1] == SourceReturnNode(
+            start_position=25, value=SourceVarNode(start_position=32, identifier="a")
+        )
+
     def test_serde(self):
         program_str = "int main( void ) { return 2;}"
 
