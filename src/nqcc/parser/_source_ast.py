@@ -13,6 +13,11 @@ class SourceConstantIntNode(SourceASTNode):
     value: int
 
 
+class SourceVarNode(SourceASTNode):
+    node_type: Literal["SourceVarNode"] = "SourceVarNode"
+    identifier: str
+
+
 class SourceComplement(SourceASTNode):
     node_type: Literal["SourceComplementNode"] = "SourceComplementNode"
 
@@ -36,6 +41,12 @@ class SourceUnaryExpressionNode(SourceASTNode):
 
 class SourceBinOp(SourceASTNode):
     precedence: int
+
+
+class SourceAssignment(SourceBinOp):
+    # Note this is distinct from an assignment in a declaration
+    node_type: Literal["SourceAssignment"] = "SourceAssignment"
+    precedence: Literal[1] = 1
 
 
 class SourceLogicalOr(SourceBinOp):
@@ -129,6 +140,7 @@ class SourceModulo(SourceBinOp):
 
 
 SourceBinaryOperator = Union[
+    SourceAssignment,
     SourceAdd,
     SourceSubtract,
     SourceMultiply,
@@ -157,8 +169,18 @@ class SourceBinaryExpressionNode(SourceASTNode):
     right: SourceExpressionNode
 
 
+class SourceAssignmentNode(SourceASTNode):
+    node_type: Literal["SourceAssignmentNode"] = "SourceAssignmentNode"
+    left: SourceExpressionNode
+    right: SourceExpressionNode
+
+
 SourceExpressionNode = Union[
-    SourceConstantIntNode, SourceUnaryExpressionNode, SourceBinaryExpressionNode
+    SourceConstantIntNode,
+    SourceVarNode,
+    SourceUnaryExpressionNode,
+    SourceBinaryExpressionNode,
+    SourceAssignmentNode,
 ]
 
 
@@ -167,13 +189,33 @@ class SourceReturnNode(SourceASTNode):
     value: SourceExpressionNode
 
 
-SourceStatementNode = Union[SourceReturnNode]
+class SourceExpressionStatementNode(SourceASTNode):
+    node_type: Literal["SourceExpressionStatementNode"] = "SourceExpressionStatementNode"
+    value: SourceExpressionNode
+
+
+class SourceNullStatementNode(SourceASTNode):
+    node_type: Literal["SourceNullStatementNode"] = "SourceNullStatementNode"
+
+
+SourceStatementNode = Union[
+    SourceReturnNode, SourceExpressionStatementNode, SourceNullStatementNode
+]
+
+
+class SourceDeclarationNode(SourceASTNode):
+    node_type: Literal["SourceDeclarationNode"] = "SourceDeclarationNode"
+    identifier: SourceVarNode
+    initial: SourceExpressionNode | None
+
+
+SourceBlockItemNode = Union[SourceDeclarationNode, SourceStatementNode]
 
 
 class SourceFunctionNode(SourceASTNode):
     node_type: Literal["SourceFunctionNode"] = "SourceFunctionNode"
     identifier: str
-    body: SourceStatementNode
+    body: list[SourceBlockItemNode]
 
 
 class SourceProgramNode(SourceASTNode):

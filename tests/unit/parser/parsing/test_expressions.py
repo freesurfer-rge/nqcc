@@ -3,6 +3,7 @@ import pytest
 from nqcc.lexer import ConstantIntegerToken, SemicolonToken
 from nqcc.parser import (
     SourceAdd,
+    SourceAssignmentNode,
     SourceBinaryExpressionNode,
     SourceBitwiseAnd,
     SourceBitwiseOr,
@@ -26,6 +27,7 @@ from nqcc.parser import (
     SourceRightShift,
     SourceSubtract,
     SourceUnaryExpressionNode,
+    SourceVarNode,
     TokenTape,
     parse_expression,
 )
@@ -250,9 +252,22 @@ class TestSourceExpressionNode:
         # We are using the semi colon to mark the end of the expression
         assert token_tape.tokens_remaining == 1
 
+    def test_assignment(self):
+        source = "a = 2;"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 4
+
+        node = parse_expression(token_tape, min_precedence=0)
+        assert isinstance(node, SourceAssignmentNode)
+        assert node.left == SourceVarNode(start_position=0, identifier="a")
+        assert node.right == SourceConstantIntNode(start_position=4, value=2)
+        # We are using the semi colon to mark the end of the expression
+        assert token_tape.tokens_remaining == 1
+
     @pytest.mark.parametrize(
         ["a_str", "b_str"],
         [
+            (" 1+2 +3;", "(1+2)+3;"),
             ("1 + -2 ;", "1 +(-2);"),
             ("1+ 2*3 +4;", "1+(2*3)+4;"),
             (" ~1 -2;", "(~1)-2;"),
@@ -272,6 +287,7 @@ class TestSourceExpressionNode:
             (" 1| 2<<3;", " 1|(2<<3);"),
             (" 1| 2>>3;", " 1|(2>>3);"),
             (" 1|| 2==2;", " 1||(2==2);"),
+            ("a= b=c ;", "a=(b=c);"),
         ],
     )
     def test_paired_expressions(self, a_str: str, b_str: str):
