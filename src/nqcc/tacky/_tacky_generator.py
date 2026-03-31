@@ -7,6 +7,7 @@ from nqcc.parser import (
     SourceBitwiseAnd,
     SourceBitwiseOr,
     SourceBitwiseXor,
+    SourceBlockItemNode,
     SourceComplement,
     SourceConstantIntNode,
     SourceDivide,
@@ -28,7 +29,6 @@ from nqcc.parser import (
     SourceProgramNode,
     SourceReturnNode,
     SourceRightShift,
-    SourceStatementNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
@@ -298,7 +298,7 @@ class TackyGenerator:
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
-    def emit_statement(self, source_node: SourceStatementNode):
+    def emit_statement(self, source_node: SourceBlockItemNode):
         match source_node:
             case SourceReturnNode():
                 src = self.emit_expression(source_node.value)
@@ -317,7 +317,8 @@ class TackyGenerator:
         self._current_instructions = []
 
         # Process the internals
-        self.emit_statement(source_node.body)
+        for stmt in source_node.body:
+            self.emit_statement(stmt)
 
         return TackyFunctionNode(
             start_position=source_node.start_position,
