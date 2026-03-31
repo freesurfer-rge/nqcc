@@ -30,3 +30,15 @@ class TestParserSerde:
         }
         """
         _check_round_trip(source)
+
+    def test_multiple_statements(self):
+        source = """int main( void ) {
+            int a;
+            ;
+            int b = 1;
+            a = b+1;
+            a = 3 * (b = a);
+            return a << b;
+        }
+        """
+        _check_round_trip(source)
