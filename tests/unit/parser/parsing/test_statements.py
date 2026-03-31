@@ -3,10 +3,13 @@ import pytest
 from nqcc.lexer import ConstantIntegerToken, KeywordToken, SemicolonToken
 from nqcc.parser import (
     SourceAdd,
+    SourceAssignmentNode,
     SourceASTBadValueError,
     SourceBinaryExpressionNode,
     SourceConstantIntNode,
     SourceExpressionStatementNode,
+    SourceMultiply,
+    SourceNullStatementNode,
     SourceReturnNode,
     SourceVarNode,
     TokenTape,
@@ -59,6 +62,16 @@ class TestSourceStatementNode:
         assert sabve.value.message == "Unexpected keyword"
         assert sabve.value.actual_token == tokens[0]
 
+    def test_null_statement(self):
+        c_str = ";"
+        token_tape = TokenTape.from_c_source(c_str)
+        assert token_tape.tokens_remaining == 1
+
+        node = parse_statement(token_tape)
+        assert isinstance(node, SourceNullStatementNode)
+        assert node.start_position == 0
+        assert token_tape.tokens_remaining == 0
+
     def test_complex_statement(self):
         c_str = "a = 3 * (b = a);"
         token_tape = TokenTape.from_c_source(c_str)
@@ -66,7 +79,18 @@ class TestSourceStatementNode:
 
         node = parse_statement(token_tape)
         assert isinstance(node, SourceExpressionStatementNode)
-        raise NotImplementedError("Need to finish")
+        assert token_tape.tokens_remaining == 0
+        assert isinstance(node.value, SourceAssignmentNode)
+        assert node.value.left == SourceVarNode(start_position=0, identifier="a")
+        assert isinstance(node.value.right, SourceBinaryExpressionNode)
+        mul_exp = node.value.right
+        assert mul_exp.operator == SourceMultiply(start_position=6)
+        assert mul_exp.left == SourceConstantIntNode(start_position=4, value=3)
+        assert isinstance(mul_exp.right, SourceAssignmentNode)
+        mul_assign = mul_exp.right
+        assert mul_assign.left == SourceVarNode(start_position=9, identifier="b")
+        assert mul_assign.right == SourceVarNode(start_position=13, identifier="a")
+        assert token_tape.tokens_remaining == 0
 
     def test_return_addition(self):
         c_str = "return a + b;"
@@ -79,3 +103,4 @@ class TestSourceStatementNode:
         assert node.value.operator == SourceAdd(start_position=9)
         assert node.value.left == SourceVarNode(start_position=7, identifier="a")
         assert node.value.right == SourceVarNode(start_position=11, identifier="b")
+        assert token_tape.tokens_remaining == 0
