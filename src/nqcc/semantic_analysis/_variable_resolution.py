@@ -4,6 +4,9 @@ from nqcc.parser import (
     SourceVarNode,
     SourceExpressionNode,
     SourceAssignmentNode,
+    SourceConstantIntNode,
+    SourceUnaryExpressionNode,
+    SourceBinaryExpressionNode,
 )
 
 from ._exceptions import (
@@ -59,3 +62,18 @@ class VariableResolver:
                     )
                 else:
                     raise SemanticAnalysisUnknownVariable(var=expr)
+            case SourceConstantIntNode():
+                return expr
+            case SourceUnaryExpressionNode():
+                return SourceUnaryExpressionNode(
+                    start_position=expr.start_position,
+                    operator=expr.operator,
+                    expression=self.resolve_expression(expr.expression),
+                )
+            case SourceBinaryExpressionNode():
+                return SourceBinaryExpressionNode(
+                    start_position=expr.start_position,
+                    operator=expr.operator,
+                    left=self.resolve_expression(expr.left),
+                    right=self.resolve_expression(expr.right),
+                )
