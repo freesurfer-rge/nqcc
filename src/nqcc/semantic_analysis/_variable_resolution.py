@@ -57,7 +57,7 @@ class VariableResolver:
             case SourceVarNode():
                 if expr.identifier in self._variable_map:
                     return SourceVarNode(
-                        start_postion=expr.start_position,
+                        start_position=expr.start_position,
                         identifier=self._variable_map[expr.identifier],
                     )
                 else:

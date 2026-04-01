@@ -3,11 +3,11 @@ import pytest
 from nqcc.parser import (
     SourceConstantIntNode,
     SourceDeclarationNode,
-    SourceVarNode,
+    SourceVarNode,SourceAssignmentNode,
     TokenTape,
-    parse_declaration,
+    parse_declaration, parse_expression
 )
-from nqcc.semantic_analysis import SemanticAnalysisDuplicateDeclaration, VariableResolver
+from nqcc.semantic_analysis import SemanticAnalysisDuplicateDeclaration, VariableResolver, SemanticAnalysisUnknownVariable
 
 
 class TestDeclarations:
@@ -88,3 +88,39 @@ class TestDeclarations:
             _ = target.resolve_declaration(decl1)
         assert saduperr.value.decl == decl1
         assert saduperr.value.message == "Duplicate declaration of 'a' at 12"
+
+class TestExpressions:
+    def test_assignment(self):
+        target = VariableResolver()
+
+        # Make sure 'a' is declared
+        decl_a = SourceDeclarationNode(
+            start_position=10,
+            identifier=SourceVarNode(start_position=11, identifier="a"),
+            initial=None,
+        )
+        _ = target.resolve_declaration(decl_a)
+
+        # Our assignment
+        c_str = "a=1;"
+        token_tape = TokenTape.from_c_source(c_str)
+        assignment = parse_expression(token_tape, min_precedence=0)
+        assert isinstance(assignment, SourceAssignmentNode)
+
+        result = target.resolve_expression(assignment)
+        assert isinstance(result, SourceAssignmentNode)
+        assert isinstance(result.left, SourceVarNode)
+        assert result.left.identifier == "a.0"
+        assert isinstance(result.right, SourceConstantIntNode)
+        assert result.right.value == 1
+
+    def test_assignment_undeclared(self):
+        target = VariableResolver()# Our assignment
+        c_str = "a=1;"
+        token_tape = TokenTape.from_c_source(c_str)
+        assignment = parse_expression(token_tape, min_precedence=0)
+        assert isinstance(assignment, SourceAssignmentNode)
+
+        with pytest.raises(SemanticAnalysisUnknownVariable) as sauv:
+            _ = target.resolve_expression(assignment)
+        assert sauv.value.message == "Unknown identifier 'a' at 0"
