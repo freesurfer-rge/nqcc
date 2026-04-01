@@ -2,6 +2,7 @@ import pathlib
 
 from nqcc.parser import SourceProgramNode
 
+
 def semantic_analysis_driver(
     source_program: SourceProgramNode, *, working_dir: pathlib.Path
 ) -> SourceProgramNode:

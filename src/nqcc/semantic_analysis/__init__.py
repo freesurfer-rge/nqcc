@@ -1,1 +1,3 @@
 from ._driver import semantic_analysis_driver
+from ._exceptions import SemanticAnalysisDuplicateDeclaration
+from ._variable_resolution import VariableResolver
