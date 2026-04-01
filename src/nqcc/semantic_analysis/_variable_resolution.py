@@ -1,0 +1,1 @@
+from nqcc.parser import SourceDeclarationNode
