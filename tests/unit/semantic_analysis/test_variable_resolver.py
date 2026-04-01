@@ -1,13 +1,19 @@
 import pytest
 
 from nqcc.parser import (
+    SourceAssignmentNode,
     SourceConstantIntNode,
     SourceDeclarationNode,
-    SourceVarNode,SourceAssignmentNode,
+    SourceVarNode,
     TokenTape,
-    parse_declaration, parse_expression
+    parse_declaration,
+    parse_expression,
 )
-from nqcc.semantic_analysis import SemanticAnalysisDuplicateDeclaration, VariableResolver, SemanticAnalysisUnknownVariable
+from nqcc.semantic_analysis import (
+    SemanticAnalysisDuplicateDeclaration,
+    SemanticAnalysisUnknownVariable,
+    VariableResolver,
+)
 
 
 class TestDeclarations:
@@ -89,6 +95,7 @@ class TestDeclarations:
         assert saduperr.value.decl == decl1
         assert saduperr.value.message == "Duplicate declaration of 'a' at 12"
 
+
 class TestExpressions:
     def test_assignment(self):
         target = VariableResolver()
@@ -115,7 +122,7 @@ class TestExpressions:
         assert result.right.value == 1
 
     def test_assignment_undeclared(self):
-        target = VariableResolver()# Our assignment
+        target = VariableResolver()  # Our assignment
         c_str = "a=1;"
         token_tape = TokenTape.from_c_source(c_str)
         assignment = parse_expression(token_tape, min_precedence=0)
