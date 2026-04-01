@@ -1,6 +1,16 @@
-from nqcc.parser import SourceDeclarationNode, SourceFunctionNode, SourceVarNode
+from nqcc.parser import (
+    SourceDeclarationNode,
+    SourceStatementNode,
+    SourceVarNode,
+    SourceExpressionNode,
+    SourceAssignmentNode,
+)
 
-from ._exceptions import SemanticAnalysisDuplicateDeclaration
+from ._exceptions import (
+    SemanticAnalysisDuplicateDeclaration,
+    SemanticAnalysisBadLValue,
+    SemanticAnalysisUnknownVariable,
+)
 
 
 class VariableResolver:
@@ -17,12 +27,35 @@ class VariableResolver:
         unique_name = f"{orig_name}.{self._counter}"
         self._counter += 1
         self._variable_map[orig_name] = unique_name
+        nxt_init: SourceExpressionNode | None = None
         if decl.initial is not None:
-            raise NotImplementedError("TBD")
+            nxt_init = self.resolve_expression(decl.initial)
 
         nxt_var = SourceVarNode(
             start_position=decl.identifier.start_position, identifier=unique_name
         )
         return SourceDeclarationNode(
-            start_position=decl.start_position, identifier=nxt_var, initial=None
+            start_position=decl.start_position, identifier=nxt_var, initial=nxt_init
         )
+
+    def resolve_statement(self, stmt: SourceStatementNode) -> SourceStatementNode:
+        raise NotImplementedError("TDB")
+
+    def resolve_expression(self, expr: SourceExpressionNode) -> SourceExpressionNode:
+        match expr:
+            case SourceAssignmentNode():
+                if not isinstance(expr.left, SourceVarNode):
+                    raise SemanticAnalysisBadLValue(expr=expr.left)
+                return SourceAssignmentNode(
+                    start_position=expr.start_position,
+                    left=self.resolve_expression(expr.left),
+                    right=self.resolve_expression(expr.right),
+                )
+            case SourceVarNode():
+                if expr.identifier in self._variable_map:
+                    return SourceVarNode(
+                        start_postion=expr.start_position,
+                        identifier=self._variable_map[expr.identifier],
+                    )
+                else:
+                    raise SemanticAnalysisUnknownVariable(var=expr)
