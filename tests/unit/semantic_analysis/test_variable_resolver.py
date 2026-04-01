@@ -1,7 +1,13 @@
 import pytest
 
-from nqcc.parser import SourceDeclarationNode, SourceVarNode
-from nqcc.semantic_analysis import VariableResolver, SemanticAnalysisDuplicateDeclaration
+from nqcc.parser import (
+    SourceConstantIntNode,
+    SourceDeclarationNode,
+    SourceVarNode,
+    TokenTape,
+    parse_declaration,
+)
+from nqcc.semantic_analysis import SemanticAnalysisDuplicateDeclaration, VariableResolver
 
 
 class TestDeclarations:
@@ -19,6 +25,21 @@ class TestDeclarations:
         assert updated.start_position == 10
         assert updated.identifier == SourceVarNode(start_position=11, identifier="a.0")
         assert updated.initial is None
+
+    def test_decl_with_init(self):
+        target = VariableResolver()
+        program_str = "int a = 1;"
+
+        token_tape = TokenTape.from_c_source(program_str)
+        decl = parse_declaration(token_tape)
+        assert isinstance(decl, SourceDeclarationNode)
+
+        result = target.resolve_declaration(decl)
+        assert isinstance(result, SourceDeclarationNode)
+        assert result.start_position == 0
+        assert result.identifier == SourceVarNode(start_position=4, identifier="a.0")
+        assert isinstance(result.initial, SourceConstantIntNode)
+        assert result.initial.value == 1
 
     def test_two_decl(self):
         target = VariableResolver()

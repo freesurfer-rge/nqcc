@@ -1,17 +1,17 @@
 from nqcc.parser import (
-    SourceDeclarationNode,
-    SourceStatementNode,
-    SourceVarNode,
-    SourceExpressionNode,
     SourceAssignmentNode,
-    SourceConstantIntNode,
-    SourceUnaryExpressionNode,
     SourceBinaryExpressionNode,
+    SourceConstantIntNode,
+    SourceDeclarationNode,
+    SourceExpressionNode,
+    SourceStatementNode,
+    SourceUnaryExpressionNode,
+    SourceVarNode,
 )
 
 from ._exceptions import (
-    SemanticAnalysisDuplicateDeclaration,
     SemanticAnalysisBadLValue,
+    SemanticAnalysisDuplicateDeclaration,
     SemanticAnalysisUnknownVariable,
 )
 
