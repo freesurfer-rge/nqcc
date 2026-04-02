@@ -16,6 +16,7 @@ def compile_run_check(target_file: pathlib.Path, macros: list[str]):
             working_dir=working_dir,
             exit_after_lex=False,
             exit_after_parse=False,
+            exit_after_semantic_analysis=False,
             exit_after_tacky=False,
             exit_after_codegen=False,
             preprocessor_defines=macros,
