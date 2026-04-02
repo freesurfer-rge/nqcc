@@ -1,10 +1,14 @@
+from typing import get_args
+
 from nqcc.parser import (
     SourceAssignmentNode,
     SourceBinaryExpressionNode,
+    SourceBlockItemNode,
     SourceConstantIntNode,
     SourceDeclarationNode,
     SourceExpressionNode,
     SourceExpressionStatementNode,
+    SourceFunctionNode,
     SourceNullStatementNode,
     SourceReturnNode,
     SourceStatementNode,
@@ -93,3 +97,26 @@ class VariableResolver:
                 )
             case _:
                 raise ValueError(f"Not recognised: {expr}")
+
+    def resolve_blockitem(self, bi: SourceBlockItemNode) -> SourceBlockItemNode:
+
+        match bi:
+            case SourceDeclarationNode():
+                return self.resolve_declaration(bi)
+            case _ if isinstance(bi, get_args(SourceStatementNode)):
+                return self.resolve_statement(bi)
+            case _:
+                raise ValueError(f"Unrecognised: {bi}")
+
+
+def resolve_function(func: SourceFunctionNode) -> SourceFunctionNode:
+    resolver = VariableResolver()
+    updated_body: list[SourceBlockItemNode] = []
+    for bi in func.body:
+        nxt = resolver.resolve_blockitem(bi)
+        updated_body.append(nxt)
+
+    result = SourceFunctionNode(
+        start_position=func.start_position, identifier=func.identifier, body=updated_body
+    )
+    return result

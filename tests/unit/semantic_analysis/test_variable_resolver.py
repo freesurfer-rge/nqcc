@@ -13,6 +13,7 @@ from nqcc.parser import (
     TokenTape,
     parse_declaration,
     parse_expression,
+    parse_function,
     parse_statement,
 )
 from nqcc.semantic_analysis import (
@@ -20,6 +21,7 @@ from nqcc.semantic_analysis import (
     SemanticAnalysisDuplicateDeclaration,
     SemanticAnalysisUnknownVariable,
     VariableResolver,
+    resolve_function,
 )
 
 
@@ -129,7 +131,7 @@ class TestExpressions:
         assert result.right.value == 1
 
     def test_assignment_undeclared(self):
-        target = VariableResolver()  # Our assignment
+        target = VariableResolver()
         c_str = "a=1;"
         token_tape = TokenTape.from_c_source(c_str)
         assignment = parse_expression(token_tape, min_precedence=0)
@@ -141,7 +143,7 @@ class TestExpressions:
         assert sauv.value.message == "Unknown identifier 'a' at 0"
 
     def test_assignment_badlvalue(self):
-        target = VariableResolver()  # Our assignment
+        target = VariableResolver()
         c_str = "1=1+2;"
         token_tape = TokenTape.from_c_source(c_str)
         assignment = parse_expression(token_tape, min_precedence=0)
@@ -155,7 +157,7 @@ class TestExpressions:
 
 class TestStatements:
     def test_null_statement(self):
-        target = VariableResolver()  # Our assignment
+        target = VariableResolver()
         c_str = ";"
         token_tape = TokenTape.from_c_source(c_str)
         stmt = parse_statement(token_tape)
@@ -165,7 +167,7 @@ class TestStatements:
         assert isinstance(result, SourceNullStatementNode)
 
     def test_expression_statement(self):
-        target = VariableResolver()  # Our assignment
+        target = VariableResolver()
         c_str = "a=22;"
         token_tape = TokenTape.from_c_source(c_str)
         stmt = parse_statement(token_tape)
@@ -188,7 +190,7 @@ class TestStatements:
         assert result.value.right.value == 22
 
     def test_return_statement(self):
-        target = VariableResolver()  # Our assignment
+        target = VariableResolver()
         c_str = "return a+44;"
         token_tape = TokenTape.from_c_source(c_str)
         stmt = parse_statement(token_tape)
@@ -210,3 +212,23 @@ class TestStatements:
         assert result.value.left.identifier == "a.0"
         assert isinstance(result.value.right, SourceConstantIntNode)
         assert result.value.right.value == 44
+
+
+class TestFunction:
+    def test_simple(self):
+        c_str = "int main(void) { int a = 1; return a;}"
+        token_tape = TokenTape.from_c_source(c_str)
+        func = parse_function(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        updated = resolve_function(func)
+        assert updated.identifier == "main"
+        assert len(updated.body) == 2
+        decl = updated.body[0]
+        assert isinstance(decl, SourceDeclarationNode)
+        assert isinstance(decl.identifier, SourceVarNode)
+        assert decl.identifier.identifier == "a.0"
+        ret = updated.body[1]
+        assert isinstance(ret, SourceReturnNode)
+        assert isinstance(ret.value, SourceVarNode)
+        assert ret.value.identifier == "a.0"
