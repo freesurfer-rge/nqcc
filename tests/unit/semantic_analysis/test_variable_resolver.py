@@ -1,22 +1,24 @@
 import pytest
 
 from nqcc.parser import (
+    SourceAdd,
     SourceAssignmentNode,
+    SourceBinaryExpressionNode,
     SourceConstantIntNode,
     SourceDeclarationNode,
-    SourceVarNode,
-    SourceReturnNode,
     SourceExpressionStatementNode,
     SourceNullStatementNode,
+    SourceReturnNode,
+    SourceVarNode,
     TokenTape,
     parse_declaration,
     parse_expression,
     parse_statement,
 )
 from nqcc.semantic_analysis import (
+    SemanticAnalysisBadLValue,
     SemanticAnalysisDuplicateDeclaration,
     SemanticAnalysisUnknownVariable,
-    SemanticAnalysisBadLValue,
     VariableResolver,
 )
 
@@ -184,3 +186,27 @@ class TestStatements:
         assert result.value.left.identifier == "a.0"
         assert isinstance(result.value.right, SourceConstantIntNode)
         assert result.value.right.value == 22
+
+    def test_return_statement(self):
+        target = VariableResolver()  # Our assignment
+        c_str = "return a+44;"
+        token_tape = TokenTape.from_c_source(c_str)
+        stmt = parse_statement(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        # Make sure 'a' is declared
+        decl_a = SourceDeclarationNode(
+            start_position=10,
+            identifier=SourceVarNode(start_position=11, identifier="a"),
+            initial=None,
+        )
+        _ = target.resolve_declaration(decl_a)
+
+        result = target.resolve_statement(stmt)
+        assert isinstance(result, SourceReturnNode)
+        assert isinstance(result.value, SourceBinaryExpressionNode)
+        assert isinstance(result.value.operator, SourceAdd)
+        assert isinstance(result.value.left, SourceVarNode)
+        assert result.value.left.identifier == "a.0"
+        assert isinstance(result.value.right, SourceConstantIntNode)
+        assert result.value.right.value == 44
