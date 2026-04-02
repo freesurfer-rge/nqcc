@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, get_args
 
 from nqcc.parser import (
     SourceAdd,
@@ -33,7 +33,7 @@ from nqcc.parser import (
     SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
-    SourceVarNode,
+    SourceVarNode,SourceStatementNode
 )
 
 from ._tacky_ast import (
@@ -254,6 +254,7 @@ class TackyGenerator:
         return result_var
 
     def emit_expression(self, source_node: SourceExpressionNode) -> TackyValue:
+        assert isinstance(source_node, get_args(SourceExpressionNode))
         match source_node:
             case SourceConstantIntNode():
                 return self.convert_constant_int(source_node)
@@ -313,7 +314,8 @@ class TackyGenerator:
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
-    def emit_statement(self, source_node: SourceBlockItemNode):
+    def emit_statement(self, source_node: SourceStatementNode):
+        assert isinstance(source_node, get_args(SourceStatementNode))
         match source_node:
             case SourceReturnNode():
                 src = self.emit_expression(source_node.value)
@@ -321,6 +323,14 @@ class TackyGenerator:
                 self._current_instructions.append(instr)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
+
+    def emit_blockitem(self, source_node: SourceBlockItemNode):
+        assert isinstance(source_node, get_args(SourceBlockItemNode))
+        match source_node:
+            case _ if isinstance(source_node, get_args(SourceStatementNode)):
+                self.emit_statement(source_node)
+            case _:
+                raise ValueError(f"Unrecognised blockitem: {source_node}")
 
     def emit_function(self, source_node: SourceFunctionNode) -> TackyFunctionNode:
         assert isinstance(source_node, SourceFunctionNode)
@@ -332,8 +342,8 @@ class TackyGenerator:
         self._current_instructions = []
 
         # Process the internals
-        for stmt in source_node.body:
-            self.emit_statement(stmt)
+        for block_item in source_node.body:
+            self.emit_blockitem(block_item)
 
         return TackyFunctionNode(
             start_position=source_node.start_position,

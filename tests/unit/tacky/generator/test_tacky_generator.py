@@ -1,4 +1,4 @@
-from nqcc.parser import TokenTape, parse_function, parse_program, parse_statement
+from nqcc.parser import TokenTape, parse_function, parse_program, parse_statement, parse_block
 from nqcc.tacky import (
     TackyBinaryNode,
     TackyComplement,
@@ -71,6 +71,22 @@ class TestStatements:
 
         instr2 = target._current_instructions[2]
         assert instr2 == TackyReturnNode(start_position=0, value=instr1.dst)
+
+class TestBlockItems:
+
+    def test_declaration(self):
+        source = "int a;"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_block(token_tape)
+
+        target = TackyGenerator()
+        target._curr_function = "test_declaration"
+
+        # Skip semantic analysis for now
+        target.emit_blockitem(src_node)
+
+        # Nothing generated for a plain declaration
+        assert len(target._current_instructions) == 0
 
 
 class TestFunctions:
