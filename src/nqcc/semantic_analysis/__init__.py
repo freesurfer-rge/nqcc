@@ -12,5 +12,6 @@ __all__ = [
     "SemanticAnalysisUnknownVariable",
     "VariableResolver",
     "resolve_function",
+    "resolve_program",
     "semantic_analysis_driver",
 ]

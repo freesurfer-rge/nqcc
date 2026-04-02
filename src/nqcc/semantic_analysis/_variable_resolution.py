@@ -10,10 +10,11 @@ from nqcc.parser import (
     SourceExpressionStatementNode,
     SourceFunctionNode,
     SourceNullStatementNode,
+    SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
     SourceUnaryExpressionNode,
-    SourceVarNode,SourceProgramNode
+    SourceVarNode,
 )
 
 from ._exceptions import (
@@ -120,6 +121,7 @@ def resolve_function(func: SourceFunctionNode) -> SourceFunctionNode:
         start_position=func.start_position, identifier=func.identifier, body=updated_body
     )
     return result
+
 
 def resolve_program(prog: SourceProgramNode) -> SourceProgramNode:
     updated_func = resolve_function(prog.value)

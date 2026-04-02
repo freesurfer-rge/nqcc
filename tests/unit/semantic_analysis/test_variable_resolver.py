@@ -14,14 +14,16 @@ from nqcc.parser import (
     parse_declaration,
     parse_expression,
     parse_function,
-    parse_statement,parse_program
+    parse_program,
+    parse_statement,
 )
 from nqcc.semantic_analysis import (
     SemanticAnalysisBadLValue,
     SemanticAnalysisDuplicateDeclaration,
     SemanticAnalysisUnknownVariable,
     VariableResolver,
-    resolve_function,resolve_program
+    resolve_function,
+    resolve_program,
 )
 
 
@@ -232,6 +234,7 @@ class TestFunction:
         assert isinstance(ret, SourceReturnNode)
         assert isinstance(ret.value, SourceVarNode)
         assert ret.value.identifier == "a.0"
+
 
 class TestProgram:
     def test_simple(self):
