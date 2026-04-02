@@ -7,6 +7,9 @@ from nqcc.parser import (
     SourceStatementNode,
     SourceUnaryExpressionNode,
     SourceVarNode,
+    SourceReturnNode,
+    SourceExpressionStatementNode,
+    SourceNullStatementNode,
 )
 
 from ._exceptions import (
@@ -42,7 +45,18 @@ class VariableResolver:
         )
 
     def resolve_statement(self, stmt: SourceStatementNode) -> SourceStatementNode:
-        raise NotImplementedError("TDB")
+        sp = stmt.start_position
+        match stmt:
+            case SourceReturnNode():
+                updated = self.resolve_expression(stmt.value)
+                return SourceReturnNode(start_position=sp, value=updated)
+            case SourceExpressionStatementNode():
+                updated = self.resolve_expression(stmt.value)
+                return SourceExpressionStatementNode(start_position=sp, value=updated)
+            case SourceNullStatementNode():
+                return SourceNullStatementNode(start_position=sp)
+            case _:
+                raise ValueError(f"Unrecognised: {stmt}")
 
     def resolve_expression(self, expr: SourceExpressionNode) -> SourceExpressionNode:
         match expr:
@@ -77,3 +91,5 @@ class VariableResolver:
                     left=self.resolve_expression(expr.left),
                     right=self.resolve_expression(expr.right),
                 )
+            case _:
+                raise ValueError(f"Not recognised: {expr}")

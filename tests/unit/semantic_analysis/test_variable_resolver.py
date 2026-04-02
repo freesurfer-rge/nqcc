@@ -5,13 +5,18 @@ from nqcc.parser import (
     SourceConstantIntNode,
     SourceDeclarationNode,
     SourceVarNode,
+    SourceReturnNode,
+    SourceExpressionStatementNode,
+    SourceNullStatementNode,
     TokenTape,
     parse_declaration,
     parse_expression,
+    parse_statement,
 )
 from nqcc.semantic_analysis import (
     SemanticAnalysisDuplicateDeclaration,
     SemanticAnalysisUnknownVariable,
+    SemanticAnalysisBadLValue,
     VariableResolver,
 )
 
@@ -126,8 +131,56 @@ class TestExpressions:
         c_str = "a=1;"
         token_tape = TokenTape.from_c_source(c_str)
         assignment = parse_expression(token_tape, min_precedence=0)
+        assert token_tape.tokens_remaining == 1
         assert isinstance(assignment, SourceAssignmentNode)
 
         with pytest.raises(SemanticAnalysisUnknownVariable) as sauv:
             _ = target.resolve_expression(assignment)
         assert sauv.value.message == "Unknown identifier 'a' at 0"
+
+    def test_assignment_badlvalue(self):
+        target = VariableResolver()  # Our assignment
+        c_str = "1=1+2;"
+        token_tape = TokenTape.from_c_source(c_str)
+        assignment = parse_expression(token_tape, min_precedence=0)
+        assert token_tape.tokens_remaining == 1
+        assert isinstance(assignment, SourceAssignmentNode)
+
+        with pytest.raises(SemanticAnalysisBadLValue) as sablv:
+            _ = target.resolve_expression(assignment)
+        assert sablv.value.message == "Not an lvalue at 0"
+
+
+class TestStatements:
+    def test_null_statement(self):
+        target = VariableResolver()  # Our assignment
+        c_str = ";"
+        token_tape = TokenTape.from_c_source(c_str)
+        stmt = parse_statement(token_tape)
+        assert isinstance(stmt, SourceNullStatementNode)
+
+        result = target.resolve_statement(stmt)
+        assert isinstance(result, SourceNullStatementNode)
+
+    def test_expression_statement(self):
+        target = VariableResolver()  # Our assignment
+        c_str = "a=22;"
+        token_tape = TokenTape.from_c_source(c_str)
+        stmt = parse_statement(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        # Make sure 'a' is declared
+        decl_a = SourceDeclarationNode(
+            start_position=10,
+            identifier=SourceVarNode(start_position=11, identifier="a"),
+            initial=None,
+        )
+        _ = target.resolve_declaration(decl_a)
+
+        result = target.resolve_statement(stmt)
+        assert isinstance(result, SourceExpressionStatementNode)
+        assert isinstance(result.value, SourceAssignmentNode)
+        assert isinstance(result.value.left, SourceVarNode)
+        assert result.value.left.identifier == "a.0"
+        assert isinstance(result.value.right, SourceConstantIntNode)
+        assert result.value.right.value == 22
