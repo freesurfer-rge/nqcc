@@ -2,6 +2,7 @@ from typing import Type
 
 from nqcc.parser import (
     SourceAdd,
+    SourceAssignmentNode,
     SourceBinaryExpressionNode,
     SourceBinaryOperator,
     SourceBitwiseAnd,
@@ -32,6 +33,7 @@ from nqcc.parser import (
     SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
+    SourceVarNode,
 )
 
 from ._tacky_ast import (
@@ -295,6 +297,19 @@ class TackyGenerator:
                 )
                 self._current_instructions.append(bin_instr)
                 return dst_b
+            case SourceVarNode():
+                return TackyVarNode(
+                    start_position=source_node.start_position, identifier=source_node.identifier
+                )
+            case SourceAssignmentNode():
+                result = self.emit_expression(source_node.right)
+                assert isinstance(source_node.left, SourceVarNode)
+                dst_assign = self.emit_expression(source_node.left)
+                tacky_copy = TackyCopyNode(
+                    start_position=source_node.start_position, src=result, dst=dst_assign
+                )
+                self._current_instructions.append(tacky_copy)
+                return dst_assign
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
