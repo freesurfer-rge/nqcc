@@ -4,7 +4,7 @@ from ._exceptions import (
     SemanticAnalysisDuplicateDeclaration,
     SemanticAnalysisUnknownVariable,
 )
-from ._variable_resolution import VariableResolver, resolve_function
+from ._variable_resolution import VariableResolver, resolve_function, resolve_program
 
 __all__ = [
     "SemanticAnalysisBadLValue",

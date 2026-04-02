@@ -14,14 +14,14 @@ from nqcc.parser import (
     parse_declaration,
     parse_expression,
     parse_function,
-    parse_statement,
+    parse_statement,parse_program
 )
 from nqcc.semantic_analysis import (
     SemanticAnalysisBadLValue,
     SemanticAnalysisDuplicateDeclaration,
     SemanticAnalysisUnknownVariable,
     VariableResolver,
-    resolve_function,
+    resolve_function,resolve_program
 )
 
 
@@ -229,6 +229,27 @@ class TestFunction:
         assert isinstance(decl.identifier, SourceVarNode)
         assert decl.identifier.identifier == "a.0"
         ret = updated.body[1]
+        assert isinstance(ret, SourceReturnNode)
+        assert isinstance(ret.value, SourceVarNode)
+        assert ret.value.identifier == "a.0"
+
+class TestProgram:
+    def test_simple(self):
+        c_str = "int main(void) { int a = 1; return a;}"
+        token_tape = TokenTape.from_c_source(c_str)
+        prog = parse_program(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        updated = resolve_program(prog)
+
+        updated_func = updated.value
+        assert updated_func.identifier == "main"
+        assert len(updated_func.body) == 2
+        decl = updated_func.body[0]
+        assert isinstance(decl, SourceDeclarationNode)
+        assert isinstance(decl.identifier, SourceVarNode)
+        assert decl.identifier.identifier == "a.0"
+        ret = updated_func.body[1]
         assert isinstance(ret, SourceReturnNode)
         assert isinstance(ret.value, SourceVarNode)
         assert ret.value.identifier == "a.0"
