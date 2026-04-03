@@ -11,9 +11,11 @@ from nqcc.parser import (
     SourceBlockItemNode,
     SourceComplement,
     SourceConstantIntNode,
+    SourceDeclarationNode,
     SourceDivide,
     SourceEqualTo,
     SourceExpressionNode,
+    SourceExpressionStatementNode,
     SourceFunctionNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
@@ -27,13 +29,15 @@ from nqcc.parser import (
     SourceMultiply,
     SourceNegate,
     SourceNotEqualTo,
+    SourceNullStatementNode,
     SourceProgramNode,
     SourceReturnNode,
     SourceRightShift,
+    SourceStatementNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
-    SourceVarNode,SourceStatementNode
+    SourceVarNode,
 )
 
 from ._tacky_ast import (
@@ -317,6 +321,10 @@ class TackyGenerator:
     def emit_statement(self, source_node: SourceStatementNode):
         assert isinstance(source_node, get_args(SourceStatementNode))
         match source_node:
+            case SourceNullStatementNode():
+                return
+            case SourceExpressionStatementNode():
+                self.emit_expression(source_node.value)
             case SourceReturnNode():
                 src = self.emit_expression(source_node.value)
                 instr = TackyReturnNode(start_position=source_node.start_position, value=src)
@@ -329,6 +337,15 @@ class TackyGenerator:
         match source_node:
             case _ if isinstance(source_node, get_args(SourceStatementNode)):
                 self.emit_statement(source_node)
+            case _ if isinstance(source_node, SourceDeclarationNode):
+                if source_node.initial is None:
+                    return
+                src_decl = self.emit_expression(source_node.initial)
+                dst_decl = self.emit_expression(source_node.identifier)
+                tacky_copy = TackyCopyNode(
+                    start_position=source_node.start_position, src=src_decl, dst=dst_decl
+                )
+                self._current_instructions.append(tacky_copy)
             case _:
                 raise ValueError(f"Unrecognised blockitem: {source_node}")
 

@@ -1,10 +1,14 @@
-from nqcc.parser import TokenTape, parse_function, parse_program, parse_statement, parse_block
+from nqcc.parser import TokenTape, parse_block, parse_function, parse_program, parse_statement
+from nqcc.semantic_analysis import resolve_function
 from nqcc.tacky import (
+    TackyAdd,
     TackyBinaryNode,
     TackyComplement,
     TackyConstantIntNode,
+    TackyCopyNode,
     TackyFunctionNode,
     TackyGenerator,
+    TackyMultiply,
     TackyNegate,
     TackyProgramNode,
     TackyReturnNode,
@@ -17,6 +21,32 @@ from nqcc.tacky import (
 
 
 class TestStatements:
+    def test_null_statement(self):
+        source = " ;"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_statement(token_tape)
+
+        target = TackyGenerator()
+        target._curr_function = "test_return"
+
+        target.emit_statement(src_node)
+        assert len(target._current_instructions) == 0
+
+    def test_expression_statement(self):
+        source = "a = 1;"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_statement(token_tape)
+
+        target = TackyGenerator()
+        target._curr_function = "test_expression_statement"
+
+        target.emit_statement(src_node)
+        assert len(target._current_instructions) == 1
+        instr0 = target._current_instructions[0]
+        assert isinstance(instr0, TackyCopyNode)
+        assert instr0.dst == TackyVarNode(start_position=0, identifier="a")
+        assert instr0.src == TackyConstantIntNode(start_position=4, value=1)
+
     def test_return(self):
         source = "return ~ 162;"
         token_tape = TokenTape.from_c_source(source)
@@ -72,8 +102,8 @@ class TestStatements:
         instr2 = target._current_instructions[2]
         assert instr2 == TackyReturnNode(start_position=0, value=instr1.dst)
 
-class TestBlockItems:
 
+class TestBlockItems:
     def test_declaration(self):
         source = "int a;"
         token_tape = TokenTape.from_c_source(source)
@@ -87,6 +117,25 @@ class TestBlockItems:
 
         # Nothing generated for a plain declaration
         assert len(target._current_instructions) == 0
+
+    def test_declaration_with_init(self):
+        source = "int a=1+2;"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_block(token_tape)
+
+        target = TackyGenerator()
+        target._curr_function = "test_declaration"
+
+        # Skip semantic analysis for now
+        target.emit_blockitem(src_node)
+
+        assert len(target._current_instructions) == 2
+        instr0 = target._current_instructions[0]
+        assert isinstance(instr0, TackyBinaryNode)
+        assert isinstance(instr0.operator, TackyAdd)
+        assert instr0.dst == TackyVarNode(start_position=7, identifier="tmp.test_declaration.0")
+        assert instr0.left == TackyConstantIntNode(start_position=6, value=1)
+        assert instr0.right == TackyConstantIntNode(start_position=8, value=2)
 
 
 class TestFunctions:
@@ -112,6 +161,46 @@ class TestFunctions:
 
         instr1 = result.instructions[1]
         assert instr1 == TackyReturnNode(start_position=16, value=instr0.dst)
+
+    def test_simple_decl(self):
+        source = """int main (  void ) {
+            int a;
+            int b = 1;
+            a = b * 2;
+            return a;
+        }"""
+
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_function(token_tape)
+        resolved_node = resolve_function(src_node)
+
+        target = TackyGenerator()
+
+        result = target.emit_function(resolved_node)
+        assert isinstance(result, TackyFunctionNode)
+        assert result.identifier == "main"
+        assert len(result.instructions) == 4
+
+        instr0 = target._current_instructions[0]
+        assert isinstance(instr0, TackyCopyNode)
+        assert instr0.src == TackyConstantIntNode(start_position=60, value=1)
+        assert instr0.dst == TackyVarNode(start_position=56, identifier="b.1")
+
+        instr1 = target._current_instructions[1]
+        assert isinstance(instr1, TackyBinaryNode)
+        assert isinstance(instr1.operator, TackyMultiply)
+        assert instr1.dst == TackyVarNode(start_position=81, identifier="tmp.main.0")
+        assert instr1.left == TackyVarNode(start_position=79, identifier="b.1")
+        assert instr1.right == TackyConstantIntNode(start_position=83, value=2)
+
+        instr2 = target._current_instructions[2]
+        assert isinstance(instr2, TackyCopyNode)
+        assert instr2.src == TackyVarNode(start_position=81, identifier="tmp.main.0")
+        assert instr2.dst == TackyVarNode(start_position=75, identifier="a.0")
+
+        instr3 = target._current_instructions[3]
+        assert isinstance(instr3, TackyReturnNode)
+        assert instr3.value == TackyVarNode(start_position=105, identifier="a.0")
 
 
 class TestPrograms:
