@@ -1,7 +1,8 @@
-from typing import Type
+from typing import Type, get_args
 
 from nqcc.parser import (
     SourceAdd,
+    SourceAssignmentNode,
     SourceBinaryExpressionNode,
     SourceBinaryOperator,
     SourceBitwiseAnd,
@@ -10,9 +11,11 @@ from nqcc.parser import (
     SourceBlockItemNode,
     SourceComplement,
     SourceConstantIntNode,
+    SourceDeclarationNode,
     SourceDivide,
     SourceEqualTo,
     SourceExpressionNode,
+    SourceExpressionStatementNode,
     SourceFunctionNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
@@ -26,12 +29,15 @@ from nqcc.parser import (
     SourceMultiply,
     SourceNegate,
     SourceNotEqualTo,
+    SourceNullStatementNode,
     SourceProgramNode,
     SourceReturnNode,
     SourceRightShift,
+    SourceStatementNode,
     SourceSubtract,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
+    SourceVarNode,
 )
 
 from ._tacky_ast import (
@@ -252,6 +258,7 @@ class TackyGenerator:
         return result_var
 
     def emit_expression(self, source_node: SourceExpressionNode) -> TackyValue:
+        assert isinstance(source_node, get_args(SourceExpressionNode))
         match source_node:
             case SourceConstantIntNode():
                 return self.convert_constant_int(source_node)
@@ -295,17 +302,52 @@ class TackyGenerator:
                 )
                 self._current_instructions.append(bin_instr)
                 return dst_b
+            case SourceVarNode():
+                return TackyVarNode(
+                    start_position=source_node.start_position, identifier=source_node.identifier
+                )
+            case SourceAssignmentNode():
+                result = self.emit_expression(source_node.right)
+                assert isinstance(source_node.left, SourceVarNode)
+                dst_assign = self.emit_expression(source_node.left)
+                tacky_copy = TackyCopyNode(
+                    start_position=source_node.start_position, src=result, dst=dst_assign
+                )
+                self._current_instructions.append(tacky_copy)
+                return dst_assign
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
-    def emit_statement(self, source_node: SourceBlockItemNode):
+    def emit_statement(self, source_node: SourceStatementNode):
+        assert isinstance(source_node, get_args(SourceStatementNode))
         match source_node:
+            case SourceNullStatementNode():
+                return
+            case SourceExpressionStatementNode():
+                self.emit_expression(source_node.value)
             case SourceReturnNode():
                 src = self.emit_expression(source_node.value)
                 instr = TackyReturnNode(start_position=source_node.start_position, value=src)
                 self._current_instructions.append(instr)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
+
+    def emit_blockitem(self, source_node: SourceBlockItemNode):
+        assert isinstance(source_node, get_args(SourceBlockItemNode))
+        match source_node:
+            case _ if isinstance(source_node, get_args(SourceStatementNode)):
+                self.emit_statement(source_node)
+            case _ if isinstance(source_node, SourceDeclarationNode):
+                if source_node.initial is None:
+                    return
+                src_decl = self.emit_expression(source_node.initial)
+                dst_decl = self.emit_expression(source_node.identifier)
+                tacky_copy = TackyCopyNode(
+                    start_position=source_node.start_position, src=src_decl, dst=dst_decl
+                )
+                self._current_instructions.append(tacky_copy)
+            case _:
+                raise ValueError(f"Unrecognised blockitem: {source_node}")
 
     def emit_function(self, source_node: SourceFunctionNode) -> TackyFunctionNode:
         assert isinstance(source_node, SourceFunctionNode)
@@ -317,8 +359,16 @@ class TackyGenerator:
         self._current_instructions = []
 
         # Process the internals
-        for stmt in source_node.body:
-            self.emit_statement(stmt)
+        for block_item in source_node.body:
+            self.emit_blockitem(block_item)
+
+        # What if there's no return statement?
+        # We add an extra; this will not run if there is
+        # a return
+        # See "Functions with no return statement" in CH 5
+        self._current_instructions.append(
+            TackyReturnNode(start_position=0, value=TackyConstantIntNode(start_position=0, value=0))
+        )
 
         return TackyFunctionNode(
             start_position=source_node.start_position,

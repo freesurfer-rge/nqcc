@@ -52,7 +52,8 @@ class TestFunctions:
         assert isinstance(asm_func, AsmFunctionNode)
         assert asm_func.start_position == 3
         assert asm_func.identifier == "main"
-        assert len(asm_func.instructions) == 4
+        # Add two instructions for 'guard' return added by Tacky
+        assert len(asm_func.instructions) == 4 + 2
 
         i0 = asm_func.instructions[0]
         assert i0 == AsmMovNode(
@@ -86,7 +87,8 @@ class TestFunctions:
         assert isinstance(asm_func, AsmFunctionNode)
         assert asm_func.start_position == 3
         assert asm_func.identifier == "main"
-        assert len(asm_func.instructions) == 4
+        # Add two instructions for 'guard' return added by Tacky
+        assert len(asm_func.instructions) == 4 + 2
 
         i0 = asm_func.instructions[0]
         assert i0 == AsmMovNode(
@@ -130,7 +132,8 @@ class TestPrograms:
         asm_func = asm_prog.function_definition
         assert asm_func.start_position == 3
         assert asm_func.identifier == "main"
-        assert len(asm_func.instructions) == 4
+        # Add two instructions for 'guard' return added by Tacky
+        assert len(asm_func.instructions) == 4 + 2
 
         i0 = asm_func.instructions[0]
         assert i0 == AsmMovNode(

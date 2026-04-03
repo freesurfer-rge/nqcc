@@ -427,3 +427,22 @@ class TestExpressions:
 
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
+
+    def test_assignment(self):
+        source = "a = 1;"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 4
+        src_node = parse_expression(token_tape, min_precedence=0)
+
+        target = TackyGenerator()
+        target._curr_function = "test_assignment"
+
+        # We will skip semantic analysis for these fragments
+        result = target.emit_expression(src_node)
+        assert result == TackyVarNode(start_position=0, identifier="a")
+
+        assert len(target._current_instructions) == 1
+        instr0 = target._current_instructions[0]
+        assert isinstance(instr0, TackyCopyNode)
+        assert instr0.dst == result
+        assert instr0.src == TackyConstantIntNode(start_position=4, value=1)
