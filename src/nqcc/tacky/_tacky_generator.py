@@ -365,6 +365,7 @@ class TackyGenerator:
         # What if there's no return statement?
         # We add an extra; this will not run if there is
         # a return
+        # See "Functions with no return statement" in CH 5
         self._current_instructions.append(
             TackyReturnNode(start_position=0, value=TackyConstantIntNode(start_position=0, value=0))
         )
