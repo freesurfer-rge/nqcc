@@ -18,7 +18,7 @@ class TestChapter05:
         compile_run_check(target_file, macros=macros)
 
     @pytest.mark.parametrize("logical_op", ["||", "&&"])
-    @pytest.mark.parametrize("v0", [0,1])
+    @pytest.mark.parametrize("v0", [0, 1])
     def test_short_circuit(self, logical_op: str, v0: int):
         target_file = SAMPLE_PROGRAM_DIR / TestChapter05.SUB_DIR / "short_circuit_checker.c"
         assert target_file.exists(), f"{target_file} not found"
