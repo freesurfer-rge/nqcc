@@ -149,7 +149,7 @@ class TestFunctions:
         result = target.emit_function(src_node)
         assert isinstance(result, TackyFunctionNode)
         assert result.identifier == "main"
-        assert len(result.instructions) == 2
+        assert len(result.instructions) == 3
 
         instr0 = result.instructions[0]
         assert instr0 == TackyUnaryNode(
@@ -161,6 +161,11 @@ class TestFunctions:
 
         instr1 = result.instructions[1]
         assert instr1 == TackyReturnNode(start_position=16, value=instr0.dst)
+
+        # Recall that we force an extra 'return 0' in the tacky function generator
+        assert result.instructions[-1] == TackyReturnNode(
+            start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
+        )
 
     def test_simple_decl(self):
         source = """int main (  void ) {
@@ -179,7 +184,7 @@ class TestFunctions:
         result = target.emit_function(resolved_node)
         assert isinstance(result, TackyFunctionNode)
         assert result.identifier == "main"
-        assert len(result.instructions) == 4
+        assert len(result.instructions) == 5
 
         instr0 = target._current_instructions[0]
         assert isinstance(instr0, TackyCopyNode)
@@ -202,6 +207,11 @@ class TestFunctions:
         assert isinstance(instr3, TackyReturnNode)
         assert instr3.value == TackyVarNode(start_position=105, identifier="a.0")
 
+        # Recall that we force an extra 'return 0' in the tacky function generator
+        assert result.instructions[-1] == TackyReturnNode(
+            start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
+        )
+
 
 class TestPrograms:
     def test_simple(self):
@@ -219,7 +229,7 @@ class TestPrograms:
         assert isinstance(main_func, TackyFunctionNode)
         assert main_func.identifier == "main"
         assert main_func.start_position == 1
-        assert len(main_func.instructions) == 2
+        assert len(main_func.instructions) == 3
 
         instr0 = main_func.instructions[0]
         assert instr0 == TackyUnaryNode(
@@ -231,3 +241,8 @@ class TestPrograms:
 
         instr1 = main_func.instructions[1]
         assert instr1 == TackyReturnNode(start_position=17, value=instr0.dst)
+
+        # Recall that we force an extra 'return 0' in the tacky function generator
+        assert main_func.instructions[-1] == TackyReturnNode(
+            start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
+        )

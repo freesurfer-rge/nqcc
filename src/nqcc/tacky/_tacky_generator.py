@@ -362,6 +362,13 @@ class TackyGenerator:
         for block_item in source_node.body:
             self.emit_blockitem(block_item)
 
+        # What if there's no return statement?
+        # We add an extra; this will not run if there is
+        # a return
+        self._current_instructions.append(
+            TackyReturnNode(start_position=0, value=TackyConstantIntNode(start_position=0, value=0))
+        )
+
         return TackyFunctionNode(
             start_position=source_node.start_position,
             identifier=source_node.identifier,
