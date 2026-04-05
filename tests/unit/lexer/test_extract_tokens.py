@@ -262,17 +262,18 @@ class TestExtractTokens:
     def test_if(self, idx):
         toks = extract_tokens("if", idx)
 
-        assert len(toks) == 1
-        assert toks[0] == GreaterThan(start_position=idx)
+        assert len(toks) == 2
+        assert toks[0] == IdentifierToken(start_position=idx, value="if")
+        assert toks[1] == KeywordToken(start_position=idx, value="if")
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_else(self, idx):
         toks = extract_tokens("else", idx)
 
-        assert len(toks) == 1
-        assert toks[0] == GreaterThan(start_position=idx)
+        assert len(toks) == 2
+        assert toks[0] == IdentifierToken(start_position=idx, value="else")
+        assert toks[1] == KeywordToken(start_position=idx, value="else")
 
-    
     @pytest.mark.parametrize("idx", [121, 130])
     def test_condquestion(self, idx):
         toks = extract_tokens("?", idx)
