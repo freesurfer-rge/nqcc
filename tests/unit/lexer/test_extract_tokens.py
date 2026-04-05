@@ -8,6 +8,7 @@ from nqcc.lexer import (
     BitwiseXor,
     CloseBraceToken,
     CloseParenToken,
+    ColonToken,
     ConstantIntegerToken,
     DecrementToken,
     DivideToken,
@@ -29,6 +30,7 @@ from nqcc.lexer import (
     NotEqualTo,
     OpenBraceToken,
     OpenParenToken,
+    QuestionMarkToken,
     SemicolonToken,
     TildeToken,
     extract_tokens,
@@ -279,11 +281,11 @@ class TestExtractTokens:
         toks = extract_tokens("?", idx)
 
         assert len(toks) == 1
-        assert toks[0] == GreaterThan(start_position=idx)
+        assert toks[0] == QuestionMarkToken(start_position=idx)
 
     @pytest.mark.parametrize("idx", [121, 130])
     def test_condcolon(self, idx):
         toks = extract_tokens(":", idx)
 
         assert len(toks) == 1
-        assert toks[0] == GreaterThan(start_position=idx)
+        assert toks[0] == ColonToken(start_position=idx)
