@@ -257,3 +257,32 @@ class TestExtractTokens:
         assert len(toks) == 2
         assert toks[0] == GreaterThan(start_position=idx)
         assert toks[1] == GreaterThanOrEqual(start_position=idx)
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_if(self, idx):
+        toks = extract_tokens("if", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == GreaterThan(start_position=idx)
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_else(self, idx):
+        toks = extract_tokens("else", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == GreaterThan(start_position=idx)
+
+    
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_condquestion(self, idx):
+        toks = extract_tokens("?", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == GreaterThan(start_position=idx)
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_condcolon(self, idx):
+        toks = extract_tokens(":", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == GreaterThan(start_position=idx)
