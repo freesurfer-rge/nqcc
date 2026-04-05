@@ -31,10 +31,11 @@ from nqcc.lexer import (
 
 
 class TestPickToken:
-    def test_identifier_vs_keyword(self):
-        toks = [IdentifierToken(value="int"), KeywordToken(value="int")]
+    @pytest.mark.parametrize("value", {"int", "return", "void", "if", "else"})
+    def test_identifier_vs_keyword(self, value: str):
+        toks = [IdentifierToken(value=value), KeywordToken(value=value)]
 
-        assert pick_token(toks) == KeywordToken(value="int")
+        assert pick_token(toks) == KeywordToken(value=value)
 
     def test_decrement_vs_negation(self):
         toks = [DecrementToken(), NegationToken()]

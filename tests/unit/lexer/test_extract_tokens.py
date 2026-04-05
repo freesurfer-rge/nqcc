@@ -8,6 +8,7 @@ from nqcc.lexer import (
     BitwiseXor,
     CloseBraceToken,
     CloseParenToken,
+    ColonToken,
     ConstantIntegerToken,
     DecrementToken,
     DivideToken,
@@ -29,6 +30,7 @@ from nqcc.lexer import (
     NotEqualTo,
     OpenBraceToken,
     OpenParenToken,
+    QuestionMarkToken,
     SemicolonToken,
     TildeToken,
     extract_tokens,
@@ -257,3 +259,33 @@ class TestExtractTokens:
         assert len(toks) == 2
         assert toks[0] == GreaterThan(start_position=idx)
         assert toks[1] == GreaterThanOrEqual(start_position=idx)
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_if(self, idx):
+        toks = extract_tokens("if", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == IdentifierToken(start_position=idx, value="if")
+        assert toks[1] == KeywordToken(start_position=idx, value="if")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_else(self, idx):
+        toks = extract_tokens("else", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == IdentifierToken(start_position=idx, value="else")
+        assert toks[1] == KeywordToken(start_position=idx, value="else")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_condquestion(self, idx):
+        toks = extract_tokens("?", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == QuestionMarkToken(start_position=idx)
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_condcolon(self, idx):
+        toks = extract_tokens(":", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == ColonToken(start_position=idx)

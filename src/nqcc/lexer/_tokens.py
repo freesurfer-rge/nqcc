@@ -44,7 +44,7 @@ class ConstantIntegerToken(Token):
         return "[0-9]+\\b"
 
 
-_KEYWORDS = {"int", "return", "void"}
+_KEYWORDS = {"int", "return", "void", "if", "else"}
 
 
 class KeywordToken(Token):
@@ -424,6 +424,32 @@ class SemicolonToken(Token):
         return "[;]"
 
 
+class QuestionMarkToken(Token):
+    token_type: Literal["QuestionMarkToken"] = "QuestionMarkToken"
+    value: Literal["?"] = "?"
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "[?]"
+
+
+class ColonToken(Token):
+    token_type: Literal["ColonToken"] = "ColonToken"
+    value: Literal[":"] = ":"
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return "[:]"
+
+
 TokenTypes: list[type] = [
     AdditionToken,
     AssignmentToken,
@@ -456,6 +482,8 @@ TokenTypes: list[type] = [
     LessThanOrEqual,
     GreaterThan,
     GreaterThanOrEqual,
+    QuestionMarkToken,
+    ColonToken,
 ]
 
 UnaryOperatorToken = Union[DecrementToken, IncrementToken, NegationToken, TildeToken, LogicalNot]
