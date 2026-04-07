@@ -12,7 +12,7 @@ from nqcc.parser import (
     SourceNullStatementNode,
     SourceReturnNode,
     SourceVarNode,
-    TokenTape,
+    TokenTape,SourceIfStatementNode,
     parse_statement,
 )
 
@@ -103,4 +103,25 @@ class TestSourceStatementNode:
         assert node.value.operator == SourceAdd(start_position=9)
         assert node.value.left == SourceVarNode(start_position=7, identifier="a")
         assert node.value.right == SourceVarNode(start_position=11, identifier="b")
+        assert token_tape.tokens_remaining == 0
+
+class TestSourceIfStatementNode:
+    def test_simple(self):
+        c_str = "if( a ) b=1;"
+        token_tape = TokenTape.from_c_source(c_str)
+        assert token_tape.tokens_remaining == 8
+
+        node = parse_statement(token_tape)
+        assert isinstance(node, SourceIfStatementNode)
+        assert node.start_position == 0
+
+        assert isinstance(node.condition, SourceVarNode)
+        assert node.condition.identifier == "a"
+
+        assert isinstance(node.then, SourceAssignmentNode)
+        assert isinstance(node.then.left, SourceVarNode)
+        assert node.then.left.identifier == "b"
+        assert isinstance(node.then.right, SourceConstantIntNode)
+        assert node.then.right.value == 1
+
         assert token_tape.tokens_remaining == 0

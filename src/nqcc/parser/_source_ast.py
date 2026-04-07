@@ -202,7 +202,7 @@ class SourceIfStatementNode(SourceASTNode):
     node_type: Literal["SourceIfStatementNode"] = "SourceIfStatementNode"
     condition: SourceExpressionNode
     then: SourceStatementNode
-    otherwise: SourceStatementNode
+    otherwise: SourceStatementNode | None
 
 
 SourceStatementNode = Union[
