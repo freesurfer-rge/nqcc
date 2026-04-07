@@ -26,10 +26,10 @@ from nqcc.parser import (
     SourceNotEqualTo,
     SourceRightShift,
     SourceSubtract,
+    SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
     SourceVarNode,
     TokenTape,
-    SourceTernaryExpressonNode,
     parse_expression,
 )
 
@@ -289,6 +289,12 @@ class TestSourceExpressionNode:
             (" 1| 2>>3;", " 1|(2>>3);"),
             (" 1|| 2==2;", " 1||(2==2);"),
             ("a= b=c ;", "a=(b=c);"),
+            ("a=(1?2:3);", "a= 1?2:3 ;"),
+            ("(a||b)?2:3;", " a||b ?2:3;"),
+            ("1?2:(3||4);", "1?2: 3||4 ;"),
+            ("x?(x=1):2;", "x? x=1 :2;"),
+            ("a?(b?1:2):3;", "a? b?1:2 :3;"),
+            ("a?1:(b?2:3);", "a?1: b?2:3 ;"),
         ],
     )
     def test_paired_expressions(self, a_str: str, b_str: str):
@@ -304,13 +310,17 @@ class TestSourceExpressionNode:
         assert a_node == b_node
 
     def test_ternary_expression(self):
-        source = "a ? b=2: c=1;"
+        source = "a? 2: 3;"
         token_tape = TokenTape.from_c_source(source)
-        assert token_tape.tokens_remaining == 10
+        assert token_tape.tokens_remaining == 6
 
         node = parse_expression(token_tape, min_precedence=0)
         assert isinstance(node, SourceTernaryExpressonNode)
-        assert node.left == SourceVarNode(start_position=0, identifier="a")
-        assert node.right == SourceConstantIntNode(start_position=4, value=2)
-        # We are using the semi colon to mark the end of the expression
+        assert node.condition == SourceVarNode(start_position=0, identifier="a")
+        assert isinstance(node.then, SourceConstantIntNode)
+        assert node.then.value == 2
+        assert isinstance(node.otherwise, SourceConstantIntNode)
+        assert node.otherwise.value == 3
+
+        # Still have the semicolon
         assert token_tape.tokens_remaining == 1

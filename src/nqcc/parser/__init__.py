@@ -47,8 +47,9 @@ from ._source_ast import (
     SourceStatementNode,
     SourceSubtract,
     SourceTernary,
+    SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
-    SourceUnaryOperator,SourceTernaryExpressonNode,
+    SourceUnaryOperator,
     SourceVarNode,
 )
 from ._token_tape import TokenTape
@@ -96,6 +97,7 @@ __all__ = [
     "SourceStatementNode",
     "SourceSubtract",
     "SourceTernary",
+    "SourceTernaryExpressonNode",
     "SourceUnaryExpressionNode",
     "SourceUnaryOperator",
     "SourceVarNode",

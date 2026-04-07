@@ -507,4 +507,5 @@ BinaryOperatorToken = Union[
     LessThanOrEqual,
     GreaterThan,
     GreaterThanOrEqual,
+    QuestionMarkToken,
 ]
