@@ -9,6 +9,7 @@ from nqcc.lexer import (
     BitwiseXor,
     CloseBraceToken,
     CloseParenToken,
+    ColonToken,
     ConstantIntegerToken,
     DivideToken,
     EqualTo,
@@ -28,6 +29,7 @@ from nqcc.lexer import (
     NotEqualTo,
     OpenBraceToken,
     OpenParenToken,
+    QuestionMarkToken,
     RightShift,
     SemicolonToken,
     TildeToken,
@@ -56,6 +58,7 @@ from ._source_ast import (
     SourceFunctionNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
+    SourceIfStatementNode,
     SourceLeftShift,
     SourceLessThan,
     SourceLessThanOrEqual,
@@ -72,6 +75,8 @@ from ._source_ast import (
     SourceRightShift,
     SourceStatementNode,
     SourceSubtract,
+    SourceTernary,
+    SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
@@ -104,6 +109,7 @@ _BINARY_OPERATOR_MAP: dict[Type, Type] = {
     LessThanOrEqual: SourceLessThanOrEqual,
     GreaterThan: SourceGreaterThan,
     GreaterThanOrEqual: SourceGreaterThanOrEqual,
+    QuestionMarkToken: SourceTernary,
 }
 
 
@@ -172,16 +178,32 @@ def parse_expression(token_tape: TokenTape, *, min_precedence: int) -> SourceExp
     while operator is not None and operator.precedence >= min_precedence:
         # First thing, actually consume the token
         lex_op = token_tape.expect(get_args(BinaryOperatorToken))
-        if isinstance(lex_op, AssignmentToken):
-            right_assign = parse_expression(token_tape, min_precedence=operator.precedence)
-            left = SourceAssignmentNode(
-                start_position=lex_op.start_position, left=left, right=right_assign
-            )
-        else:
-            right = parse_expression(token_tape, min_precedence=1 + operator.precedence)
-            left = SourceBinaryExpressionNode(
-                start_position=operator.start_position, operator=operator, left=left, right=right
-            )
+        match lex_op:
+            case AssignmentToken():
+                right_assign = parse_expression(token_tape, min_precedence=operator.precedence)
+                left = SourceAssignmentNode(
+                    start_position=lex_op.start_position, left=left, right=right_assign
+                )
+
+            case QuestionMarkToken():
+                middle = parse_expression(token_tape, min_precedence=0)
+                _ = token_tape.expect(ColonToken)
+                right = parse_expression(token_tape, min_precedence=operator.precedence)
+                left = SourceTernaryExpressonNode(
+                    start_position=lex_op.start_position,
+                    condition=left,
+                    then=middle,
+                    otherwise=right,
+                )
+
+            case _:
+                right = parse_expression(token_tape, min_precedence=1 + operator.precedence)
+                left = SourceBinaryExpressionNode(
+                    start_position=operator.start_position,
+                    operator=operator,
+                    left=left,
+                    right=right,
+                )
 
         # Set up for next iteration
         operator = convert_binary_operator(token_tape.peek())
@@ -190,20 +212,41 @@ def parse_expression(token_tape: TokenTape, *, min_precedence: int) -> SourceExp
 
 def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
     first_token = token_tape.peek()
+    sp = first_token.start_position
 
     match first_token:
         case SemicolonToken():
             _ = token_tape.take()
             return SourceNullStatementNode(start_position=first_token.start_position)
         case KeywordToken():
-            return_token = token_tape.expect(KeywordToken)
-            if return_token.value != "return":
-                raise SourceASTBadValueError(
-                    expected_value="return", actual_token=return_token, message="Unexpected keyword"
-                )
-            return_value = parse_expression(token_tape, min_precedence=0)
-            _ = token_tape.expect(SemicolonToken)
-            return SourceReturnNode(start_position=return_token.start_position, value=return_value)
+            keyword_token = token_tape.expect(KeywordToken)
+            match keyword_token.value:
+                case "return":
+                    return_value = parse_expression(token_tape, min_precedence=0)
+                    _ = token_tape.expect(SemicolonToken)
+                    return SourceReturnNode(start_position=sp, value=return_value)
+                case "if":
+                    _ = token_tape.expect(OpenParenToken)
+                    if_cond = parse_expression(token_tape, min_precedence=0)
+                    _ = token_tape.expect(CloseParenToken)
+                    if_then = parse_statement(token_tape)
+
+                    if_otherwise = None
+                    tok_else = token_tape.peek()
+                    if isinstance(tok_else, KeywordToken) and (tok_else.value == "else"):
+                        _ = token_tape.expect(KeywordToken)
+                        if_otherwise = parse_statement(token_tape)
+
+                    return SourceIfStatementNode(
+                        start_position=sp, condition=if_cond, then=if_then, otherwise=if_otherwise
+                    )
+
+                case _:
+                    raise SourceASTBadValueError(
+                        expected_value="keyword",
+                        actual_token=first_token,
+                        message="Unexpected keyword",
+                    )
         case _:
             expr = parse_expression(token_tape, min_precedence=0)
             _ = token_tape.expect(SemicolonToken)

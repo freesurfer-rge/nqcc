@@ -49,6 +49,11 @@ class SourceAssignment(SourceBinOp):
     precedence: Literal[1] = 1
 
 
+class SourceTernary(SourceBinOp):
+    node_type: Literal["SourceTernary"] = "SourceTernary"
+    precedence: Literal[3] = 3
+
+
 class SourceLogicalOr(SourceBinOp):
     node_type: Literal["SourceLogicalOr"] = "SourceLogicalOr"
     precedence: Literal[5] = 5
@@ -159,6 +164,7 @@ SourceBinaryOperator = Union[
     SourceGreaterThanOrEqual,
     SourceLogicalAnd,
     SourceLogicalOr,
+    SourceTernary,
 ]
 
 
@@ -175,12 +181,20 @@ class SourceAssignmentNode(SourceASTNode):
     right: SourceExpressionNode
 
 
+class SourceTernaryExpressonNode(SourceASTNode):
+    node_type: Literal["SourceTernaryExpressonNode"] = "SourceTernaryExpressonNode"
+    condition: SourceExpressionNode
+    then: SourceExpressionNode
+    otherwise: SourceExpressionNode
+
+
 SourceExpressionNode = Union[
     SourceConstantIntNode,
     SourceVarNode,
     SourceUnaryExpressionNode,
     SourceBinaryExpressionNode,
     SourceAssignmentNode,
+    SourceTernaryExpressonNode,
 ]
 
 
@@ -198,8 +212,15 @@ class SourceNullStatementNode(SourceASTNode):
     node_type: Literal["SourceNullStatementNode"] = "SourceNullStatementNode"
 
 
+class SourceIfStatementNode(SourceASTNode):
+    node_type: Literal["SourceIfStatementNode"] = "SourceIfStatementNode"
+    condition: SourceExpressionNode
+    then: SourceStatementNode
+    otherwise: SourceStatementNode | None
+
+
 SourceStatementNode = Union[
-    SourceReturnNode, SourceExpressionStatementNode, SourceNullStatementNode
+    SourceReturnNode, SourceExpressionStatementNode, SourceNullStatementNode, SourceIfStatementNode
 ]
 
 
