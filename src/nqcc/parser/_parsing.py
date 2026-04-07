@@ -56,6 +56,7 @@ from ._source_ast import (
     SourceFunctionNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
+    SourceIfStatementNode,
     SourceLeftShift,
     SourceLessThan,
     SourceLessThanOrEqual,
@@ -188,9 +189,9 @@ def parse_expression(token_tape: TokenTape, *, min_precedence: int) -> SourceExp
     return left
 
 
-
 def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
     first_token = token_tape.peek()
+    sp = first_token.start_position
 
     match first_token:
         case SemicolonToken():
@@ -202,10 +203,28 @@ def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
                 case "return":
                     return_value = parse_expression(token_tape, min_precedence=0)
                     _ = token_tape.expect(SemicolonToken)
-                    return SourceReturnNode(start_position=keyword_token.start_position, value=return_value)
+                    return SourceReturnNode(start_position=sp, value=return_value)
+                case "if":
+                    _ = token_tape.expect(OpenParenToken)
+                    if_cond = parse_expression(token_tape, min_precedence=0)
+                    _ = token_tape.expect(CloseParenToken)
+                    if_then = parse_statement(token_tape)
+
+                    if_otherwise = None
+                    tok_else = token_tape.peek()
+                    if isinstance(tok_else, KeywordToken) and (tok_else.value == "else"):
+                        _ = token_tape.expect(KeywordToken)
+                        if_otherwise = parse_statement(token_tape)
+
+                    return SourceIfStatementNode(
+                        start_position=sp, condition=if_cond, then=if_then, otherwise=if_otherwise
+                    )
+
                 case _:
                     raise SourceASTBadValueError(
-                        expected_value="return", actual_token=keyword_token, message="Unexpected keyword"
+                        expected_value="keyword",
+                        actual_token=first_token,
+                        message="Unexpected keyword",
                     )
         case _:
             expr = parse_expression(token_tape, min_precedence=0)
