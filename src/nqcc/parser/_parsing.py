@@ -78,7 +78,7 @@ from ._source_ast import (
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
-    SourceTernery,
+    SourceTernary,
 )
 from ._token_tape import TokenTape
 
@@ -108,7 +108,7 @@ _BINARY_OPERATOR_MAP: dict[Type, Type] = {
     LessThanOrEqual: SourceLessThanOrEqual,
     GreaterThan: SourceGreaterThan,
     GreaterThanOrEqual: SourceGreaterThanOrEqual,
-    QuestionMarkToken: SourceTernery,
+    QuestionMarkToken: SourceTernary,
 }
 
 

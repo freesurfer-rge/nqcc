@@ -49,8 +49,8 @@ class SourceAssignment(SourceBinOp):
     precedence: Literal[1] = 1
 
 
-class SourceTernery(SourceBinOp):
-    node_type: Literal["SourceTernery"] = "SourceTernery"
+class SourceTernary(SourceBinOp):
+    node_type: Literal["SourceTernary"] = "SourceTernary"
     precedence: Literal[3] = 3
 
 
@@ -164,7 +164,7 @@ SourceBinaryOperator = Union[
     SourceGreaterThanOrEqual,
     SourceLogicalAnd,
     SourceLogicalOr,
-    SourceTernery,
+    SourceTernary,
 ]
 
 
