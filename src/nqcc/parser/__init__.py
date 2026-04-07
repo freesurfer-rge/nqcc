@@ -48,7 +48,7 @@ from ._source_ast import (
     SourceSubtract,
     SourceTernary,
     SourceUnaryExpressionNode,
-    SourceUnaryOperator,
+    SourceUnaryOperator,SourceTernaryExpressonNode,
     SourceVarNode,
 )
 from ._token_tape import TokenTape

@@ -29,6 +29,7 @@ from nqcc.parser import (
     SourceUnaryExpressionNode,
     SourceVarNode,
     TokenTape,
+    SourceTernaryExpressonNode,
     parse_expression,
 )
 
@@ -301,3 +302,15 @@ class TestSourceExpressionNode:
         print(f"{b_node.model_dump_json(indent=2)}")
 
         assert a_node == b_node
+
+    def test_ternary_expression(self):
+        source = "a ? b=2: c=1;"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 10
+
+        node = parse_expression(token_tape, min_precedence=0)
+        assert isinstance(node, SourceTernaryExpressonNode)
+        assert node.left == SourceVarNode(start_position=0, identifier="a")
+        assert node.right == SourceConstantIntNode(start_position=4, value=2)
+        # We are using the semi colon to mark the end of the expression
+        assert token_tape.tokens_remaining == 1

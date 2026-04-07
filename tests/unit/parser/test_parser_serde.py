@@ -42,3 +42,27 @@ class TestParserSerde:
         }
         """
         _check_round_trip(source)
+
+    def test_if_statement(self):
+        source = """int main( void ) {
+            int a;
+            ;
+            int b = 1;
+            if( a>=1 )
+            a = b+1;
+            else
+            a = 3 * (b = a);
+            return a << b;
+        }
+        """
+        _check_round_trip(source)
+
+    def test_ternary_statement(self):
+        source = """int main( void ) {
+            int a;
+            int b = 1;
+            b ? a=0 : a=12;
+            return a << b;
+        }
+        """
+        _check_round_trip(source)
