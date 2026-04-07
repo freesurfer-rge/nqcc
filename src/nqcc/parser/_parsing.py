@@ -32,6 +32,8 @@ from nqcc.lexer import (
     SemicolonToken,
     TildeToken,
     Token,
+    QuestionMarkToken,
+    ColonToken,
     UnaryOperatorToken,
 )
 
@@ -76,6 +78,7 @@ from ._source_ast import (
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
+    SourceTernery,
 )
 from ._token_tape import TokenTape
 
@@ -105,6 +108,7 @@ _BINARY_OPERATOR_MAP: dict[Type, Type] = {
     LessThanOrEqual: SourceLessThanOrEqual,
     GreaterThan: SourceGreaterThan,
     GreaterThanOrEqual: SourceGreaterThanOrEqual,
+    QuestionMarkToken: SourceTernery,
 }
 
 
@@ -173,16 +177,20 @@ def parse_expression(token_tape: TokenTape, *, min_precedence: int) -> SourceExp
     while operator is not None and operator.precedence >= min_precedence:
         # First thing, actually consume the token
         lex_op = token_tape.expect(get_args(BinaryOperatorToken))
-        if isinstance(lex_op, AssignmentToken):
-            right_assign = parse_expression(token_tape, min_precedence=operator.precedence)
-            left = SourceAssignmentNode(
-                start_position=lex_op.start_position, left=left, right=right_assign
-            )
-        else:
-            right = parse_expression(token_tape, min_precedence=1 + operator.precedence)
-            left = SourceBinaryExpressionNode(
-                start_position=operator.start_position, operator=operator, left=left, right=right
-            )
+        match lex_op:
+            case AssignmentToken():
+                right_assign = parse_expression(token_tape, min_precedence=operator.precedence)
+                left = SourceAssignmentNode(
+                    start_position=lex_op.start_position, left=left, right=right_assign
+                )
+            case _:
+                right = parse_expression(token_tape, min_precedence=1 + operator.precedence)
+                left = SourceBinaryExpressionNode(
+                    start_position=operator.start_position,
+                    operator=operator,
+                    left=left,
+                    right=right,
+                )
 
         # Set up for next iteration
         operator = convert_binary_operator(token_tape.peek())

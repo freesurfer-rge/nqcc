@@ -49,6 +49,7 @@ from ._source_ast import (
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
+    SourceTernery,
 )
 from ._token_tape import TokenTape
 
