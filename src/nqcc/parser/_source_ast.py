@@ -198,8 +198,15 @@ class SourceNullStatementNode(SourceASTNode):
     node_type: Literal["SourceNullStatementNode"] = "SourceNullStatementNode"
 
 
+class SourceIfStatementNode(SourceASTNode):
+    node_type: Literal["SourceIfStatementNode"] = "SourceIfStatementNode"
+    condition: SourceExpressionNode
+    then: SourceStatementNode
+    otherwise: SourceStatementNode
+
+
 SourceStatementNode = Union[
-    SourceReturnNode, SourceExpressionStatementNode, SourceNullStatementNode
+    SourceReturnNode, SourceExpressionStatementNode, SourceNullStatementNode, SourceIfStatementNode
 ]
 
 

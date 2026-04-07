@@ -196,14 +196,16 @@ def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
             _ = token_tape.take()
             return SourceNullStatementNode(start_position=first_token.start_position)
         case KeywordToken():
-            return_token = token_tape.expect(KeywordToken)
-            if return_token.value != "return":
-                raise SourceASTBadValueError(
-                    expected_value="return", actual_token=return_token, message="Unexpected keyword"
-                )
-            return_value = parse_expression(token_tape, min_precedence=0)
-            _ = token_tape.expect(SemicolonToken)
-            return SourceReturnNode(start_position=return_token.start_position, value=return_value)
+            keyword_token = token_tape.expect(KeywordToken)
+            match keyword_token.value:
+                case "return":
+                    return_value = parse_expression(token_tape, min_precedence=0)
+                    _ = token_tape.expect(SemicolonToken)
+                    return SourceReturnNode(start_position=keyword_token.start_position, value=return_value)
+                case _:
+                    raise SourceASTBadValueError(
+                        expected_value="return", actual_token=keyword_token, message="Unexpected keyword"
+                    )
         case _:
             expr = parse_expression(token_tape, min_precedence=0)
             _ = token_tape.expect(SemicolonToken)
