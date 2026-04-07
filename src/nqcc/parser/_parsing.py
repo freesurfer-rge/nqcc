@@ -9,6 +9,7 @@ from nqcc.lexer import (
     BitwiseXor,
     CloseBraceToken,
     CloseParenToken,
+    ColonToken,
     ConstantIntegerToken,
     DivideToken,
     EqualTo,
@@ -28,12 +29,11 @@ from nqcc.lexer import (
     NotEqualTo,
     OpenBraceToken,
     OpenParenToken,
+    QuestionMarkToken,
     RightShift,
     SemicolonToken,
     TildeToken,
     Token,
-    QuestionMarkToken,
-    ColonToken,
     UnaryOperatorToken,
 )
 
@@ -75,10 +75,11 @@ from ._source_ast import (
     SourceRightShift,
     SourceStatementNode,
     SourceSubtract,
+    SourceTernary,
+    SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
-    SourceTernary,
 )
 from ._token_tape import TokenTape
 
@@ -183,6 +184,18 @@ def parse_expression(token_tape: TokenTape, *, min_precedence: int) -> SourceExp
                 left = SourceAssignmentNode(
                     start_position=lex_op.start_position, left=left, right=right_assign
                 )
+
+            case QuestionMarkToken():
+                middle = parse_expression(token_tape, min_precedence=0)
+                _ = token_tape.expect(ColonToken)
+                right = parse_expression(token_tape, min_precedence=operator.precedence)
+                left = SourceTernaryExpressonNode(
+                    start_position=lex_op.start_position,
+                    condition=left,
+                    then=middle,
+                    otherwise=right,
+                )
+
             case _:
                 right = parse_expression(token_tape, min_precedence=1 + operator.precedence)
                 left = SourceBinaryExpressionNode(

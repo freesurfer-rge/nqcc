@@ -181,12 +181,20 @@ class SourceAssignmentNode(SourceASTNode):
     right: SourceExpressionNode
 
 
+class SourceTernaryExpressonNode(SourceASTNode):
+    node_type: Literal["SourceTernaryExpressonNode"] = "SourceTernaryExpressonNode"
+    condition: SourceExpressionNode
+    then: SourceExpressionNode
+    otherwise: SourceExpressionNode
+
+
 SourceExpressionNode = Union[
     SourceConstantIntNode,
     SourceVarNode,
     SourceUnaryExpressionNode,
     SourceBinaryExpressionNode,
     SourceAssignmentNode,
+    SourceTernaryExpressonNode,
 ]
 
 
