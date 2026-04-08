@@ -10,6 +10,7 @@ from nqcc.parser import (
     SourceIfStatementNode,
     SourceNullStatementNode,
     SourceReturnNode,
+    SourceTernaryExpressonNode,
     SourceVarNode,
     TokenTape,
     parse_declaration,
@@ -156,6 +157,28 @@ class TestExpressions:
         with pytest.raises(SemanticAnalysisBadLValue) as sablv:
             _ = target.resolve_expression(assignment)
         assert sablv.value.message == "Not an lvalue at 0"
+
+    def test_ternary(self):
+        target = VariableResolver()
+        c_str = "a?b:c;"
+        token_tape = TokenTape.from_c_source(c_str)
+        ternary_expr = parse_expression(token_tape, min_precedence=0)
+        assert token_tape.tokens_remaining == 1
+        assert isinstance(ternary_expr, SourceTernaryExpressonNode)
+
+        for decl_var in ["a", "b", "c"]:
+            decl = SourceDeclarationNode(
+                start_position=ord(decl_var),
+                identifier=SourceVarNode(start_position=ord(decl_var) + 32, identifier=decl_var),
+                initial=None,
+            )
+            _ = target.resolve_declaration(decl)
+
+        result = target.resolve_expression(ternary_expr)
+        assert isinstance(result, SourceTernaryExpressonNode)
+        assert result.condition == SourceVarNode(start_position=0, identifier="a.0")
+        assert result.then == SourceVarNode(start_position=2, identifier="b.1")
+        assert result.otherwise == SourceVarNode(start_position=4, identifier="c.2")
 
 
 class TestStatements:

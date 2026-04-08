@@ -14,6 +14,7 @@ from nqcc.parser import (
     SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
+    SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
     SourceVarNode,
 )
@@ -108,6 +109,13 @@ class VariableResolver:
                     operator=expr.operator,
                     left=self.resolve_expression(expr.left),
                     right=self.resolve_expression(expr.right),
+                )
+            case SourceTernaryExpressonNode():
+                return SourceTernaryExpressonNode(
+                    start_position=expr.start_position,
+                    condition=self.resolve_expression(expr.condition),
+                    then=self.resolve_expression(expr.then),
+                    otherwise=self.resolve_expression(expr.otherwise),
                 )
             case _:
                 raise ValueError(f"Not recognised: {expr}")
