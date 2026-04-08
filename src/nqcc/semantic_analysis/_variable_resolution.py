@@ -9,6 +9,7 @@ from nqcc.parser import (
     SourceExpressionNode,
     SourceExpressionStatementNode,
     SourceFunctionNode,
+    SourceIfStatementNode,
     SourceNullStatementNode,
     SourceProgramNode,
     SourceReturnNode,
@@ -55,6 +56,18 @@ class VariableResolver:
             case SourceReturnNode():
                 updated = self.resolve_expression(stmt.value)
                 return SourceReturnNode(start_position=sp, value=updated)
+            case SourceIfStatementNode():
+                cond_update = self.resolve_expression(stmt.condition)
+                then_update = self.resolve_statement(stmt.then)
+                otherwise_update = None
+                if stmt.otherwise:
+                    otherwise_update = self.resolve_statement(stmt.otherwise)
+                return SourceIfStatementNode(
+                    start_position=sp,
+                    condition=cond_update,
+                    then=then_update,
+                    otherwise=otherwise_update,
+                )
             case SourceExpressionStatementNode():
                 updated = self.resolve_expression(stmt.value)
                 return SourceExpressionStatementNode(start_position=sp, value=updated)

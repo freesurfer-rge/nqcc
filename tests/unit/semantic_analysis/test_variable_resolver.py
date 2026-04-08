@@ -7,10 +7,11 @@ from nqcc.parser import (
     SourceConstantIntNode,
     SourceDeclarationNode,
     SourceExpressionStatementNode,
+    SourceIfStatementNode,
     SourceNullStatementNode,
     SourceReturnNode,
     SourceVarNode,
-    TokenTape,SourceIfStatementNode,
+    TokenTape,
     parse_declaration,
     parse_expression,
     parse_function,
@@ -217,19 +218,18 @@ class TestStatements:
 
     def test_if_statement(self):
         target = VariableResolver()
-        # Again, tag an extra semicolon onto the end to ensure parsing is complete
-        c_str = """if (a)
-        if( a>10 )
+        c_str = """
+        if( a )
            return a;
         else
            return b;
-
-        ;
 """
         token_tape = TokenTape.from_c_source(c_str)
         stmt = parse_statement(token_tape)
         # Will not consume the final semicolon
-        assert token_tape.tokens_remaining == 1
+        assert token_tape.tokens_remaining == 0
+        assert isinstance(stmt, SourceIfStatementNode)
+        assert stmt.otherwise is not None
 
         # Make sure 'a' and 'b' are declared
         decl_a = SourceDeclarationNode(
@@ -247,7 +247,16 @@ class TestStatements:
 
         result = target.resolve_statement(stmt)
         assert isinstance(result, SourceIfStatementNode)
+        assert isinstance(result.condition, SourceVarNode)
+        assert result.condition.identifier == "a.0"
 
+        assert isinstance(result.then, SourceReturnNode)
+        assert isinstance(result.then.value, SourceVarNode)
+        assert result.then.value.identifier == "a.0"
+
+        assert isinstance(result.otherwise, SourceReturnNode)
+        assert isinstance(result.otherwise.value, SourceVarNode)
+        assert result.otherwise.value.identifier == "b.1"
 
 
 class TestFunction:
