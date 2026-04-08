@@ -7,8 +7,10 @@ from nqcc.parser import (
     SourceConstantIntNode,
     SourceDeclarationNode,
     SourceExpressionStatementNode,
+    SourceIfStatementNode,
     SourceNullStatementNode,
     SourceReturnNode,
+    SourceTernaryExpressonNode,
     SourceVarNode,
     TokenTape,
     parse_declaration,
@@ -156,6 +158,28 @@ class TestExpressions:
             _ = target.resolve_expression(assignment)
         assert sablv.value.message == "Not an lvalue at 0"
 
+    def test_ternary(self):
+        target = VariableResolver()
+        c_str = "a?b:c;"
+        token_tape = TokenTape.from_c_source(c_str)
+        ternary_expr = parse_expression(token_tape, min_precedence=0)
+        assert token_tape.tokens_remaining == 1
+        assert isinstance(ternary_expr, SourceTernaryExpressonNode)
+
+        for decl_var in ["a", "b", "c"]:
+            decl = SourceDeclarationNode(
+                start_position=ord(decl_var),
+                identifier=SourceVarNode(start_position=ord(decl_var) + 32, identifier=decl_var),
+                initial=None,
+            )
+            _ = target.resolve_declaration(decl)
+
+        result = target.resolve_expression(ternary_expr)
+        assert isinstance(result, SourceTernaryExpressonNode)
+        assert result.condition == SourceVarNode(start_position=0, identifier="a.0")
+        assert result.then == SourceVarNode(start_position=2, identifier="b.1")
+        assert result.otherwise == SourceVarNode(start_position=4, identifier="c.2")
+
 
 class TestStatements:
     def test_null_statement(self):
@@ -214,6 +238,48 @@ class TestStatements:
         assert result.value.left.identifier == "a.0"
         assert isinstance(result.value.right, SourceConstantIntNode)
         assert result.value.right.value == 44
+
+    def test_if_statement(self):
+        target = VariableResolver()
+        c_str = """
+        if( a )
+           return a;
+        else
+           return b;
+"""
+        token_tape = TokenTape.from_c_source(c_str)
+        stmt = parse_statement(token_tape)
+        # Will not consume the final semicolon
+        assert token_tape.tokens_remaining == 0
+        assert isinstance(stmt, SourceIfStatementNode)
+        assert stmt.otherwise is not None
+
+        # Make sure 'a' and 'b' are declared
+        decl_a = SourceDeclarationNode(
+            start_position=10,
+            identifier=SourceVarNode(start_position=11, identifier="a"),
+            initial=None,
+        )
+        _ = target.resolve_declaration(decl_a)
+        decl_b = SourceDeclarationNode(
+            start_position=11,
+            identifier=SourceVarNode(start_position=12, identifier="b"),
+            initial=None,
+        )
+        _ = target.resolve_declaration(decl_b)
+
+        result = target.resolve_statement(stmt)
+        assert isinstance(result, SourceIfStatementNode)
+        assert isinstance(result.condition, SourceVarNode)
+        assert result.condition.identifier == "a.0"
+
+        assert isinstance(result.then, SourceReturnNode)
+        assert isinstance(result.then.value, SourceVarNode)
+        assert result.then.value.identifier == "a.0"
+
+        assert isinstance(result.otherwise, SourceReturnNode)
+        assert isinstance(result.otherwise.value, SourceVarNode)
+        assert result.otherwise.value.identifier == "b.1"
 
 
 class TestFunction:
