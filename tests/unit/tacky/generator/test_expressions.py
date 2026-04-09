@@ -353,6 +353,50 @@ class TestExpressions:
         # And the semi colon should remain
         assert token_tape.tokens_remaining == 1
 
+    def test_ternary(self):
+        source = "a?1:2;"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 6
+        src_node = parse_expression(token_tape, min_precedence=0)
+
+        target = TackyGenerator()
+        target._curr_function = "test_ternary"
+
+        result = target.emit_expression(src_node)
+        assert result == TackyVarNode(start_position=1, identifier="tmp.test_ternary.0")
+
+        assert len(target._current_instructions) == 6
+
+        instr0 = target._current_instructions[0]
+        assert isinstance(instr0, TackyJumpIfZeroNode)
+        assert instr0.condition == TackyVarNode(start_position=0, identifier="a")
+        assert instr0.target == "label.test_ternary.ternaryotherwise.0"
+
+        instr1 = target._current_instructions[1]
+        assert isinstance(instr1, TackyCopyNode)
+        assert instr1.dst == TackyVarNode(start_position=1, identifier="tmp.test_ternary.0")
+        assert instr1.src == TackyConstantIntNode(start_position=2, value=1)
+
+        instr2 = target._current_instructions[2]
+        assert isinstance(instr2, TackyJumpNode)
+        assert instr2.target == "label.test_ternary.ternaryend.1"
+
+        instr3 = target._current_instructions[3]
+        assert isinstance(instr3, TackyLabelNode)
+        assert instr3.identifier == "label.test_ternary.ternaryotherwise.0"
+
+        instr4 = target._current_instructions[4]
+        assert isinstance(instr4, TackyCopyNode)
+        assert instr4.dst == TackyVarNode(start_position=1, identifier="tmp.test_ternary.0")
+        assert instr4.src == TackyConstantIntNode(start_position=4, value=2)
+
+        instr5 = target._current_instructions[5]
+        assert isinstance(instr5, TackyLabelNode)
+        assert instr5.identifier == "label.test_ternary.ternaryend.1"
+
+        # Should not consume the semicolon
+        assert token_tape.tokens_remaining == 1
+
     def test_multiple_binary(self):
         source = "1 + 2 * 3;"
         token_tape = TokenTape.from_c_source(source)
