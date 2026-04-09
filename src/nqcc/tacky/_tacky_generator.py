@@ -19,6 +19,7 @@ from nqcc.parser import (
     SourceFunctionNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
+    SourceIfStatementNode,
     SourceLeftShift,
     SourceLessThan,
     SourceLessThanOrEqual,
@@ -372,6 +373,45 @@ class TackyGenerator:
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
+    def emit_if_statement(self, source_node: SourceIfStatementNode):
+        assert isinstance(source_node, SourceIfStatementNode)
+        OTHERWISE_LABEL = "ifotherwise"
+        END_LABEL = "ifend"
+        otherwise_label = TackyLabelNode(
+            start_position=source_node.start_position,
+            identifier=self.get_function_label(OTHERWISE_LABEL),
+        )
+        end_label = TackyLabelNode(
+            start_position=source_node.start_position, identifier=self.get_function_label(END_LABEL)
+        )
+
+        has_otherwise = source_node.otherwise is not None
+
+        cond_val = self.emit_expression(source_node.condition)
+        jmp0 = TackyJumpIfZeroNode(
+            start_position=source_node.start_position,
+            condition=cond_val,
+            target=otherwise_label.identifier if has_otherwise else end_label.identifier,
+        )
+        self._current_instructions.append(jmp0)
+        self.emit_statement(source_node.then)
+
+        if has_otherwise:
+            # Assert should never fire, shuts up mypy
+            assert source_node.otherwise is not None
+            # 'then' has to jump to end
+            jmp1 = TackyJumpNode(
+                start_position=source_node.start_position, target=end_label.identifier
+            )
+            self._current_instructions.append(jmp1)
+
+            # Add the 'otherwise' label and instructions
+            self._current_instructions.append(otherwise_label)
+            self.emit_statement(source_node.otherwise)
+
+        # Finally end the if block
+        self._current_instructions.append(end_label)
+
     def emit_statement(self, source_node: SourceStatementNode):
         assert isinstance(source_node, get_args(SourceStatementNode))
         match source_node:
@@ -383,6 +423,8 @@ class TackyGenerator:
                 src = self.emit_expression(source_node.value)
                 instr = TackyReturnNode(start_position=source_node.start_position, value=src)
                 self._current_instructions.append(instr)
+            case SourceIfStatementNode():
+                self.emit_if_statement(source_node)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
