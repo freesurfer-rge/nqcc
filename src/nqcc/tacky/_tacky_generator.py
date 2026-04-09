@@ -35,6 +35,7 @@ from nqcc.parser import (
     SourceRightShift,
     SourceStatementNode,
     SourceSubtract,
+    SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
@@ -257,6 +258,57 @@ class TackyGenerator:
         self._current_instructions.append(end_label)
         return result_var
 
+    def emit_ternary(self, source_node: SourceTernaryExpressonNode) -> TackyValue:
+        assert isinstance(source_node, SourceTernaryExpressonNode)
+        OTHERWISE_LABEL = "ternaryotherwise"
+        END_LABEL = "ternaryend"
+        otherwise_label = TackyLabelNode(
+            start_position=source_node.start_position,
+            identifier=self.get_function_label(OTHERWISE_LABEL),
+        )
+        end_label = TackyLabelNode(
+            start_position=source_node.start_position, identifier=self.get_function_label(END_LABEL)
+        )
+        result_var = TackyVarNode(
+            start_position=source_node.start_position,
+            identifier=self.get_function_temporary(),
+        )
+
+        # Evaluate the condition
+        cond_val = self.emit_expression(source_node.condition)
+        # See if we should jump
+        jmp0 = TackyJumpIfZeroNode(
+            start_position=source_node.start_position,
+            target=otherwise_label.identifier,
+            condition=cond_val,
+        )
+        self._current_instructions.append(jmp0)
+
+        # Run 'then'
+        then_val = self.emit_expression(source_node.then)
+        copy_then_result = TackyCopyNode(
+            start_position=source_node.start_position,
+            src=then_val,
+            dst=result_var,
+        )
+        self._current_instructions.append(copy_then_result)
+        jmp_end = TackyJumpNode(
+            start_position=source_node.start_position, target=end_label.identifier
+        )
+        self._current_instructions.append(jmp_end)
+
+        # And 'otherwise'
+        self._current_instructions.append(otherwise_label)
+        otherwise_val = self.emit_expression(source_node.otherwise)
+        copy_otherwise_result = TackyCopyNode(
+            start_position=source_node.start_position, src=otherwise_val, dst=result_var
+        )
+        self._current_instructions.append(copy_otherwise_result)
+
+        self._current_instructions.append(end_label)
+
+        return result_var
+
     def emit_expression(self, source_node: SourceExpressionNode) -> TackyValue:
         assert isinstance(source_node, get_args(SourceExpressionNode))
         match source_node:
@@ -302,6 +354,8 @@ class TackyGenerator:
                 )
                 self._current_instructions.append(bin_instr)
                 return dst_b
+            case SourceTernaryExpressonNode():
+                return self.emit_ternary(source_node)
             case SourceVarNode():
                 return TackyVarNode(
                     start_position=source_node.start_position, identifier=source_node.identifier
