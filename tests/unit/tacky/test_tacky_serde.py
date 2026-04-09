@@ -31,3 +31,18 @@ class TestTackySerde:
     def test_logical_or(self):
         source = "int main (void) { return (1-3) || (3-2); }"
         self._round_trip(source)
+
+    def test_conditionals(self):
+        source = """
+int main( void ) {
+    int a;
+    int b = 1;
+    a = b * 2;
+    if( a<2 )
+      b = a ? b+1 : 5;
+    else
+      a = 6;
+    return a + b;
+}
+"""
+        self._round_trip(source)
