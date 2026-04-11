@@ -219,8 +219,17 @@ class SourceIfStatementNode(SourceASTNode):
     otherwise: SourceStatementNode | None
 
 
+class SourceCompoundNode(SourceASTNode):
+    node_type: Literal["SourceCompoundNode"] = "SourceCompoundNode"
+    block: SourceBlockNode
+
+
 SourceStatementNode = Union[
-    SourceReturnNode, SourceExpressionStatementNode, SourceNullStatementNode, SourceIfStatementNode
+    SourceReturnNode,
+    SourceExpressionStatementNode,
+    SourceNullStatementNode,
+    SourceIfStatementNode,
+    SourceCompoundNode,
 ]
 
 
@@ -233,10 +242,15 @@ class SourceDeclarationNode(SourceASTNode):
 SourceBlockItemNode = Union[SourceDeclarationNode, SourceStatementNode]
 
 
+class SourceBlockNode(SourceASTNode):
+    node_type: Literal["SourceBlockNode"] = "SourceBlockNode"
+    items: list[SourceBlockItemNode]
+
+
 class SourceFunctionNode(SourceASTNode):
     node_type: Literal["SourceFunctionNode"] = "SourceFunctionNode"
     identifier: str
-    body: list[SourceBlockItemNode]
+    body: SourceBlockNode
 
 
 class SourceProgramNode(SourceASTNode):
