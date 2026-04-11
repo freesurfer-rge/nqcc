@@ -1,4 +1,4 @@
-from nqcc.parser import TokenTape, parse_block, parse_function, parse_program, parse_statement
+from nqcc.parser import TokenTape, parse_block_item, parse_function, parse_program, parse_statement
 from nqcc.semantic_analysis import resolve_function
 from nqcc.tacky import (
     TackyAdd,
@@ -221,7 +221,7 @@ class TestBlockItems:
     def test_declaration(self):
         source = "int a;"
         token_tape = TokenTape.from_c_source(source)
-        src_node = parse_block(token_tape)
+        src_node = parse_block_item(token_tape)
 
         target = TackyGenerator()
         target._curr_function = "test_declaration"
@@ -235,7 +235,7 @@ class TestBlockItems:
     def test_declaration_with_init(self):
         source = "int a=1+2;"
         token_tape = TokenTape.from_c_source(source)
-        src_node = parse_block(token_tape)
+        src_node = parse_block_item(token_tape)
 
         target = TackyGenerator()
         target._curr_function = "test_declaration"
