@@ -9,6 +9,7 @@ from nqcc.parser import (
     SourceBitwiseOr,
     SourceBitwiseXor,
     SourceBlockItemNode,
+    SourceBlockNode,
     SourceComplement,
     SourceConstantIntNode,
     SourceDeclarationNode,
@@ -445,6 +446,11 @@ class TackyGenerator:
             case _:
                 raise ValueError(f"Unrecognised blockitem: {source_node}")
 
+    def emit_block(self, source_node: SourceBlockNode):
+        assert isinstance(source_node, SourceBlockNode)
+        for block_item in source_node.items:
+            self.emit_blockitem(block_item)
+
     def emit_function(self, source_node: SourceFunctionNode) -> TackyFunctionNode:
         assert isinstance(source_node, SourceFunctionNode)
 
@@ -455,8 +461,7 @@ class TackyGenerator:
         self._current_instructions = []
 
         # Process the internals
-        for block_item in source_node.body:
-            self.emit_blockitem(block_item)
+        self.emit_block(source_node.body)
 
         # What if there's no return statement?
         # We add an extra; this will not run if there is
