@@ -48,7 +48,9 @@ from ._source_ast import (
     SourceBitwiseOr,
     SourceBitwiseXor,
     SourceBlockItemNode,
+    SourceBlockNode,
     SourceComplement,
+    SourceCompoundNode,
     SourceConstantIntNode,
     SourceDeclarationNode,
     SourceDivide,
@@ -78,8 +80,6 @@ from ._source_ast import (
     SourceTernary,
     SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
-    SourceCompoundNode,
-    SourceBlockNode,
     SourceUnaryOperator,
     SourceVarNode,
 )

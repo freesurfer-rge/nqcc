@@ -5,6 +5,7 @@ from nqcc.parser import (
     SourceAdd,
     SourceASTBadTypeError,
     SourceBinaryExpressionNode,
+    SourceBlockNode,
     SourceConstantIntNode,
     SourceDeclarationNode,
     SourceFunctionNode,
@@ -73,12 +74,12 @@ class TestSourceFunctionNode:
         assert node.start_position == program_str.find("int")
         assert node.identifier == "main"
 
-        assert isinstance(node.body, list)
-        assert len(node.body) == 1
-        assert isinstance(node.body[0], SourceReturnNode)
-        assert node.body[0].start_position == program_str.find("return")
+        assert isinstance(node.body, SourceBlockNode)
+        assert len(node.body.items) == 1
+        assert isinstance(node.body.items[0], SourceReturnNode)
+        assert node.body.items[0].start_position == program_str.find("return")
 
-        return_value_node = node.body[0].value
+        return_value_node = node.body.items[0].value
         assert isinstance(return_value_node, SourceConstantIntNode)
         assert return_value_node.start_position == program_str.find("2")
 
@@ -92,14 +93,14 @@ class TestSourceFunctionNode:
         assert node.start_position == program_str.find("int")
         assert node.identifier == "main"
 
-        assert isinstance(node.body, list)
-        assert len(node.body) == 2
-        assert node.body[0] == SourceDeclarationNode(
+        assert isinstance(node.body, SourceBlockNode)
+        assert len(node.body.items) == 2
+        assert node.body.items[0] == SourceDeclarationNode(
             start_position=15,
             identifier=SourceVarNode(start_position=19, identifier="a"),
             initial=SourceConstantIntNode(start_position=21, value=11),
         )
-        assert node.body[1] == SourceReturnNode(
+        assert node.body.items[1] == SourceReturnNode(
             start_position=25, value=SourceVarNode(start_position=32, identifier="a")
         )
 
@@ -149,12 +150,12 @@ class TestSourceProgramNode:
 
         assert func_node.identifier == "main"
 
-        assert isinstance(func_node.body, list)
-        assert len(func_node.body) == 1
-        assert isinstance(func_node.body[0], SourceReturnNode)
-        assert func_node.body[0].start_position == program_str.find("return")
+        assert isinstance(func_node.body, SourceBlockNode)
+        assert len(func_node.body.items) == 1
+        assert isinstance(func_node.body.items[0], SourceReturnNode)
+        assert func_node.body.items[0].start_position == program_str.find("return")
 
-        return_value_node = func_node.body[0].value
+        return_value_node = func_node.body.items[0].value
         assert isinstance(return_value_node, SourceConstantIntNode)
         assert return_value_node.start_position == program_str.find("2")
 
