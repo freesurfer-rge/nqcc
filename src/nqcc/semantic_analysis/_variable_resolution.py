@@ -1,3 +1,5 @@
+import copy
+
 from typing import get_args
 
 from pydantic import BaseModel
@@ -18,7 +20,7 @@ from nqcc.parser import (
     SourceStatementNode,
     SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
-    SourceVarNode,
+    SourceVarNode,SourceBlockNode,SourceCompoundNode
 )
 
 from ._exceptions import (
@@ -89,6 +91,15 @@ class VariableResolver:
                 return SourceExpressionStatementNode(start_position=sp, value=updated)
             case SourceNullStatementNode():
                 return SourceNullStatementNode(start_position=sp)
+            case SourceCompoundNode():
+                inner_map = make_inner_variable_map(self._variable_map)
+                # This save/restore is ugly.....
+                orig_map = copy.deepcopy(self._variable_map)
+                self._variable_map = inner_map
+                resolved_block = self.resolve_block(stmt.block)
+                result = SourceCompoundNode(start_position=sp, block=resolved_block)
+                self._variable_map = orig_map
+                return result
             case _:
                 raise ValueError(f"Unrecognised: {stmt}")
 
@@ -135,6 +146,16 @@ class VariableResolver:
             case _:
                 raise ValueError(f"Not recognised: {expr}")
 
+    def resolve_block(self, block: SourceBlockNode) -> SourceBlockNode:
+        assert isinstance(block, SourceBlockNode)
+
+        resolved_items: list[SourceBlockItemNode] = []
+        for item in block.items:
+            nxt = self.resolve_blockitem(item)
+            resolved_items.append(nxt)
+
+        return SourceBlockNode(start_position=block.start_position, items=resolved_items)
+
     def resolve_blockitem(self, bi: SourceBlockItemNode) -> SourceBlockItemNode:
 
         match bi:
@@ -148,11 +169,7 @@ class VariableResolver:
 
 def resolve_function(func: SourceFunctionNode) -> SourceFunctionNode:
     resolver = VariableResolver()
-    updated_body: list[SourceBlockItemNode] = []
-    for bi in func.body:
-        nxt = resolver.resolve_blockitem(bi)
-        updated_body.append(nxt)
-
+    updated_body = resolver.resolve_block(func.body)
     result = SourceFunctionNode(
         start_position=func.start_position, identifier=func.identifier, body=updated_body
     )

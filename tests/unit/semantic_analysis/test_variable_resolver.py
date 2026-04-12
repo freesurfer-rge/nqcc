@@ -306,12 +306,12 @@ class TestFunction:
 
         updated = resolve_function(func)
         assert updated.identifier == "main"
-        assert len(updated.body) == 2
-        decl = updated.body[0]
+        assert len(updated.body.items) == 2
+        decl = updated.body.items[0]
         assert isinstance(decl, SourceDeclarationNode)
         assert isinstance(decl.identifier, SourceVarNode)
         assert decl.identifier.identifier == "a.0"
-        ret = updated.body[1]
+        ret = updated.body.items[1]
         assert isinstance(ret, SourceReturnNode)
         assert isinstance(ret.value, SourceVarNode)
         assert ret.value.identifier == "a.0"
@@ -328,12 +328,12 @@ class TestProgram:
 
         updated_func = updated.value
         assert updated_func.identifier == "main"
-        assert len(updated_func.body) == 2
-        decl = updated_func.body[0]
+        assert len(updated_func.body.items) == 2
+        decl = updated_func.body.items[0]
         assert isinstance(decl, SourceDeclarationNode)
         assert isinstance(decl.identifier, SourceVarNode)
         assert decl.identifier.identifier == "a.0"
-        ret = updated_func.body[1]
+        ret = updated_func.body.items[1]
         assert isinstance(ret, SourceReturnNode)
         assert isinstance(ret.value, SourceVarNode)
         assert ret.value.identifier == "a.0"
