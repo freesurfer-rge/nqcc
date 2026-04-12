@@ -11,6 +11,7 @@ from nqcc.parser import (
     SourceBlockItemNode,
     SourceBlockNode,
     SourceComplement,
+    SourceCompoundNode,
     SourceConstantIntNode,
     SourceDeclarationNode,
     SourceDivide,
@@ -426,6 +427,8 @@ class TackyGenerator:
                 self._current_instructions.append(instr)
             case SourceIfStatementNode():
                 self.emit_if_statement(source_node)
+            case SourceCompoundNode():
+                self.emit_block(source_node.block)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 

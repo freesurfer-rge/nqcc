@@ -216,6 +216,27 @@ class TestStatements:
         assert isinstance(instr8, TackyLabelNode)
         assert instr8.identifier == "label.test_if_then_else.ifend.1"
 
+    def test_compound(self):
+        source = "{ int a = 1; }"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 7
+        src_node = parse_statement(token_tape)
+        # With the else, should consume everything
+        assert token_tape.tokens_remaining == 0
+
+        # We skip semantic analysis for simplicity
+
+        target = TackyGenerator()
+        target._curr_function = "test_compound"
+
+        target.emit_statement(src_node)
+
+        assert len(target._current_instructions) == 1
+        instr0 = target._current_instructions[0]
+        assert isinstance(instr0, TackyCopyNode)
+        assert instr0.dst == TackyVarNode(start_position=6, identifier="a")
+        assert instr0.src == TackyConstantIntNode(start_position=10, value=1)
+
 
 class TestBlockItems:
     def test_declaration(self):
