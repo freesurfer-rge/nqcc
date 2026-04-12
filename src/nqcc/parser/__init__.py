@@ -1,7 +1,7 @@
 from ._driver import parser_driver
 from ._exceptions import SourceASTBadTypeError, SourceASTBadValueError
 from ._parsing import (
-    parse_block,
+    parse_block_item,
     parse_declaration,
     parse_expression,
     parse_function,
@@ -19,7 +19,9 @@ from ._source_ast import (
     SourceBitwiseOr,
     SourceBitwiseXor,
     SourceBlockItemNode,
+    SourceBlockNode,
     SourceComplement,
+    SourceCompoundNode,
     SourceConstantIntNode,
     SourceDeclarationNode,
     SourceDivide,
@@ -67,7 +69,9 @@ __all__ = [
     "SourceBitwiseOr",
     "SourceBitwiseXor",
     "SourceBlockItemNode",
+    "SourceBlockNode",
     "SourceComplement",
+    "SourceCompoundNode",
     "SourceConstantIntNode",
     "SourceDeclarationNode",
     "SourceDivide",
@@ -102,7 +106,7 @@ __all__ = [
     "SourceUnaryOperator",
     "SourceVarNode",
     "TokenTape",
-    "parse_block",
+    "parse_block_item",
     "parse_declaration",
     "parse_expression",
     "parse_function",

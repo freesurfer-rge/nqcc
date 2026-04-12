@@ -4,13 +4,21 @@ from ._exceptions import (
     SemanticAnalysisDuplicateDeclaration,
     SemanticAnalysisUnknownVariable,
 )
-from ._variable_resolution import VariableResolver, resolve_function, resolve_program
+from ._variable_resolution import (
+    VariableInfo,
+    VariableResolver,
+    make_inner_variable_map,
+    resolve_function,
+    resolve_program,
+)
 
 __all__ = [
     "SemanticAnalysisBadLValue",
     "SemanticAnalysisDuplicateDeclaration",
     "SemanticAnalysisUnknownVariable",
+    "VariableInfo",
     "VariableResolver",
+    "make_inner_variable_map",
     "resolve_function",
     "resolve_program",
     "semantic_analysis_driver",

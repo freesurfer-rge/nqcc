@@ -48,7 +48,9 @@ from ._source_ast import (
     SourceBitwiseOr,
     SourceBitwiseXor,
     SourceBlockItemNode,
+    SourceBlockNode,
     SourceComplement,
+    SourceCompoundNode,
     SourceConstantIntNode,
     SourceDeclarationNode,
     SourceDivide,
@@ -247,10 +249,25 @@ def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
                         actual_token=first_token,
                         message="Unexpected keyword",
                     )
+        case OpenBraceToken():
+            # We have a compound statement
+            block = parse_block(token_tape)
+            return SourceCompoundNode(start_position=first_token.start_position, block=block)
+
         case _:
             expr = parse_expression(token_tape, min_precedence=0)
             _ = token_tape.expect(SemicolonToken)
             return SourceExpressionStatementNode(start_position=expr.start_position, value=expr)
+
+
+def parse_block(token_tape: TokenTape) -> SourceBlockNode:
+    opening_token = token_tape.expect(OpenBraceToken)
+    items: list[SourceBlockItemNode] = []
+    while not isinstance(token_tape.peek(), CloseBraceToken):
+        nxt = parse_block_item(token_tape)
+        items.append(nxt)
+    _ = token_tape.expect(CloseBraceToken)
+    return SourceBlockNode(start_position=opening_token.start_position, items=items)
 
 
 def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:
@@ -272,7 +289,7 @@ def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:
     )
 
 
-def parse_block(token_tape: TokenTape) -> SourceBlockItemNode:
+def parse_block_item(token_tape: TokenTape) -> SourceBlockItemNode:
     peeked = token_tape.peek()
 
     # Only support 'int' declarations right now
@@ -298,13 +315,7 @@ def parse_function(token_tape: TokenTape) -> SourceFunctionNode:
         )
     _ = token_tape.expect(CloseParenToken)
 
-    _ = token_tape.expect(OpenBraceToken)
-    body_block: list[SourceBlockItemNode] = []
-    while not isinstance(token_tape.peek(), CloseBraceToken):
-        nxt_block = parse_block(token_tape)
-        body_block.append(nxt_block)
-
-    _ = token_tape.expect(CloseBraceToken)
+    body_block = parse_block(token_tape)
 
     return SourceFunctionNode(
         identifier=function_name_token.value,

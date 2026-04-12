@@ -1,9 +1,14 @@
+import copy
 from typing import get_args
+
+from pydantic import BaseModel
 
 from nqcc.parser import (
     SourceAssignmentNode,
     SourceBinaryExpressionNode,
     SourceBlockItemNode,
+    SourceBlockNode,
+    SourceCompoundNode,
     SourceConstantIntNode,
     SourceDeclarationNode,
     SourceExpressionNode,
@@ -26,20 +31,33 @@ from ._exceptions import (
 )
 
 
+class VariableInfo(BaseModel):
+    name: str
+    defined_in_block: bool
+
+
+def make_inner_variable_map(outer_map: dict[str, VariableInfo]) -> dict[str, VariableInfo]:
+    result: dict[str, VariableInfo] = {}
+    for k, v in outer_map.items():
+        nxt = VariableInfo(name=v.name, defined_in_block=False)
+        result[k] = nxt
+    return result
+
+
 class VariableResolver:
     def __init__(self) -> None:
-        self._variable_map: dict[str, str] = {}
+        self._variable_map: dict[str, VariableInfo] = {}
         self._counter = 0
 
     def resolve_declaration(self, decl: SourceDeclarationNode):
         assert isinstance(decl, SourceDeclarationNode)
 
         orig_name = decl.identifier.identifier
-        if orig_name in self._variable_map:
+        if orig_name in self._variable_map and self._variable_map[orig_name].defined_in_block:
             raise SemanticAnalysisDuplicateDeclaration(decl=decl)
         unique_name = f"{orig_name}.{self._counter}"
         self._counter += 1
-        self._variable_map[orig_name] = unique_name
+        self._variable_map[orig_name] = VariableInfo(name=unique_name, defined_in_block=True)
         nxt_init: SourceExpressionNode | None = None
         if decl.initial is not None:
             nxt_init = self.resolve_expression(decl.initial)
@@ -74,6 +92,15 @@ class VariableResolver:
                 return SourceExpressionStatementNode(start_position=sp, value=updated)
             case SourceNullStatementNode():
                 return SourceNullStatementNode(start_position=sp)
+            case SourceCompoundNode():
+                inner_map = make_inner_variable_map(self._variable_map)
+                # This save/restore is ugly.....
+                orig_map = copy.deepcopy(self._variable_map)
+                self._variable_map = inner_map
+                resolved_block = self.resolve_block(stmt.block)
+                result = SourceCompoundNode(start_position=sp, block=resolved_block)
+                self._variable_map = orig_map
+                return result
             case _:
                 raise ValueError(f"Unrecognised: {stmt}")
 
@@ -91,7 +118,7 @@ class VariableResolver:
                 if expr.identifier in self._variable_map:
                     return SourceVarNode(
                         start_position=expr.start_position,
-                        identifier=self._variable_map[expr.identifier],
+                        identifier=self._variable_map[expr.identifier].name,
                     )
                 else:
                     raise SemanticAnalysisUnknownVariable(var=expr)
@@ -120,6 +147,16 @@ class VariableResolver:
             case _:
                 raise ValueError(f"Not recognised: {expr}")
 
+    def resolve_block(self, block: SourceBlockNode) -> SourceBlockNode:
+        assert isinstance(block, SourceBlockNode)
+
+        resolved_items: list[SourceBlockItemNode] = []
+        for item in block.items:
+            nxt = self.resolve_blockitem(item)
+            resolved_items.append(nxt)
+
+        return SourceBlockNode(start_position=block.start_position, items=resolved_items)
+
     def resolve_blockitem(self, bi: SourceBlockItemNode) -> SourceBlockItemNode:
 
         match bi:
@@ -133,11 +170,7 @@ class VariableResolver:
 
 def resolve_function(func: SourceFunctionNode) -> SourceFunctionNode:
     resolver = VariableResolver()
-    updated_body: list[SourceBlockItemNode] = []
-    for bi in func.body:
-        nxt = resolver.resolve_blockitem(bi)
-        updated_body.append(nxt)
-
+    updated_body = resolver.resolve_block(func.body)
     result = SourceFunctionNode(
         start_position=func.start_position, identifier=func.identifier, body=updated_body
     )

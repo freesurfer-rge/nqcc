@@ -6,7 +6,10 @@ from nqcc.parser import (
     SourceAssignmentNode,
     SourceASTBadValueError,
     SourceBinaryExpressionNode,
+    SourceBlockNode,
+    SourceCompoundNode,
     SourceConstantIntNode,
+    SourceDeclarationNode,
     SourceExpressionStatementNode,
     SourceGreaterThan,
     SourceIfStatementNode,
@@ -199,3 +202,69 @@ class TestSourceIfStatementNode:
         assert isinstance(inner.otherwise, SourceReturnNode)
         assert isinstance(inner.otherwise.value, SourceVarNode)
         assert inner.otherwise.value.identifier == "b"
+
+    def test_braced(self):
+        # Again, tag an extra semicolon onto the end
+        c_str = """if (a) {
+            return a;
+        } else {
+            return b;
+        }
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        assert token_tape.tokens_remaining == 15
+
+        node = parse_statement(token_tape)
+        assert isinstance(node, SourceIfStatementNode)
+        assert node.start_position == 0
+
+        assert isinstance(node.condition, SourceVarNode)
+        assert node.condition.identifier == "a"
+
+        assert isinstance(node.then, SourceCompoundNode)
+        assert isinstance(node.then.block, SourceBlockNode)
+        assert len(node.then.block.items) == 1
+        assert node.then.block.items[0] == SourceReturnNode(
+            start_position=21, value=SourceVarNode(start_position=28, identifier="a")
+        )
+
+        assert isinstance(node.otherwise, SourceCompoundNode)
+        assert isinstance(node.otherwise.block, SourceBlockNode)
+        assert len(node.otherwise.block.items) == 1
+        assert node.otherwise.block.items[0] == SourceReturnNode(
+            start_position=60, value=SourceVarNode(start_position=67, identifier="b")
+        )
+
+
+class TestSourceCompoundNode:
+    def test_simple(self):
+        c_str = """
+        {
+            int a;
+            a = a + 1;
+        }
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        assert token_tape.tokens_remaining == 11
+
+        node = parse_statement(token_tape)
+        assert token_tape.tokens_remaining == 0
+        assert isinstance(node, SourceCompoundNode)
+        assert isinstance(node.block, SourceBlockNode)
+        assert len(node.block.items) == 2
+
+        item0 = node.block.items[0]
+        assert isinstance(item0, SourceDeclarationNode)
+        assert item0.identifier.identifier == "a"
+        assert item0.initial is None
+
+        item1 = node.block.items[1]
+        assert isinstance(item1, SourceExpressionStatementNode)
+        assert isinstance(item1.value, SourceAssignmentNode)
+        assert item1.value.left == SourceVarNode(start_position=42, identifier="a")
+
+        add_op = item1.value.right
+        assert isinstance(add_op, SourceBinaryExpressionNode)
+        assert isinstance(add_op.operator, SourceAdd)
+        assert add_op.left == SourceVarNode(start_position=46, identifier="a")
+        assert add_op.right == SourceConstantIntNode(start_position=50, value=1)
