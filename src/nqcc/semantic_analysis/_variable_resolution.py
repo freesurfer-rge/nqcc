@@ -27,9 +27,18 @@ from ._exceptions import (
     SemanticAnalysisUnknownVariable,
 )
 
+
 class VariableInfo(BaseModel):
     name: str
     defined_in_block: bool
+
+
+def make_inner_variable_map(outer_map: dict[str, VariableInfo]) -> VariableInfo:
+    result: dict[str, VariableInfo] = {}
+    for k, v in outer_map.items():
+        nxt = VariableInfo(name=v.name, defined_in_block=False)
+        result[k] = nxt
+    return result
 
 
 class VariableResolver:
