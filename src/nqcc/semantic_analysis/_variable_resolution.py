@@ -1,5 +1,4 @@
 import copy
-
 from typing import get_args
 
 from pydantic import BaseModel
@@ -8,6 +7,8 @@ from nqcc.parser import (
     SourceAssignmentNode,
     SourceBinaryExpressionNode,
     SourceBlockItemNode,
+    SourceBlockNode,
+    SourceCompoundNode,
     SourceConstantIntNode,
     SourceDeclarationNode,
     SourceExpressionNode,
@@ -20,7 +21,7 @@ from nqcc.parser import (
     SourceStatementNode,
     SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
-    SourceVarNode,SourceBlockNode,SourceCompoundNode
+    SourceVarNode,
 )
 
 from ._exceptions import (
@@ -35,7 +36,7 @@ class VariableInfo(BaseModel):
     defined_in_block: bool
 
 
-def make_inner_variable_map(outer_map: dict[str, VariableInfo]) -> VariableInfo:
+def make_inner_variable_map(outer_map: dict[str, VariableInfo]) -> dict[str, VariableInfo]:
     result: dict[str, VariableInfo] = {}
     for k, v in outer_map.items():
         nxt = VariableInfo(name=v.name, defined_in_block=False)

@@ -4,6 +4,7 @@ from nqcc.parser import (
     SourceAdd,
     SourceAssignmentNode,
     SourceBinaryExpressionNode,
+    SourceCompoundNode,
     SourceConstantIntNode,
     SourceDeclarationNode,
     SourceExpressionStatementNode,
@@ -12,7 +13,7 @@ from nqcc.parser import (
     SourceReturnNode,
     SourceTernaryExpressonNode,
     SourceVarNode,
-    TokenTape,SourceCompoundNode,
+    TokenTape,
     parse_declaration,
     parse_expression,
     parse_function,
@@ -360,7 +361,6 @@ class TestFunction:
         assert isinstance(ret, SourceReturnNode)
         assert isinstance(ret.value, SourceVarNode)
         assert ret.value.identifier == "x.0"
-
 
 
 class TestProgram:
