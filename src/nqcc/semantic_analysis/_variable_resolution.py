@@ -1,5 +1,7 @@
 from typing import get_args
 
+from pydantic import BaseModel
+
 from nqcc.parser import (
     SourceAssignmentNode,
     SourceBinaryExpressionNode,
@@ -25,21 +27,25 @@ from ._exceptions import (
     SemanticAnalysisUnknownVariable,
 )
 
+class VariableInfo(BaseModel):
+    name: str
+    defined_in_block: bool
+
 
 class VariableResolver:
     def __init__(self) -> None:
-        self._variable_map: dict[str, str] = {}
+        self._variable_map: dict[str, VariableInfo] = {}
         self._counter = 0
 
     def resolve_declaration(self, decl: SourceDeclarationNode):
         assert isinstance(decl, SourceDeclarationNode)
 
         orig_name = decl.identifier.identifier
-        if orig_name in self._variable_map:
+        if orig_name in self._variable_map and self._variable_map[orig_name].defined_in_block:
             raise SemanticAnalysisDuplicateDeclaration(decl=decl)
         unique_name = f"{orig_name}.{self._counter}"
         self._counter += 1
-        self._variable_map[orig_name] = unique_name
+        self._variable_map[orig_name] = VariableInfo(name=unique_name, defined_in_block=True)
         nxt_init: SourceExpressionNode | None = None
         if decl.initial is not None:
             nxt_init = self.resolve_expression(decl.initial)
@@ -91,7 +97,7 @@ class VariableResolver:
                 if expr.identifier in self._variable_map:
                     return SourceVarNode(
                         start_position=expr.start_position,
-                        identifier=self._variable_map[expr.identifier],
+                        identifier=self._variable_map[expr.identifier].name,
                     )
                 else:
                     raise SemanticAnalysisUnknownVariable(var=expr)
