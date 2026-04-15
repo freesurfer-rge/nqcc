@@ -289,3 +289,43 @@ class TestExtractTokens:
 
         assert len(toks) == 1
         assert toks[0] == ColonToken(start_position=idx)
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_do(self, idx):
+        toks = extract_tokens("do", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == IdentifierToken(start_position=idx, value="do")
+        assert toks[1] == KeywordToken(start_position=idx, value="do")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_while(self, idx):
+        toks = extract_tokens("while", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == IdentifierToken(start_position=idx, value="while")
+        assert toks[1] == KeywordToken(start_position=idx, value="while")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_for(self, idx):
+        toks = extract_tokens("for", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == IdentifierToken(start_position=idx, value="for")
+        assert toks[1] == KeywordToken(start_position=idx, value="for")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_break(self, idx):
+        toks = extract_tokens("break", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == IdentifierToken(start_position=idx, value="break")
+        assert toks[1] == KeywordToken(start_position=idx, value="break")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_continue(self, idx):
+        toks = extract_tokens("continue", idx)
+
+        assert len(toks) == 2
+        assert toks[0] == IdentifierToken(start_position=idx, value="continue")
+        assert toks[1] == KeywordToken(start_position=idx, value="continue")
