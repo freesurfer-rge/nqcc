@@ -48,6 +48,7 @@ class TestInnerMap:
 class TestDeclarations:
     def test_smoke_no_init(self):
         target = VariableResolver()
+        variable_map = {}
 
         decl = SourceDeclarationNode(
             start_position=10,
@@ -55,26 +56,30 @@ class TestDeclarations:
             initial=None,
         )
 
-        updated = target.resolve_declaration(decl)
+        updated = target.resolve_declaration(decl, variable_map)
         assert isinstance(updated, SourceDeclarationNode)
         assert updated.start_position == 10
         assert updated.identifier == SourceVarNode(start_position=11, identifier="a.0")
         assert updated.initial is None
+        assert len(variable_map) == 1
 
     def test_decl_with_init(self):
         target = VariableResolver()
+        variable_map = {}
+
         program_str = "int a = 1;"
 
         token_tape = TokenTape.from_c_source(program_str)
         decl = parse_declaration(token_tape)
         assert isinstance(decl, SourceDeclarationNode)
 
-        result = target.resolve_declaration(decl)
+        result = target.resolve_declaration(decl, variable_map)
         assert isinstance(result, SourceDeclarationNode)
         assert result.start_position == 0
         assert result.identifier == SourceVarNode(start_position=4, identifier="a.0")
         assert isinstance(result.initial, SourceConstantIntNode)
         assert result.initial.value == 1
+        assert len(variable_map) == 1
 
     def test_two_decl(self):
         target = VariableResolver()
@@ -85,7 +90,8 @@ class TestDeclarations:
             initial=None,
         )
 
-        updated0 = target.resolve_declaration(decl0)
+        variable_map = {}
+        updated0 = target.resolve_declaration(decl0, variable_map)
         assert isinstance(updated0, SourceDeclarationNode)
         assert updated0.start_position == 10
         assert updated0.identifier == SourceVarNode(start_position=11, identifier="a.0")
@@ -97,7 +103,7 @@ class TestDeclarations:
             initial=None,
         )
 
-        updated1 = target.resolve_declaration(decl1)
+        updated1 = target.resolve_declaration(decl1, variable_map)
         assert isinstance(updated1, SourceDeclarationNode)
         assert updated1.start_position == 12
         assert updated1.identifier == SourceVarNode(start_position=13, identifier="b.1")
@@ -105,13 +111,14 @@ class TestDeclarations:
 
     def test_duplicate_name(self):
         target = VariableResolver()
+        variable_map = {}
 
         decl0 = SourceDeclarationNode(
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl0)
+        _ = target.resolve_declaration(decl0, variable_map)
 
         decl1 = SourceDeclarationNode(
             start_position=12,
@@ -120,7 +127,7 @@ class TestDeclarations:
         )
 
         with pytest.raises(SemanticAnalysisDuplicateDeclaration) as saduperr:
-            _ = target.resolve_declaration(decl1)
+            _ = target.resolve_declaration(decl1, variable_map)
         assert saduperr.value.decl == decl1
         assert saduperr.value.message == "Duplicate declaration of 'a' at 12"
 
@@ -128,6 +135,7 @@ class TestDeclarations:
 class TestExpressions:
     def test_assignment(self):
         target = VariableResolver()
+        variable_map = {}
 
         # Make sure 'a' is declared
         decl_a = SourceDeclarationNode(
@@ -135,7 +143,7 @@ class TestExpressions:
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl_a)
+        _ = target.resolve_declaration(decl_a, variable_map)
 
         # Our assignment
         c_str = "a=1;"
@@ -143,7 +151,7 @@ class TestExpressions:
         assignment = parse_expression(token_tape, min_precedence=0)
         assert isinstance(assignment, SourceAssignmentNode)
 
-        result = target.resolve_expression(assignment)
+        result = target.resolve_expression(assignment, variable_map)
         assert isinstance(result, SourceAssignmentNode)
         assert isinstance(result.left, SourceVarNode)
         assert result.left.identifier == "a.0"
@@ -152,6 +160,7 @@ class TestExpressions:
 
     def test_assignment_undeclared(self):
         target = VariableResolver()
+        variable_map = {}
         c_str = "a=1;"
         token_tape = TokenTape.from_c_source(c_str)
         assignment = parse_expression(token_tape, min_precedence=0)
@@ -159,11 +168,12 @@ class TestExpressions:
         assert isinstance(assignment, SourceAssignmentNode)
 
         with pytest.raises(SemanticAnalysisUnknownVariable) as sauv:
-            _ = target.resolve_expression(assignment)
+            _ = target.resolve_expression(assignment, variable_map)
         assert sauv.value.message == "Unknown identifier 'a' at 0"
 
     def test_assignment_badlvalue(self):
         target = VariableResolver()
+        variable_map = {}
         c_str = "1=1+2;"
         token_tape = TokenTape.from_c_source(c_str)
         assignment = parse_expression(token_tape, min_precedence=0)
@@ -171,11 +181,12 @@ class TestExpressions:
         assert isinstance(assignment, SourceAssignmentNode)
 
         with pytest.raises(SemanticAnalysisBadLValue) as sablv:
-            _ = target.resolve_expression(assignment)
+            _ = target.resolve_expression(assignment, variable_map)
         assert sablv.value.message == "Not an lvalue at 0"
 
     def test_ternary(self):
         target = VariableResolver()
+        variable_map = {}
         c_str = "a?b:c;"
         token_tape = TokenTape.from_c_source(c_str)
         ternary_expr = parse_expression(token_tape, min_precedence=0)
@@ -188,9 +199,9 @@ class TestExpressions:
                 identifier=SourceVarNode(start_position=ord(decl_var) + 32, identifier=decl_var),
                 initial=None,
             )
-            _ = target.resolve_declaration(decl)
+            _ = target.resolve_declaration(decl, variable_map)
 
-        result = target.resolve_expression(ternary_expr)
+        result = target.resolve_expression(ternary_expr, variable_map)
         assert isinstance(result, SourceTernaryExpressonNode)
         assert result.condition == SourceVarNode(start_position=0, identifier="a.0")
         assert result.then == SourceVarNode(start_position=2, identifier="b.1")
@@ -200,16 +211,18 @@ class TestExpressions:
 class TestStatements:
     def test_null_statement(self):
         target = VariableResolver()
+        variable_map = {}
         c_str = ";"
         token_tape = TokenTape.from_c_source(c_str)
         stmt = parse_statement(token_tape)
         assert isinstance(stmt, SourceNullStatementNode)
 
-        result = target.resolve_statement(stmt)
+        result = target.resolve_statement(stmt, variable_map)
         assert isinstance(result, SourceNullStatementNode)
 
     def test_expression_statement(self):
         target = VariableResolver()
+        variable_map = {}
         c_str = "a=22;"
         token_tape = TokenTape.from_c_source(c_str)
         stmt = parse_statement(token_tape)
@@ -221,9 +234,9 @@ class TestStatements:
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl_a)
+        _ = target.resolve_declaration(decl_a, variable_map)
 
-        result = target.resolve_statement(stmt)
+        result = target.resolve_statement(stmt, variable_map)
         assert isinstance(result, SourceExpressionStatementNode)
         assert isinstance(result.value, SourceAssignmentNode)
         assert isinstance(result.value.left, SourceVarNode)
@@ -233,6 +246,7 @@ class TestStatements:
 
     def test_return_statement(self):
         target = VariableResolver()
+        variable_map = {}
         c_str = "return a+44;"
         token_tape = TokenTape.from_c_source(c_str)
         stmt = parse_statement(token_tape)
@@ -244,9 +258,9 @@ class TestStatements:
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl_a)
+        _ = target.resolve_declaration(decl_a, variable_map)
 
-        result = target.resolve_statement(stmt)
+        result = target.resolve_statement(stmt, variable_map)
         assert isinstance(result, SourceReturnNode)
         assert isinstance(result.value, SourceBinaryExpressionNode)
         assert isinstance(result.value.operator, SourceAdd)
@@ -257,6 +271,7 @@ class TestStatements:
 
     def test_if_statement(self):
         target = VariableResolver()
+        variable_map = {}
         c_str = """
         if( a )
            return a;
@@ -276,15 +291,15 @@ class TestStatements:
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl_a)
+        _ = target.resolve_declaration(decl_a, variable_map)
         decl_b = SourceDeclarationNode(
             start_position=11,
             identifier=SourceVarNode(start_position=12, identifier="b"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl_b)
+        _ = target.resolve_declaration(decl_b, variable_map)
 
-        result = target.resolve_statement(stmt)
+        result = target.resolve_statement(stmt, variable_map)
         assert isinstance(result, SourceIfStatementNode)
         assert isinstance(result.condition, SourceVarNode)
         assert result.condition.identifier == "a.0"
