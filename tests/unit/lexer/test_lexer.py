@@ -31,7 +31,9 @@ from nqcc.lexer import (
 
 
 class TestPickToken:
-    @pytest.mark.parametrize("value", {"int", "return", "void", "if", "else"})
+    @pytest.mark.parametrize(
+        "value", {"int", "return", "void", "if", "else", "do", "while", "for", "break", "continue"}
+    )
     def test_identifier_vs_keyword(self, value: str):
         toks = [IdentifierToken(value=value), KeywordToken(value=value)]
 
