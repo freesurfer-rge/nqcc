@@ -61,7 +61,7 @@ class VariableResolver:
         variable_map[orig_name] = VariableInfo(name=unique_name, defined_in_block=True)
         nxt_init: SourceExpressionNode | None = None
         if decl.initial is not None:
-            nxt_init = self.resolve_expression(decl.initial)
+            nxt_init = self.resolve_expression(decl.initial, variable_map)
 
         nxt_var = SourceVarNode(
             start_position=decl.identifier.start_position, identifier=unique_name
@@ -115,7 +115,7 @@ class VariableResolver:
                     right=self.resolve_expression(expr.right, variable_map),
                 )
             case SourceVarNode():
-                if expr.identifier in self._variable_map:
+                if expr.identifier in variable_map:
                     return SourceVarNode(
                         start_position=expr.start_position,
                         identifier=variable_map[expr.identifier].name,
