@@ -1,4 +1,3 @@
-import copy
 from typing import get_args
 
 from pydantic import BaseModel
