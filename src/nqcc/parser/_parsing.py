@@ -84,7 +84,7 @@ from ._source_ast import (
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
-    SourceWhileNode,
+    SourceWhileNode,SourceDoWhileNode,
 )
 from ._token_tape import TokenTape
 
@@ -241,6 +241,17 @@ def parse_while_statement(token_tape: TokenTape, start_position: int) -> SourceW
 
     return SourceWhileNode(start_position=start_position, condition=condition, body=body)
 
+def parse_dowhile_statement(token_tape: TokenTape, start_position: int) -> SourceDoWhileNode:
+    # do was already consume
+    body = parse_statement(token_tape)
+    while_token = token_tape.expect(KeywordToken)
+    if while_token.value != "while":
+        raise SourceASTBadValueError(expected_value="while", actual_token=while_token, message="Expected while for do")
+    _ = token_tape.expect(OpenParenToken)
+    condition = parse_expression(token_tape, min_precedence=0)
+    _ = token_tape.expect(CloseParenToken)
+    _ = token_tape.expect(SemicolonToken)
+    return SourceDoWhileNode(start_position=start_position, condition=condition, body=body)
 
 def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
     first_token = token_tape.peek()
@@ -282,6 +293,10 @@ def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
                 case "while":
                     # Note that we already consumed the 'while'
                     return parse_while_statement(token_tape, start_position=sp)
+
+                case "do":
+                    # We already consumed the 'do'
+                    return parse_dowhile_statement(token_tape, start_position=sp)
 
                 case _:
                     raise SourceASTBadValueError(
