@@ -224,12 +224,45 @@ class SourceCompoundNode(SourceASTNode):
     block: SourceBlockNode
 
 
+class SourceBreakNode(SourceASTNode):
+    node_type: Literal["SourceBreakNode"] = "SourceBreakNode"
+
+
+class SourceContinueNode(SourceASTNode):
+    node_type: Literal["SourceContinueNode"] = "SourceContinueNode"
+
+
+class SourceWhileNode(SourceASTNode):
+    node_type: Literal["SourceWhileNode"] = "SourceWhileNode"
+    condition: SourceExpressionNode
+    body: SourceStatementNode
+
+
+class SourceDoWhileNode(SourceASTNode):
+    node_type: Literal["SourceDoWhileNode"] = "SourceDoWhileNode"
+    condition: SourceExpressionNode
+    body: SourceStatementNode
+
+
+class SourceForNode(SourceASTNode):
+    node_type: Literal["SourceForNode"] = "SourceForNode"
+    init: SourceForInitNode
+    condition: SourceExpressionNode | None
+    post: SourceExpressionNode | None
+    body: SourceStatementNode
+
+
 SourceStatementNode = Union[
     SourceReturnNode,
     SourceExpressionStatementNode,
     SourceNullStatementNode,
     SourceIfStatementNode,
     SourceCompoundNode,
+    SourceBreakNode,
+    SourceContinueNode,
+    SourceWhileNode,
+    SourceDoWhileNode,
+    SourceForNode,
 ]
 
 
