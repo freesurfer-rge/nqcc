@@ -19,6 +19,9 @@ from nqcc.parser import (
     SourceNullStatementNode,
     SourceReturnNode,
     SourceVarNode,
+    SourceWhileNode,
+    SourceDoWhileNode,
+    SourceDivide,
     TokenTape,
     parse_statement,
 )
@@ -296,3 +299,62 @@ class TestSourceContinueNode:
         assert token_tape.tokens_remaining == 0
 
         assert node == SourceContinueNode(start_position=9, label="")
+
+
+class TestSourceWhileNode:
+    def test_simple(self):
+        c_str = """
+        while( a > 0 )
+            a = a / 2;
+        a = a + 1;
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+
+        node = parse_statement(token_tape)
+        assert token_tape.tokens_remaining == 6
+
+        assert isinstance(node, SourceWhileNode)
+        cond = node.condition
+        assert isinstance(cond, SourceBinaryExpressionNode)
+        assert isinstance(cond.operator, SourceGreaterThan)
+        assert cond.left == SourceVarNode(start_position=16, identifier="a")
+        assert cond.right == SourceConstantIntNode(start_position=20, value=0)
+
+        assert isinstance(node.body, SourceExpressionStatementNode)
+        assert isinstance(node.body.value, SourceAssignmentNode)
+        body = node.body.value
+        assert body.left == SourceVarNode(start_position=36, identifier="a")
+        isinstance(body.right, SourceBinaryExpressionNode)
+        assert isinstance(body.right.operator, SourceDivide)
+        assert body.right.left == SourceVarNode(start_position=40, identifier="a")
+        assert body.right.right == SourceConstantIntNode(start_position=44, value=2)
+
+    def test_simple_braces(self):
+        c_str = """
+        while( a > 0 ) {
+            a = a / 2;
+        }
+        a = a + 1;
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+
+        node = parse_statement(token_tape)
+        assert token_tape.tokens_remaining == 6
+
+        assert isinstance(node, SourceWhileNode)
+        cond = node.condition
+        assert isinstance(cond, SourceBinaryExpressionNode)
+        assert isinstance(cond.operator, SourceGreaterThan)
+        assert cond.left == SourceVarNode(start_position=16, identifier="a")
+        assert cond.right == SourceConstantIntNode(start_position=20, value=0)
+
+        assert isinstance(node.body, SourceCompoundNode)
+        assert len(node.body.block.items) == 1
+        stmt = node.body.block.items[0]
+        assert isinstance(stmt, SourceExpressionStatementNode)
+        assert isinstance(stmt.value, SourceAssignmentNode)
+        assert stmt.value.left == SourceVarNode(start_position=38, identifier="a")
+        isinstance(stmt.value.right, SourceBinaryExpressionNode)
+        assert isinstance(stmt.value.right.operator, SourceDivide)
+        assert stmt.value.right.left == SourceVarNode(start_position=42, identifier="a")
+        assert stmt.value.right.right == SourceConstantIntNode(start_position=46, value=2)
