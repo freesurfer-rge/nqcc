@@ -60,10 +60,14 @@ from ._source_ast import (
     SourceEqualTo,
     SourceExpressionNode,
     SourceExpressionStatementNode,
+    SourceForInitNode,
+    SourceForNode,
     SourceFunctionNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
     SourceIfStatementNode,
+    SourceInitDeclNode,
+    SourceInitExpressionNode,
     SourceLeftShift,
     SourceLessThan,
     SourceLessThanOrEqual,
@@ -85,7 +89,7 @@ from ._source_ast import (
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
-    SourceWhileNode,SourceForNode,SourceForInitNode, SourceInitExpressionNode, SourceInitDeclNode
+    SourceWhileNode,
 )
 from ._token_tape import TokenTape
 
@@ -258,22 +262,25 @@ def parse_dowhile_statement(token_tape: TokenTape, start_position: int) -> Sourc
     _ = token_tape.expect(SemicolonToken)
     return SourceDoWhileNode(start_position=start_position, condition=condition, body=body)
 
+
 def parse_for_statement(token_tape: TokenTape, start_position: int) -> SourceForNode:
     # for was already consumed
     _ = token_tape.expect(OpenParenToken)
 
     # Get the 'initial' expression
     initial = parse_optional_expression(token_tape, SemicolonToken)
-    init_expr : SourceForInitNode
+    init_expr: SourceForInitNode
     if initial is None:
         init_expr = SourceInitExpressionNode(start_position=start_position, expression=None)
     elif isinstance(initial, SourceAssignmentNode):
-        init_expr = SourceInitExpressionNode(start_position=initial.start_position, expression=initial)
+        init_expr = SourceInitExpressionNode(
+            start_position=initial.start_position, expression=initial
+        )
     elif isinstance(initial, SourceDeclarationNode):
         init_expr = SourceInitDeclNode(start_position=initial.start_position, decl=initial)
     else:
         raise ValueError("Bad init expression")
-    
+
     # Get the 'condition' expression
     condition = parse_optional_expression(token_tape, SemicolonToken)
     assert not isinstance(condition, SourceDeclarationNode), "Can't declare in for condition"
@@ -284,7 +291,9 @@ def parse_for_statement(token_tape: TokenTape, start_position: int) -> SourceFor
 
     body = parse_statement(token_tape)
 
-    return SourceForNode(start_position=start_position, init=init_expr, condition=condition, post=post, body=body)
+    return SourceForNode(
+        start_position=start_position, init=init_expr, condition=condition, post=post, body=body
+    )
 
 
 def parse_statement(token_tape: TokenTape) -> SourceStatementNode:  # noqa: C901
@@ -331,7 +340,7 @@ def parse_statement(token_tape: TokenTape) -> SourceStatementNode:  # noqa: C901
                 case "do":
                     # We already consumed the 'do'
                     return parse_dowhile_statement(token_tape, start_position=sp)
-                
+
                 case "for":
                     # We already consumed the 'for'
                     return parse_for_statement(token_tape, start_position=sp)
