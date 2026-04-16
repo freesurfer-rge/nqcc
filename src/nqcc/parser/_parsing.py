@@ -287,7 +287,7 @@ def parse_for_statement(token_tape: TokenTape, start_position: int) -> SourceFor
 
     # Get the 'post' expression
     post = parse_optional_expression(token_tape, CloseParenToken)
-    assert not isinstance(condition, SourceDeclarationNode), "Can't declare in for post"
+    assert not isinstance(post, SourceDeclarationNode), "Can't declare in for post"
 
     body = parse_statement(token_tape)
 
@@ -295,6 +295,8 @@ def parse_for_statement(token_tape: TokenTape, start_position: int) -> SourceFor
         start_position=start_position, init=init_expr, condition=condition, post=post, body=body
     )
 
+SourceConstantIntNode | SourceVarNode | SourceUnaryExpressionNode | SourceBinaryExpressionNode | SourceAssignmentNode | SourceTernaryExpressonNode | SourceDeclarationNode | None
+SourceConstantIntNode | SourceVarNode | SourceUnaryExpressionNode | SourceBinaryExpressionNode | SourceAssignmentNode | SourceTernaryExpressonNode | None
 
 def parse_statement(token_tape: TokenTape) -> SourceStatementNode:  # noqa: C901
     first_token = token_tape.peek()
