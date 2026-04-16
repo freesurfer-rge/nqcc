@@ -1,4 +1,3 @@
-
 from nqcc.lexer import CloseParenToken, SemicolonToken
 from nqcc.parser import (
     SourceAdd,

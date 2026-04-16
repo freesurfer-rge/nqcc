@@ -7,8 +7,10 @@ from nqcc.parser import (
     SourceASTBadValueError,
     SourceBinaryExpressionNode,
     SourceBlockNode,
+    SourceBreakNode,
     SourceCompoundNode,
     SourceConstantIntNode,
+    SourceContinueNode,
     SourceDeclarationNode,
     SourceExpressionStatementNode,
     SourceGreaterThan,
@@ -268,3 +270,29 @@ class TestSourceCompoundNode:
         assert isinstance(add_op.operator, SourceAdd)
         assert add_op.left == SourceVarNode(start_position=46, identifier="a")
         assert add_op.right == SourceConstantIntNode(start_position=50, value=1)
+
+
+class TestSourceBreakNode:
+    def test_simple(self):
+        c_str = """
+        break;
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+
+        node = parse_statement(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        assert node == SourceBreakNode(start_position=9, label="")
+
+
+class TestSourceContinueNode:
+    def test_simple(self):
+        c_str = """
+        continue;
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+
+        node = parse_statement(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        assert node == SourceContinueNode(start_position=9, label="")

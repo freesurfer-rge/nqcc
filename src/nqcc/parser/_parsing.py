@@ -49,9 +49,11 @@ from ._source_ast import (
     SourceBitwiseXor,
     SourceBlockItemNode,
     SourceBlockNode,
+    SourceBreakNode,
     SourceComplement,
     SourceCompoundNode,
     SourceConstantIntNode,
+    SourceContinueNode,
     SourceDeclarationNode,
     SourceDivide,
     SourceEqualTo,
@@ -260,6 +262,12 @@ def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
                     return SourceIfStatementNode(
                         start_position=sp, condition=if_cond, then=if_then, otherwise=if_otherwise
                     )
+                case "break":
+                    _ = token_tape.expect(SemicolonToken)
+                    return SourceBreakNode(start_position=sp)
+                case "continue":
+                    _ = token_tape.expect(SemicolonToken)
+                    return SourceContinueNode(start_position=sp)
 
                 case _:
                     raise SourceASTBadValueError(
