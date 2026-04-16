@@ -269,8 +269,8 @@ def parse_for_statement(token_tape: TokenTape, start_position: int) -> SourceFor
         init_expr = SourceInitExpressionNode(start_position=start_position, expression=None)
     elif isinstance(initial, SourceAssignmentNode):
         init_expr = SourceInitExpressionNode(start_position=initial.start_position, expression=initial)
-    elif isinstance(initial, SourceInitDeclNode):
-        init_expr = initial
+    elif isinstance(initial, SourceDeclarationNode):
+        init_expr = SourceInitDeclNode(start_position=initial.start_position, decl=initial)
     else:
         raise ValueError("Bad init expression")
     

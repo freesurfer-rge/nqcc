@@ -463,8 +463,9 @@ class TestSourceForNode:
     
     def test_simple_with_init(self):
         c_str = """
-        for( int i=0; i<10; i=i+1)
-            a = 10 + a;
+        for( int i=0; i<10; i=i+1) {
+            a = 12 + a;
+        }
         a = a + 1;
         """
         token_tape = TokenTape.from_c_source(c_str)
@@ -477,28 +478,29 @@ class TestSourceForNode:
         assert isinstance(node.init, SourceInitDeclNode)
         assert isinstance(node.init.decl, SourceDeclarationNode)
         decl = node.init.decl
-        assert decl.identifier == SourceVarNode(start_position=14, identifier="i")
-        assert decl.initial == SourceConstantIntNode(start_position=16, value=0)
+        assert decl.identifier == SourceVarNode(start_position=18, identifier="i")
+        assert decl.initial == SourceConstantIntNode(start_position=20, value=0)
 
         assert isinstance(node.condition, SourceBinaryExpressionNode)
         assert isinstance(node.condition.operator, SourceLessThan)
-        assert node.condition.left == SourceVarNode(start_position=19, identifier="i")
-        assert node.condition.right == SourceConstantIntNode(start_position=21, value=10)
+        assert node.condition.left == SourceVarNode(start_position=23, identifier="i")
+        assert node.condition.right == SourceConstantIntNode(start_position=25, value=10)
 
         assert isinstance(node.post, SourceAssignmentNode)
-        assert node.post.left == SourceVarNode(start_position=25, identifier="i")
+        assert node.post.left == SourceVarNode(start_position=29, identifier="i")
         assert isinstance(node.post.right, SourceBinaryExpressionNode)
         pe = node.post.right
         assert isinstance(pe.operator, SourceAdd)
-        assert pe.left == SourceVarNode(start_position=27, identifier="i")
-        assert pe.right == SourceConstantIntNode(start_position=29, value=1)
+        assert pe.left == SourceVarNode(start_position=31, identifier="i")
+        assert pe.right == SourceConstantIntNode(start_position=33, value=1)
 
-        assert isinstance(node.body, SourceExpressionStatementNode)
-        stmt = node.body
+        assert isinstance(node.body, SourceCompoundNode)
+        assert len(node.body.block.items) == 1
+        stmt = node.body.block.items[0]
         assert isinstance(stmt.value, SourceAssignmentNode)
-        assert stmt.value.left == SourceVarNode(start_position=44, identifier="a")
+        assert stmt.value.left == SourceVarNode(start_position=50, identifier="a")
         assert isinstance(stmt.value.right, SourceBinaryExpressionNode)
         assign_expr = stmt.value.right
         assert isinstance(assign_expr.operator, SourceAdd)
-        assert assign_expr.left == SourceConstantIntNode(start_position=48, value=10)
-        assert assign_expr.right == SourceVarNode(start_position=53, identifier="a")
+        assert assign_expr.left == SourceConstantIntNode(start_position=54, value=12)
+        assert assign_expr.right == SourceVarNode(start_position=59, identifier="a")
