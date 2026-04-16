@@ -12,6 +12,8 @@ from nqcc.parser import (
     SourceConstantIntNode,
     SourceContinueNode,
     SourceDeclarationNode,
+    SourceDivide,
+    SourceDoWhileNode,
     SourceExpressionStatementNode,
     SourceGreaterThan,
     SourceIfStatementNode,
@@ -20,8 +22,6 @@ from nqcc.parser import (
     SourceReturnNode,
     SourceVarNode,
     SourceWhileNode,
-    SourceDoWhileNode,
-    SourceDivide,
     TokenTape,
     parse_statement,
 )
@@ -359,6 +359,7 @@ class TestSourceWhileNode:
         assert stmt.value.right.left == SourceVarNode(start_position=42, identifier="a")
         assert stmt.value.right.right == SourceConstantIntNode(start_position=46, value=2)
 
+
 class TestSourceDoWhileNode:
     def test_simple(self):
         c_str = """
@@ -401,7 +402,7 @@ class TestSourceDoWhileNode:
 
         assert isinstance(node, SourceDoWhileNode)
         assert isinstance(node.body, SourceCompoundNode)
-        assert len(node.body.block.items)==1
+        assert len(node.body.block.items) == 1
         stmt = node.body.block.items[0]
         assert isinstance(stmt, SourceExpressionStatementNode)
         assert isinstance(stmt.value, SourceAssignmentNode)
