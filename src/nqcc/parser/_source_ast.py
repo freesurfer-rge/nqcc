@@ -224,12 +224,50 @@ class SourceCompoundNode(SourceASTNode):
     block: SourceBlockNode
 
 
+class SourceBreakNode(SourceASTNode):
+    node_type: Literal["SourceBreakNode"] = "SourceBreakNode"
+    label: str = ""
+
+
+class SourceContinueNode(SourceASTNode):
+    node_type: Literal["SourceContinueNode"] = "SourceContinueNode"
+    label: str = ""
+
+
+class SourceWhileNode(SourceASTNode):
+    node_type: Literal["SourceWhileNode"] = "SourceWhileNode"
+    condition: SourceExpressionNode
+    body: SourceStatementNode
+    label: str = ""
+
+
+class SourceDoWhileNode(SourceASTNode):
+    node_type: Literal["SourceDoWhileNode"] = "SourceDoWhileNode"
+    condition: SourceExpressionNode
+    body: SourceStatementNode
+    label: str = ""
+
+
+class SourceForNode(SourceASTNode):
+    node_type: Literal["SourceForNode"] = "SourceForNode"
+    init: SourceForInitNode
+    condition: SourceExpressionNode | None
+    post: SourceExpressionNode | None
+    body: SourceStatementNode
+    label: str = ""
+
+
 SourceStatementNode = Union[
     SourceReturnNode,
     SourceExpressionStatementNode,
     SourceNullStatementNode,
     SourceIfStatementNode,
     SourceCompoundNode,
+    SourceBreakNode,
+    SourceContinueNode,
+    SourceWhileNode,
+    SourceDoWhileNode,
+    SourceForNode,
 ]
 
 
@@ -245,6 +283,19 @@ SourceBlockItemNode = Union[SourceDeclarationNode, SourceStatementNode]
 class SourceBlockNode(SourceASTNode):
     node_type: Literal["SourceBlockNode"] = "SourceBlockNode"
     items: list[SourceBlockItemNode]
+
+
+class SourceInitDeclNode(SourceASTNode):
+    node_type: Literal["SourceInitDeclNode"] = "SourceInitDeclNode"
+    decl: SourceDeclarationNode
+
+
+class SourceInitExpressionNode(SourceASTNode):
+    node_type: Literal["SourceInitExpressionNode"] = "SourceInitExpressionNode"
+    expression: SourceExpressionNode | None
+
+
+SourceForInitNode = Union[SourceInitDeclNode, SourceInitExpressionNode]
 
 
 class SourceFunctionNode(SourceASTNode):

@@ -49,18 +49,25 @@ from ._source_ast import (
     SourceBitwiseXor,
     SourceBlockItemNode,
     SourceBlockNode,
+    SourceBreakNode,
     SourceComplement,
     SourceCompoundNode,
     SourceConstantIntNode,
+    SourceContinueNode,
     SourceDeclarationNode,
     SourceDivide,
+    SourceDoWhileNode,
     SourceEqualTo,
     SourceExpressionNode,
     SourceExpressionStatementNode,
+    SourceForInitNode,
+    SourceForNode,
     SourceFunctionNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
     SourceIfStatementNode,
+    SourceInitDeclNode,
+    SourceInitExpressionNode,
     SourceLeftShift,
     SourceLessThan,
     SourceLessThanOrEqual,
@@ -82,6 +89,7 @@ from ._source_ast import (
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
+    SourceWhileNode,
 )
 from ._token_tape import TokenTape
 
@@ -212,7 +220,104 @@ def parse_expression(token_tape: TokenTape, *, min_precedence: int) -> SourceExp
     return left
 
 
-def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
+def parse_optional_expression(
+    token_tape: TokenTape, end_token: Type
+) -> SourceExpressionNode | SourceDeclarationNode | None:
+    first_token = token_tape.peek()
+    result: SourceExpressionNode | SourceDeclarationNode
+    if isinstance(first_token, end_token):
+        _ = token_tape.expect(end_token)
+        return None
+    elif isinstance(first_token, KeywordToken):
+        assert first_token.value == "int", f"Was expecting int counter: {first_token}"
+        result = parse_declaration(token_tape)
+        # Decl will consume the ending token
+    else:
+        result = parse_expression(token_tape, min_precedence=0)
+        _ = token_tape.expect(end_token)
+    return result
+
+
+def parse_while_statement(token_tape: TokenTape, start_position: int) -> SourceWhileNode:
+    # while was already consumed
+    _ = token_tape.expect(OpenParenToken)
+    condition = parse_expression(token_tape, min_precedence=0)
+    _ = token_tape.expect(CloseParenToken)
+    body = parse_statement(token_tape)
+
+    return SourceWhileNode(start_position=start_position, condition=condition, body=body)
+
+
+def parse_dowhile_statement(token_tape: TokenTape, start_position: int) -> SourceDoWhileNode:
+    # do was already consumed
+    body = parse_statement(token_tape)
+    while_token = token_tape.expect(KeywordToken)
+    if while_token.value != "while":
+        raise SourceASTBadValueError(
+            expected_value="while", actual_token=while_token, message="Expected while for do"
+        )
+    _ = token_tape.expect(OpenParenToken)
+    condition = parse_expression(token_tape, min_precedence=0)
+    _ = token_tape.expect(CloseParenToken)
+    _ = token_tape.expect(SemicolonToken)
+    return SourceDoWhileNode(start_position=start_position, condition=condition, body=body)
+
+
+def parse_for_statement(token_tape: TokenTape, start_position: int) -> SourceForNode:
+    # for was already consumed
+    _ = token_tape.expect(OpenParenToken)
+
+    # Get the 'initial' expression
+    initial = parse_optional_expression(token_tape, SemicolonToken)
+    init_expr: SourceForInitNode
+    if initial is None:
+        init_expr = SourceInitExpressionNode(start_position=start_position, expression=None)
+    elif isinstance(initial, SourceAssignmentNode):
+        init_expr = SourceInitExpressionNode(
+            start_position=initial.start_position, expression=initial
+        )
+    elif isinstance(initial, SourceDeclarationNode):
+        init_expr = SourceInitDeclNode(start_position=initial.start_position, decl=initial)
+    else:
+        raise ValueError("Bad init expression")
+
+    # Get the 'condition' expression
+    condition = parse_optional_expression(token_tape, SemicolonToken)
+    assert not isinstance(condition, SourceDeclarationNode), "Can't declare in for condition"
+
+    # Get the 'post' expression
+    post = parse_optional_expression(token_tape, CloseParenToken)
+    assert not isinstance(post, SourceDeclarationNode), "Can't declare in for post"
+
+    body = parse_statement(token_tape)
+
+    return SourceForNode(
+        start_position=start_position, init=init_expr, condition=condition, post=post, body=body
+    )
+
+
+(
+    SourceConstantIntNode
+    | SourceVarNode
+    | SourceUnaryExpressionNode
+    | SourceBinaryExpressionNode
+    | SourceAssignmentNode
+    | SourceTernaryExpressonNode
+    | SourceDeclarationNode
+    | None
+)
+(
+    SourceConstantIntNode
+    | SourceVarNode
+    | SourceUnaryExpressionNode
+    | SourceBinaryExpressionNode
+    | SourceAssignmentNode
+    | SourceTernaryExpressonNode
+    | None
+)
+
+
+def parse_statement(token_tape: TokenTape) -> SourceStatementNode:  # noqa: C901
     first_token = token_tape.peek()
     sp = first_token.start_position
 
@@ -242,6 +347,24 @@ def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
                     return SourceIfStatementNode(
                         start_position=sp, condition=if_cond, then=if_then, otherwise=if_otherwise
                     )
+                case "break":
+                    _ = token_tape.expect(SemicolonToken)
+                    return SourceBreakNode(start_position=sp)
+                case "continue":
+                    _ = token_tape.expect(SemicolonToken)
+                    return SourceContinueNode(start_position=sp)
+
+                case "while":
+                    # Note that we already consumed the 'while'
+                    return parse_while_statement(token_tape, start_position=sp)
+
+                case "do":
+                    # We already consumed the 'do'
+                    return parse_dowhile_statement(token_tape, start_position=sp)
+
+                case "for":
+                    # We already consumed the 'for'
+                    return parse_for_statement(token_tape, start_position=sp)
 
                 case _:
                     raise SourceASTBadValueError(

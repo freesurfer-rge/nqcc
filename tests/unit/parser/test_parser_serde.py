@@ -66,3 +66,15 @@ class TestParserSerde:
         }
         """
         _check_round_trip(source)
+
+    def test_for_loop(self):
+        source = """
+        int main( void ) {
+            int a = 10;
+            for( int i=0; i<2*5; i=i+2) {
+                a = a * i;
+            }
+            return a;
+        }
+        """
+        _check_round_trip(source)
