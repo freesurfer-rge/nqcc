@@ -247,6 +247,19 @@ class SourceBlockNode(SourceASTNode):
     items: list[SourceBlockItemNode]
 
 
+class SourceInitDeclNode(SourceASTNode):
+    node_type: Literal["SourceInitDeclNode"] = "SourceInitDeclNode"
+    decl: SourceDeclarationNode
+
+
+class SourceInitExpressionNode(SourceASTNode):
+    node_type: Literal["SourceInitExpressionNode"] = "SourceInitExpressionNode"
+    expression: SourceExpressionNode | None
+
+
+SourceForInitNode = Union[SourceInitDeclNode, SourceInitExpressionNode]
+
+
 class SourceFunctionNode(SourceASTNode):
     node_type: Literal["SourceFunctionNode"] = "SourceFunctionNode"
     identifier: str
