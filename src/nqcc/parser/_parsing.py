@@ -85,7 +85,7 @@ from ._source_ast import (
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
-    SourceWhileNode,
+    SourceWhileNode,SourceForNode,SourceForInitNode, SourceInitExpressionNode, SourceInitDeclNode
 )
 from ._token_tape import TokenTape
 
@@ -235,6 +235,7 @@ def parse_optional_expression(
 
 
 def parse_while_statement(token_tape: TokenTape, start_position: int) -> SourceWhileNode:
+    # while was already consumed
     _ = token_tape.expect(OpenParenToken)
     condition = parse_expression(token_tape, min_precedence=0)
     _ = token_tape.expect(CloseParenToken)
@@ -244,7 +245,7 @@ def parse_while_statement(token_tape: TokenTape, start_position: int) -> SourceW
 
 
 def parse_dowhile_statement(token_tape: TokenTape, start_position: int) -> SourceDoWhileNode:
-    # do was already consume
+    # do was already consumed
     body = parse_statement(token_tape)
     while_token = token_tape.expect(KeywordToken)
     if while_token.value != "while":
@@ -256,6 +257,34 @@ def parse_dowhile_statement(token_tape: TokenTape, start_position: int) -> Sourc
     _ = token_tape.expect(CloseParenToken)
     _ = token_tape.expect(SemicolonToken)
     return SourceDoWhileNode(start_position=start_position, condition=condition, body=body)
+
+def parse_for_statement(token_tape: TokenTape, start_position: int) -> SourceForNode:
+    # for was already consumed
+    _ = token_tape.expect(OpenParenToken)
+
+    # Get the 'initial' expression
+    initial = parse_optional_expression(token_tape, SemicolonToken)
+    init_expr : SourceForInitNode
+    if initial is None:
+        init_expr = SourceInitExpressionNode(start_position=start_position, expression=None)
+    elif isinstance(initial, SourceAssignmentNode):
+        init_expr = SourceInitExpressionNode(start_position=initial.start_position, expression=initial)
+    elif isinstance(initial, SourceInitDeclNode):
+        init_expr = initial
+    else:
+        raise ValueError("Bad init expression")
+    
+    # Get the 'condition' expression
+    condition = parse_optional_expression(token_tape, SemicolonToken)
+    assert not isinstance(condition, SourceDeclarationNode), "Can't declare in for condition"
+
+    # Get the 'post' expression
+    post = parse_optional_expression(token_tape, CloseParenToken)
+    assert not isinstance(condition, SourceDeclarationNode), "Can't declare in for post"
+
+    body = parse_statement(token_tape)
+
+    return SourceForNode(start_position=start_position, init=init_expr, condition=condition, post=post, body=body)
 
 
 def parse_statement(token_tape: TokenTape) -> SourceStatementNode:  # noqa: C901
@@ -302,6 +331,10 @@ def parse_statement(token_tape: TokenTape) -> SourceStatementNode:  # noqa: C901
                 case "do":
                     # We already consumed the 'do'
                     return parse_dowhile_statement(token_tape, start_position=sp)
+                
+                case "for":
+                    # We already consumed the 'for'
+                    return parse_for_statement(token_tape, start_position=sp)
 
                 case _:
                     raise SourceASTBadValueError(
