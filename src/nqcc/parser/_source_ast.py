@@ -226,22 +226,26 @@ class SourceCompoundNode(SourceASTNode):
 
 class SourceBreakNode(SourceASTNode):
     node_type: Literal["SourceBreakNode"] = "SourceBreakNode"
+    label: str = ""
 
 
 class SourceContinueNode(SourceASTNode):
     node_type: Literal["SourceContinueNode"] = "SourceContinueNode"
+    label: str = ""
 
 
 class SourceWhileNode(SourceASTNode):
     node_type: Literal["SourceWhileNode"] = "SourceWhileNode"
     condition: SourceExpressionNode
     body: SourceStatementNode
+    label: str = ""
 
 
 class SourceDoWhileNode(SourceASTNode):
     node_type: Literal["SourceDoWhileNode"] = "SourceDoWhileNode"
     condition: SourceExpressionNode
     body: SourceStatementNode
+    label: str = ""
 
 
 class SourceForNode(SourceASTNode):
@@ -250,6 +254,7 @@ class SourceForNode(SourceASTNode):
     condition: SourceExpressionNode | None
     post: SourceExpressionNode | None
     body: SourceStatementNode
+    label: str = ""
 
 
 SourceStatementNode = Union[
