@@ -6,7 +6,7 @@ from ._parsing import (
     parse_expression,
     parse_function,
     parse_program,
-    parse_statement,
+    parse_statement,parse_optional_expression
 )
 from ._source_ast import (
     SourceAdd,
@@ -128,5 +128,5 @@ __all__ = [
     "parse_function",
     "parse_program",
     "parse_statement",
-    "parser_driver",
+    "parser_driver","parse_optional_expression"
 ]

@@ -211,6 +211,20 @@ def parse_expression(token_tape: TokenTape, *, min_precedence: int) -> SourceExp
         operator = convert_binary_operator(token_tape.peek())
     return left
 
+def parse_optional_expression(token_tape: TokenTape, end_token: Type) -> SourceExpressionNode | SourceDeclarationNode | None:
+    first_token = token_tape.peek()
+    result : SourceExpressionNode | SourceDeclarationNode
+    if isinstance(first_token,end_token):
+        _ = token_tape.expect(end_token)
+        return None
+    elif isinstance(first_token, KeywordToken):
+        assert first_token.value == "int", f"Was expecting int counter: {first_token}"
+        result = parse_declaration(token_tape)
+        # Decl will consume the ending token
+    else:
+        result = parse_expression(token_tape, min_precedence=0)
+        _ = token_tape.expect(end_token)
+    return result
 
 def parse_statement(token_tape: TokenTape) -> SourceStatementNode:
     first_token = token_tape.peek()
