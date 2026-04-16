@@ -5,8 +5,9 @@ from ._parsing import (
     parse_declaration,
     parse_expression,
     parse_function,
+    parse_optional_expression,
     parse_program,
-    parse_statement,parse_optional_expression
+    parse_statement,
 )
 from ._source_ast import (
     SourceAdd,
@@ -126,7 +127,8 @@ __all__ = [
     "parse_declaration",
     "parse_expression",
     "parse_function",
+    "parse_optional_expression",
     "parse_program",
     "parse_statement",
-    "parser_driver","parse_optional_expression"
+    "parser_driver",
 ]
