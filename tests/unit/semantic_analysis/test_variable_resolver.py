@@ -4,8 +4,10 @@ from nqcc.parser import (
     SourceAdd,
     SourceAssignmentNode,
     SourceBinaryExpressionNode,
+    SourceBreakNode,
     SourceCompoundNode,
     SourceConstantIntNode,
+    SourceContinueNode,
     SourceDeclarationNode,
     SourceExpressionStatementNode,
     SourceIfStatementNode,
@@ -13,6 +15,7 @@ from nqcc.parser import (
     SourceReturnNode,
     SourceTernaryExpressonNode,
     SourceVarNode,
+    SourceWhileNode,
     TokenTape,
     parse_declaration,
     parse_expression,
@@ -209,16 +212,25 @@ class TestExpressions:
 
 
 class TestStatements:
-    def test_null_statement(self):
+    @pytest.mark.parametrize(
+        ("c_stmt", "node_type"),
+        [
+            (";", SourceNullStatementNode),
+            ("break;", SourceBreakNode),
+            ("continue;", SourceContinueNode),
+        ],
+    )
+    def test_null_statement(self, c_stmt: str, node_type: type):
         target = VariableResolver()
-        variable_map = {}
-        c_str = ";"
-        token_tape = TokenTape.from_c_source(c_str)
+        variable_map: dict[str, VariableInfo] = {}
+        token_tape = TokenTape.from_c_source(c_stmt)
         stmt = parse_statement(token_tape)
-        assert isinstance(stmt, SourceNullStatementNode)
+        assert isinstance(stmt, node_type)
 
         result = target.resolve_statement(stmt, variable_map)
-        assert isinstance(result, SourceNullStatementNode)
+        assert isinstance(result, node_type)
+        assert result == stmt
+        assert len(variable_map) == 0
 
     def test_expression_statement(self):
         target = VariableResolver()
@@ -280,7 +292,6 @@ class TestStatements:
 """
         token_tape = TokenTape.from_c_source(c_str)
         stmt = parse_statement(token_tape)
-        # Will not consume the final semicolon
         assert token_tape.tokens_remaining == 0
         assert isinstance(stmt, SourceIfStatementNode)
         assert stmt.otherwise is not None
@@ -311,6 +322,39 @@ class TestStatements:
         assert isinstance(result.otherwise, SourceReturnNode)
         assert isinstance(result.otherwise.value, SourceVarNode)
         assert result.otherwise.value.identifier == "b.1"
+
+    def test_while_statement(self):
+        target = VariableResolver()
+        variable_map = {}
+        c_str = """
+        while( a < 10) a=a+1;
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        stmt = parse_statement(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        # Make sure that 'a' is declared
+        decl_a = SourceDeclarationNode(
+            start_position=10,
+            identifier=SourceVarNode(start_position=11, identifier="a"),
+            initial=None,
+        )
+        _ = target.resolve_declaration(decl_a, variable_map)
+
+        result = target.resolve_statement(stmt, variable_map)
+        assert len(variable_map) == 1
+        assert isinstance(result, SourceWhileNode)
+        assert isinstance(result.condition, SourceBinaryExpressionNode)
+        assert isinstance(result.condition.left, SourceVarNode)
+        assert result.condition.left.identifier == "a.0"
+
+        assert isinstance(result.body, SourceExpressionStatementNode)
+        assert isinstance(result.body.value, SourceAssignmentNode)
+        assert isinstance(result.body.value.left, SourceVarNode)
+        assert result.body.value.left.identifier == "a.0"
+        assert isinstance(result.body.value.right, SourceBinaryExpressionNode)
+        assert isinstance(result.body.value.right.left, SourceVarNode)
+        assert result.body.value.right.left.identifier == "a.0"
 
 
 class TestFunction:

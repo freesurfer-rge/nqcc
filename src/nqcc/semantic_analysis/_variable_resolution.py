@@ -7,8 +7,10 @@ from nqcc.parser import (
     SourceBinaryExpressionNode,
     SourceBlockItemNode,
     SourceBlockNode,
+    SourceBreakNode,
     SourceCompoundNode,
     SourceConstantIntNode,
+    SourceContinueNode,
     SourceDeclarationNode,
     SourceExpressionNode,
     SourceExpressionStatementNode,
@@ -21,6 +23,7 @@ from nqcc.parser import (
     SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
     SourceVarNode,
+    SourceWhileNode,
 )
 
 from ._exceptions import (
@@ -92,12 +95,16 @@ class VariableResolver:
             case SourceExpressionStatementNode():
                 updated = self.resolve_expression(stmt.value, variable_map)
                 return SourceExpressionStatementNode(start_position=sp, value=updated)
-            case SourceNullStatementNode():
-                return SourceNullStatementNode(start_position=sp)
+            case SourceNullStatementNode() | SourceContinueNode() | SourceBreakNode():
+                return stmt
             case SourceCompoundNode():
                 inner_map = make_inner_variable_map(variable_map)
                 resolved_block = self.resolve_block(stmt.block, inner_map)
                 return SourceCompoundNode(start_position=sp, block=resolved_block)
+            case SourceWhileNode():
+                updated_cond = self.resolve_expression(stmt.condition, variable_map)
+                updated_body = self.resolve_statement(stmt.body, variable_map)
+                return SourceWhileNode(start_position=sp, condition=updated_cond, body=updated_body)
             case _:
                 raise ValueError(f"Unrecognised: {stmt}")
 
