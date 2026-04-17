@@ -1,7 +1,15 @@
 import pytest
 
-from nqcc.parser import SourceBreakNode, SourceContinueNode
-from nqcc.semantic_analysis import LoopLabeller, SemanticAnalysisOutsideLoop
+from nqcc.parser import (
+    SourceBreakNode,
+    SourceCompoundNode,
+    SourceContinueNode,
+    SourceIfStatementNode,
+    SourceWhileNode,
+    TokenTape,
+    parse_function,
+)
+from nqcc.semantic_analysis import LoopLabeller, SemanticAnalysisOutsideLoop, label_loops_function
 
 
 class TestErrors:
@@ -20,3 +28,47 @@ class TestErrors:
         with pytest.raises(SemanticAnalysisOutsideLoop) as saeol:
             _ = target.label_statement(stmt, "")
         assert saeol.value.message == "Outside loop: SourceContinueNode 112"
+
+
+class TestWhileLabelling:
+    def test_simple(self):
+        # This looks odd, but we need to check both side of the if
+        c_str = """
+        int main( void ) {
+            int a = 0;
+            int b = 2;
+            while( a < 10 ) {
+                if( a== 2) continue; else continue;
+                if( b> 120) break;
+                b = b * 2;
+            }
+            return b;
+        }
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        func = parse_function(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        # We don't need to do variable resolution to test
+
+        label_loops_function(func)
+
+        assert len(func.body.items) == 4
+        while_stmt = func.body.items[2]
+        assert isinstance(while_stmt, SourceWhileNode)
+        assert while_stmt.label == "while.main.0"
+
+        assert isinstance(while_stmt.body, SourceCompoundNode)
+        assert len(while_stmt.body.block.items) == 3
+
+        if_cont = while_stmt.body.block.items[0]
+        assert isinstance(if_cont, SourceIfStatementNode)
+        assert isinstance(if_cont.then, SourceContinueNode)
+        assert if_cont.then.label == "while.main.0"
+        assert isinstance(if_cont.otherwise, SourceContinueNode)
+        assert if_cont.otherwise.label == "while.main.0"
+
+        if_break = while_stmt.body.block.items[1]
+        assert isinstance(if_break, SourceIfStatementNode)
+        assert isinstance(if_break.then, SourceBreakNode)
+        assert if_break.then.label == "while.main.0"
