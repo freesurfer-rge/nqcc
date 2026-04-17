@@ -11,7 +11,7 @@ from nqcc.parser import (
     SourceFunctionNode,
     SourceIfStatementNode,
     SourceStatementNode,
-    SourceWhileNode,
+    SourceWhileNode,SourceForNode
 )
 
 from ._exceptions import SemanticAnalysisOutsideLoop
@@ -48,6 +48,10 @@ class LoopLabeller:
                 self.label_statement(stmt.body, loop_label)
                 stmt.label = loop_label
             case SourceDoWhileNode():
+                loop_label = self.get_loop_label(stmt)
+                self.label_statement(stmt.body, loop_label)
+                stmt.label = loop_label
+            case SourceForNode():
                 loop_label = self.get_loop_label(stmt)
                 self.label_statement(stmt.body, loop_label)
                 stmt.label = loop_label

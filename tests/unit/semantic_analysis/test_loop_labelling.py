@@ -5,7 +5,7 @@ from nqcc.parser import (
     SourceCompoundNode,
     SourceContinueNode,
     SourceDoWhileNode,
-    SourceIfStatementNode,
+    SourceIfStatementNode,SourceForNode,
     SourceWhileNode,
     TokenTape,
     parse_function,
@@ -162,3 +162,29 @@ class TestDowhileLabelling:
         assert isinstance(if_break, SourceIfStatementNode)
         assert isinstance(if_break.then, SourceBreakNode)
         assert if_break.then.label == "do.main.0"
+
+
+class TestForLabelling:
+    def test_simple(self):
+        c_str = """
+        int main( void ) {
+            int a =0;
+            for( ; a<10; a=a+1) continue;
+            return a;
+        }
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        func = parse_function(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        # We don't need to do variable resolution to test
+
+        label_loops_function(func)
+        assert len(func.body.items) == 3
+
+        for_stmt = func.body.items[1]
+        assert isinstance(for_stmt, SourceForNode)
+        assert for_stmt.label == "for.main.0"
+
+        assert isinstance(for_stmt.body, SourceContinueNode)
+        assert for_stmt.body.label == "for.main.0"
