@@ -16,6 +16,7 @@ from nqcc.parser import (
     SourceTernaryExpressonNode,
     SourceVarNode,
     SourceWhileNode,
+    SourceDoWhileNode,
     TokenTape,
     parse_declaration,
     parse_expression,
@@ -355,6 +356,39 @@ class TestStatements:
         assert isinstance(result.body.value.right, SourceBinaryExpressionNode)
         assert isinstance(result.body.value.right.left, SourceVarNode)
         assert result.body.value.right.left.identifier == "a.0"
+
+    def test_dowhile_statement(self):
+        target = VariableResolver()
+        variable_map = {}
+        c_str = """
+        do a=2+a; while( a < 3 );
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        stmt = parse_statement(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        # Make sure that 'a' is declared
+        decl_a = SourceDeclarationNode(
+            start_position=10,
+            identifier=SourceVarNode(start_position=11, identifier="a"),
+            initial=None,
+        )
+        _ = target.resolve_declaration(decl_a, variable_map)
+
+        result = target.resolve_statement(stmt, variable_map)
+        assert len(variable_map) == 1
+        assert isinstance(result, SourceDoWhileNode)
+        assert isinstance(result.condition, SourceBinaryExpressionNode)
+        assert isinstance(result.condition.left, SourceVarNode)
+        assert result.condition.left.identifier == "a.0"
+
+        assert isinstance(result.body, SourceExpressionStatementNode)
+        assert isinstance(result.body.value, SourceAssignmentNode)
+        assert isinstance(result.body.value.left, SourceVarNode)
+        assert result.body.value.left.identifier == "a.0"
+        assert isinstance(result.body.value.right, SourceBinaryExpressionNode)
+        assert isinstance(result.body.value.right.right, SourceVarNode)
+        assert result.body.value.right.right.identifier == "a.0"
 
 
 class TestFunction:

@@ -20,6 +20,7 @@ from nqcc.parser import (
     SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
+    SourceDoWhileNode,
     SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
     SourceVarNode,
@@ -105,6 +106,12 @@ class VariableResolver:
                 updated_cond = self.resolve_expression(stmt.condition, variable_map)
                 updated_body = self.resolve_statement(stmt.body, variable_map)
                 return SourceWhileNode(start_position=sp, condition=updated_cond, body=updated_body)
+            case SourceDoWhileNode():
+                updated_cond = self.resolve_expression(stmt.condition, variable_map)
+                updated_body = self.resolve_statement(stmt.body, variable_map)
+                return SourceDoWhileNode(
+                    start_position=sp, condition=updated_cond, body=updated_body
+                )
             case _:
                 raise ValueError(f"Unrecognised: {stmt}")
 
