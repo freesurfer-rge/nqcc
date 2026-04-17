@@ -7,13 +7,20 @@ from nqcc.parser import (
     SourceBinaryExpressionNode,
     SourceBlockItemNode,
     SourceBlockNode,
+    SourceBreakNode,
     SourceCompoundNode,
     SourceConstantIntNode,
+    SourceContinueNode,
     SourceDeclarationNode,
+    SourceDoWhileNode,
     SourceExpressionNode,
     SourceExpressionStatementNode,
+    SourceForInitNode,
+    SourceForNode,
     SourceFunctionNode,
     SourceIfStatementNode,
+    SourceInitDeclNode,
+    SourceInitExpressionNode,
     SourceNullStatementNode,
     SourceProgramNode,
     SourceReturnNode,
@@ -21,6 +28,7 @@ from nqcc.parser import (
     SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
     SourceVarNode,
+    SourceWhileNode,
 )
 
 from ._exceptions import (
@@ -69,6 +77,21 @@ class VariableResolver:
             start_position=decl.start_position, identifier=nxt_var, initial=nxt_init
         )
 
+    def resolve_for_init(
+        self, init: SourceForInitNode, variable_map: dict[str, VariableInfo]
+    ) -> SourceForInitNode:
+        assert isinstance(init, get_args(SourceForInitNode))
+        sp = init.start_position
+        match init:
+            case SourceInitDeclNode():
+                updated_decl = self.resolve_declaration(init.decl, variable_map)
+                return SourceInitDeclNode(start_position=sp, decl=updated_decl)
+            case SourceInitExpressionNode():
+                updated_exp = self.resolve_optional_expression(init.expression, variable_map)
+                return SourceInitExpressionNode(start_position=sp, expression=updated_exp)
+            case _:
+                raise ValueError(f"Unrecognised: {init}")
+
     def resolve_statement(
         self, stmt: SourceStatementNode, variable_map: dict[str, VariableInfo]
     ) -> SourceStatementNode:
@@ -92,14 +115,40 @@ class VariableResolver:
             case SourceExpressionStatementNode():
                 updated = self.resolve_expression(stmt.value, variable_map)
                 return SourceExpressionStatementNode(start_position=sp, value=updated)
-            case SourceNullStatementNode():
-                return SourceNullStatementNode(start_position=sp)
+            case SourceNullStatementNode() | SourceContinueNode() | SourceBreakNode():
+                return stmt
             case SourceCompoundNode():
                 inner_map = make_inner_variable_map(variable_map)
                 resolved_block = self.resolve_block(stmt.block, inner_map)
                 return SourceCompoundNode(start_position=sp, block=resolved_block)
+            case SourceWhileNode():
+                updated_cond = self.resolve_expression(stmt.condition, variable_map)
+                updated_body = self.resolve_statement(stmt.body, variable_map)
+                return SourceWhileNode(start_position=sp, condition=updated_cond, body=updated_body)
+            case SourceDoWhileNode():
+                updated_cond = self.resolve_expression(stmt.condition, variable_map)
+                updated_body = self.resolve_statement(stmt.body, variable_map)
+                return SourceDoWhileNode(
+                    start_position=sp, condition=updated_cond, body=updated_body
+                )
+            case SourceForNode():
+                inner_map = make_inner_variable_map(variable_map)
+                init = self.resolve_for_init(stmt.init, inner_map)
+                cond = self.resolve_optional_expression(stmt.condition, inner_map)
+                post = self.resolve_optional_expression(stmt.post, inner_map)
+                body = self.resolve_statement(stmt.body, inner_map)
+                return SourceForNode(
+                    start_position=sp, init=init, condition=cond, post=post, body=body
+                )
             case _:
                 raise ValueError(f"Unrecognised: {stmt}")
+
+    def resolve_optional_expression(
+        self, expr: SourceExpressionNode | None, variable_map: dict[str, VariableInfo]
+    ) -> SourceExpressionNode | None:
+        if expr is None:
+            return None
+        return self.resolve_expression(expr, variable_map)
 
     def resolve_expression(
         self, expr: SourceExpressionNode, variable_map: dict[str, VariableInfo]

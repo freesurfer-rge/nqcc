@@ -1,4 +1,10 @@
-from nqcc.parser import SourceDeclarationNode, SourceExpressionNode, SourceVarNode
+from nqcc.parser import (
+    SourceBreakNode,
+    SourceContinueNode,
+    SourceDeclarationNode,
+    SourceExpressionNode,
+    SourceVarNode,
+)
 
 
 class SemanticAnalysisDuplicateDeclaration(ValueError):
@@ -23,5 +29,13 @@ class SemanticAnalysisUnknownVariable(ValueError):
     def __init__(self, *, var: SourceVarNode):
         self.var = var
         message = f"Unknown identifier '{var.identifier}' at {var.start_position}"
+        self.message = message
+        super().__init__(self.message)
+
+
+class SemanticAnalysisOutsideLoop(ValueError):
+    def __init__(self, *, stmt: SourceBreakNode | SourceContinueNode):
+        self.stmt = stmt
+        message = f"Outside loop: {stmt.node_type} {stmt.start_position}"
         self.message = message
         super().__init__(self.message)
