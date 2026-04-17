@@ -5,7 +5,7 @@ from ._exceptions import (
     SemanticAnalysisOutsideLoop,
     SemanticAnalysisUnknownVariable,
 )
-from ._loop_labelling import LoopLabeller, label_loops_function
+from ._loop_labelling import LoopLabeller, label_loops_function, label_loops_program
 from ._variable_resolution import (
     VariableInfo,
     VariableResolver,
@@ -23,6 +23,7 @@ __all__ = [
     "VariableInfo",
     "VariableResolver",
     "label_loops_function",
+    "label_loops_program",
     "make_inner_variable_map",
     "resolve_function",
     "resolve_program",

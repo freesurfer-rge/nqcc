@@ -5,12 +5,19 @@ from nqcc.parser import (
     SourceCompoundNode,
     SourceContinueNode,
     SourceDoWhileNode,
-    SourceIfStatementNode,SourceForNode,
+    SourceForNode,
+    SourceIfStatementNode,
     SourceWhileNode,
     TokenTape,
     parse_function,
+    parse_program,
 )
-from nqcc.semantic_analysis import LoopLabeller, SemanticAnalysisOutsideLoop, label_loops_function
+from nqcc.semantic_analysis import (
+    LoopLabeller,
+    SemanticAnalysisOutsideLoop,
+    label_loops_function,
+    label_loops_program,
+)
 
 
 class TestErrors:
@@ -183,6 +190,32 @@ class TestForLabelling:
         assert len(func.body.items) == 3
 
         for_stmt = func.body.items[1]
+        assert isinstance(for_stmt, SourceForNode)
+        assert for_stmt.label == "for.main.0"
+
+        assert isinstance(for_stmt.body, SourceContinueNode)
+        assert for_stmt.body.label == "for.main.0"
+
+
+class TestProgram:
+    def test_smoke(self):
+        c_str = """
+        int main( void ) {
+            int a =0;
+            for( ; a<10; a=a+1) continue;
+            return a;
+        }
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        prog = parse_program(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        # We don't need to do variable resolution to test
+
+        label_loops_program(prog)
+        assert len(prog.value.body.items) == 3
+
+        for_stmt = prog.value.body.items[1]
         assert isinstance(for_stmt, SourceForNode)
         assert for_stmt.label == "for.main.0"
 

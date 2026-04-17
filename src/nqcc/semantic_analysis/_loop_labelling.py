@@ -10,8 +10,9 @@ from nqcc.parser import (
     SourceForNode,
     SourceFunctionNode,
     SourceIfStatementNode,
+    SourceProgramNode,
     SourceStatementNode,
-    SourceWhileNode,SourceForNode
+    SourceWhileNode,
 )
 
 from ._exceptions import SemanticAnalysisOutsideLoop
@@ -78,3 +79,9 @@ def label_loops_function(func: SourceFunctionNode) -> None:
 
     labeller = LoopLabeller(function_name=func.identifier)
     labeller.label_block(func.body, "")
+
+
+def label_loops_program(prog: SourceProgramNode) -> None:
+    assert isinstance(prog, SourceProgramNode)
+
+    label_loops_function(prog.value)
