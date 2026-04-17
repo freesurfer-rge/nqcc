@@ -19,6 +19,10 @@ from ._exceptions import SemanticAnalysisOutsideLoop
 
 LABEL_MAP = {SourceForNode: "for", SourceWhileNode: "while", SourceDoWhileNode: "do"}
 
+# Note that in this file, we do in-place updates
+# Unlike the variable resolver, we only have to deal with a subset of the statements
+# so we can do a simpler in-place update
+
 
 class LoopLabeller:
     def __init__(self, *, function_name: str) -> None:
@@ -82,6 +86,7 @@ def label_loops_function(func: SourceFunctionNode) -> None:
 
 
 def label_loops_program(prog: SourceProgramNode) -> None:
+    # An in-place update
     assert isinstance(prog, SourceProgramNode)
 
     label_loops_function(prog.value)
