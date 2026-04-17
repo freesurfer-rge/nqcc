@@ -40,7 +40,7 @@ class TestErrors:
 
 class TestWhileLabelling:
     def test_simple(self):
-        # This looks odd, but we need to check both side of the if
+        # This looks odd, but we need to check both sides of the if
         c_str = """
         int main( void ) {
             int a = 0;
