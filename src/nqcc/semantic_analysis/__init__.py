@@ -2,8 +2,10 @@ from ._driver import semantic_analysis_driver
 from ._exceptions import (
     SemanticAnalysisBadLValue,
     SemanticAnalysisDuplicateDeclaration,
-    SemanticAnalysisUnknownVariable,SemanticAnalysisOutsideLoop
+    SemanticAnalysisOutsideLoop,
+    SemanticAnalysisUnknownVariable,
 )
+from ._loop_labelling import LoopLabeller
 from ._variable_resolution import (
     VariableInfo,
     VariableResolver,
@@ -13,9 +15,11 @@ from ._variable_resolution import (
 )
 
 __all__ = [
+    "LoopLabeller",
     "SemanticAnalysisBadLValue",
     "SemanticAnalysisDuplicateDeclaration",
-    "SemanticAnalysisUnknownVariable","SemanticAnalysisOutsideLoop",
+    "SemanticAnalysisOutsideLoop",
+    "SemanticAnalysisUnknownVariable",
     "VariableInfo",
     "VariableResolver",
     "make_inner_variable_map",
