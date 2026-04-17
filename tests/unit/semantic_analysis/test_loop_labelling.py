@@ -72,3 +72,52 @@ class TestWhileLabelling:
         assert isinstance(if_break, SourceIfStatementNode)
         assert isinstance(if_break.then, SourceBreakNode)
         assert if_break.then.label == "while.main.0"
+
+    def test_nested(self):
+        c_str = """
+        int main( void ) {
+            int a = 0;
+            int b = 2;
+            while( a < 10 ) {
+                int c = 0;
+                while( c < 12 ) {
+                    if( c%2 == 0) break;
+                    b = b+1;
+                    c = c + 3;
+                }
+                if( b> 120) continue;
+                b = b * 2;
+            }
+            return b;
+        }
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        func = parse_function(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        # We don't need to do variable resolution to test
+
+        label_loops_function(func)
+        assert len(func.body.items) == 4
+
+        outer_while = func.body.items[2]
+        assert isinstance(outer_while, SourceWhileNode)
+        assert outer_while.label == "while.main.0"
+
+        assert isinstance(outer_while.body, SourceCompoundNode)
+        assert len(outer_while.body.block.items) == 4
+
+        inner_while = outer_while.body.block.items[1]
+        assert isinstance(inner_while, SourceWhileNode)
+        assert inner_while.label == "while.main.1"
+        assert isinstance(inner_while.body, SourceCompoundNode)
+        assert len(inner_while.body.block.items) == 3
+        inner_if = inner_while.body.block.items[0]
+        assert isinstance(inner_if, SourceIfStatementNode)
+        assert isinstance(inner_if.then, SourceBreakNode)
+        assert inner_if.then.label == "while.main.1"
+
+        outer_if = outer_while.body.block.items[2]
+        assert isinstance(outer_if, SourceIfStatementNode)
+        assert isinstance(outer_if.then, SourceContinueNode)
+        assert outer_if.then.label == "while.main.0"
