@@ -47,7 +47,10 @@ class LoopLabeller:
                 loop_label = self.get_loop_label(stmt)
                 self.label_statement(stmt.body, loop_label)
                 stmt.label = loop_label
-
+            case SourceDoWhileNode():
+                loop_label = self.get_loop_label(stmt)
+                self.label_statement(stmt.body, loop_label)
+                stmt.label = loop_label
             case _:
                 # We're modifying in place and don't need to worry about other types
                 pass

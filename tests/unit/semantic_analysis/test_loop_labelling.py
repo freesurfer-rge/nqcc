@@ -4,6 +4,7 @@ from nqcc.parser import (
     SourceBreakNode,
     SourceCompoundNode,
     SourceContinueNode,
+    SourceDoWhileNode,
     SourceIfStatementNode,
     SourceWhileNode,
     TokenTape,
@@ -121,3 +122,43 @@ class TestWhileLabelling:
         assert isinstance(outer_if, SourceIfStatementNode)
         assert isinstance(outer_if.then, SourceContinueNode)
         assert outer_if.then.label == "while.main.0"
+
+
+class TestDowhileLabelling:
+    def test_simple(self):
+        c_str = """
+        int main( void ) {
+            int a = 0;
+            int b = 2;
+            do {
+                if( a == 2) continue;
+                if( b > 120) break;
+                b = b * 2;
+                a = a + 1;
+            } while ( a< 10 );
+            return b;
+        }
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        func = parse_function(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        # We don't need to do variable resolution to test
+
+        label_loops_function(func)
+        assert len(func.body.items) == 4
+
+        do_stmt = func.body.items[2]
+        assert isinstance(do_stmt, SourceDoWhileNode)
+        assert do_stmt.label == "do.main.0"
+
+        assert isinstance(do_stmt.body, SourceCompoundNode)
+        assert len(do_stmt.body.block.items) == 4
+        if_cont = do_stmt.body.block.items[0]
+        assert isinstance(if_cont, SourceIfStatementNode)
+        assert isinstance(if_cont.then, SourceContinueNode)
+        assert if_cont.then.label == "do.main.0"
+        if_break = do_stmt.body.block.items[1]
+        assert isinstance(if_break, SourceIfStatementNode)
+        assert isinstance(if_break.then, SourceBreakNode)
+        assert if_break.then.label == "do.main.0"
