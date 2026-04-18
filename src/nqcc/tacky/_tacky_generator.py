@@ -42,6 +42,8 @@ from nqcc.parser import (
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
+    SourceBreakNode,
+    SourceContinueNode,
 )
 
 from ._tacky_ast import (
@@ -106,6 +108,14 @@ _BINARY_OPERATOR_MAP: dict[Type[SourceBinaryOperator], Type[TackyBinaryOperator]
     SourceGreaterThan: TackyGreaterThan,
     SourceGreaterThanOrEqual: TackyGreaterThanOrEqual,
 }
+
+
+def get_break_label(loop_label: str) -> str:
+    return f"break_{loop_label}"
+
+
+def get_continue_label(loop_label: str) -> str:
+    return f"continue_{loop_label}"
 
 
 class TackyGenerator:
@@ -423,12 +433,24 @@ class TackyGenerator:
                 self.emit_expression(source_node.value)
             case SourceReturnNode():
                 src = self.emit_expression(source_node.value)
-                instr = TackyReturnNode(start_position=source_node.start_position, value=src)
-                self._current_instructions.append(instr)
+                ret_instr = TackyReturnNode(start_position=source_node.start_position, value=src)
+                self._current_instructions.append(ret_instr)
             case SourceIfStatementNode():
                 self.emit_if_statement(source_node)
             case SourceCompoundNode():
                 self.emit_block(source_node.block)
+            case SourceBreakNode():
+                break_instr = TackyJumpNode(
+                    start_position=source_node.start_position,
+                    target=get_break_label(source_node.label),
+                )
+                self._current_instructions.append(break_instr)
+            case SourceContinueNode():
+                continue_instr = TackyJumpNode(
+                    start_position=source_node.start_position,
+                    target=get_continue_label(source_node.label),
+                )
+                self._current_instructions.append(continue_instr)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
