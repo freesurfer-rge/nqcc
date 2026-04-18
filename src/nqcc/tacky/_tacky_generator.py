@@ -44,7 +44,7 @@ from nqcc.parser import (
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
-    SourceWhileNode,
+    SourceWhileNode,SourceDoWhileNode
 )
 
 from ._tacky_ast import (
@@ -110,6 +110,8 @@ _BINARY_OPERATOR_MAP: dict[Type[SourceBinaryOperator], Type[TackyBinaryOperator]
     SourceGreaterThanOrEqual: TackyGreaterThanOrEqual,
 }
 
+def get_start_label(loop_label: str) -> str:
+    return f"start_{loop_label}"
 
 def get_break_label(loop_label: str) -> str:
     return f"break_{loop_label}"
@@ -454,6 +456,28 @@ class TackyGenerator:
         )
         self._current_instructions.append(break_label)
 
+    def emit_dowhile_statement(self, source_node: SourceDoWhileNode):
+        assert isinstance(source_node, SourceDoWhileNode)
+
+        start_label = TackyLabelNode(start_position=source_node.start_position, identifier=get_start_label(source_node.label))
+        self._current_instructions.append(start_label)
+
+        self.emit_statement(source_node.body)
+
+        cont_label = TackyLabelNode(start_position=source_node.start_position, identifier=get_continue_label(source_node.label))
+        self._current_instructions.append(cont_label)
+
+        cond_val = self.emit_expression(source_node.condition)
+        jump_condition = TackyJumpIfNotZeroNode(
+            start_position=source_node.condition.start_position,
+            target=get_start_label(source_node.label),
+            condition=cond_val,
+        )
+        self._current_instructions.append(jump_condition)
+
+        break_label = TackyLabelNode(start_position=source_node.start_position, identifier=get_break_label(source_node.label))
+        self._current_instructions.append(break_label)
+
     def emit_statement(self, source_node: SourceStatementNode):
         assert isinstance(source_node, get_args(SourceStatementNode))
         match source_node:
@@ -483,6 +507,8 @@ class TackyGenerator:
                 self._current_instructions.append(continue_instr)
             case SourceWhileNode():
                 self.emit_while_statement(source_node)
+            case SourceDoWhileNode():
+                self.emit_dowhile_statement(source_node)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 

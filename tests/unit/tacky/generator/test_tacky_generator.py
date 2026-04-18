@@ -298,6 +298,26 @@ class TestStatements:
         instr11 = target._current_instructions[11]
         assert instr11 == TackyLabelNode(start_position=9, identifier="break_while.test_while.0")
 
+    def test_dowhile(self):
+        source = """
+        do {
+          if( a==2 ) continue;
+          a = a + 1;
+          break;
+        } while( a < 10 );
+        """
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_block_item(token_tape)
+
+        labeller = LoopLabeller(function_name="test_while")
+        labeller.label_statement(src_node, current_label="")
+
+        target = TackyGenerator()
+        target._curr_function = "test_while"
+
+        # Skip semantic analysis for now
+        target.emit_statement(src_node)
+        assert len(target._current_instructions) == 12
 
 class TestBlockItems:
     def test_declaration(self):
