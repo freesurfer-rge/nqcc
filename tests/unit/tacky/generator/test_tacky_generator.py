@@ -256,6 +256,47 @@ class TestStatements:
 
         # Skip semantic analysis for now
         target.emit_statement(src_node)
+        assert len(target._current_instructions) == 12
+
+        instr0 = target._current_instructions[0]
+        assert instr0 == TackyLabelNode(start_position=9, identifier="continue_while.test_while.0")
+
+        instr1 = target._current_instructions[1]
+        assert isinstance(instr1, TackyBinaryNode)
+
+        instr2 = target._current_instructions[2]
+        assert instr2 == TackyJumpIfZeroNode(
+            start_position=18, target="break_while.test_while.0", condition=instr1.dst
+        )
+
+        instr3 = target._current_instructions[3]
+        assert isinstance(instr3, TackyBinaryNode)
+
+        instr4 = target._current_instructions[4]
+        assert instr4 == TackyJumpIfZeroNode(
+            start_position=37, target="label.test_while.ifend.1", condition=instr3.dst
+        )
+
+        instr5 = target._current_instructions[5]
+        assert instr5 == TackyJumpNode(start_position=48, target="continue_while.test_while.0")
+
+        instr6 = target._current_instructions[6]
+        assert instr6 == TackyLabelNode(start_position=37, identifier="label.test_while.ifend.1")
+
+        instr7 = target._current_instructions[7]
+        assert isinstance(instr7, TackyBinaryNode)
+
+        instr8 = target._current_instructions[8]
+        assert isinstance(instr8, TackyCopyNode)
+
+        instr9 = target._current_instructions[9]
+        assert instr9 == TackyJumpNode(start_position=89, target="break_while.test_while.0")
+
+        instr10 = target._current_instructions[10]
+        assert instr10 == TackyJumpNode(start_position=9, target="continue_while.test_while.0")
+
+        instr11 = target._current_instructions[11]
+        assert instr11 == TackyLabelNode(start_position=9, identifier="break_while.test_while.0")
 
 
 class TestBlockItems:
