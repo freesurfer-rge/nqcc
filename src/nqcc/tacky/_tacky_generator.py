@@ -10,9 +10,11 @@ from nqcc.parser import (
     SourceBitwiseXor,
     SourceBlockItemNode,
     SourceBlockNode,
+    SourceBreakNode,
     SourceComplement,
     SourceCompoundNode,
     SourceConstantIntNode,
+    SourceContinueNode,
     SourceDeclarationNode,
     SourceDivide,
     SourceEqualTo,
@@ -42,8 +44,7 @@ from nqcc.parser import (
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
-    SourceBreakNode,
-    SourceContinueNode,
+    SourceWhileNode,
 )
 
 from ._tacky_ast import (
@@ -424,6 +425,35 @@ class TackyGenerator:
         # Finally end the if block
         self._current_instructions.append(end_label)
 
+    def emit_while_statement(self, source_node: SourceWhileNode):
+        assert isinstance(source_node, SourceWhileNode)
+
+        cont_label = TackyLabelNode(
+            start_position=source_node.start_position,
+            identifier=get_continue_label(source_node.label),
+        )
+        self._current_instructions.append(cont_label)
+
+        cond_val = self.emit_expression(source_node.condition)
+        jump_condition = TackyJumpIfZeroNode(
+            start_position=source_node.condition.start_position,
+            target=get_break_label(source_node.label),
+            condition=cond_val,
+        )
+        self._current_instructions.append(jump_condition)
+
+        self.emit_statement(source_node.body)
+
+        jump_continue = TackyJumpNode(
+            start_position=source_node.start_position, target=get_continue_label(source_node.label)
+        )
+        self._current_instructions.append(jump_continue)
+
+        break_label = TackyLabelNode(
+            start_position=source_node.start_position, identifier=get_break_label(source_node.label)
+        )
+        self._current_instructions.append(break_label)
+
     def emit_statement(self, source_node: SourceStatementNode):
         assert isinstance(source_node, get_args(SourceStatementNode))
         match source_node:
@@ -451,6 +481,8 @@ class TackyGenerator:
                     target=get_continue_label(source_node.label),
                 )
                 self._current_instructions.append(continue_instr)
+            case SourceWhileNode():
+                self.emit_while_statement(source_node)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 

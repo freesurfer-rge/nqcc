@@ -1,5 +1,5 @@
 from nqcc.parser import TokenTape, parse_block_item, parse_function, parse_program, parse_statement
-from nqcc.semantic_analysis import resolve_function, LoopLabeller
+from nqcc.semantic_analysis import LoopLabeller, resolve_function
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
@@ -237,7 +237,6 @@ class TestStatements:
         assert instr0.dst == TackyVarNode(start_position=6, identifier="a")
         assert instr0.src == TackyConstantIntNode(start_position=10, value=1)
 
-    
     def test_while(self):
         source = """
         while( a < 10 ) {
@@ -256,7 +255,7 @@ class TestStatements:
         target._curr_function = "test_while"
 
         # Skip semantic analysis for now
-        target.emit_blockitem(src_node)
+        target.emit_statement(src_node)
 
 
 class TestBlockItems:
@@ -292,7 +291,6 @@ class TestBlockItems:
         assert instr0.dst == TackyVarNode(start_position=7, identifier="tmp.test_declaration.0")
         assert instr0.left == TackyConstantIntNode(start_position=6, value=1)
         assert instr0.right == TackyConstantIntNode(start_position=8, value=2)
-
 
 
 class TestFunctions:
