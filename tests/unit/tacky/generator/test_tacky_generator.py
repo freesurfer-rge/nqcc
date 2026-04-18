@@ -8,6 +8,7 @@ from nqcc.tacky import (
     TackyCopyNode,
     TackyFunctionNode,
     TackyGenerator,
+    TackyJumpIfNotZeroNode,
     TackyJumpIfZeroNode,
     TackyJumpNode,
     TackyLabelNode,
@@ -309,15 +310,55 @@ class TestStatements:
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_block_item(token_tape)
 
-        labeller = LoopLabeller(function_name="test_while")
+        labeller = LoopLabeller(function_name="test_dowhile")
         labeller.label_statement(src_node, current_label="")
 
         target = TackyGenerator()
-        target._curr_function = "test_while"
+        target._curr_function = "test_dowhile"
 
         # Skip semantic analysis for now
         target.emit_statement(src_node)
         assert len(target._current_instructions) == 12
+        instr0 = target._current_instructions[0]
+        assert instr0 == TackyLabelNode(start_position=9, identifier="start_do.test_dowhile.0")
+
+        instr1 = target._current_instructions[1]
+        assert isinstance(instr1, TackyBinaryNode)
+
+        instr2 = target._current_instructions[2]
+        assert instr2 == TackyJumpIfZeroNode(
+            start_position=24, target="label.test_dowhile.ifend.1", condition=instr1.dst
+        )
+
+        instr3 = target._current_instructions[3]
+        assert instr3 == TackyJumpNode(start_position=35, target="continue_do.test_dowhile.0")
+
+        instr4 = target._current_instructions[4]
+        assert instr4 == TackyLabelNode(start_position=24, identifier="label.test_dowhile.ifend.1")
+
+        instr5 = target._current_instructions[5]
+        assert isinstance(instr5, TackyBinaryNode)
+
+        instr6 = target._current_instructions[6]
+        assert isinstance(instr6, TackyCopyNode)
+
+        instr7 = target._current_instructions[7]
+        assert instr7 == TackyJumpNode(start_position=76, target="break_do.test_dowhile.0")
+
+        instr8 = target._current_instructions[8]
+        assert instr8 == TackyLabelNode(start_position=9, identifier="continue_do.test_dowhile.0")
+
+        instr9 = target._current_instructions[9]
+        assert isinstance(instr9, TackyBinaryNode)
+
+        instr10 = target._current_instructions[10]
+        assert instr10 == TackyJumpIfNotZeroNode(
+            start_position=102, target="start_do.test_dowhile.0", condition=instr9.dst
+        )
+
+        instr11 = target._current_instructions[11]
+        assert instr11 == TackyLabelNode(start_position=9, identifier="break_do.test_dowhile.0")
+
 
 class TestBlockItems:
     def test_declaration(self):
