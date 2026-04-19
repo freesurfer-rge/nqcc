@@ -46,3 +46,24 @@ int main( void ) {
 }
 """
         self._round_trip(source)
+
+    def test_loops(self):
+        source = """
+        int main( void ) {
+            int counter;
+
+            for( int a=0; a<10; a=a+1){
+                int b = 0;
+                while( b< 10) {
+                    if( a == 6 ) continue;
+                    b = b + 1;
+                    if( a>8) break;
+
+                    do {
+                        counter = counter + 1;
+                    } while( b<2);
+                }
+            }
+        }
+        """
+        self._round_trip(source)
