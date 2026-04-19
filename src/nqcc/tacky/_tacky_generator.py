@@ -17,7 +17,7 @@ from nqcc.parser import (
     SourceContinueNode,
     SourceDeclarationNode,
     SourceDivide,
-    SourceDoWhileNode,
+    SourceDoWhileNode,SourceForInitNode, SourceForNode,
     SourceEqualTo,
     SourceExpressionNode,
     SourceExpressionStatementNode,
@@ -42,7 +42,7 @@ from nqcc.parser import (
     SourceStatementNode,
     SourceSubtract,
     SourceTernaryExpressonNode,
-    SourceUnaryExpressionNode,
+    SourceUnaryExpressionNode,SourceInitDeclNode, SourceInitExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
     SourceWhileNode,
@@ -488,6 +488,49 @@ class TackyGenerator:
         )
         self._current_instructions.append(break_label)
 
+    def emit_forinit(self, source_node: SourceForInitNode):
+        assert isinstance(source_node, get_args(SourceForInitNode))
+
+        match source_node:
+            case SourceInitDeclNode():
+                self.emit_declaration(source_node.decl)
+            case SourceInitExpressionNode():
+                if source_node.expression is None:
+                    return
+                self.emit_expression(source_node.expression)
+
+    def emit_for_statement(self, source_node: SourceForNode):
+        assert isinstance(source_node, SourceForNode)
+
+        self.emit_forinit(source_node.init)
+
+        start_label = TackyLabelNode(start_position=source_node.start_position, identifier=get_start_label(source_node.label))
+        self._current_instructions.append(start_label)
+
+        if source_node.condition is not None:
+            cond_val = self.emit_expression(source_node.condition)
+            jump_condition = TackyJumpIfZeroNode(
+                start_position=source_node.condition.start_position,
+                target=get_break_label(source_node.label),
+                condition=cond_val,
+            )
+            self._current_instructions.append(jump_condition)
+
+        self.emit_statement(source_node.body)
+
+        cont_label = TackyLabelNode(start_position=source_node.start_position, identifier=get_continue_label(source_node.label))
+        self._current_instructions.append(cont_label)
+
+        if source_node.post is not None:
+            self.emit_expression(source_node.post)
+
+        jump_start = TackyJumpNode(start_position=source_node.start_position, target=get_start_label(source_node.label))
+        self._current_instructions.append(jump_start)
+
+        break_label = TackyLabelNode(start_position=source_node.start_position, identifier=get_break_label(source_node.label))
+        self._current_instructions.append(break_label)
+
+
     def emit_statement(self, source_node: SourceStatementNode):
         assert isinstance(source_node, get_args(SourceStatementNode))
         match source_node:
@@ -519,8 +562,21 @@ class TackyGenerator:
                 self.emit_while_statement(source_node)
             case SourceDoWhileNode():
                 self.emit_dowhile_statement(source_node)
+            case SourceForNode():
+                self.emit_for_statement(source_node)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
+
+    def emit_declaration(self, source_node:SourceDeclarationNode):
+        assert isinstance(source_node, SourceDeclarationNode)
+        if source_node.initial is None:
+            return
+        src_decl = self.emit_expression(source_node.initial)
+        dst_decl = self.emit_expression(source_node.identifier)
+        tacky_copy = TackyCopyNode(
+            start_position=source_node.start_position, src=src_decl, dst=dst_decl
+        )
+        self._current_instructions.append(tacky_copy)
 
     def emit_blockitem(self, source_node: SourceBlockItemNode):
         assert isinstance(source_node, get_args(SourceBlockItemNode))
@@ -528,14 +584,7 @@ class TackyGenerator:
             case _ if isinstance(source_node, get_args(SourceStatementNode)):
                 self.emit_statement(source_node)
             case _ if isinstance(source_node, SourceDeclarationNode):
-                if source_node.initial is None:
-                    return
-                src_decl = self.emit_expression(source_node.initial)
-                dst_decl = self.emit_expression(source_node.identifier)
-                tacky_copy = TackyCopyNode(
-                    start_position=source_node.start_position, src=src_decl, dst=dst_decl
-                )
-                self._current_instructions.append(tacky_copy)
+                self.emit_declaration(source_node)
             case _:
                 raise ValueError(f"Unrecognised blockitem: {source_node}")
 

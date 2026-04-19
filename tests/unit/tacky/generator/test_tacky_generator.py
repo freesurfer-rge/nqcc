@@ -359,6 +359,47 @@ class TestStatements:
         instr11 = target._current_instructions[11]
         assert instr11 == TackyLabelNode(start_position=9, identifier="break_do.test_dowhile.0")
 
+    def test_for_init(self):
+        source = """
+        for( b=0; b<10; b=b+1) c = c + b;
+        """
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_block_item(token_tape)
+
+        labeller = LoopLabeller(function_name="test_for_init")
+        labeller.label_statement(src_node, current_label="")
+
+        target = TackyGenerator()
+        target._curr_function = "test_for_init"
+
+        # Skip semantic analysis for now
+        target.emit_statement(src_node)
+        assert len(target._current_instructions) == 11
+
+        instr0 = target._current_instructions[0]
+        assert instr0 == TackyLabelNode(start_position=9, identifier="start_do.test_dowhile.0")
+
+    def test_for_decl(self):
+        source = """
+        for( int b=0; b<10; b=b+1) c = c + b;
+        """
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_block_item(token_tape)
+
+        labeller = LoopLabeller(function_name="test_for_decl")
+        labeller.label_statement(src_node, current_label="")
+
+        target = TackyGenerator()
+        target._curr_function = "test_for_decl"
+
+        # Skip semantic analysis for now
+        target.emit_statement(src_node)
+        assert len(target._current_instructions) == 11
+
+        instr0 = target._current_instructions[0]
+        assert instr0 == TackyLabelNode(start_position=9, identifier="start_do.test_dowhile.0")
+
+
 
 class TestBlockItems:
     def test_declaration(self):
