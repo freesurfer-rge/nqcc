@@ -361,7 +361,7 @@ class TestStatements:
 
     def test_for_init(self):
         source = """
-        for( b=0; b<10; b=b+1) c = c + b;
+        for( b=2; b<10; b=b+1) c = c - b;
         """
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_block_item(token_tape)
@@ -377,11 +377,48 @@ class TestStatements:
         assert len(target._current_instructions) == 11
 
         instr0 = target._current_instructions[0]
-        assert instr0 == TackyLabelNode(start_position=9, identifier="start_do.test_dowhile.0")
+        assert isinstance(instr0, TackyCopyNode)
+        assert instr0.src == TackyConstantIntNode(start_position=16, value=2)
+
+        instr1 = target._current_instructions[1]
+        assert instr1 == TackyLabelNode(start_position=9, identifier="start_for.test_for_init.0")
+
+        instr2 = target._current_instructions[2]
+        assert isinstance(instr2, TackyBinaryNode)
+
+        instr3 = target._current_instructions[3]
+        assert instr3 == TackyJumpIfZeroNode(
+            start_position=20, target="break_for.test_for_init.0", condition=instr2.dst
+        )
+
+        instr4 = target._current_instructions[4]
+        assert isinstance(instr4, TackyBinaryNode)
+        assert isinstance(instr4.operator, TackySubtract)
+
+        instr5 = target._current_instructions[5]
+        assert isinstance(instr5, TackyCopyNode)
+        assert instr5.src == instr4.dst
+
+        instr6 = target._current_instructions[6]
+        assert instr6 == TackyLabelNode(start_position=9, identifier="continue_for.test_for_init.0")
+
+        instr7 = target._current_instructions[7]
+        assert isinstance(instr7, TackyBinaryNode)
+        assert isinstance(instr7.operator, TackyAdd)
+
+        instr8 = target._current_instructions[8]
+        assert isinstance(instr8, TackyCopyNode)
+        assert instr8.src == instr7.dst
+
+        instr9 = target._current_instructions[9]
+        assert instr9 == TackyJumpNode(start_position=9, target="start_for.test_for_init.0")
+
+        instr10 = target._current_instructions[10]
+        assert instr10 == TackyLabelNode(start_position=9, identifier="break_for.test_for_init.0")
 
     def test_for_decl(self):
         source = """
-        for( int b=0; b<10; b=b+1) c = c + b;
+        for( int b=0; b<10; b=b+1) c = c - b;
         """
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_block_item(token_tape)
@@ -397,8 +434,44 @@ class TestStatements:
         assert len(target._current_instructions) == 11
 
         instr0 = target._current_instructions[0]
-        assert instr0 == TackyLabelNode(start_position=9, identifier="start_do.test_dowhile.0")
+        assert isinstance(instr0, TackyCopyNode)
+        assert instr0.src == TackyConstantIntNode(start_position=20, value=0)
 
+        instr1 = target._current_instructions[1]
+        assert instr1 == TackyLabelNode(start_position=9, identifier="start_for.test_for_decl.0")
+
+        instr2 = target._current_instructions[2]
+        assert isinstance(instr2, TackyBinaryNode)
+
+        instr3 = target._current_instructions[3]
+        assert instr3 == TackyJumpIfZeroNode(
+            start_position=24, target="break_for.test_for_decl.0", condition=instr2.dst
+        )
+
+        instr4 = target._current_instructions[4]
+        assert isinstance(instr4, TackyBinaryNode)
+        assert isinstance(instr4.operator, TackySubtract)
+
+        instr5 = target._current_instructions[5]
+        assert isinstance(instr5, TackyCopyNode)
+        assert instr5.src == instr4.dst
+
+        instr6 = target._current_instructions[6]
+        assert instr6 == TackyLabelNode(start_position=9, identifier="continue_for.test_for_decl.0")
+
+        instr7 = target._current_instructions[7]
+        assert isinstance(instr7, TackyBinaryNode)
+        assert isinstance(instr7.operator, TackyAdd)
+
+        instr8 = target._current_instructions[8]
+        assert isinstance(instr8, TackyCopyNode)
+        assert instr8.src == instr7.dst
+
+        instr9 = target._current_instructions[9]
+        assert instr9 == TackyJumpNode(start_position=9, target="start_for.test_for_decl.0")
+
+        instr10 = target._current_instructions[10]
+        assert instr10 == TackyLabelNode(start_position=9, identifier="break_for.test_for_decl.0")
 
 
 class TestBlockItems:

@@ -17,14 +17,18 @@ from nqcc.parser import (
     SourceContinueNode,
     SourceDeclarationNode,
     SourceDivide,
-    SourceDoWhileNode,SourceForInitNode, SourceForNode,
+    SourceDoWhileNode,
     SourceEqualTo,
     SourceExpressionNode,
     SourceExpressionStatementNode,
+    SourceForInitNode,
+    SourceForNode,
     SourceFunctionNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
     SourceIfStatementNode,
+    SourceInitDeclNode,
+    SourceInitExpressionNode,
     SourceLeftShift,
     SourceLessThan,
     SourceLessThanOrEqual,
@@ -42,7 +46,7 @@ from nqcc.parser import (
     SourceStatementNode,
     SourceSubtract,
     SourceTernaryExpressonNode,
-    SourceUnaryExpressionNode,SourceInitDeclNode, SourceInitExpressionNode,
+    SourceUnaryExpressionNode,
     SourceUnaryOperator,
     SourceVarNode,
     SourceWhileNode,
@@ -504,7 +508,9 @@ class TackyGenerator:
 
         self.emit_forinit(source_node.init)
 
-        start_label = TackyLabelNode(start_position=source_node.start_position, identifier=get_start_label(source_node.label))
+        start_label = TackyLabelNode(
+            start_position=source_node.start_position, identifier=get_start_label(source_node.label)
+        )
         self._current_instructions.append(start_label)
 
         if source_node.condition is not None:
@@ -518,20 +524,26 @@ class TackyGenerator:
 
         self.emit_statement(source_node.body)
 
-        cont_label = TackyLabelNode(start_position=source_node.start_position, identifier=get_continue_label(source_node.label))
+        cont_label = TackyLabelNode(
+            start_position=source_node.start_position,
+            identifier=get_continue_label(source_node.label),
+        )
         self._current_instructions.append(cont_label)
 
         if source_node.post is not None:
             self.emit_expression(source_node.post)
 
-        jump_start = TackyJumpNode(start_position=source_node.start_position, target=get_start_label(source_node.label))
+        jump_start = TackyJumpNode(
+            start_position=source_node.start_position, target=get_start_label(source_node.label)
+        )
         self._current_instructions.append(jump_start)
 
-        break_label = TackyLabelNode(start_position=source_node.start_position, identifier=get_break_label(source_node.label))
+        break_label = TackyLabelNode(
+            start_position=source_node.start_position, identifier=get_break_label(source_node.label)
+        )
         self._current_instructions.append(break_label)
 
-
-    def emit_statement(self, source_node: SourceStatementNode):
+    def emit_statement(self, source_node: SourceStatementNode):  # noqa: C901
         assert isinstance(source_node, get_args(SourceStatementNode))
         match source_node:
             case SourceNullStatementNode():
@@ -567,7 +579,7 @@ class TackyGenerator:
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
-    def emit_declaration(self, source_node:SourceDeclarationNode):
+    def emit_declaration(self, source_node: SourceDeclarationNode):
         assert isinstance(source_node, SourceDeclarationNode)
         if source_node.initial is None:
             return
