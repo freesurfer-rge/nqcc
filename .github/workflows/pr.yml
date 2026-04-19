@@ -28,12 +28,12 @@ jobs:
           - name: Run pip install
             run: pip install -e .[dev]
 
-          - uses: astral-sh/ruff-action@v4
+          - uses: astral-sh/ruff-action@v4.0.0
             name: Check format with ruff
             with:
               args: format --check .
 
-          - uses: astral-sh/ruff-action@v4
+          - uses: astral-sh/ruff-action@v4.0.0
             name: Run ruff linting
             with:
               args: check .
