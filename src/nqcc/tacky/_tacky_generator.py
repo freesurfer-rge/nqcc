@@ -168,13 +168,10 @@ class TackyGenerator:
         assert isinstance(source_node.operator, SourceLogicalAnd)
         FALSE_LABEL = "logicalandfalse"
         END_LABEL = "logicalandend"
-        false_label = TackyLabelNode(
-            start_position=source_node.start_position,
-            identifier=self.get_function_label(FALSE_LABEL),
-        )
-        end_label = TackyLabelNode(
-            start_position=source_node.start_position, identifier=self.get_function_label(END_LABEL)
-        )
+
+        false_identifier = self.get_function_label(FALSE_LABEL)
+        end_identifier = self.get_function_label(END_LABEL)
+
         result_var = TackyVarNode(
             start_position=source_node.start_position,
             identifier=self.get_function_temporary(),
@@ -184,7 +181,7 @@ class TackyGenerator:
         l_val = self.emit_expression(source_node.left)
         jmp0 = TackyJumpIfZeroNode(
             start_position=source_node.start_position,
-            target=false_label.identifier,
+            target=false_identifier,
             condition=l_val,
         )
         self._current_instructions.append(jmp0)
@@ -193,7 +190,7 @@ class TackyGenerator:
         r_val = self.emit_expression(source_node.right)
         jmp1 = TackyJumpIfZeroNode(
             start_position=source_node.start_position,
-            target=false_label.identifier,
+            target=false_identifier,
             condition=r_val,
         )
         self._current_instructions.append(jmp1)
@@ -205,13 +202,11 @@ class TackyGenerator:
             dst=result_var,
         )
         self._current_instructions.append(copy_true_result)
-        jmp_end = TackyJumpNode(
-            start_position=source_node.start_position, target=end_label.identifier
-        )
+        jmp_end = TackyJumpNode(start_position=source_node.start_position, target=end_identifier)
         self._current_instructions.append(jmp_end)
 
         # Now handle the case where && evaluated to false
-        self._current_instructions.append(false_label)
+        self.emit_label(start_position=source_node.start_position, identifier=false_identifier)
         copy_false_result = TackyCopyNode(
             start_position=source_node.start_position,
             src=TackyConstantIntNode(start_position=source_node.start_position, value=0),
@@ -219,7 +214,7 @@ class TackyGenerator:
         )
         self._current_instructions.append(copy_false_result)
 
-        self._current_instructions.append(end_label)
+        self.emit_label(start_position=source_node.start_position, identifier=end_identifier)
         return result_var
 
     def emit_logical_or(self, source_node: SourceBinaryExpressionNode) -> TackyValue:
@@ -227,23 +222,20 @@ class TackyGenerator:
         assert isinstance(source_node.operator, SourceLogicalOr)
         TRUE_LABEL = "logicalortrue"
         END_LABEL = "logicalorend"
-        true_label = TackyLabelNode(
-            start_position=source_node.start_position,
-            identifier=self.get_function_label(TRUE_LABEL),
-        )
-        end_label = TackyLabelNode(
-            start_position=source_node.start_position, identifier=self.get_function_label(END_LABEL)
-        )
+
         result_var = TackyVarNode(
             start_position=source_node.start_position,
             identifier=self.get_function_temporary(),
         )
 
+        true_identifier = self.get_function_label(TRUE_LABEL)
+        end_identifier = self.get_function_label(END_LABEL)
+
         # Evaluate left and short circuit if we can
         l_val = self.emit_expression(source_node.left)
         jmp0 = TackyJumpIfNotZeroNode(
             start_position=source_node.start_position,
-            target=true_label.identifier,
+            target=true_identifier,
             condition=l_val,
         )
         self._current_instructions.append(jmp0)
@@ -252,7 +244,7 @@ class TackyGenerator:
         r_val = self.emit_expression(source_node.right)
         jmp1 = TackyJumpIfNotZeroNode(
             start_position=source_node.start_position,
-            target=true_label.identifier,
+            target=true_identifier,
             condition=r_val,
         )
         self._current_instructions.append(jmp1)
@@ -264,13 +256,11 @@ class TackyGenerator:
             dst=result_var,
         )
         self._current_instructions.append(copy_false_result)
-        jmp_end = TackyJumpNode(
-            start_position=source_node.start_position, target=end_label.identifier
-        )
+        jmp_end = TackyJumpNode(start_position=source_node.start_position, target=end_identifier)
         self._current_instructions.append(jmp_end)
 
         # Now handle the case where || evaluated to True
-        self._current_instructions.append(true_label)
+        self.emit_label(start_position=source_node.start_position, identifier=true_identifier)
         copy_true_result = TackyCopyNode(
             start_position=source_node.start_position,
             src=TackyConstantIntNode(start_position=source_node.start_position, value=1),
@@ -278,20 +268,17 @@ class TackyGenerator:
         )
         self._current_instructions.append(copy_true_result)
 
-        self._current_instructions.append(end_label)
+        self.emit_label(start_position=source_node.start_position, identifier=end_identifier)
         return result_var
 
     def emit_ternary(self, source_node: SourceTernaryExpressonNode) -> TackyValue:
         assert isinstance(source_node, SourceTernaryExpressonNode)
         OTHERWISE_LABEL = "ternaryotherwise"
         END_LABEL = "ternaryend"
-        otherwise_label = TackyLabelNode(
-            start_position=source_node.start_position,
-            identifier=self.get_function_label(OTHERWISE_LABEL),
-        )
-        end_label = TackyLabelNode(
-            start_position=source_node.start_position, identifier=self.get_function_label(END_LABEL)
-        )
+
+        otherwise_identifier = self.get_function_label(OTHERWISE_LABEL)
+        end_identifier = self.get_function_label(END_LABEL)
+
         result_var = TackyVarNode(
             start_position=source_node.start_position,
             identifier=self.get_function_temporary(),
@@ -302,7 +289,7 @@ class TackyGenerator:
         # See if we should jump
         jmp0 = TackyJumpIfZeroNode(
             start_position=source_node.start_position,
-            target=otherwise_label.identifier,
+            target=otherwise_identifier,
             condition=cond_val,
         )
         self._current_instructions.append(jmp0)
@@ -315,20 +302,18 @@ class TackyGenerator:
             dst=result_var,
         )
         self._current_instructions.append(copy_then_result)
-        jmp_end = TackyJumpNode(
-            start_position=source_node.start_position, target=end_label.identifier
-        )
+        jmp_end = TackyJumpNode(start_position=source_node.start_position, target=end_identifier)
         self._current_instructions.append(jmp_end)
 
         # And 'otherwise'
-        self._current_instructions.append(otherwise_label)
+        self.emit_label(start_position=source_node.start_position, identifier=otherwise_identifier)
         otherwise_val = self.emit_expression(source_node.otherwise)
         copy_otherwise_result = TackyCopyNode(
             start_position=source_node.start_position, src=otherwise_val, dst=result_var
         )
         self._current_instructions.append(copy_otherwise_result)
 
-        self._current_instructions.append(end_label)
+        self.emit_label(start_position=source_node.start_position, identifier=end_identifier)
 
         return result_var
 
@@ -395,25 +380,28 @@ class TackyGenerator:
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
+    def emit_label(self, start_position: int, identifier: str):
+        lbl = TackyLabelNode(start_position=start_position, identifier=identifier)
+        self._current_instructions.append(lbl)
+
     def emit_if_statement(self, source_node: SourceIfStatementNode):
         assert isinstance(source_node, SourceIfStatementNode)
         OTHERWISE_LABEL = "ifotherwise"
         END_LABEL = "ifend"
-        otherwise_label = TackyLabelNode(
-            start_position=source_node.start_position,
-            identifier=self.get_function_label(OTHERWISE_LABEL),
-        )
-        end_label = TackyLabelNode(
-            start_position=source_node.start_position, identifier=self.get_function_label(END_LABEL)
-        )
+
+        otherwise_identifier = self.get_function_label(OTHERWISE_LABEL)
+        end_identifier = self.get_function_label(END_LABEL)
 
         has_otherwise = source_node.otherwise is not None
 
         cond_val = self.emit_expression(source_node.condition)
+        jmp0_target: str
+        if has_otherwise:
+            jmp0_target = otherwise_identifier
+        else:
+            jmp0_target = end_identifier
         jmp0 = TackyJumpIfZeroNode(
-            start_position=source_node.start_position,
-            condition=cond_val,
-            target=otherwise_label.identifier if has_otherwise else end_label.identifier,
+            start_position=source_node.start_position, condition=cond_val, target=jmp0_target
         )
         self._current_instructions.append(jmp0)
         self.emit_statement(source_node.then)
@@ -422,26 +410,25 @@ class TackyGenerator:
             # Assert should never fire, shuts up mypy
             assert source_node.otherwise is not None
             # 'then' has to jump to end
-            jmp1 = TackyJumpNode(
-                start_position=source_node.start_position, target=end_label.identifier
-            )
+            jmp1 = TackyJumpNode(start_position=source_node.start_position, target=end_identifier)
             self._current_instructions.append(jmp1)
 
             # Add the 'otherwise' label and instructions
-            self._current_instructions.append(otherwise_label)
+            self.emit_label(
+                start_position=source_node.start_position, identifier=otherwise_identifier
+            )
             self.emit_statement(source_node.otherwise)
 
         # Finally end the if block
-        self._current_instructions.append(end_label)
+        self.emit_label(start_position=source_node.start_position, identifier=end_identifier)
 
     def emit_while_statement(self, source_node: SourceWhileNode):
         assert isinstance(source_node, SourceWhileNode)
 
-        cont_label = TackyLabelNode(
+        self.emit_label(
             start_position=source_node.start_position,
             identifier=get_continue_label(source_node.label),
         )
-        self._current_instructions.append(cont_label)
 
         cond_val = self.emit_expression(source_node.condition)
         jump_condition = TackyJumpIfZeroNode(
@@ -458,26 +445,23 @@ class TackyGenerator:
         )
         self._current_instructions.append(jump_continue)
 
-        break_label = TackyLabelNode(
+        self.emit_label(
             start_position=source_node.start_position, identifier=get_break_label(source_node.label)
         )
-        self._current_instructions.append(break_label)
 
     def emit_dowhile_statement(self, source_node: SourceDoWhileNode):
         assert isinstance(source_node, SourceDoWhileNode)
 
-        start_label = TackyLabelNode(
+        self.emit_label(
             start_position=source_node.start_position, identifier=get_start_label(source_node.label)
         )
-        self._current_instructions.append(start_label)
 
         self.emit_statement(source_node.body)
 
-        cont_label = TackyLabelNode(
+        self.emit_label(
             start_position=source_node.start_position,
             identifier=get_continue_label(source_node.label),
         )
-        self._current_instructions.append(cont_label)
 
         cond_val = self.emit_expression(source_node.condition)
         jump_condition = TackyJumpIfNotZeroNode(
@@ -487,10 +471,9 @@ class TackyGenerator:
         )
         self._current_instructions.append(jump_condition)
 
-        break_label = TackyLabelNode(
+        self.emit_label(
             start_position=source_node.start_position, identifier=get_break_label(source_node.label)
         )
-        self._current_instructions.append(break_label)
 
     def emit_forinit(self, source_node: SourceForInitNode):
         assert isinstance(source_node, get_args(SourceForInitNode))
@@ -508,10 +491,9 @@ class TackyGenerator:
 
         self.emit_forinit(source_node.init)
 
-        start_label = TackyLabelNode(
+        self.emit_label(
             start_position=source_node.start_position, identifier=get_start_label(source_node.label)
         )
-        self._current_instructions.append(start_label)
 
         if source_node.condition is not None:
             cond_val = self.emit_expression(source_node.condition)
@@ -524,11 +506,10 @@ class TackyGenerator:
 
         self.emit_statement(source_node.body)
 
-        cont_label = TackyLabelNode(
+        self.emit_label(
             start_position=source_node.start_position,
             identifier=get_continue_label(source_node.label),
         )
-        self._current_instructions.append(cont_label)
 
         if source_node.post is not None:
             self.emit_expression(source_node.post)
@@ -538,10 +519,9 @@ class TackyGenerator:
         )
         self._current_instructions.append(jump_start)
 
-        break_label = TackyLabelNode(
+        self.emit_label(
             start_position=source_node.start_position, identifier=get_break_label(source_node.label)
         )
-        self._current_instructions.append(break_label)
 
     def emit_statement(self, source_node: SourceStatementNode):  # noqa: C901
         assert isinstance(source_node, get_args(SourceStatementNode))

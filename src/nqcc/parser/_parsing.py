@@ -296,27 +296,6 @@ def parse_for_statement(token_tape: TokenTape, start_position: int) -> SourceFor
     )
 
 
-(
-    SourceConstantIntNode
-    | SourceVarNode
-    | SourceUnaryExpressionNode
-    | SourceBinaryExpressionNode
-    | SourceAssignmentNode
-    | SourceTernaryExpressonNode
-    | SourceDeclarationNode
-    | None
-)
-(
-    SourceConstantIntNode
-    | SourceVarNode
-    | SourceUnaryExpressionNode
-    | SourceBinaryExpressionNode
-    | SourceAssignmentNode
-    | SourceTernaryExpressonNode
-    | None
-)
-
-
 def parse_statement(token_tape: TokenTape) -> SourceStatementNode:  # noqa: C901
     first_token = token_tape.peek()
     sp = first_token.start_position
