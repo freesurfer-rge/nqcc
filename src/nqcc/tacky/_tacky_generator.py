@@ -395,25 +395,28 @@ class TackyGenerator:
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
+    def emit_label_statement(self, start_position: int, identifier: str):
+        lbl = TackyLabelNode(start_position=start_position, identifier=identifier)
+        self._current_instructions.append(lbl)
+
     def emit_if_statement(self, source_node: SourceIfStatementNode):
         assert isinstance(source_node, SourceIfStatementNode)
         OTHERWISE_LABEL = "ifotherwise"
         END_LABEL = "ifend"
-        otherwise_label = TackyLabelNode(
-            start_position=source_node.start_position,
-            identifier=self.get_function_label(OTHERWISE_LABEL),
-        )
-        end_label = TackyLabelNode(
-            start_position=source_node.start_position, identifier=self.get_function_label(END_LABEL)
-        )
+
+        otherwise_identifier = self.get_function_label(OTHERWISE_LABEL)
+        end_identifier = self.get_function_label(END_LABEL)
 
         has_otherwise = source_node.otherwise is not None
 
         cond_val = self.emit_expression(source_node.condition)
+        jmp0_target: str
+        if has_otherwise:
+            jmp0_target = otherwise_identifier
+        else:
+            jmp0_target = end_identifier
         jmp0 = TackyJumpIfZeroNode(
-            start_position=source_node.start_position,
-            condition=cond_val,
-            target=otherwise_label.identifier if has_otherwise else end_label.identifier,
+            start_position=source_node.start_position, condition=cond_val, target=jmp0_target
         )
         self._current_instructions.append(jmp0)
         self.emit_statement(source_node.then)
@@ -422,17 +425,19 @@ class TackyGenerator:
             # Assert should never fire, shuts up mypy
             assert source_node.otherwise is not None
             # 'then' has to jump to end
-            jmp1 = TackyJumpNode(
-                start_position=source_node.start_position, target=end_label.identifier
-            )
+            jmp1 = TackyJumpNode(start_position=source_node.start_position, target=end_identifier)
             self._current_instructions.append(jmp1)
 
             # Add the 'otherwise' label and instructions
-            self._current_instructions.append(otherwise_label)
+            self.emit_label_statement(
+                start_position=source_node.start_position, identifier=otherwise_identifier
+            )
             self.emit_statement(source_node.otherwise)
 
         # Finally end the if block
-        self._current_instructions.append(end_label)
+        self.emit_label_statement(
+            start_position=source_node.start_position, identifier=end_identifier
+        )
 
     def emit_while_statement(self, source_node: SourceWhileNode):
         assert isinstance(source_node, SourceWhileNode)
