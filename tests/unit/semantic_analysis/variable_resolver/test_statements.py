@@ -97,6 +97,8 @@ class TestStatements:
         assert isinstance(result.value.right, SourceConstantIntNode)
         assert result.value.right.value == 44
 
+
+class TestConditionals:
     def test_if_statement(self):
         target = VariableResolver()
         variable_map = {}
@@ -139,6 +141,8 @@ class TestStatements:
         assert isinstance(result.otherwise.value, SourceVarNode)
         assert result.otherwise.value.identifier == "b.1"
 
+
+class TestLoops:
     def test_while_statement(self):
         target = VariableResolver()
         variable_map = {}
