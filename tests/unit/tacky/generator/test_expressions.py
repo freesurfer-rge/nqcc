@@ -159,6 +159,8 @@ class TestExpressions:
         )
         assert result == instr1.dst
 
+
+class TestBinaryExpressions:
     @pytest.mark.parametrize(
         "operator",
         ["+", "-", "*", "/", "%", "&", "|", "^", "<<", ">>", "==", "!=", "<", "<=", ">", ">="],
@@ -472,6 +474,8 @@ class TestExpressions:
         # The expression doesn't consume the semicolon
         assert token_tape.tokens_remaining == 1
 
+
+class TestAssignment:
     def test_assignment(self):
         source = "a = 1;"
         token_tape = TokenTape.from_c_source(source)
