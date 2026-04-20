@@ -1,4 +1,3 @@
-
 from nqcc.parser import (
     SourceBinaryExpressionNode,
     SourceCompoundNode,
