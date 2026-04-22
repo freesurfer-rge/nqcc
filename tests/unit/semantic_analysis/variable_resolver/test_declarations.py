@@ -2,7 +2,7 @@ import pytest
 
 from nqcc.parser import (
     SourceConstantIntNode,
-    SourceDeclarationNode,
+    SourceVariableDeclarationNode,
     SourceVarNode,
     TokenTape,
     parse_declaration,
@@ -18,14 +18,14 @@ class TestDeclarations:
         target = VariableResolver()
         variable_map = {}
 
-        decl = SourceDeclarationNode(
+        decl = SourceVariableDeclarationNode(
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
         )
 
         updated = target.resolve_declaration(decl, variable_map)
-        assert isinstance(updated, SourceDeclarationNode)
+        assert isinstance(updated, SourceVariableDeclarationNode)
         assert updated.start_position == 10
         assert updated.identifier == SourceVarNode(start_position=11, identifier="a.0")
         assert updated.initial is None
@@ -39,10 +39,10 @@ class TestDeclarations:
 
         token_tape = TokenTape.from_c_source(program_str)
         decl = parse_declaration(token_tape)
-        assert isinstance(decl, SourceDeclarationNode)
+        assert isinstance(decl, SourceVariableDeclarationNode)
 
         result = target.resolve_declaration(decl, variable_map)
-        assert isinstance(result, SourceDeclarationNode)
+        assert isinstance(result, SourceVariableDeclarationNode)
         assert result.start_position == 0
         assert result.identifier == SourceVarNode(start_position=4, identifier="a.0")
         assert isinstance(result.initial, SourceConstantIntNode)
@@ -52,7 +52,7 @@ class TestDeclarations:
     def test_two_decl(self):
         target = VariableResolver()
 
-        decl0 = SourceDeclarationNode(
+        decl0 = SourceVariableDeclarationNode(
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
@@ -60,19 +60,19 @@ class TestDeclarations:
 
         variable_map = {}
         updated0 = target.resolve_declaration(decl0, variable_map)
-        assert isinstance(updated0, SourceDeclarationNode)
+        assert isinstance(updated0, SourceVariableDeclarationNode)
         assert updated0.start_position == 10
         assert updated0.identifier == SourceVarNode(start_position=11, identifier="a.0")
         assert updated0.initial is None
 
-        decl1 = SourceDeclarationNode(
+        decl1 = SourceVariableDeclarationNode(
             start_position=12,
             identifier=SourceVarNode(start_position=13, identifier="b"),
             initial=None,
         )
 
         updated1 = target.resolve_declaration(decl1, variable_map)
-        assert isinstance(updated1, SourceDeclarationNode)
+        assert isinstance(updated1, SourceVariableDeclarationNode)
         assert updated1.start_position == 12
         assert updated1.identifier == SourceVarNode(start_position=13, identifier="b.1")
         assert updated1.initial is None
@@ -81,14 +81,14 @@ class TestDeclarations:
         target = VariableResolver()
         variable_map = {}
 
-        decl0 = SourceDeclarationNode(
+        decl0 = SourceVariableDeclarationNode(
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
         )
         _ = target.resolve_declaration(decl0, variable_map)
 
-        decl1 = SourceDeclarationNode(
+        decl1 = SourceVariableDeclarationNode(
             start_position=12,
             identifier=SourceVarNode(start_position=13, identifier="a"),
             initial=None,

@@ -11,7 +11,7 @@ from nqcc.parser import (
     SourceCompoundNode,
     SourceConstantIntNode,
     SourceContinueNode,
-    SourceDeclarationNode,
+    SourceVariableDeclarationNode,
     SourceExpressionStatementNode,
     SourceMultiply,
     SourceNullStatementNode,
@@ -129,7 +129,7 @@ class TestSourceCompoundNode:
         assert len(node.block.items) == 2
 
         item0 = node.block.items[0]
-        assert isinstance(item0, SourceDeclarationNode)
+        assert isinstance(item0, SourceVariableDeclarationNode)
         assert item0.identifier.identifier == "a"
         assert item0.initial is None
 

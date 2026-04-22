@@ -4,7 +4,7 @@ from nqcc.parser import (
     SourceBinaryExpressionNode,
     SourceCompoundNode,
     SourceConstantIntNode,
-    SourceDeclarationNode,
+    SourceVariableDeclarationNode,
     SourceDivide,
     SourceDoWhileNode,
     SourceExpressionStatementNode,
@@ -196,7 +196,7 @@ class TestSourceForNode:
         assert isinstance(node, SourceForNode)
 
         assert isinstance(node.init, SourceInitDeclNode)
-        assert isinstance(node.init.decl, SourceDeclarationNode)
+        assert isinstance(node.init.decl, SourceVariableDeclarationNode)
         decl = node.init.decl
         assert decl.identifier == SourceVarNode(start_position=18, identifier="i")
         assert decl.initial == SourceConstantIntNode(start_position=20, value=0)

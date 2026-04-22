@@ -271,13 +271,13 @@ SourceStatementNode = Union[
 ]
 
 
-class SourceDeclarationNode(SourceASTNode):
-    node_type: Literal["SourceDeclarationNode"] = "SourceDeclarationNode"
+class SourceVariableDeclarationNode(SourceASTNode):
+    node_type: Literal["SourceVariableDeclarationNode"] = "SourceVariableDeclarationNode"
     identifier: SourceVarNode
     initial: SourceExpressionNode | None
 
 
-SourceBlockItemNode = Union[SourceDeclarationNode, SourceStatementNode]
+SourceBlockItemNode = Union[SourceVariableDeclarationNode, SourceStatementNode]
 
 
 class SourceBlockNode(SourceASTNode):
@@ -287,7 +287,7 @@ class SourceBlockNode(SourceASTNode):
 
 class SourceInitDeclNode(SourceASTNode):
     node_type: Literal["SourceInitDeclNode"] = "SourceInitDeclNode"
-    decl: SourceDeclarationNode
+    decl: SourceVariableDeclarationNode
 
 
 class SourceInitExpressionNode(SourceASTNode):

@@ -3,7 +3,7 @@ import pytest
 from nqcc.parser import (
     SourceAssignmentNode,
     SourceConstantIntNode,
-    SourceDeclarationNode,
+    SourceVariableDeclarationNode,
     SourceTernaryExpressonNode,
     SourceVarNode,
     TokenTape,
@@ -22,7 +22,7 @@ class TestExpressions:
         variable_map = {}
 
         # Make sure 'a' is declared
-        decl_a = SourceDeclarationNode(
+        decl_a = SourceVariableDeclarationNode(
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
@@ -78,7 +78,7 @@ class TestExpressions:
         assert isinstance(ternary_expr, SourceTernaryExpressonNode)
 
         for decl_var in ["a", "b", "c"]:
-            decl = SourceDeclarationNode(
+            decl = SourceVariableDeclarationNode(
                 start_position=ord(decl_var),
                 identifier=SourceVarNode(start_position=ord(decl_var) + 32, identifier=decl_var),
                 initial=None,

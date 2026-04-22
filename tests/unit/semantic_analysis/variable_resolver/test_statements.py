@@ -7,7 +7,7 @@ from nqcc.parser import (
     SourceBreakNode,
     SourceConstantIntNode,
     SourceContinueNode,
-    SourceDeclarationNode,
+    SourceVariableDeclarationNode,
     SourceDoWhileNode,
     SourceExpressionStatementNode,
     SourceForNode,
@@ -57,7 +57,7 @@ class TestStatements:
         assert token_tape.tokens_remaining == 0
 
         # Make sure 'a' is declared
-        decl_a = SourceDeclarationNode(
+        decl_a = SourceVariableDeclarationNode(
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
@@ -81,7 +81,7 @@ class TestStatements:
         assert token_tape.tokens_remaining == 0
 
         # Make sure 'a' is declared
-        decl_a = SourceDeclarationNode(
+        decl_a = SourceVariableDeclarationNode(
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
@@ -115,13 +115,13 @@ class TestConditionals:
         assert stmt.otherwise is not None
 
         # Make sure 'a' and 'b' are declared
-        decl_a = SourceDeclarationNode(
+        decl_a = SourceVariableDeclarationNode(
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
         )
         _ = target.resolve_declaration(decl_a, variable_map)
-        decl_b = SourceDeclarationNode(
+        decl_b = SourceVariableDeclarationNode(
             start_position=11,
             identifier=SourceVarNode(start_position=12, identifier="b"),
             initial=None,
@@ -154,7 +154,7 @@ class TestLoops:
         assert token_tape.tokens_remaining == 0
 
         # Make sure that 'a' is declared
-        decl_a = SourceDeclarationNode(
+        decl_a = SourceVariableDeclarationNode(
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
@@ -187,7 +187,7 @@ class TestLoops:
         assert token_tape.tokens_remaining == 0
 
         # Make sure that 'a' is declared
-        decl_a = SourceDeclarationNode(
+        decl_a = SourceVariableDeclarationNode(
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
@@ -220,7 +220,7 @@ class TestLoops:
         assert token_tape.tokens_remaining == 0
 
         # Make sure that 'a' is declared
-        decl_a = SourceDeclarationNode(
+        decl_a = SourceVariableDeclarationNode(
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
@@ -228,7 +228,7 @@ class TestLoops:
         _ = target.resolve_declaration(decl_a, variable_map)
 
         # And also 'b'
-        decl_b = SourceDeclarationNode(
+        decl_b = SourceVariableDeclarationNode(
             start_position=13,
             identifier=SourceVarNode(start_position=14, identifier="b"),
             initial=None,
@@ -273,7 +273,7 @@ class TestLoops:
         assert token_tape.tokens_remaining == 0
 
         # Make sure that 'a' is declared outside the loop
-        decl_a = SourceDeclarationNode(
+        decl_a = SourceVariableDeclarationNode(
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
@@ -281,7 +281,7 @@ class TestLoops:
         _ = target.resolve_declaration(decl_a, variable_map)
 
         # And also 'b'
-        decl_b = SourceDeclarationNode(
+        decl_b = SourceVariableDeclarationNode(
             start_position=13,
             identifier=SourceVarNode(start_position=14, identifier="b"),
             initial=None,
@@ -293,7 +293,7 @@ class TestLoops:
         assert len(variable_map) == 2
         assert isinstance(result, SourceForNode)
         assert isinstance(result.init, SourceInitDeclNode)
-        assert isinstance(result.init.decl, SourceDeclarationNode)
+        assert isinstance(result.init.decl, SourceVariableDeclarationNode)
         assert isinstance(result.init.decl.identifier, SourceVarNode)
         assert result.init.decl.identifier.identifier == "a.2"
 

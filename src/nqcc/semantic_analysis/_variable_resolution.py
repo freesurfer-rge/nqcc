@@ -11,7 +11,7 @@ from nqcc.parser import (
     SourceCompoundNode,
     SourceConstantIntNode,
     SourceContinueNode,
-    SourceDeclarationNode,
+    SourceVariableDeclarationNode,
     SourceDoWhileNode,
     SourceExpressionNode,
     SourceExpressionStatementNode,
@@ -56,9 +56,9 @@ class VariableResolver:
         self._counter = 0
 
     def resolve_declaration(
-        self, decl: SourceDeclarationNode, variable_map: dict[str, VariableInfo]
+        self, decl: SourceVariableDeclarationNode, variable_map: dict[str, VariableInfo]
     ):
-        assert isinstance(decl, SourceDeclarationNode)
+        assert isinstance(decl, SourceVariableDeclarationNode)
 
         orig_name = decl.identifier.identifier
         if orig_name in variable_map and variable_map[orig_name].defined_in_block:
@@ -73,7 +73,7 @@ class VariableResolver:
         nxt_var = SourceVarNode(
             start_position=decl.identifier.start_position, identifier=unique_name
         )
-        return SourceDeclarationNode(
+        return SourceVariableDeclarationNode(
             start_position=decl.start_position, identifier=nxt_var, initial=nxt_init
         )
 
@@ -212,7 +212,7 @@ class VariableResolver:
     ) -> SourceBlockItemNode:
 
         match bi:
-            case SourceDeclarationNode():
+            case SourceVariableDeclarationNode():
                 return self.resolve_declaration(bi, variable_map)
             case _ if isinstance(bi, get_args(SourceStatementNode)):
                 return self.resolve_statement(bi, variable_map)

@@ -7,7 +7,7 @@ from nqcc.parser import (
     SourceBinaryExpressionNode,
     SourceBlockNode,
     SourceConstantIntNode,
-    SourceDeclarationNode,
+    SourceVariableDeclarationNode,
     SourceFunctionNode,
     SourceProgramNode,
     SourceReturnNode,
@@ -27,7 +27,7 @@ class TestSourceDeclarationNode:
         node = parse_declaration(token_tape)
         assert token_tape.tokens_remaining == 0
 
-        assert isinstance(node, SourceDeclarationNode)
+        assert isinstance(node, SourceVariableDeclarationNode)
         assert node.start_position == 0
         assert node.identifier == SourceVarNode(start_position=4, identifier="a")
         assert not node.initial
@@ -39,7 +39,7 @@ class TestSourceDeclarationNode:
         node = parse_declaration(token_tape)
         assert token_tape.tokens_remaining == 0
 
-        assert isinstance(node, SourceDeclarationNode)
+        assert isinstance(node, SourceVariableDeclarationNode)
         assert node.start_position == 0
         assert node.identifier == SourceVarNode(start_position=4, identifier="a")
         assert node.initial == SourceConstantIntNode(start_position=6, value=1)
@@ -51,7 +51,7 @@ class TestSourceDeclarationNode:
         node = parse_declaration(token_tape)
         assert token_tape.tokens_remaining == 0
 
-        assert isinstance(node, SourceDeclarationNode)
+        assert isinstance(node, SourceVariableDeclarationNode)
         assert node.start_position == 0
         assert node.identifier == SourceVarNode(start_position=4, identifier="a")
         assert node.initial == SourceBinaryExpressionNode(
@@ -95,7 +95,7 @@ class TestSourceFunctionNode:
 
         assert isinstance(node.body, SourceBlockNode)
         assert len(node.body.items) == 2
-        assert node.body.items[0] == SourceDeclarationNode(
+        assert node.body.items[0] == SourceVariableDeclarationNode(
             start_position=15,
             identifier=SourceVarNode(start_position=19, identifier="a"),
             initial=SourceConstantIntNode(start_position=21, value=11),

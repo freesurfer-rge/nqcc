@@ -15,7 +15,7 @@ from nqcc.parser import (
     SourceCompoundNode,
     SourceConstantIntNode,
     SourceContinueNode,
-    SourceDeclarationNode,
+    SourceVariableDeclarationNode,
     SourceDivide,
     SourceDoWhileNode,
     SourceEqualTo,
@@ -559,8 +559,8 @@ class TackyGenerator:
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
-    def emit_declaration(self, source_node: SourceDeclarationNode):
-        assert isinstance(source_node, SourceDeclarationNode)
+    def emit_declaration(self, source_node: SourceVariableDeclarationNode):
+        assert isinstance(source_node, SourceVariableDeclarationNode)
         if source_node.initial is None:
             return
         src_decl = self.emit_expression(source_node.initial)
@@ -575,7 +575,7 @@ class TackyGenerator:
         match source_node:
             case _ if isinstance(source_node, get_args(SourceStatementNode)):
                 self.emit_statement(source_node)
-            case _ if isinstance(source_node, SourceDeclarationNode):
+            case _ if isinstance(source_node, SourceVariableDeclarationNode):
                 self.emit_declaration(source_node)
             case _:
                 raise ValueError(f"Unrecognised blockitem: {source_node}")

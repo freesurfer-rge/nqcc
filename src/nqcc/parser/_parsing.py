@@ -54,7 +54,7 @@ from ._source_ast import (
     SourceCompoundNode,
     SourceConstantIntNode,
     SourceContinueNode,
-    SourceDeclarationNode,
+    SourceVariableDeclarationNode,
     SourceDivide,
     SourceDoWhileNode,
     SourceEqualTo,
@@ -222,9 +222,9 @@ def parse_expression(token_tape: TokenTape, *, min_precedence: int) -> SourceExp
 
 def parse_optional_expression(
     token_tape: TokenTape, end_token: Type
-) -> SourceExpressionNode | SourceDeclarationNode | None:
+) -> SourceExpressionNode | SourceVariableDeclarationNode | None:
     first_token = token_tape.peek()
-    result: SourceExpressionNode | SourceDeclarationNode
+    result: SourceExpressionNode | SourceVariableDeclarationNode
     if isinstance(first_token, end_token):
         _ = token_tape.expect(end_token)
         return None
@@ -276,18 +276,18 @@ def parse_for_statement(token_tape: TokenTape, start_position: int) -> SourceFor
         init_expr = SourceInitExpressionNode(
             start_position=initial.start_position, expression=initial
         )
-    elif isinstance(initial, SourceDeclarationNode):
+    elif isinstance(initial, SourceVariableDeclarationNode):
         init_expr = SourceInitDeclNode(start_position=initial.start_position, decl=initial)
     else:
         raise ValueError("Bad init expression")
 
     # Get the 'condition' expression
     condition = parse_optional_expression(token_tape, SemicolonToken)
-    assert not isinstance(condition, SourceDeclarationNode), "Can't declare in for condition"
+    assert not isinstance(condition, SourceVariableDeclarationNode), "Can't declare in for condition"
 
     # Get the 'post' expression
     post = parse_optional_expression(token_tape, CloseParenToken)
-    assert not isinstance(post, SourceDeclarationNode), "Can't declare in for post"
+    assert not isinstance(post, SourceVariableDeclarationNode), "Can't declare in for post"
 
     body = parse_statement(token_tape)
 
@@ -372,7 +372,7 @@ def parse_block(token_tape: TokenTape) -> SourceBlockNode:
     return SourceBlockNode(start_position=opening_token.start_position, items=items)
 
 
-def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:
+def parse_declaration(token_tape: TokenTape) -> SourceVariableDeclarationNode:
     type_token = token_tape.expect(KeywordToken)
     assert type_token.value == "int", "Can only handle int declarations!"
 
@@ -386,7 +386,7 @@ def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:
         initialiser = parse_expression(token_tape, min_precedence=0)
     _ = token_tape.expect(SemicolonToken)
 
-    return SourceDeclarationNode(
+    return SourceVariableDeclarationNode(
         start_position=type_token.start_position, identifier=var, initial=initialiser
     )
 
