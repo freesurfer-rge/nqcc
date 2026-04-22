@@ -35,7 +35,7 @@ from ._tokens import (
     RightShift,
     SemicolonToken,
     TildeToken,
-    Token,
+    Token,CommaToken,
     UnaryOperatorToken,
 )
 
@@ -80,5 +80,5 @@ __all__ = [
     "extract_tokens",
     "lex_string",
     "lexer_driver",
-    "pick_token",
+    "pick_token","CommaToken"
 ]
