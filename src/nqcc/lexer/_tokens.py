@@ -448,7 +448,8 @@ class ColonToken(Token):
     @classmethod
     def re(cls) -> str:
         return "[:]"
-    
+
+
 class CommaToken(Token):
     token_type: Literal["CommaToken"] = "CommaToken"
     value: Literal[","] = ","

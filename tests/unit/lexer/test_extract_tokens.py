@@ -9,6 +9,7 @@ from nqcc.lexer import (
     CloseBraceToken,
     CloseParenToken,
     ColonToken,
+    CommaToken,
     ConstantIntegerToken,
     DecrementToken,
     DivideToken,
@@ -33,7 +34,7 @@ from nqcc.lexer import (
     QuestionMarkToken,
     SemicolonToken,
     TildeToken,
-    extract_tokens,CommaToken
+    extract_tokens,
 )
 
 

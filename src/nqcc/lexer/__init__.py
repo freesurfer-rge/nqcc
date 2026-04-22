@@ -10,6 +10,7 @@ from ._tokens import (
     CloseBraceToken,
     CloseParenToken,
     ColonToken,
+    CommaToken,
     ConstantIntegerToken,
     DecrementToken,
     DivideToken,
@@ -35,7 +36,7 @@ from ._tokens import (
     RightShift,
     SemicolonToken,
     TildeToken,
-    Token,CommaToken,
+    Token,
     UnaryOperatorToken,
 )
 
@@ -49,6 +50,7 @@ __all__ = [
     "CloseBraceToken",
     "CloseParenToken",
     "ColonToken",
+    "CommaToken",
     "ConstantIntegerToken",
     "DecrementToken",
     "DivideToken",
@@ -80,5 +82,5 @@ __all__ = [
     "extract_tokens",
     "lex_string",
     "lexer_driver",
-    "pick_token","CommaToken"
+    "pick_token",
 ]
