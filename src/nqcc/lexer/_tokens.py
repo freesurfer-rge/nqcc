@@ -448,6 +448,18 @@ class ColonToken(Token):
     @classmethod
     def re(cls) -> str:
         return "[:]"
+    
+class CommaToken(Token):
+    token_type: Literal["CommaToken"] = "CommaToken"
+    value: Literal[","] = ","
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return ","
 
 
 TokenTypes: list[type] = [
