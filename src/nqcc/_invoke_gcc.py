@@ -30,6 +30,7 @@ def generate_objectfile(assembly_path: pathlib.Path, output_path: pathlib.Path) 
 
     return output_path
 
+
 def generate_executable(assembly_path: pathlib.Path, output_path: pathlib.Path) -> pathlib.Path:
     assert assembly_path.exists(), f"{assembly_path} not found"
 

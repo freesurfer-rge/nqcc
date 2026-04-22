@@ -19,6 +19,7 @@ def compile_run_check(target_file: pathlib.Path, macros: list[str]):
             exit_after_semantic_analysis=False,
             exit_after_tacky=False,
             exit_after_codegen=False,
+            compile_only=False,
             preprocessor_defines=macros,
         )
         assert executable_path.exists(), f"Executable {executable_path} not generated!"
