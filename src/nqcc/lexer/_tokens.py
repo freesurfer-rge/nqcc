@@ -496,6 +496,7 @@ TokenTypes: list[type] = [
     GreaterThanOrEqual,
     QuestionMarkToken,
     ColonToken,
+    CommaToken,
 ]
 
 UnaryOperatorToken = Union[DecrementToken, IncrementToken, NegationToken, TildeToken, LogicalNot]
