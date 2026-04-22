@@ -9,6 +9,7 @@ from nqcc.lexer import (
     CloseBraceToken,
     CloseParenToken,
     ColonToken,
+    CommaToken,
     ConstantIntegerToken,
     DecrementToken,
     DivideToken,
@@ -329,3 +330,10 @@ class TestExtractTokens:
         assert len(toks) == 2
         assert toks[0] == IdentifierToken(start_position=idx, value="continue")
         assert toks[1] == KeywordToken(start_position=idx, value="continue")
+
+    @pytest.mark.parametrize("idx", [121, 130])
+    def test_comma(self, idx):
+        toks = extract_tokens(",", idx)
+
+        assert len(toks) == 1
+        assert toks[0] == CommaToken(start_position=idx)

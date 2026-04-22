@@ -450,6 +450,19 @@ class ColonToken(Token):
         return "[:]"
 
 
+class CommaToken(Token):
+    token_type: Literal["CommaToken"] = "CommaToken"
+    value: Literal[","] = ","
+
+    @property
+    def precedence(self) -> int:
+        return 5
+
+    @classmethod
+    def re(cls) -> str:
+        return ","
+
+
 TokenTypes: list[type] = [
     AdditionToken,
     AssignmentToken,
@@ -484,6 +497,7 @@ TokenTypes: list[type] = [
     GreaterThanOrEqual,
     QuestionMarkToken,
     ColonToken,
+    CommaToken,
 ]
 
 UnaryOperatorToken = Union[DecrementToken, IncrementToken, NegationToken, TildeToken, LogicalNot]
