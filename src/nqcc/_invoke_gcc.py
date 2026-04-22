@@ -22,6 +22,15 @@ def preprocess_c_file(
     return output_path
 
 
+def generate_objectfile(assembly_path: pathlib.Path, output_path: pathlib.Path) -> pathlib.Path:
+    assert assembly_path.exists(), f"{assembly_path} not found"
+
+    generation_command = ["gcc", "-c", str(assembly_path), "-o", str(output_path)]
+    subprocess.run(generation_command)
+
+    return output_path
+
+
 def generate_executable(assembly_path: pathlib.Path, output_path: pathlib.Path) -> pathlib.Path:
     assert assembly_path.exists(), f"{assembly_path} not found"
 

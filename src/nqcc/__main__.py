@@ -3,7 +3,7 @@ import logging
 import pathlib
 import shutil
 
-from nqcc import emit_assembler, generate_executable, preprocess_c_file
+from nqcc import emit_assembler, generate_executable, generate_objectfile, preprocess_c_file
 from nqcc.codegen import codegen_driver
 from nqcc.lexer import lexer_driver
 from nqcc.parser import parser_driver
@@ -39,6 +39,8 @@ def parse_args():
     )
 
     book_group = parser.add_argument_group(title="Required for book's test suite")
+
+    book_group.add_argument("-c", action="store_true", help="Compile only", dest="compile_only")
 
     exit_group = book_group.add_mutually_exclusive_group()
     exit_group.add_argument("--lex", action="store_true", help="Exit after the lexer")
@@ -81,6 +83,7 @@ def main(
     exit_after_semantic_analysis: bool,
     exit_after_tacky: bool,
     exit_after_codegen: bool,
+    compile_only: bool,
     preprocessor_defines: list[str],
 ):
 
@@ -136,10 +139,14 @@ def main(
     _logger.info("Emitting assembly code")
     asm_path = emit_assembler(asm_ast, working_dir=working_dir, file_stem=file_stem)
 
-    _logger.info("Generating executable")
-    executable_path = generate_executable(asm_path, target.parent / file_stem)
+    if compile_only:
+        _logger.info("Generating object file")
+        final_output_path = generate_objectfile(asm_path, target.parent / f"{file_stem}.o")
+    else:
+        _logger.info("Generating executable")
+        final_output_path = generate_executable(asm_path, target.parent / file_stem)
     _logger.info("Done")
-    return executable_path
+    return final_output_path
 
 
 if __name__ == "__main__":
@@ -153,5 +160,6 @@ if __name__ == "__main__":
         exit_after_semantic_analysis=args.validate,
         exit_after_tacky=args.tacky,
         exit_after_codegen=args.codegen,
+        compile_only=args.compile_only,
         preprocessor_defines=args.define_list,
     )
