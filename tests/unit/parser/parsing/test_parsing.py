@@ -117,14 +117,6 @@ class TestSourceFunctionDeclarationNode:
         assert len(node.params) == 1
         assert node.params[0] == "a"
 
-    def test_no_definition_in_decl(self):
-        cdecl_str = "int a(void){ return 2; };"
-        token_tape = TokenTape.from_c_source(cdecl_str)
-
-        with pytest.raises(SourceASTBadTypeError) as sabte:
-            _ = parse_declaration(token_tape)
-        assert sabte.value.message == "Received token of unexpected type"
-
 
 class TestSourceFunctionNode:
     def test_function_simple(self):

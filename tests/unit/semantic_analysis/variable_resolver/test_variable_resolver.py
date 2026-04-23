@@ -88,7 +88,7 @@ class TestProgram:
 
         updated = resolve_program(prog)
 
-        updated_func = updated.value
+        updated_func = updated.functions[0]
         assert updated_func.identifier == "main"
         assert len(updated_func.body.items) == 2
         decl = updated_func.body.items[0]

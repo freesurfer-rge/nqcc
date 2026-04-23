@@ -225,12 +225,18 @@ def resolve_function(func: SourceFunctionDeclarationNode) -> SourceFunctionDecla
     variable_map: dict[str, VariableInfo] = {}
     updated_body = resolver.resolve_block(func.body, variable_map)
     result = SourceFunctionDeclarationNode(
-        start_position=func.start_position, identifier=func.identifier, body=updated_body
+        start_position=func.start_position,
+        identifier=func.identifier,
+        body=updated_body,
+        params=func.params,
     )
     return result
 
 
 def resolve_program(prog: SourceProgramNode) -> SourceProgramNode:
-    updated_func = resolve_function(prog.value)
-    result = SourceProgramNode(start_position=prog.start_position, value=updated_func)
+    updated_funcs = []
+    for f in prog.functions:
+        updated = resolve_function(f)
+        updated_funcs.append(updated)
+    result = SourceProgramNode(start_position=prog.start_position, functions=updated_funcs)
     return result

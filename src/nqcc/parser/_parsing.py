@@ -416,11 +416,18 @@ def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:
     if isinstance(token_tape.peek(), OpenParenToken):
         # We have a function declaration
         params = parse_function_parameter_list(token_tape)
+
+        if isinstance(token_tape.peek(), OpenBraceToken):
+            body_block = parse_block(token_tape)
+        else:
+            token_tape.expect(SemicolonToken)
+            body_block = None
+
         result = SourceFunctionDeclarationNode(
             start_position=type_token.start_position,
             identifier=name_token.value,
             params=params,
-            body=None,
+            body=body_block,
         )
     else:
         # We have a variable declaration
@@ -430,12 +437,12 @@ def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:
         if not isinstance(token_tape.peek(), SemicolonToken):
             _ = token_tape.expect(AssignmentToken)
             initialiser = parse_expression(token_tape, min_precedence=0)
+        _ = token_tape.expect(SemicolonToken)
 
         result = SourceVariableDeclarationNode(
             start_position=type_token.start_position, identifier=var, initial=initialiser
         )
 
-    _ = token_tape.expect(SemicolonToken)
     return result
 
 
@@ -482,27 +489,9 @@ def parse_function_parameter_list(token_tape: TokenTape) -> list[str]:
 
 
 def parse_function(token_tape: TokenTape) -> SourceFunctionDeclarationNode:
-    type_token = token_tape.expect(KeywordToken)
-    if type_token.value != "int":
-        raise SourceASTBadValueError(
-            expected_value="int", actual_token=type_token, message="Unexpected return type"
-        )
-    function_name_token = token_tape.expect(IdentifierToken)
-
-    param_list = parse_function_parameter_list(token_tape)
-
-    if isinstance(token_tape.peek(), OpenBraceToken):
-        body_block = parse_block(token_tape)
-    else:
-        token_tape.expect(SemicolonToken)
-        body_block = None
-
-    return SourceFunctionDeclarationNode(
-        identifier=function_name_token.value,
-        body=body_block,
-        params=param_list,
-        start_position=type_token.start_position,
-    )
+    decl = parse_declaration(token_tape)
+    assert isinstance(decl, SourceFunctionDeclarationNode)
+    return decl
 
 
 def parse_program(token_tape: TokenTape) -> SourceProgramNode:
