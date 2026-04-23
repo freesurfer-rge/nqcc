@@ -61,7 +61,7 @@ from ._source_ast import (
     SourceExpressionStatementNode,
     SourceForInitNode,
     SourceForNode,
-    SourceFunctionNode,
+    SourceFunctionDeclarationNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
     SourceIfStatementNode,
@@ -403,7 +403,7 @@ def parse_block_item(token_tape: TokenTape) -> SourceBlockItemNode:
     return parse_statement(token_tape)
 
 
-def parse_function(token_tape: TokenTape) -> SourceFunctionNode:
+def parse_function(token_tape: TokenTape) -> SourceFunctionDeclarationNode:
     type_token = token_tape.expect(KeywordToken)
     if type_token.value != "int":
         raise SourceASTBadValueError(
@@ -421,17 +421,18 @@ def parse_function(token_tape: TokenTape) -> SourceFunctionNode:
 
     body_block = parse_block(token_tape)
 
-    return SourceFunctionNode(
+    return SourceFunctionDeclarationNode(
         identifier=function_name_token.value,
         body=body_block,
+        params=[],
         start_position=type_token.start_position,
     )
 
 
 def parse_program(token_tape: TokenTape) -> SourceProgramNode:
-    f = parse_function(token_tape)
+    funcs = []
+    while token_tape.tokens_remaining > 0:
+        f = parse_function(token_tape)
+        funcs.append(f)
 
-    if token_tape.tokens_remaining > 0:
-        raise ValueError("Did not expect any more tokens")
-
-    return SourceProgramNode(start_position=0, value=f)
+    return SourceProgramNode(start_position=0, functions=funcs)
