@@ -1,7 +1,7 @@
 from typing import Type, get_args
 
 from nqcc.lexer import (
-    AdditionToken,
+    AdditionToken,CommaToken,
     AssignmentToken,
     BinaryOperatorToken,
     BitwiseAnd,
@@ -402,6 +402,33 @@ def parse_block_item(token_tape: TokenTape) -> SourceBlockItemNode:
 
     return parse_statement(token_tape)
 
+def parse_function_parameter_list(token_tape: TokenTape) -> list[str]:
+    result = []
+    _ = token_tape.expect(OpenParenToken)
+    
+    first_arg_token = token_tape.peek()
+    if not isinstance(first_arg_token, KeywordToken) or first_arg_token.value not in ["void", "int"]:
+        raise SourceASTBadValueError(
+            expected_value="void or int", actual_token=first_arg_token, message="Unexpected arguments"
+        )
+    
+    if first_arg_token.value == "void":
+        # Just consume the keyword
+        _ = token_tape.expect(KeywordToken)
+    else:
+        while True:
+            type_token = token_tape.expect(KeywordToken)
+            assert type_token.value == "int"
+            name_token = token_tape.expect(IdentifierToken)
+            result.append(name_token.value)
+            if isinstance(token_tape.peek(), CloseParenToken):
+                break
+            _ = token_tape.expect(CommaToken)
+
+    _ = token_tape.expect(CloseParenToken)
+    return result
+
+
 
 def parse_function(token_tape: TokenTape) -> SourceFunctionDeclarationNode:
     type_token = token_tape.expect(KeywordToken)
@@ -411,20 +438,17 @@ def parse_function(token_tape: TokenTape) -> SourceFunctionDeclarationNode:
         )
     function_name_token = token_tape.expect(IdentifierToken)
 
-    _ = token_tape.expect(OpenParenToken)
-    arg_token = token_tape.expect(KeywordToken)
-    if arg_token.value != "void":
-        raise SourceASTBadValueError(
-            expected_value="void", actual_token=arg_token, message="Unexpected arguments"
-        )
-    _ = token_tape.expect(CloseParenToken)
+    param_list = parse_function_parameter_list(token_tape)
 
-    body_block = parse_block(token_tape)
+    if isinstance(token_tape.peek(), OpenBraceToken):
+        body_block = parse_block(token_tape)
+    else:
+        body_block = None
 
     return SourceFunctionDeclarationNode(
         identifier=function_name_token.value,
         body=body_block,
-        params=[],
+        params=param_list,
         start_position=type_token.start_position,
     )
 
