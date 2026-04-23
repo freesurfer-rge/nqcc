@@ -190,6 +190,32 @@ class TestSourceProgramNode:
         assert isinstance(return_value_node, SourceConstantIntNode)
         assert return_value_node.start_position == program_str.find("2")
 
+    def test_program_two_function(self):
+        program_str = """
+        int combine(int first_num, int second_num) {
+            return first_num + second_num;
+        }
+
+        int main(void) {
+            return combine(10, 11);
+        }
+        """
+        token_tape = TokenTape.from_c_source(program_str)
+
+        node = parse_program(token_tape)
+
+        assert isinstance(node, SourceProgramNode)
+        assert node.start_position == 0
+
+        assert len(node.functions) == 2
+        f0 = node.functions[0]
+        assert isinstance(f0, SourceFunctionDeclarationNode)
+        assert f0.identifier == "combine"
+
+        f1 = node.function[1]
+        assert isinstance(f1, SourceFunctionDeclarationNode)
+        assert f1.identifier == "main"
+
     def test_program_serde(self):
         program_str = "   int main( void ) { return 6;}"
 
