@@ -188,6 +188,12 @@ class SourceTernaryExpressonNode(SourceASTNode):
     otherwise: SourceExpressionNode
 
 
+class SourceFunctionCallNode(SourceASTNode):
+    node_type: Literal["SourceFunctionCallNode"] = "SourceFunctionCallNode"
+    identifier: str
+    args: list[SourceExpressionNode]
+
+
 SourceExpressionNode = Union[
     SourceConstantIntNode,
     SourceVarNode,
@@ -195,6 +201,7 @@ SourceExpressionNode = Union[
     SourceBinaryExpressionNode,
     SourceAssignmentNode,
     SourceTernaryExpressonNode,
+    SourceFunctionCallNode,
 ]
 
 
