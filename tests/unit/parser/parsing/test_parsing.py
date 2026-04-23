@@ -3,7 +3,7 @@ import pytest
 from nqcc.lexer import CloseParenToken
 from nqcc.parser import (
     SourceAdd,
-    SourceASTBadTypeError,SourceASTBadValueError,
+    SourceASTBadTypeError,
     SourceBinaryExpressionNode,
     SourceBlockNode,
     SourceConstantIntNode,
@@ -91,6 +91,39 @@ class TestSourceVariableDeclarationNode:
             left=SourceConstantIntNode(start_position=6, value=1),
             right=SourceConstantIntNode(start_position=8, value=2),
         )
+
+
+class TestSourceFunctionDeclarationNode:
+    def test_void(self):
+        cdecl_str = "int a_function_decl(void);"
+        token_tape = TokenTape.from_c_source(cdecl_str)
+
+        node = parse_declaration(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        assert isinstance(node, SourceFunctionDeclarationNode)
+        assert node.identifier == "a_function_decl"
+        assert len(node.params) == 0
+
+    def test_one_arg(self):
+        cdecl_str = "int b_func(int a);"
+        token_tape = TokenTape.from_c_source(cdecl_str)
+
+        node = parse_declaration(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        assert isinstance(node, SourceFunctionDeclarationNode)
+        assert node.identifier == "b_func"
+        assert len(node.params) == 1
+        assert node.params[0] == "a"
+
+    def test_no_definition_in_decl(self):
+        cdecl_str = "int a(void){ return 2; };"
+        token_tape = TokenTape.from_c_source(cdecl_str)
+
+        with pytest.raises(SourceASTBadTypeError) as sabte:
+            _ = parse_declaration(token_tape)
+        assert sabte.value.message == "Received token of unexpected type"
 
 
 class TestSourceFunctionNode:

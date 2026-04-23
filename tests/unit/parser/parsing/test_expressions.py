@@ -31,7 +31,8 @@ from nqcc.parser import (
     SourceUnaryExpressionNode,
     SourceVarNode,
     TokenTape,
-    parse_expression,parse_function_argument_list
+    parse_expression,
+    parse_function_argument_list,
 )
 
 _BINARY_EXPRESSION_MAP = {
@@ -326,6 +327,7 @@ class TestSourceExpressionNode:
         # Still have the semicolon
         assert token_tape.tokens_remaining == 1
 
+
 class TestFunctionArguments:
     def test_empty(self):
         source = "()"
@@ -357,7 +359,10 @@ class TestFunctionArguments:
 
         with pytest.raises(ValueError) as ve:
             _ = parse_function_argument_list(token_tape)
-        assert ve.value.args[0] == "Could not match type of token_type='CloseParenToken' start_position=9 value=')'"
+        assert (
+            ve.value.args[0]
+            == "Could not match type of token_type='CloseParenToken' start_position=9 value=')'"
+        )
 
 
 class TestFunctionCall:
@@ -431,5 +436,3 @@ class TestFunctionCall:
         assert arg0.identifier == "func_b"
         assert len(arg0.args) == 1
         assert arg0.args[0] == SourceConstantIntNode(start_position=15, value=10)
-
-    

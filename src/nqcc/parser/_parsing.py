@@ -55,6 +55,7 @@ from ._source_ast import (
     SourceCompoundNode,
     SourceConstantIntNode,
     SourceContinueNode,
+    SourceDeclarationNode,
     SourceDivide,
     SourceDoWhileNode,
     SourceEqualTo,
@@ -258,8 +259,10 @@ def parse_optional_expression(
         return None
     elif isinstance(first_token, KeywordToken):
         assert first_token.value == "int", f"Was expecting int counter: {first_token}"
-        result = parse_declaration(token_tape)
+        parsed_decl = parse_declaration(token_tape)
+        assert not isinstance(parsed_decl, SourceFunctionDeclarationNode)
         # Decl will consume the ending token
+        result = parsed_decl
     else:
         result = parse_expression(token_tape, min_precedence=0)
         _ = token_tape.expect(end_token)
@@ -402,23 +405,38 @@ def parse_block(token_tape: TokenTape) -> SourceBlockNode:
     return SourceBlockNode(start_position=opening_token.start_position, items=items)
 
 
-def parse_declaration(token_tape: TokenTape) -> SourceVariableDeclarationNode:
+def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:
     type_token = token_tape.expect(KeywordToken)
     assert type_token.value == "int", "Can only handle int declarations!"
 
     name_token = token_tape.expect(IdentifierToken)
-    assert isinstance(name_token, IdentifierToken), "Expected variable name!"
-    var = SourceVarNode(start_position=name_token.start_position, identifier=name_token.value)
+    assert isinstance(name_token, IdentifierToken), "Expected identifier!"
 
-    initialiser: SourceExpressionNode | None = None
-    if not isinstance(token_tape.peek(), SemicolonToken):
-        _ = token_tape.expect(AssignmentToken)
-        initialiser = parse_expression(token_tape, min_precedence=0)
+    result: SourceDeclarationNode
+    if isinstance(token_tape.peek(), OpenParenToken):
+        # We have a function declaration
+        params = parse_function_parameter_list(token_tape)
+        result = SourceFunctionDeclarationNode(
+            start_position=type_token.start_position,
+            identifier=name_token.value,
+            params=params,
+            body=None,
+        )
+    else:
+        # We have a variable declaration
+        var = SourceVarNode(start_position=name_token.start_position, identifier=name_token.value)
+
+        initialiser: SourceExpressionNode | None = None
+        if not isinstance(token_tape.peek(), SemicolonToken):
+            _ = token_tape.expect(AssignmentToken)
+            initialiser = parse_expression(token_tape, min_precedence=0)
+
+        result = SourceVariableDeclarationNode(
+            start_position=type_token.start_position, identifier=var, initial=initialiser
+        )
+
     _ = token_tape.expect(SemicolonToken)
-
-    return SourceVariableDeclarationNode(
-        start_position=type_token.start_position, identifier=var, initial=initialiser
-    )
+    return result
 
 
 def parse_block_item(token_tape: TokenTape) -> SourceBlockItemNode:
