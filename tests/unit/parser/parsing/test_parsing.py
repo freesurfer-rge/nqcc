@@ -3,7 +3,7 @@ import pytest
 from nqcc.lexer import CloseParenToken
 from nqcc.parser import (
     SourceAdd,
-    SourceASTBadTypeError,
+    SourceASTBadTypeError,SourceASTBadValueError,
     SourceBinaryExpressionNode,
     SourceBlockNode,
     SourceConstantIntNode,

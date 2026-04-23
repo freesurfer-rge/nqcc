@@ -153,12 +153,14 @@ def convert_binary_operator(lexer_token: Token) -> SourceBinaryOperator | None:
 def parse_function_argument_list(token_tape: TokenTape) -> list[SourceExpressionNode]:
     result = []
     _ = token_tape.expect(OpenParenToken)
-    while not isinstance(token_tape.peek(), CloseParenToken):
+    must_have_arg = False
+    while not isinstance(token_tape.peek(), CloseParenToken) or must_have_arg:
         nxt_arg = parse_expression(token_tape, min_precedence=0)
         result.append(nxt_arg)
         if isinstance(token_tape.peek(), CloseParenToken):
             break
         _ = token_tape.expect(CommaToken)
+        must_have_arg = True
     _ = token_tape.expect(CloseParenToken)
 
     return result

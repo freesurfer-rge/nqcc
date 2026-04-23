@@ -31,7 +31,7 @@ from nqcc.parser import (
     SourceUnaryExpressionNode,
     SourceVarNode,
     TokenTape,
-    parse_expression,
+    parse_expression,parse_function_argument_list
 )
 
 _BINARY_EXPRESSION_MAP = {
@@ -326,6 +326,39 @@ class TestSourceExpressionNode:
         # Still have the semicolon
         assert token_tape.tokens_remaining == 1
 
+class TestFunctionArguments:
+    def test_empty(self):
+        source = "()"
+        token_tape = TokenTape.from_c_source(source)
+
+        args = parse_function_argument_list(token_tape)
+        assert len(args) == 0
+
+    def test_single(self):
+        source = "(1)"
+        token_tape = TokenTape.from_c_source(source)
+
+        args = parse_function_argument_list(token_tape)
+        assert len(args) == 1
+        assert args[0] == SourceConstantIntNode(start_position=1, value=1)
+
+    def test_two(self):
+        source = "(5, 6)"
+        token_tape = TokenTape.from_c_source(source)
+
+        args = parse_function_argument_list(token_tape)
+        assert len(args) == 2
+        assert args[0] == SourceConstantIntNode(start_position=1, value=5)
+        assert args[1] == SourceConstantIntNode(start_position=4, value=6)
+
+    def test_bad_comma(self):
+        source = "(1, 2, 3,)"
+        token_tape = TokenTape.from_c_source(source)
+
+        with pytest.raises(ValueError) as ve:
+            _ = parse_function_argument_list(token_tape)
+        assert ve.value.args[0] == "Could not match type of token_type='CloseParenToken' start_position=9 value=')'"
+
 
 class TestFunctionCall:
     def test_simple(self):
@@ -398,3 +431,5 @@ class TestFunctionCall:
         assert arg0.identifier == "func_b"
         assert len(arg0.args) == 1
         assert arg0.args[0] == SourceConstantIntNode(start_position=15, value=10)
+
+    

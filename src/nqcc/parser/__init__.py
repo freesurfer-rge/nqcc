@@ -5,7 +5,7 @@ from ._parsing import (
     parse_declaration,
     parse_expression,
     parse_function,
-    parse_function_parameter_list,
+    parse_function_parameter_list,parse_function_argument_list,
     parse_optional_expression,
     parse_program,
     parse_statement,
@@ -136,5 +136,5 @@ __all__ = [
     "parse_optional_expression",
     "parse_program",
     "parse_statement",
-    "parser_driver",
+    "parser_driver","parse_function_argument_list"
 ]
