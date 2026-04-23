@@ -1,7 +1,7 @@
 from typing import Type, get_args
 
 from nqcc.lexer import (
-    AdditionToken,CommaToken,
+    AdditionToken,
     AssignmentToken,
     BinaryOperatorToken,
     BitwiseAnd,
@@ -10,6 +10,7 @@ from nqcc.lexer import (
     CloseBraceToken,
     CloseParenToken,
     ColonToken,
+    CommaToken,
     ConstantIntegerToken,
     DivideToken,
     EqualTo,
@@ -402,16 +403,22 @@ def parse_block_item(token_tape: TokenTape) -> SourceBlockItemNode:
 
     return parse_statement(token_tape)
 
+
 def parse_function_parameter_list(token_tape: TokenTape) -> list[str]:
     result = []
     _ = token_tape.expect(OpenParenToken)
-    
+
     first_arg_token = token_tape.peek()
-    if not isinstance(first_arg_token, KeywordToken) or first_arg_token.value not in ["void", "int"]:
+    if not isinstance(first_arg_token, KeywordToken) or first_arg_token.value not in [
+        "void",
+        "int",
+    ]:
         raise SourceASTBadValueError(
-            expected_value="void or int", actual_token=first_arg_token, message="Unexpected arguments"
+            expected_value="void or int",
+            actual_token=first_arg_token,
+            message="Unexpected arguments",
         )
-    
+
     if first_arg_token.value == "void":
         # Just consume the keyword
         _ = token_tape.expect(KeywordToken)
@@ -427,7 +434,6 @@ def parse_function_parameter_list(token_tape: TokenTape) -> list[str]:
 
     _ = token_tape.expect(CloseParenToken)
     return result
-
 
 
 def parse_function(token_tape: TokenTape) -> SourceFunctionDeclarationNode:

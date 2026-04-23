@@ -15,11 +15,41 @@ from nqcc.parser import (
     TokenTape,
     parse_declaration,
     parse_function,
+    parse_function_parameter_list,
     parse_program,
 )
 
 
-class TestSourceDeclarationNode:
+class TestParseFunctionParameterList:
+    def test_void(self):
+        param_str = "(void)"
+        token_tape = TokenTape.from_c_source(param_str)
+
+        params = parse_function_parameter_list(token_tape)
+        assert isinstance(params, list)
+        assert len(params) == 0
+
+    def test_single(self):
+        param_str = " ( int a    ) "
+        token_tape = TokenTape.from_c_source(param_str)
+
+        params = parse_function_parameter_list(token_tape)
+        assert isinstance(params, list)
+        assert len(params) == 1
+        assert params[0] == "a"
+
+    def test_two_params(self):
+        param_str = " ( int a, int b_parameter   ) "
+        token_tape = TokenTape.from_c_source(param_str)
+
+        params = parse_function_parameter_list(token_tape)
+        assert isinstance(params, list)
+        assert len(params) == 2
+        assert params[0] == "a"
+        assert params[1] == "b_parameter"
+
+
+class TestSourceVariableDeclarationNode:
     def test_no_initial(self):
         cdecl_str = "int a;"
         token_tape = TokenTape.from_c_source(cdecl_str)
