@@ -15,7 +15,6 @@ from nqcc.parser import (
     SourceCompoundNode,
     SourceConstantIntNode,
     SourceContinueNode,
-    SourceVariableDeclarationNode,
     SourceDivide,
     SourceDoWhileNode,
     SourceEqualTo,
@@ -48,6 +47,7 @@ from nqcc.parser import (
     SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
+    SourceVariableDeclarationNode,
     SourceVarNode,
     SourceWhileNode,
 )

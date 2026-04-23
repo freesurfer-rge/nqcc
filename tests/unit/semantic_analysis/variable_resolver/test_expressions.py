@@ -3,8 +3,8 @@ import pytest
 from nqcc.parser import (
     SourceAssignmentNode,
     SourceConstantIntNode,
-    SourceVariableDeclarationNode,
     SourceTernaryExpressonNode,
+    SourceVariableDeclarationNode,
     SourceVarNode,
     TokenTape,
     parse_expression,

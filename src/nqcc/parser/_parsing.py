@@ -54,7 +54,6 @@ from ._source_ast import (
     SourceCompoundNode,
     SourceConstantIntNode,
     SourceContinueNode,
-    SourceVariableDeclarationNode,
     SourceDivide,
     SourceDoWhileNode,
     SourceEqualTo,
@@ -88,6 +87,7 @@ from ._source_ast import (
     SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
+    SourceVariableDeclarationNode,
     SourceVarNode,
     SourceWhileNode,
 )
@@ -283,7 +283,9 @@ def parse_for_statement(token_tape: TokenTape, start_position: int) -> SourceFor
 
     # Get the 'condition' expression
     condition = parse_optional_expression(token_tape, SemicolonToken)
-    assert not isinstance(condition, SourceVariableDeclarationNode), "Can't declare in for condition"
+    assert not isinstance(condition, SourceVariableDeclarationNode), (
+        "Can't declare in for condition"
+    )
 
     # Get the 'post' expression
     post = parse_optional_expression(token_tape, CloseParenToken)

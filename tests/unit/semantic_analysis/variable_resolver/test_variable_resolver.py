@@ -1,8 +1,8 @@
 from nqcc.parser import (
     SourceBinaryExpressionNode,
     SourceCompoundNode,
-    SourceVariableDeclarationNode,
     SourceReturnNode,
+    SourceVariableDeclarationNode,
     SourceVarNode,
     TokenTape,
     parse_function,

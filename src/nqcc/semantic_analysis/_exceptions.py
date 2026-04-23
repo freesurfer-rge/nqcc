@@ -1,8 +1,8 @@
 from nqcc.parser import (
     SourceBreakNode,
     SourceContinueNode,
-    SourceVariableDeclarationNode,
     SourceExpressionNode,
+    SourceVariableDeclarationNode,
     SourceVarNode,
 )
 
