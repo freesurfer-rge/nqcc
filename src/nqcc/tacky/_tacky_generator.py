@@ -595,7 +595,11 @@ class TackyGenerator:
         self._current_instructions = []
 
         # Process the internals
-        self.emit_block(source_node.body)
+        if source_node.body:
+            # Hmmm.... should probably always have body
+            self.emit_block(source_node.body)
+        else:
+            print("No body?")
 
         # What if there's no return statement?
         # We add an extra; this will not run if there is
@@ -614,6 +618,7 @@ class TackyGenerator:
     def emit_program(self, source_node: SourceProgramNode) -> TackyProgramNode:
         assert isinstance(source_node, SourceProgramNode)
 
-        func = self.emit_function(source_node.value)
+        assert len(source_node.functions) == 1
+        func = self.emit_function(source_node.functions[0])
 
         return TackyProgramNode(start_position=0, function_definition=func)

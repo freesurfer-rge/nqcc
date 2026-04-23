@@ -223,8 +223,8 @@ class VariableResolver:
 def resolve_function(func: SourceFunctionDeclarationNode) -> SourceFunctionDeclarationNode:
     resolver = VariableResolver()
     variable_map: dict[str, VariableInfo] = {}
-    if func.body:
-        updated_body = resolver.resolve_block(func.body, variable_map)
+    assert func.body is not None, "Missing function body"
+    updated_body = resolver.resolve_block(func.body, variable_map)
     result = SourceFunctionDeclarationNode(
         start_position=func.start_position,
         identifier=func.identifier,
