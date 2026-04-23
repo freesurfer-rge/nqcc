@@ -62,6 +62,7 @@ from ._source_ast import (
     SourceExpressionStatementNode,
     SourceForInitNode,
     SourceForNode,
+    SourceFunctionCallNode,
     SourceFunctionDeclarationNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
@@ -149,6 +150,20 @@ def convert_binary_operator(lexer_token: Token) -> SourceBinaryOperator | None:
     return result_type(start_position=lexer_token.start_position)
 
 
+def parse_function_argument_list(token_tape: TokenTape) -> list[SourceExpressionNode]:
+    result = []
+    _ = token_tape.expect(OpenParenToken)
+    while True:
+        nxt_arg = parse_expression(token_tape, min_precedence=0)
+        result.append(nxt_arg)
+        if isinstance(token_tape.peek(), CloseParenToken):
+            break
+        _ = token_tape.expect(CommaToken)
+    _ = token_tape.expect(CloseParenToken)
+
+    return result
+
+
 def parse_factor(token_tape: TokenTape) -> SourceExpressionNode:
     token = token_tape.peek()
 
@@ -175,7 +190,17 @@ def parse_factor(token_tape: TokenTape) -> SourceExpressionNode:
 
         case IdentifierToken():
             id_token = token_tape.take()
-            return SourceVarNode(start_position=id_token.start_position, identifier=id_token.value)
+            nxt_token = token_tape.peek()
+            if isinstance(nxt_token, OpenParenToken):
+                # We have a function call
+                args = parse_function_argument_list(token_tape)
+                return SourceFunctionCallNode(
+                    start_position=id_token.start_position, identifier=id_token.value, args=args
+                )
+            else:
+                return SourceVarNode(
+                    start_position=id_token.start_position, identifier=id_token.value
+                )
 
         case _:
             raise ValueError(f"Could not match type of {token}")

@@ -7,6 +7,7 @@ from nqcc.parser import (
     SourceBinaryExpressionNode,
     SourceBlockNode,
     SourceConstantIntNode,
+    SourceFunctionCallNode,
     SourceFunctionDeclarationNode,
     SourceProgramNode,
     SourceReturnNode,
@@ -195,8 +196,8 @@ class TestSourceProgramNode:
         int combine(int first_num, int second_num) {
             return first_num + second_num;
         }
-
-        int main(void) {
+               
+       int main(void) {
             return combine(10, 11);
         }
         """
@@ -211,10 +212,23 @@ class TestSourceProgramNode:
         f0 = node.functions[0]
         assert isinstance(f0, SourceFunctionDeclarationNode)
         assert f0.identifier == "combine"
+        assert len(f0.params) == 2
+        assert f0.params[0] == "first_num"
+        assert f0.params[1] == "second_num"
 
-        f1 = node.function[1]
+        f1 = node.functions[1]
         assert isinstance(f1, SourceFunctionDeclarationNode)
         assert f1.identifier == "main"
+        assert len(f1.params) == 0
+        assert isinstance(f1.body, SourceBlockNode)
+        assert len(f1.body.items) == 1
+        s0 = f1.body.items[0]
+        assert isinstance(s0, SourceReturnNode)
+        assert isinstance(s0.value, SourceFunctionCallNode)
+        assert s0.value.identifier == f0.identifier
+        assert len(s0.value.args) == 2
+        assert s0.value.args[0] == SourceConstantIntNode(start_position=174, value=10)
+        assert s0.value.args[1] == SourceConstantIntNode(start_position=178, value=11)
 
     def test_program_serde(self):
         program_str = "   int main( void ) { return 6;}"
