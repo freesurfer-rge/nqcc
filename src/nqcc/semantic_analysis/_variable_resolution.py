@@ -16,7 +16,7 @@ from nqcc.parser import (
     SourceExpressionStatementNode,
     SourceForInitNode,
     SourceForNode,
-    SourceFunctionNode,
+    SourceFunctionDeclarationNode,
     SourceIfStatementNode,
     SourceInitDeclNode,
     SourceInitExpressionNode,
@@ -220,11 +220,11 @@ class VariableResolver:
                 raise ValueError(f"Unrecognised: {bi}")
 
 
-def resolve_function(func: SourceFunctionNode) -> SourceFunctionNode:
+def resolve_function(func: SourceFunctionDeclarationNode) -> SourceFunctionDeclarationNode:
     resolver = VariableResolver()
     variable_map: dict[str, VariableInfo] = {}
     updated_body = resolver.resolve_block(func.body, variable_map)
-    result = SourceFunctionNode(
+    result = SourceFunctionDeclarationNode(
         start_position=func.start_position, identifier=func.identifier, body=updated_body
     )
     return result

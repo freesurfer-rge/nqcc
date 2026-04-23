@@ -474,6 +474,7 @@ def parse_function(token_tape: TokenTape) -> SourceFunctionDeclarationNode:
     if isinstance(token_tape.peek(), OpenBraceToken):
         body_block = parse_block(token_tape)
     else:
+        token_tape.expect(SemicolonToken)
         body_block = None
 
     return SourceFunctionDeclarationNode(
