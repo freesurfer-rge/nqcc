@@ -7,7 +7,7 @@ from nqcc.parser import (
     SourceBinaryExpressionNode,
     SourceBlockNode,
     SourceConstantIntNode,
-    SourceFunctionNode,
+    SourceFunctionDeclarationNode,
     SourceProgramNode,
     SourceReturnNode,
     SourceVariableDeclarationNode,
@@ -70,7 +70,7 @@ class TestSourceFunctionNode:
 
         node = parse_function(token_tape)
 
-        assert isinstance(node, SourceFunctionNode)
+        assert isinstance(node, SourceFunctionDeclarationNode)
         assert node.start_position == program_str.find("int")
         assert node.identifier == "main"
 
@@ -89,7 +89,7 @@ class TestSourceFunctionNode:
 
         node = parse_function(token_tape)
 
-        assert isinstance(node, SourceFunctionNode)
+        assert isinstance(node, SourceFunctionDeclarationNode)
         assert node.start_position == program_str.find("int")
         assert node.identifier == "main"
 
@@ -113,7 +113,7 @@ class TestSourceFunctionNode:
 
         node_str = node.model_dump_json()
 
-        node_serde = SourceFunctionNode.model_validate_json(node_str)
+        node_serde = SourceFunctionDeclarationNode.model_validate_json(node_str)
         assert node == node_serde
 
     def test_switched_parens(self):
@@ -145,8 +145,9 @@ class TestSourceProgramNode:
         assert isinstance(node, SourceProgramNode)
         assert node.start_position == 0
 
-        func_node = node.value
-        assert isinstance(func_node, SourceFunctionNode)
+        assert len(node.functions) == 1
+        func_node = node.functions[0]
+        assert isinstance(func_node, SourceFunctionDeclarationNode)
 
         assert func_node.identifier == "main"
 

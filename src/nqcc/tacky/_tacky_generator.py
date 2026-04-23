@@ -22,7 +22,7 @@ from nqcc.parser import (
     SourceExpressionStatementNode,
     SourceForInitNode,
     SourceForNode,
-    SourceFunctionNode,
+    SourceFunctionDeclarationNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
     SourceIfStatementNode,
@@ -585,8 +585,8 @@ class TackyGenerator:
         for block_item in source_node.items:
             self.emit_blockitem(block_item)
 
-    def emit_function(self, source_node: SourceFunctionNode) -> TackyFunctionNode:
-        assert isinstance(source_node, SourceFunctionNode)
+    def emit_function(self, source_node: SourceFunctionDeclarationNode) -> TackyFunctionNode:
+        assert isinstance(source_node, SourceFunctionDeclarationNode)
 
         # Set up internal state
         self._nxt_tmp = 0
