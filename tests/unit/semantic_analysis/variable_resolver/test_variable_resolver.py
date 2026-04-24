@@ -1,8 +1,8 @@
 from nqcc.parser import (
     SourceBinaryExpressionNode,
     SourceCompoundNode,
-    SourceDeclarationNode,
     SourceReturnNode,
+    SourceVariableDeclarationNode,
     SourceVarNode,
     TokenTape,
     parse_function,
@@ -25,7 +25,7 @@ class TestFunction:
         assert updated.identifier == "main"
         assert len(updated.body.items) == 2
         decl = updated.body.items[0]
-        assert isinstance(decl, SourceDeclarationNode)
+        assert isinstance(decl, SourceVariableDeclarationNode)
         assert isinstance(decl.identifier, SourceVarNode)
         assert decl.identifier.identifier == "a.0"
         ret = updated.body.items[1]
@@ -52,7 +52,7 @@ class TestFunction:
         assert len(updated.body.items) == 3
 
         decl0 = updated.body.items[0]
-        assert isinstance(decl0, SourceDeclarationNode)
+        assert isinstance(decl0, SourceVariableDeclarationNode)
         assert isinstance(decl0.identifier, SourceVarNode)
         assert decl0.identifier.identifier == "x.0"
 
@@ -61,7 +61,7 @@ class TestFunction:
         assert len(compound0.block.items) == 2
 
         decl1 = compound0.block.items[0]
-        assert isinstance(decl1, SourceDeclarationNode)
+        assert isinstance(decl1, SourceVariableDeclarationNode)
         assert isinstance(decl1.identifier, SourceVarNode)
         assert decl1.identifier.identifier == "y.1"
         assert isinstance(decl1.initial, SourceBinaryExpressionNode)
@@ -69,7 +69,7 @@ class TestFunction:
         assert decl1.initial.left.identifier == "x.0"
 
         decl2 = compound0.block.items[1]
-        assert isinstance(decl2, SourceDeclarationNode)
+        assert isinstance(decl2, SourceVariableDeclarationNode)
         assert isinstance(decl2.identifier, SourceVarNode)
         assert decl2.identifier.identifier == "x.2"
 
@@ -88,11 +88,11 @@ class TestProgram:
 
         updated = resolve_program(prog)
 
-        updated_func = updated.value
+        updated_func = updated.functions[0]
         assert updated_func.identifier == "main"
         assert len(updated_func.body.items) == 2
         decl = updated_func.body.items[0]
-        assert isinstance(decl, SourceDeclarationNode)
+        assert isinstance(decl, SourceVariableDeclarationNode)
         assert isinstance(decl.identifier, SourceVarNode)
         assert decl.identifier.identifier == "a.0"
         ret = updated_func.body.items[1]

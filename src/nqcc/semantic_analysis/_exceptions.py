@@ -1,14 +1,14 @@
 from nqcc.parser import (
     SourceBreakNode,
     SourceContinueNode,
-    SourceDeclarationNode,
     SourceExpressionNode,
+    SourceVariableDeclarationNode,
     SourceVarNode,
 )
 
 
 class SemanticAnalysisDuplicateDeclaration(ValueError):
-    def __init__(self, *, decl: SourceDeclarationNode):
+    def __init__(self, *, decl: SourceVariableDeclarationNode):
         self.decl = decl
         message = (
             f"Duplicate declaration of '{decl.identifier.identifier}' at {decl.start_position}"

@@ -8,7 +8,7 @@ from nqcc.parser import (
     SourceContinueNode,
     SourceDoWhileNode,
     SourceForNode,
-    SourceFunctionNode,
+    SourceFunctionDeclarationNode,
     SourceIfStatementNode,
     SourceProgramNode,
     SourceStatementNode,
@@ -77,11 +77,12 @@ class LoopLabeller:
             self.label_statement(bi, current_label)
 
 
-def label_loops_function(func: SourceFunctionNode) -> None:
+def label_loops_function(func: SourceFunctionDeclarationNode) -> None:
     # Note that this (and everything else) updates in-place
-    assert isinstance(func, SourceFunctionNode)
+    assert isinstance(func, SourceFunctionDeclarationNode)
 
     labeller = LoopLabeller(function_name=func.identifier)
+    assert func.body is not None, "Missing function body"
     labeller.label_block(func.body, "")
 
 
@@ -89,4 +90,5 @@ def label_loops_program(prog: SourceProgramNode) -> None:
     # An in-place update
     assert isinstance(prog, SourceProgramNode)
 
-    label_loops_function(prog.value)
+    for f in prog.functions:
+        label_loops_function(f)

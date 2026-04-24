@@ -12,6 +12,7 @@ from nqcc.parser import (
     SourceConstantIntNode,
     SourceDivide,
     SourceEqualTo,
+    SourceFunctionCallNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
     SourceLeftShift,
@@ -31,6 +32,7 @@ from nqcc.parser import (
     SourceVarNode,
     TokenTape,
     parse_expression,
+    parse_function_argument_list,
 )
 
 _BINARY_EXPRESSION_MAP = {
@@ -324,3 +326,113 @@ class TestSourceExpressionNode:
 
         # Still have the semicolon
         assert token_tape.tokens_remaining == 1
+
+
+class TestFunctionArguments:
+    def test_empty(self):
+        source = "()"
+        token_tape = TokenTape.from_c_source(source)
+
+        args = parse_function_argument_list(token_tape)
+        assert len(args) == 0
+
+    def test_single(self):
+        source = "(1)"
+        token_tape = TokenTape.from_c_source(source)
+
+        args = parse_function_argument_list(token_tape)
+        assert len(args) == 1
+        assert args[0] == SourceConstantIntNode(start_position=1, value=1)
+
+    def test_two(self):
+        source = "(5, 6)"
+        token_tape = TokenTape.from_c_source(source)
+
+        args = parse_function_argument_list(token_tape)
+        assert len(args) == 2
+        assert args[0] == SourceConstantIntNode(start_position=1, value=5)
+        assert args[1] == SourceConstantIntNode(start_position=4, value=6)
+
+    def test_bad_comma(self):
+        source = "(1, 2, 3,)"
+        token_tape = TokenTape.from_c_source(source)
+
+        with pytest.raises(ValueError) as ve:
+            _ = parse_function_argument_list(token_tape)
+        assert (
+            ve.value.args[0]
+            == "Could not match type of token_type='CloseParenToken' start_position=9 value=')'"
+        )
+
+
+class TestFunctionCall:
+    def test_simple(self):
+        source = "my_func();"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 4
+
+        node = parse_expression(token_tape, min_precedence=0)
+        # Still have the semicolon
+        assert token_tape.tokens_remaining == 1
+
+        assert isinstance(node, SourceFunctionCallNode)
+        assert node.identifier == "my_func"
+        assert len(node.args) == 0
+
+    def test_one_arg(self):
+        source = "my_func(a);"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 5
+
+        node = parse_expression(token_tape, min_precedence=0)
+        # Still have the semicolon
+        assert token_tape.tokens_remaining == 1
+
+        assert isinstance(node, SourceFunctionCallNode)
+        assert node.identifier == "my_func"
+        assert len(node.args) == 1
+        assert node.args[0] == SourceVarNode(start_position=8, identifier="a")
+
+    def test_two_arg(self):
+        source = "my_other_func(1+2, a*b);"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 11
+
+        node = parse_expression(token_tape, min_precedence=0)
+        # Still have the semicolon
+        assert token_tape.tokens_remaining == 1
+
+        assert isinstance(node, SourceFunctionCallNode)
+        assert node.identifier == "my_other_func"
+        assert len(node.args) == 2
+
+        arg0 = node.args[0]
+        assert isinstance(arg0, SourceBinaryExpressionNode)
+        assert isinstance(arg0.operator, SourceAdd)
+        assert arg0.left == SourceConstantIntNode(start_position=14, value=1)
+        assert arg0.right == SourceConstantIntNode(start_position=16, value=2)
+
+        arg1 = node.args[1]
+        assert isinstance(arg1, SourceBinaryExpressionNode)
+        assert isinstance(arg1.operator, SourceMultiply)
+        assert arg1.left == SourceVarNode(start_position=19, identifier="a")
+        assert arg1.right == SourceVarNode(start_position=21, identifier="b")
+
+    def test_nested(self):
+        source = "func_a( func_b(10)   );"
+        token_tape = TokenTape.from_c_source(source)
+        assert token_tape.tokens_remaining == 8
+
+        node = parse_expression(token_tape, min_precedence=0)
+        # Still have the semicolon
+        assert token_tape.tokens_remaining == 1
+
+        assert isinstance(node, SourceFunctionCallNode)
+        assert node.identifier == "func_a"
+        assert len(node.args) == 1
+
+        arg0 = node.args[0]
+        assert isinstance(arg0, SourceFunctionCallNode)
+        assert arg0.identifier == "func_b"
+        assert len(arg0.args) == 1
+        assert arg0.args[0] == SourceConstantIntNode(start_position=15, value=10)

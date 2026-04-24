@@ -11,13 +11,12 @@ from nqcc.parser import (
     SourceCompoundNode,
     SourceConstantIntNode,
     SourceContinueNode,
-    SourceDeclarationNode,
     SourceDoWhileNode,
     SourceExpressionNode,
     SourceExpressionStatementNode,
     SourceForInitNode,
     SourceForNode,
-    SourceFunctionNode,
+    SourceFunctionDeclarationNode,
     SourceIfStatementNode,
     SourceInitDeclNode,
     SourceInitExpressionNode,
@@ -27,6 +26,7 @@ from nqcc.parser import (
     SourceStatementNode,
     SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
+    SourceVariableDeclarationNode,
     SourceVarNode,
     SourceWhileNode,
 )
@@ -56,9 +56,9 @@ class VariableResolver:
         self._counter = 0
 
     def resolve_declaration(
-        self, decl: SourceDeclarationNode, variable_map: dict[str, VariableInfo]
+        self, decl: SourceVariableDeclarationNode, variable_map: dict[str, VariableInfo]
     ):
-        assert isinstance(decl, SourceDeclarationNode)
+        assert isinstance(decl, SourceVariableDeclarationNode)
 
         orig_name = decl.identifier.identifier
         if orig_name in variable_map and variable_map[orig_name].defined_in_block:
@@ -73,7 +73,7 @@ class VariableResolver:
         nxt_var = SourceVarNode(
             start_position=decl.identifier.start_position, identifier=unique_name
         )
-        return SourceDeclarationNode(
+        return SourceVariableDeclarationNode(
             start_position=decl.start_position, identifier=nxt_var, initial=nxt_init
         )
 
@@ -212,7 +212,7 @@ class VariableResolver:
     ) -> SourceBlockItemNode:
 
         match bi:
-            case SourceDeclarationNode():
+            case SourceVariableDeclarationNode():
                 return self.resolve_declaration(bi, variable_map)
             case _ if isinstance(bi, get_args(SourceStatementNode)):
                 return self.resolve_statement(bi, variable_map)
@@ -220,17 +220,24 @@ class VariableResolver:
                 raise ValueError(f"Unrecognised: {bi}")
 
 
-def resolve_function(func: SourceFunctionNode) -> SourceFunctionNode:
+def resolve_function(func: SourceFunctionDeclarationNode) -> SourceFunctionDeclarationNode:
     resolver = VariableResolver()
     variable_map: dict[str, VariableInfo] = {}
+    assert func.body is not None, "Missing function body"
     updated_body = resolver.resolve_block(func.body, variable_map)
-    result = SourceFunctionNode(
-        start_position=func.start_position, identifier=func.identifier, body=updated_body
+    result = SourceFunctionDeclarationNode(
+        start_position=func.start_position,
+        identifier=func.identifier,
+        body=updated_body,
+        params=func.params,
     )
     return result
 
 
 def resolve_program(prog: SourceProgramNode) -> SourceProgramNode:
-    updated_func = resolve_function(prog.value)
-    result = SourceProgramNode(start_position=prog.start_position, value=updated_func)
+    updated_funcs = []
+    for f in prog.functions:
+        updated = resolve_function(f)
+        updated_funcs.append(updated)
+    result = SourceProgramNode(start_position=prog.start_position, functions=updated_funcs)
     return result

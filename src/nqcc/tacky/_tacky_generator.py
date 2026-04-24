@@ -15,7 +15,6 @@ from nqcc.parser import (
     SourceCompoundNode,
     SourceConstantIntNode,
     SourceContinueNode,
-    SourceDeclarationNode,
     SourceDivide,
     SourceDoWhileNode,
     SourceEqualTo,
@@ -23,7 +22,7 @@ from nqcc.parser import (
     SourceExpressionStatementNode,
     SourceForInitNode,
     SourceForNode,
-    SourceFunctionNode,
+    SourceFunctionDeclarationNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
     SourceIfStatementNode,
@@ -48,6 +47,7 @@ from nqcc.parser import (
     SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
+    SourceVariableDeclarationNode,
     SourceVarNode,
     SourceWhileNode,
 )
@@ -559,8 +559,8 @@ class TackyGenerator:
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
-    def emit_declaration(self, source_node: SourceDeclarationNode):
-        assert isinstance(source_node, SourceDeclarationNode)
+    def emit_declaration(self, source_node: SourceVariableDeclarationNode):
+        assert isinstance(source_node, SourceVariableDeclarationNode)
         if source_node.initial is None:
             return
         src_decl = self.emit_expression(source_node.initial)
@@ -575,7 +575,7 @@ class TackyGenerator:
         match source_node:
             case _ if isinstance(source_node, get_args(SourceStatementNode)):
                 self.emit_statement(source_node)
-            case _ if isinstance(source_node, SourceDeclarationNode):
+            case _ if isinstance(source_node, SourceVariableDeclarationNode):
                 self.emit_declaration(source_node)
             case _:
                 raise ValueError(f"Unrecognised blockitem: {source_node}")
@@ -585,8 +585,8 @@ class TackyGenerator:
         for block_item in source_node.items:
             self.emit_blockitem(block_item)
 
-    def emit_function(self, source_node: SourceFunctionNode) -> TackyFunctionNode:
-        assert isinstance(source_node, SourceFunctionNode)
+    def emit_function(self, source_node: SourceFunctionDeclarationNode) -> TackyFunctionNode:
+        assert isinstance(source_node, SourceFunctionDeclarationNode)
 
         # Set up internal state
         self._nxt_tmp = 0
@@ -595,7 +595,11 @@ class TackyGenerator:
         self._current_instructions = []
 
         # Process the internals
-        self.emit_block(source_node.body)
+        if source_node.body:
+            # Hmmm.... should probably always have body
+            self.emit_block(source_node.body)
+        else:
+            print("No body?")
 
         # What if there's no return statement?
         # We add an extra; this will not run if there is
@@ -614,6 +618,7 @@ class TackyGenerator:
     def emit_program(self, source_node: SourceProgramNode) -> TackyProgramNode:
         assert isinstance(source_node, SourceProgramNode)
 
-        func = self.emit_function(source_node.value)
+        assert len(source_node.functions) == 1
+        func = self.emit_function(source_node.functions[0])
 
         return TackyProgramNode(start_position=0, function_definition=func)

@@ -213,9 +213,9 @@ class TestProgram:
         # We don't need to do variable resolution to test
 
         label_loops_program(prog)
-        assert len(prog.value.body.items) == 3
+        assert len(prog.functions[0].body.items) == 3
 
-        for_stmt = prog.value.body.items[1]
+        for_stmt = prog.functions[0].body.items[1]
         assert isinstance(for_stmt, SourceForNode)
         assert for_stmt.label == "for.main.0"
 

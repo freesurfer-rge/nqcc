@@ -4,7 +4,7 @@ from nqcc.parser import (
     SourceAssignmentNode,
     SourceBinaryExpressionNode,
     SourceConstantIntNode,
-    SourceDeclarationNode,
+    SourceVariableDeclarationNode,
     SourceVarNode,
     TokenTape,
     parse_optional_expression,
@@ -32,7 +32,7 @@ class TestOptionalForInit:
         source = " int a = 32;"
         token_tape = TokenTape.from_c_source(source)
         result = parse_optional_expression(token_tape, SemicolonToken)
-        assert isinstance(result, SourceDeclarationNode)
+        assert isinstance(result, SourceVariableDeclarationNode)
         assert result.identifier == SourceVarNode(start_position=5, identifier="a")
         assert result.initial == SourceConstantIntNode(start_position=9, value=32)
         assert token_tape.tokens_remaining == 0

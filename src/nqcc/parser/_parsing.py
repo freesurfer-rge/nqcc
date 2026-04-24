@@ -10,6 +10,7 @@ from nqcc.lexer import (
     CloseBraceToken,
     CloseParenToken,
     ColonToken,
+    CommaToken,
     ConstantIntegerToken,
     DivideToken,
     EqualTo,
@@ -62,7 +63,8 @@ from ._source_ast import (
     SourceExpressionStatementNode,
     SourceForInitNode,
     SourceForNode,
-    SourceFunctionNode,
+    SourceFunctionCallNode,
+    SourceFunctionDeclarationNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
     SourceIfStatementNode,
@@ -88,6 +90,7 @@ from ._source_ast import (
     SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
     SourceUnaryOperator,
+    SourceVariableDeclarationNode,
     SourceVarNode,
     SourceWhileNode,
 )
@@ -148,6 +151,22 @@ def convert_binary_operator(lexer_token: Token) -> SourceBinaryOperator | None:
     return result_type(start_position=lexer_token.start_position)
 
 
+def parse_function_argument_list(token_tape: TokenTape) -> list[SourceExpressionNode]:
+    result = []
+    _ = token_tape.expect(OpenParenToken)
+    must_have_arg = False
+    while not isinstance(token_tape.peek(), CloseParenToken) or must_have_arg:
+        nxt_arg = parse_expression(token_tape, min_precedence=0)
+        result.append(nxt_arg)
+        if isinstance(token_tape.peek(), CloseParenToken):
+            break
+        _ = token_tape.expect(CommaToken)
+        must_have_arg = True
+    _ = token_tape.expect(CloseParenToken)
+
+    return result
+
+
 def parse_factor(token_tape: TokenTape) -> SourceExpressionNode:
     token = token_tape.peek()
 
@@ -174,7 +193,17 @@ def parse_factor(token_tape: TokenTape) -> SourceExpressionNode:
 
         case IdentifierToken():
             id_token = token_tape.take()
-            return SourceVarNode(start_position=id_token.start_position, identifier=id_token.value)
+            nxt_token = token_tape.peek()
+            if isinstance(nxt_token, OpenParenToken):
+                # We have a function call
+                args = parse_function_argument_list(token_tape)
+                return SourceFunctionCallNode(
+                    start_position=id_token.start_position, identifier=id_token.value, args=args
+                )
+            else:
+                return SourceVarNode(
+                    start_position=id_token.start_position, identifier=id_token.value
+                )
 
         case _:
             raise ValueError(f"Could not match type of {token}")
@@ -222,16 +251,18 @@ def parse_expression(token_tape: TokenTape, *, min_precedence: int) -> SourceExp
 
 def parse_optional_expression(
     token_tape: TokenTape, end_token: Type
-) -> SourceExpressionNode | SourceDeclarationNode | None:
+) -> SourceExpressionNode | SourceVariableDeclarationNode | None:
     first_token = token_tape.peek()
-    result: SourceExpressionNode | SourceDeclarationNode
+    result: SourceExpressionNode | SourceVariableDeclarationNode
     if isinstance(first_token, end_token):
         _ = token_tape.expect(end_token)
         return None
     elif isinstance(first_token, KeywordToken):
         assert first_token.value == "int", f"Was expecting int counter: {first_token}"
-        result = parse_declaration(token_tape)
+        parsed_decl = parse_declaration(token_tape)
+        assert not isinstance(parsed_decl, SourceFunctionDeclarationNode)
         # Decl will consume the ending token
+        result = parsed_decl
     else:
         result = parse_expression(token_tape, min_precedence=0)
         _ = token_tape.expect(end_token)
@@ -276,18 +307,20 @@ def parse_for_statement(token_tape: TokenTape, start_position: int) -> SourceFor
         init_expr = SourceInitExpressionNode(
             start_position=initial.start_position, expression=initial
         )
-    elif isinstance(initial, SourceDeclarationNode):
+    elif isinstance(initial, SourceVariableDeclarationNode):
         init_expr = SourceInitDeclNode(start_position=initial.start_position, decl=initial)
     else:
         raise ValueError("Bad init expression")
 
     # Get the 'condition' expression
     condition = parse_optional_expression(token_tape, SemicolonToken)
-    assert not isinstance(condition, SourceDeclarationNode), "Can't declare in for condition"
+    assert not isinstance(condition, SourceVariableDeclarationNode), (
+        "Can't declare in for condition"
+    )
 
     # Get the 'post' expression
     post = parse_optional_expression(token_tape, CloseParenToken)
-    assert not isinstance(post, SourceDeclarationNode), "Can't declare in for post"
+    assert not isinstance(post, SourceVariableDeclarationNode), "Can't declare in for post"
 
     body = parse_statement(token_tape)
 
@@ -377,18 +410,40 @@ def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:
     assert type_token.value == "int", "Can only handle int declarations!"
 
     name_token = token_tape.expect(IdentifierToken)
-    assert isinstance(name_token, IdentifierToken), "Expected variable name!"
-    var = SourceVarNode(start_position=name_token.start_position, identifier=name_token.value)
+    assert isinstance(name_token, IdentifierToken), "Expected identifier!"
 
-    initialiser: SourceExpressionNode | None = None
-    if not isinstance(token_tape.peek(), SemicolonToken):
-        _ = token_tape.expect(AssignmentToken)
-        initialiser = parse_expression(token_tape, min_precedence=0)
-    _ = token_tape.expect(SemicolonToken)
+    result: SourceDeclarationNode
+    if isinstance(token_tape.peek(), OpenParenToken):
+        # We have a function declaration
+        params = parse_function_parameter_list(token_tape)
 
-    return SourceDeclarationNode(
-        start_position=type_token.start_position, identifier=var, initial=initialiser
-    )
+        if isinstance(token_tape.peek(), OpenBraceToken):
+            body_block = parse_block(token_tape)
+        else:
+            token_tape.expect(SemicolonToken)
+            body_block = None
+
+        result = SourceFunctionDeclarationNode(
+            start_position=type_token.start_position,
+            identifier=name_token.value,
+            params=params,
+            body=body_block,
+        )
+    else:
+        # We have a variable declaration
+        var = SourceVarNode(start_position=name_token.start_position, identifier=name_token.value)
+
+        initialiser: SourceExpressionNode | None = None
+        if not isinstance(token_tape.peek(), SemicolonToken):
+            _ = token_tape.expect(AssignmentToken)
+            initialiser = parse_expression(token_tape, min_precedence=0)
+        _ = token_tape.expect(SemicolonToken)
+
+        result = SourceVariableDeclarationNode(
+            start_position=type_token.start_position, identifier=var, initial=initialiser
+        )
+
+    return result
 
 
 def parse_block_item(token_tape: TokenTape) -> SourceBlockItemNode:
@@ -401,35 +456,48 @@ def parse_block_item(token_tape: TokenTape) -> SourceBlockItemNode:
     return parse_statement(token_tape)
 
 
-def parse_function(token_tape: TokenTape) -> SourceFunctionNode:
-    type_token = token_tape.expect(KeywordToken)
-    if type_token.value != "int":
-        raise SourceASTBadValueError(
-            expected_value="int", actual_token=type_token, message="Unexpected return type"
-        )
-    function_name_token = token_tape.expect(IdentifierToken)
-
+def parse_function_parameter_list(token_tape: TokenTape) -> list[str]:
+    result = []
     _ = token_tape.expect(OpenParenToken)
-    arg_token = token_tape.expect(KeywordToken)
-    if arg_token.value != "void":
+
+    first_arg_token = token_tape.peek()
+    if not isinstance(first_arg_token, KeywordToken) or first_arg_token.value not in [
+        "void",
+        "int",
+    ]:
         raise SourceASTBadValueError(
-            expected_value="void", actual_token=arg_token, message="Unexpected arguments"
+            expected_value="void or int",
+            actual_token=first_arg_token,
+            message="Unexpected arguments",
         )
+
+    if first_arg_token.value == "void":
+        # Just consume the keyword
+        _ = token_tape.expect(KeywordToken)
+    else:
+        while True:
+            type_token = token_tape.expect(KeywordToken)
+            assert type_token.value == "int"
+            name_token = token_tape.expect(IdentifierToken)
+            result.append(name_token.value)
+            if isinstance(token_tape.peek(), CloseParenToken):
+                break
+            _ = token_tape.expect(CommaToken)
+
     _ = token_tape.expect(CloseParenToken)
+    return result
 
-    body_block = parse_block(token_tape)
 
-    return SourceFunctionNode(
-        identifier=function_name_token.value,
-        body=body_block,
-        start_position=type_token.start_position,
-    )
+def parse_function(token_tape: TokenTape) -> SourceFunctionDeclarationNode:
+    decl = parse_declaration(token_tape)
+    assert isinstance(decl, SourceFunctionDeclarationNode)
+    return decl
 
 
 def parse_program(token_tape: TokenTape) -> SourceProgramNode:
-    f = parse_function(token_tape)
+    funcs = []
+    while token_tape.tokens_remaining > 0:
+        f = parse_function(token_tape)
+        funcs.append(f)
 
-    if token_tape.tokens_remaining > 0:
-        raise ValueError("Did not expect any more tokens")
-
-    return SourceProgramNode(start_position=0, value=f)
+    return SourceProgramNode(start_position=0, functions=funcs)
