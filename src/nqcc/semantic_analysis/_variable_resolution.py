@@ -38,15 +38,15 @@ from ._exceptions import (
 )
 
 
-class VariableInfo(BaseModel):
+class IdentifierInfo(BaseModel):
     name: str
     defined_in_block: bool
 
 
-def make_inner_variable_map(outer_map: dict[str, VariableInfo]) -> dict[str, VariableInfo]:
-    result: dict[str, VariableInfo] = {}
+def make_inner_variable_map(outer_map: dict[str, IdentifierInfo]) -> dict[str, IdentifierInfo]:
+    result: dict[str, IdentifierInfo] = {}
     for k, v in outer_map.items():
-        nxt = VariableInfo(name=v.name, defined_in_block=False)
+        nxt = IdentifierInfo(name=v.name, defined_in_block=False)
         result[k] = nxt
     return result
 
@@ -56,7 +56,7 @@ class VariableResolver:
         self._counter = 0
 
     def resolve_declaration(
-        self, decl: SourceVariableDeclarationNode, variable_map: dict[str, VariableInfo]
+        self, decl: SourceVariableDeclarationNode, variable_map: dict[str, IdentifierInfo]
     ):
         assert isinstance(decl, SourceVariableDeclarationNode)
 
@@ -65,7 +65,7 @@ class VariableResolver:
             raise SemanticAnalysisDuplicateDeclaration(decl=decl)
         unique_name = f"{orig_name}.{self._counter}"
         self._counter += 1
-        variable_map[orig_name] = VariableInfo(name=unique_name, defined_in_block=True)
+        variable_map[orig_name] = IdentifierInfo(name=unique_name, defined_in_block=True)
         nxt_init: SourceExpressionNode | None = None
         if decl.initial is not None:
             nxt_init = self.resolve_expression(decl.initial, variable_map)
@@ -78,7 +78,7 @@ class VariableResolver:
         )
 
     def resolve_for_init(
-        self, init: SourceForInitNode, variable_map: dict[str, VariableInfo]
+        self, init: SourceForInitNode, variable_map: dict[str, IdentifierInfo]
     ) -> SourceForInitNode:
         assert isinstance(init, get_args(SourceForInitNode))
         sp = init.start_position
@@ -93,7 +93,7 @@ class VariableResolver:
                 raise ValueError(f"Unrecognised: {init}")
 
     def resolve_statement(
-        self, stmt: SourceStatementNode, variable_map: dict[str, VariableInfo]
+        self, stmt: SourceStatementNode, variable_map: dict[str, IdentifierInfo]
     ) -> SourceStatementNode:
         sp = stmt.start_position
         match stmt:
@@ -144,14 +144,14 @@ class VariableResolver:
                 raise ValueError(f"Unrecognised: {stmt}")
 
     def resolve_optional_expression(
-        self, expr: SourceExpressionNode | None, variable_map: dict[str, VariableInfo]
+        self, expr: SourceExpressionNode | None, variable_map: dict[str, IdentifierInfo]
     ) -> SourceExpressionNode | None:
         if expr is None:
             return None
         return self.resolve_expression(expr, variable_map)
 
     def resolve_expression(
-        self, expr: SourceExpressionNode, variable_map: dict[str, VariableInfo]
+        self, expr: SourceExpressionNode, variable_map: dict[str, IdentifierInfo]
     ) -> SourceExpressionNode:
         match expr:
             case SourceAssignmentNode():
@@ -196,7 +196,7 @@ class VariableResolver:
                 raise ValueError(f"Not recognised: {expr}")
 
     def resolve_block(
-        self, block: SourceBlockNode, variable_map: dict[str, VariableInfo]
+        self, block: SourceBlockNode, variable_map: dict[str, IdentifierInfo]
     ) -> SourceBlockNode:
         assert isinstance(block, SourceBlockNode)
 
@@ -208,7 +208,7 @@ class VariableResolver:
         return SourceBlockNode(start_position=block.start_position, items=resolved_items)
 
     def resolve_blockitem(
-        self, bi: SourceBlockItemNode, variable_map: dict[str, VariableInfo]
+        self, bi: SourceBlockItemNode, variable_map: dict[str, IdentifierInfo]
     ) -> SourceBlockItemNode:
 
         match bi:
@@ -222,7 +222,7 @@ class VariableResolver:
 
 def resolve_function(func: SourceFunctionDeclarationNode) -> SourceFunctionDeclarationNode:
     resolver = VariableResolver()
-    variable_map: dict[str, VariableInfo] = {}
+    variable_map: dict[str, IdentifierInfo] = {}
     assert func.body is not None, "Missing function body"
     updated_body = resolver.resolve_block(func.body, variable_map)
     result = SourceFunctionDeclarationNode(

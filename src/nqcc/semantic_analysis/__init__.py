@@ -7,7 +7,7 @@ from ._exceptions import (
 )
 from ._loop_labelling import LoopLabeller, label_loops_function, label_loops_program
 from ._variable_resolution import (
-    VariableInfo,
+    IdentifierInfo,
     VariableResolver,
     make_inner_variable_map,
     resolve_function,
@@ -20,7 +20,7 @@ __all__ = [
     "SemanticAnalysisDuplicateDeclaration",
     "SemanticAnalysisOutsideLoop",
     "SemanticAnalysisUnknownVariable",
-    "VariableInfo",
+    "IdentifierInfo",
     "VariableResolver",
     "label_loops_function",
     "label_loops_program",

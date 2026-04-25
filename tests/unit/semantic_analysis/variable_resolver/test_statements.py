@@ -22,7 +22,7 @@ from nqcc.parser import (
     parse_statement,
 )
 from nqcc.semantic_analysis import (
-    VariableInfo,
+    IdentifierInfo,
     VariableResolver,
 )
 
@@ -38,7 +38,7 @@ class TestStatements:
     )
     def test_null_statement(self, c_stmt: str, node_type: type):
         target = VariableResolver()
-        variable_map: dict[str, VariableInfo] = {}
+        variable_map: dict[str, IdentifierInfo] = {}
         token_tape = TokenTape.from_c_source(c_stmt)
         stmt = parse_statement(token_tape)
         assert isinstance(stmt, node_type)
