@@ -163,3 +163,39 @@ class TestProgram:
         assert isinstance(ret, SourceReturnNode)
         assert isinstance(ret.value, SourceVarNode)
         assert ret.value.identifier == "a.0"
+
+    def test_func_with_decl(self) -> None:
+        c_str = """
+        int my_func(int a);
+
+        int main(void) {
+            return my_func(2);
+        }
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        prog = parse_program(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        updated = resolve_program(prog)
+
+        # Not much, but at least it's something...
+        assert len(updated.functions) == 2
+
+    def test_func_with_defn(self) -> None:
+        c_str = """
+        int my_func(int a) {
+            return a + 1;
+        }
+
+        int main(void) {
+            return my_func(2);
+        }
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        prog = parse_program(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        updated = resolve_program(prog)
+
+        # Not much, but at least it's something...
+        assert len(updated.functions) == 2
