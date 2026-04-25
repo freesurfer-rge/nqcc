@@ -13,7 +13,7 @@ from nqcc.semantic_analysis import (
 )
 
 
-class TestDeclarations:
+class TestVariableDeclarations:
     def test_smoke_no_init(self):
         target = IdentifierResolver()
         identifier_map = {}

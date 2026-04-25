@@ -30,6 +30,7 @@ from nqcc.parser import (
     SourceVarNode,
     SourceWhileNode,
     SourceFunctionCallNode,
+    SourceDeclarationNode,
 )
 
 from ._exceptions import (
@@ -58,8 +59,17 @@ class IdentifierResolver:
         self._counter = 0
 
     def resolve_declaration(
+        self, decl: SourceDeclarationNode, identifier_map: dict[str, IdentifierInfo]
+    ) -> SourceDeclarationNode:
+        match decl:
+            case SourceVariableDeclarationNode():
+                return self.resolve_variable_declaration(decl, identifier_map)
+            case _:
+                raise ValueError(f"Unrecognised declaration: {decl}")
+
+    def resolve_variable_declaration(
         self, decl: SourceVariableDeclarationNode, identifier_map: dict[str, IdentifierInfo]
-    ):
+    ) -> SourceVariableDeclarationNode:
         assert isinstance(decl, SourceVariableDeclarationNode)
 
         orig_name = decl.identifier.identifier
