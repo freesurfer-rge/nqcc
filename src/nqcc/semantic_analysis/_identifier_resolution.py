@@ -58,21 +58,21 @@ class IdentifierResolver:
         self._counter = 0
 
     def resolve_declaration(
-        self, decl: SourceVariableDeclarationNode, variable_map: dict[str, IdentifierInfo]
+        self, decl: SourceVariableDeclarationNode, identifier_map: dict[str, IdentifierInfo]
     ):
         assert isinstance(decl, SourceVariableDeclarationNode)
 
         orig_name = decl.identifier.identifier
-        if orig_name in variable_map and variable_map[orig_name].defined_in_block:
+        if orig_name in identifier_map and identifier_map[orig_name].defined_in_block:
             raise SemanticAnalysisDuplicateDeclaration(decl=decl)
         unique_name = f"{orig_name}.{self._counter}"
         self._counter += 1
-        variable_map[orig_name] = IdentifierInfo(
+        identifier_map[orig_name] = IdentifierInfo(
             name=unique_name, defined_in_block=True, has_linkage=False
         )
         nxt_init: SourceExpressionNode | None = None
         if decl.initial is not None:
-            nxt_init = self.resolve_expression(decl.initial, variable_map)
+            nxt_init = self.resolve_expression(decl.initial, identifier_map)
 
         nxt_var = SourceVarNode(
             start_position=decl.identifier.start_position, identifier=unique_name
@@ -82,34 +82,34 @@ class IdentifierResolver:
         )
 
     def resolve_for_init(
-        self, init: SourceForInitNode, variable_map: dict[str, IdentifierInfo]
+        self, init: SourceForInitNode, identifier_map: dict[str, IdentifierInfo]
     ) -> SourceForInitNode:
         assert isinstance(init, get_args(SourceForInitNode))
         sp = init.start_position
         match init:
             case SourceInitDeclNode():
-                updated_decl = self.resolve_declaration(init.decl, variable_map)
+                updated_decl = self.resolve_declaration(init.decl, identifier_map)
                 return SourceInitDeclNode(start_position=sp, decl=updated_decl)
             case SourceInitExpressionNode():
-                updated_exp = self.resolve_optional_expression(init.expression, variable_map)
+                updated_exp = self.resolve_optional_expression(init.expression, identifier_map)
                 return SourceInitExpressionNode(start_position=sp, expression=updated_exp)
             case _:
                 raise ValueError(f"Unrecognised: {init}")
 
     def resolve_statement(
-        self, stmt: SourceStatementNode, variable_map: dict[str, IdentifierInfo]
+        self, stmt: SourceStatementNode, identifier_map: dict[str, IdentifierInfo]
     ) -> SourceStatementNode:
         sp = stmt.start_position
         match stmt:
             case SourceReturnNode():
-                updated = self.resolve_expression(stmt.value, variable_map)
+                updated = self.resolve_expression(stmt.value, identifier_map)
                 return SourceReturnNode(start_position=sp, value=updated)
             case SourceIfStatementNode():
-                cond_update = self.resolve_expression(stmt.condition, variable_map)
-                then_update = self.resolve_statement(stmt.then, variable_map)
+                cond_update = self.resolve_expression(stmt.condition, identifier_map)
+                then_update = self.resolve_statement(stmt.then, identifier_map)
                 otherwise_update = None
                 if stmt.otherwise:
-                    otherwise_update = self.resolve_statement(stmt.otherwise, variable_map)
+                    otherwise_update = self.resolve_statement(stmt.otherwise, identifier_map)
                 return SourceIfStatementNode(
                     start_position=sp,
                     condition=cond_update,
@@ -117,26 +117,26 @@ class IdentifierResolver:
                     otherwise=otherwise_update,
                 )
             case SourceExpressionStatementNode():
-                updated = self.resolve_expression(stmt.value, variable_map)
+                updated = self.resolve_expression(stmt.value, identifier_map)
                 return SourceExpressionStatementNode(start_position=sp, value=updated)
             case SourceNullStatementNode() | SourceContinueNode() | SourceBreakNode():
                 return stmt
             case SourceCompoundNode():
-                inner_map = make_inner_identifier_map(variable_map)
+                inner_map = make_inner_identifier_map(identifier_map)
                 resolved_block = self.resolve_block(stmt.block, inner_map)
                 return SourceCompoundNode(start_position=sp, block=resolved_block)
             case SourceWhileNode():
-                updated_cond = self.resolve_expression(stmt.condition, variable_map)
-                updated_body = self.resolve_statement(stmt.body, variable_map)
+                updated_cond = self.resolve_expression(stmt.condition, identifier_map)
+                updated_body = self.resolve_statement(stmt.body, identifier_map)
                 return SourceWhileNode(start_position=sp, condition=updated_cond, body=updated_body)
             case SourceDoWhileNode():
-                updated_cond = self.resolve_expression(stmt.condition, variable_map)
-                updated_body = self.resolve_statement(stmt.body, variable_map)
+                updated_cond = self.resolve_expression(stmt.condition, identifier_map)
+                updated_body = self.resolve_statement(stmt.body, identifier_map)
                 return SourceDoWhileNode(
                     start_position=sp, condition=updated_cond, body=updated_body
                 )
             case SourceForNode():
-                inner_map = make_inner_identifier_map(variable_map)
+                inner_map = make_inner_identifier_map(identifier_map)
                 init = self.resolve_for_init(stmt.init, inner_map)
                 cond = self.resolve_optional_expression(stmt.condition, inner_map)
                 post = self.resolve_optional_expression(stmt.post, inner_map)
@@ -148,14 +148,14 @@ class IdentifierResolver:
                 raise ValueError(f"Unrecognised: {stmt}")
 
     def resolve_optional_expression(
-        self, expr: SourceExpressionNode | None, variable_map: dict[str, IdentifierInfo]
+        self, expr: SourceExpressionNode | None, identifier_map: dict[str, IdentifierInfo]
     ) -> SourceExpressionNode | None:
         if expr is None:
             return None
-        return self.resolve_expression(expr, variable_map)
+        return self.resolve_expression(expr, identifier_map)
 
     def resolve_expression(
-        self, expr: SourceExpressionNode, variable_map: dict[str, IdentifierInfo]
+        self, expr: SourceExpressionNode, identifier_map: dict[str, IdentifierInfo]
     ) -> SourceExpressionNode:
         match expr:
             case SourceAssignmentNode():
@@ -163,14 +163,14 @@ class IdentifierResolver:
                     raise SemanticAnalysisBadLValue(expr=expr.left)
                 return SourceAssignmentNode(
                     start_position=expr.start_position,
-                    left=self.resolve_expression(expr.left, variable_map),
-                    right=self.resolve_expression(expr.right, variable_map),
+                    left=self.resolve_expression(expr.left, identifier_map),
+                    right=self.resolve_expression(expr.right, identifier_map),
                 )
             case SourceVarNode():
-                if expr.identifier in variable_map:
+                if expr.identifier in identifier_map:
                     return SourceVarNode(
                         start_position=expr.start_position,
-                        identifier=variable_map[expr.identifier].name,
+                        identifier=identifier_map[expr.identifier].name,
                     )
                 else:
                     raise SemanticAnalysisUnknownVariable(var=expr)
@@ -180,25 +180,25 @@ class IdentifierResolver:
                 return SourceUnaryExpressionNode(
                     start_position=expr.start_position,
                     operator=expr.operator,
-                    expression=self.resolve_expression(expr.expression, variable_map),
+                    expression=self.resolve_expression(expr.expression, identifier_map),
                 )
             case SourceBinaryExpressionNode():
                 return SourceBinaryExpressionNode(
                     start_position=expr.start_position,
                     operator=expr.operator,
-                    left=self.resolve_expression(expr.left, variable_map),
-                    right=self.resolve_expression(expr.right, variable_map),
+                    left=self.resolve_expression(expr.left, identifier_map),
+                    right=self.resolve_expression(expr.right, identifier_map),
                 )
             case SourceTernaryExpressonNode():
                 return SourceTernaryExpressonNode(
                     start_position=expr.start_position,
-                    condition=self.resolve_expression(expr.condition, variable_map),
-                    then=self.resolve_expression(expr.then, variable_map),
-                    otherwise=self.resolve_expression(expr.otherwise, variable_map),
+                    condition=self.resolve_expression(expr.condition, identifier_map),
+                    then=self.resolve_expression(expr.then, identifier_map),
+                    otherwise=self.resolve_expression(expr.otherwise, identifier_map),
                 )
             case SourceFunctionCallNode():
-                if expr.identifier in variable_map:
-                    new_name = variable_map[expr.identifier].name
+                if expr.identifier in identifier_map:
+                    new_name = identifier_map[expr.identifier].name
                     new_args = []
 
                     return SourceFunctionCallNode(
@@ -210,35 +210,35 @@ class IdentifierResolver:
                 raise ValueError(f"Not recognised: {expr}")
 
     def resolve_block(
-        self, block: SourceBlockNode, variable_map: dict[str, IdentifierInfo]
+        self, block: SourceBlockNode, identifier_map: dict[str, IdentifierInfo]
     ) -> SourceBlockNode:
         assert isinstance(block, SourceBlockNode)
 
         resolved_items: list[SourceBlockItemNode] = []
         for item in block.items:
-            nxt = self.resolve_blockitem(item, variable_map)
+            nxt = self.resolve_blockitem(item, identifier_map)
             resolved_items.append(nxt)
 
         return SourceBlockNode(start_position=block.start_position, items=resolved_items)
 
     def resolve_blockitem(
-        self, bi: SourceBlockItemNode, variable_map: dict[str, IdentifierInfo]
+        self, bi: SourceBlockItemNode, identifier_map: dict[str, IdentifierInfo]
     ) -> SourceBlockItemNode:
 
         match bi:
             case SourceVariableDeclarationNode():
-                return self.resolve_declaration(bi, variable_map)
+                return self.resolve_declaration(bi, identifier_map)
             case _ if isinstance(bi, get_args(SourceStatementNode)):
-                return self.resolve_statement(bi, variable_map)
+                return self.resolve_statement(bi, identifier_map)
             case _:
                 raise ValueError(f"Unrecognised: {bi}")
 
 
 def resolve_function(func: SourceFunctionDeclarationNode) -> SourceFunctionDeclarationNode:
     resolver = IdentifierResolver()
-    variable_map: dict[str, IdentifierInfo] = {}
+    identifier_map: dict[str, IdentifierInfo] = {}
     assert func.body is not None, "Missing function body"
-    updated_body = resolver.resolve_block(func.body, variable_map)
+    updated_body = resolver.resolve_block(func.body, identifier_map)
     result = SourceFunctionDeclarationNode(
         start_position=func.start_position,
         identifier=func.identifier,
