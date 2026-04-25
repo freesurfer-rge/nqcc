@@ -42,14 +42,14 @@ from ._exceptions import (
 
 class IdentifierInfo(BaseModel):
     name: str
-    defined_in_block: bool
+    from_current_scope: bool
     has_linkage: bool
 
 
 def make_inner_identifier_map(outer_map: dict[str, IdentifierInfo]) -> dict[str, IdentifierInfo]:
     result: dict[str, IdentifierInfo] = {}
     for k, v in outer_map.items():
-        nxt = IdentifierInfo(name=v.name, defined_in_block=False, has_linkage=v.has_linkage)
+        nxt = IdentifierInfo(name=v.name, from_current_scope=False, has_linkage=v.has_linkage)
         result[k] = nxt
     return result
 
@@ -74,7 +74,7 @@ class IdentifierResolver:
 
         if decl.identifier in identifier_map:
             prev_entry = identifier_map[decl.identifier]
-            if prev_entry.defined_in_block and (not prev_entry.has_linkage):
+            if prev_entry.from_current_scope and (not prev_entry.has_linkage):
                 raise SemanticAnalysisDuplicateDeclaration(decl=decl)
 
     def resolve_variable_declaration(
@@ -83,12 +83,12 @@ class IdentifierResolver:
         assert isinstance(decl, SourceVariableDeclarationNode)
 
         orig_name = decl.identifier.identifier
-        if orig_name in identifier_map and identifier_map[orig_name].defined_in_block:
+        if orig_name in identifier_map and identifier_map[orig_name].from_current_scope:
             raise SemanticAnalysisDuplicateDeclaration(decl=decl)
         unique_name = f"{orig_name}.{self._counter}"
         self._counter += 1
         identifier_map[orig_name] = IdentifierInfo(
-            name=unique_name, defined_in_block=True, has_linkage=False
+            name=unique_name, from_current_scope=True, has_linkage=False
         )
         nxt_init: SourceExpressionNode | None = None
         if decl.initial is not None:
