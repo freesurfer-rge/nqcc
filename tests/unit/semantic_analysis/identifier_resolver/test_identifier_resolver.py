@@ -3,8 +3,10 @@ import pytest
 from nqcc.parser import (
     SourceBinaryExpressionNode,
     SourceCompoundNode,
+    SourceFunctionCallNode,
+    SourceFunctionDeclarationNode,
     SourceReturnNode,
-    SourceVariableDeclarationNode,SourceFunctionCallNode, SourceFunctionDeclarationNode,
+    SourceVariableDeclarationNode,
     SourceVarNode,
     TokenTape,
     parse_function,
