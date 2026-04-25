@@ -5,7 +5,8 @@ from nqcc.parser import (
     SourceConstantIntNode,
     SourceTernaryExpressonNode,
     SourceVariableDeclarationNode,
-    SourceVarNode,SourceFunctionCallNode,
+    SourceVarNode,
+    SourceFunctionCallNode,
     TokenTape,
     parse_expression,
 )
@@ -91,6 +92,7 @@ class TestExpressions:
         assert result.then == SourceVarNode(start_position=2, identifier="b.1")
         assert result.otherwise == SourceVarNode(start_position=4, identifier="c.2")
 
+
 class TestFunctionCalls:
     def test_simple(self):
         target = IdentifierResolver()
@@ -100,7 +102,7 @@ class TestFunctionCalls:
         func_call_expr = parse_expression(token_tape, min_precedence=0)
         assert token_tape.tokens_remaining == 1
         assert isinstance(func_call_expr, SourceFunctionCallNode)
-        assert func_call_expr.identifier =="some_func"
+        assert func_call_expr.identifier == "some_func"
         assert len(func_call_expr.args) == 0
 
         result = target.resolve_expression(func_call_expr, variable_map)

@@ -28,7 +28,8 @@ from nqcc.parser import (
     SourceUnaryExpressionNode,
     SourceVariableDeclarationNode,
     SourceVarNode,
-    SourceWhileNode,SourceFunctionCallNode
+    SourceWhileNode,
+    SourceFunctionCallNode,
 )
 
 from ._exceptions import (
@@ -195,6 +196,16 @@ class IdentifierResolver:
                     then=self.resolve_expression(expr.then, variable_map),
                     otherwise=self.resolve_expression(expr.otherwise, variable_map),
                 )
+            case SourceFunctionCallNode():
+                if expr.identifier in variable_map:
+                    new_name = variable_map[expr.identifier].name
+                    new_args = []
+
+                    return SourceFunctionCallNode(
+                        start_position=expr.start_position, identifier=new_name, args=new_args
+                    )
+                else:
+                    raise SemanticAnalysisUnknownVariable(var=expr)
             case _:
                 raise ValueError(f"Not recognised: {expr}")
 
