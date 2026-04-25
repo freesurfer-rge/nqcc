@@ -305,8 +305,9 @@ class IdentifierResolver:
 def resolve_function(func: SourceFunctionDeclarationNode) -> SourceFunctionDeclarationNode:
     resolver = IdentifierResolver()
     identifier_map: dict[str, IdentifierInfo] = {}
-    assert func.body is not None, "Missing function body"
-    updated_body = resolver.resolve_block(func.body, identifier_map)
+    updated_body = None
+    if func.body:
+        updated_body = resolver.resolve_block(func.body, identifier_map)
     result = SourceFunctionDeclarationNode(
         start_position=func.start_position,
         identifier=func.identifier,
