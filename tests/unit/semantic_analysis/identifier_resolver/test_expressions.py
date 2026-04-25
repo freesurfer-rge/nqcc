@@ -9,6 +9,7 @@ from nqcc.parser import (
     SourceVariableDeclarationNode,
     SourceVarNode,
     TokenTape,
+    parse_declaration,
     parse_expression,
 )
 from nqcc.semantic_analysis import (
@@ -118,3 +119,60 @@ class TestFunctionCalls:
         assert isinstance(result, SourceFunctionCallNode)
         assert result.identifier == func_call_expr.identifier
         assert len(result.args) == 0
+
+    def test_onearg_constant(self):
+        target = IdentifierResolver()
+        identifier_map = {}
+
+        decl_str = "int some_func(int a);"
+        token_tape = TokenTape.from_c_source(decl_str)
+        decl = parse_declaration(token_tape)
+        assert token_tape.tokens_remaining == 0
+        assert isinstance(decl, SourceFunctionDeclarationNode)
+
+        _ = target.resolve_function_declaration(decl, identifier_map)
+
+        call_str = "some_func(2);"
+        token_tape = TokenTape.from_c_source(call_str)
+        call_expr = parse_expression(token_tape, min_precedence=0)
+        assert token_tape.tokens_remaining == 1
+        assert isinstance(call_expr, SourceFunctionCallNode)
+
+        result = target.resolve_expression(call_expr, identifier_map)
+        assert result.identifier == call_expr.identifier
+        assert len(result.args) == 1
+        arg0 = result.args[0]
+        assert isinstance(arg0, SourceConstantIntNode)
+        assert arg0.value == 2
+
+    def test_onearg_variable(self):
+        target = IdentifierResolver()
+        identifier_map = {}
+
+        func_decl_str = "int some_func(int a);"
+        token_tape = TokenTape.from_c_source(func_decl_str)
+        decl = parse_declaration(token_tape)
+        assert token_tape.tokens_remaining == 0
+        assert isinstance(decl, SourceFunctionDeclarationNode)
+        _ = target.resolve_function_declaration(decl, identifier_map)
+
+        var_decl_str = "int a = 2;"
+        token_tape = TokenTape.from_c_source(var_decl_str)
+        var_decl = parse_declaration(token_tape)
+        assert token_tape.tokens_remaining == 0
+        assert isinstance(var_decl, SourceVariableDeclarationNode)
+        var_resolved = target.resolve_declaration(var_decl, identifier_map)
+        assert var_resolved.identifier.identifier == "a.1"
+
+        call_str = "some_func(a);"
+        token_tape = TokenTape.from_c_source(call_str)
+        call_expr = parse_expression(token_tape, min_precedence=0)
+        assert token_tape.tokens_remaining == 1
+        assert isinstance(call_expr, SourceFunctionCallNode)
+
+        result = target.resolve_expression(call_expr, identifier_map)
+        assert result.identifier == call_expr.identifier
+        assert len(result.args) == 1
+        arg0 = result.args[0]
+        assert isinstance(arg0, SourceVarNode)
+        assert arg0.identifier == "a.1"

@@ -1,3 +1,5 @@
+import pytest
+
 from nqcc.parser import (
     SourceBinaryExpressionNode,
     SourceCompoundNode,
@@ -77,6 +79,37 @@ class TestFunction:
         assert isinstance(ret, SourceReturnNode)
         assert isinstance(ret.value, SourceVarNode)
         assert ret.value.identifier == "x.0"
+
+    def test_internal_func_defn(self):
+        c_str = """
+        int main(void){
+            int foo(void);
+            return foo();
+        }
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        func = parse_function(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        updated = resolve_function(func)
+        assert updated.identifier == "main"
+        assert len(updated.body.items) == 3
+
+    def test_no_nested_functions(self):
+        c_str = """int main( void ) {
+            int my_func(int a)
+            {
+                return a;
+            }
+            return 2;
+        }
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        func = parse_function(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        with pytest.raises(ValueError, match="Soemthing"):
+            _ = resolve_function(func)
 
 
 class TestProgram:
