@@ -85,8 +85,7 @@ class IdentifierResolver:
 
         inner_map = make_inner_identifier_map(identifier_map)
 
-        assert len(decl.params) == 0
-        new_params: list[str] = []
+        new_params: list[str] = self.resolve_function_params(decl.params, inner_map)
 
         new_body = None
         if decl.body is not None:
@@ -122,6 +121,25 @@ class IdentifierResolver:
         return SourceVariableDeclarationNode(
             start_position=decl.start_position, identifier=nxt_var, initial=nxt_init
         )
+
+    def resolve_function_params(
+        self, params: list[str], identifier_map: dict[str, IdentifierInfo]
+    ) -> list[str]:
+        result = []
+
+        for p in params:
+            if p in identifier_map:
+                # Probably should have better exception
+                raise ValueError(f"parameter {p} already defined")
+
+            unique_name = f"{p}.{self._counter}"
+            self._counter += 1
+
+            identifier_map[p] = IdentifierInfo(
+                name=unique_name, from_current_scope=True, has_linkage=False
+            )
+            result.append(unique_name)
+        return result
 
     def resolve_for_init(
         self, init: SourceForInitNode, identifier_map: dict[str, IdentifierInfo]
@@ -241,7 +259,11 @@ class IdentifierResolver:
             case SourceFunctionCallNode():
                 if expr.identifier in identifier_map:
                     new_name = identifier_map[expr.identifier].name
+
                     new_args: list[SourceExpressionNode] = []
+                    for arg in expr.args:
+                        nxt = self.resolve_expression(arg, identifier_map)
+                        new_args.append(nxt)
 
                     return SourceFunctionCallNode(
                         start_position=expr.start_position, identifier=new_name, args=new_args

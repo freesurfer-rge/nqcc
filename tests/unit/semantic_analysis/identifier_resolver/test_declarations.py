@@ -1,8 +1,10 @@
 import pytest
 
 from nqcc.parser import (
+    SourceBlockNode,
     SourceConstantIntNode,
     SourceFunctionDeclarationNode,
+    SourceReturnNode,
     SourceVariableDeclarationNode,
     SourceVarNode,
     TokenTape,
@@ -115,6 +117,53 @@ class TestFunctionDeclarations:
         assert result.identifier == decl.identifier
         assert len(result.params) == 0
         assert result.body is None
+
+        assert "some_func" in identifier_map
+        assert identifier_map["some_func"].name == "some_func"
+        assert identifier_map["some_func"].from_current_scope
+        assert identifier_map["some_func"].has_linkage
+
+    def test_arg_nobody(self):
+        target = IdentifierResolver()
+        identifier_map = {}
+
+        decl = SourceFunctionDeclarationNode(
+            start_position=123, identifier="some_func", params=["a"], body=None
+        )
+
+        result = target.resolve_declaration(decl, identifier_map)
+        assert result.start_position == decl.start_position
+        assert result.identifier == decl.identifier
+        assert len(result.params) == 1
+        assert result.params[0] == "a.0"
+        assert result.body is None
+
+        assert "some_func" in identifier_map
+        assert identifier_map["some_func"].name == "some_func"
+        assert identifier_map["some_func"].from_current_scope
+        assert identifier_map["some_func"].has_linkage
+
+    def test_arg_body(self):
+        target = IdentifierResolver()
+        identifier_map = {}
+
+        c_str = """int some_func(int a) { return a; }
+        """
+
+        token_tape = TokenTape.from_c_source(c_str)
+        decl = parse_declaration(token_tape)
+        assert isinstance(decl, SourceFunctionDeclarationNode)
+
+        result = target.resolve_declaration(decl, identifier_map)
+        assert result.start_position == decl.start_position
+        assert result.identifier == decl.identifier
+        assert len(result.params) == 1
+        assert result.params[0] == "a.0"
+        assert isinstance(result.body, SourceBlockNode)
+        assert len(result.body.items) == 1
+        ret_node = result.body.items[0]
+        assert isinstance(ret_node, SourceReturnNode)
+        assert ret_node.value == SourceVarNode(start_position=30, identifier="a.0")
 
         assert "some_func" in identifier_map
         assert identifier_map["some_func"].name == "some_func"
