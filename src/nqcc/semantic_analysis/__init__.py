@@ -9,7 +9,7 @@ from ._loop_labelling import LoopLabeller, label_loops_function, label_loops_pro
 from ._variable_resolution import (
     IdentifierInfo,
     VariableResolver,
-    make_inner_variable_map,
+    make_inner_identifier_map,
     resolve_function,
     resolve_program,
 )
@@ -24,7 +24,7 @@ __all__ = [
     "VariableResolver",
     "label_loops_function",
     "label_loops_program",
-    "make_inner_variable_map",
+    "make_inner_identifier_map",
     "resolve_function",
     "resolve_program",
     "semantic_analysis_driver",

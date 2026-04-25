@@ -43,7 +43,7 @@ class IdentifierInfo(BaseModel):
     defined_in_block: bool
 
 
-def make_inner_variable_map(outer_map: dict[str, IdentifierInfo]) -> dict[str, IdentifierInfo]:
+def make_inner_identifier_map(outer_map: dict[str, IdentifierInfo]) -> dict[str, IdentifierInfo]:
     result: dict[str, IdentifierInfo] = {}
     for k, v in outer_map.items():
         nxt = IdentifierInfo(name=v.name, defined_in_block=False)
@@ -118,7 +118,7 @@ class VariableResolver:
             case SourceNullStatementNode() | SourceContinueNode() | SourceBreakNode():
                 return stmt
             case SourceCompoundNode():
-                inner_map = make_inner_variable_map(variable_map)
+                inner_map = make_inner_identifier_map(variable_map)
                 resolved_block = self.resolve_block(stmt.block, inner_map)
                 return SourceCompoundNode(start_position=sp, block=resolved_block)
             case SourceWhileNode():
@@ -132,7 +132,7 @@ class VariableResolver:
                     start_position=sp, condition=updated_cond, body=updated_body
                 )
             case SourceForNode():
-                inner_map = make_inner_variable_map(variable_map)
+                inner_map = make_inner_identifier_map(variable_map)
                 init = self.resolve_for_init(stmt.init, inner_map)
                 cond = self.resolve_optional_expression(stmt.condition, inner_map)
                 post = self.resolve_optional_expression(stmt.post, inner_map)
