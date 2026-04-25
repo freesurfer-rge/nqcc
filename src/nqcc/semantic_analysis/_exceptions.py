@@ -2,13 +2,13 @@ from nqcc.parser import (
     SourceBreakNode,
     SourceContinueNode,
     SourceExpressionNode,
-    SourceVariableDeclarationNode,
+    SourceDeclarationNode,
     SourceVarNode,
 )
 
 
 class SemanticAnalysisDuplicateDeclaration(ValueError):
-    def __init__(self, *, decl: SourceVariableDeclarationNode):
+    def __init__(self, *, decl: SourceDeclarationNode):
         self.decl = decl
         message = (
             f"Duplicate declaration of '{decl.identifier.identifier}' at {decl.start_position}"
@@ -25,7 +25,7 @@ class SemanticAnalysisBadLValue(ValueError):
         super().__init__(self.message)
 
 
-class SemanticAnalysisUnknownVariable(ValueError):
+class SemanticAnalysisUnknownIdentifier(ValueError):
     def __init__(self, *, var: SourceVarNode):
         self.var = var
         message = f"Unknown identifier '{var.identifier}' at {var.start_position}"

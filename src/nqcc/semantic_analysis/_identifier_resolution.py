@@ -36,7 +36,7 @@ from nqcc.parser import (
 from ._exceptions import (
     SemanticAnalysisBadLValue,
     SemanticAnalysisDuplicateDeclaration,
-    SemanticAnalysisUnknownVariable,
+    SemanticAnalysisUnknownIdentifier,
 )
 
 
@@ -90,7 +90,7 @@ class IdentifierResolver:
 
         new_body = None
         if decl.body is not None:
-            new_body = self.resolve_block(decl.body)
+            new_body = self.resolve_block(decl.body, inner_map)
 
         return SourceFunctionDeclarationNode(
             start_position=decl.start_position,
@@ -215,7 +215,7 @@ class IdentifierResolver:
                         identifier=identifier_map[expr.identifier].name,
                     )
                 else:
-                    raise SemanticAnalysisUnknownVariable(var=expr)
+                    raise SemanticAnalysisUnknownIdentifier(var=expr)
             case SourceConstantIntNode():
                 return expr
             case SourceUnaryExpressionNode():
@@ -247,7 +247,7 @@ class IdentifierResolver:
                         start_position=expr.start_position, identifier=new_name, args=new_args
                     )
                 else:
-                    raise SemanticAnalysisUnknownVariable(var=expr)
+                    raise SemanticAnalysisUnknownIdentifier(var=expr)
             case _:
                 raise ValueError(f"Not recognised: {expr}")
 

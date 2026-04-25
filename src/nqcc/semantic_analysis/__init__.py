@@ -3,7 +3,7 @@ from ._exceptions import (
     SemanticAnalysisBadLValue,
     SemanticAnalysisDuplicateDeclaration,
     SemanticAnalysisOutsideLoop,
-    SemanticAnalysisUnknownVariable,
+    SemanticAnalysisUnknownIdentifier,
 )
 from ._identifier_resolution import (
     IdentifierInfo,
@@ -21,7 +21,7 @@ __all__ = [
     "SemanticAnalysisBadLValue",
     "SemanticAnalysisDuplicateDeclaration",
     "SemanticAnalysisOutsideLoop",
-    "SemanticAnalysisUnknownVariable",
+    "SemanticAnalysisUnknownIdentifier",
     "label_loops_function",
     "label_loops_program",
     "make_inner_identifier_map",

@@ -14,7 +14,7 @@ from nqcc.parser import (
 from nqcc.semantic_analysis import (
     IdentifierResolver,
     SemanticAnalysisBadLValue,
-    SemanticAnalysisUnknownVariable,
+    SemanticAnalysisUnknownIdentifier,
 )
 
 
@@ -53,7 +53,7 @@ class TestExpressions:
         assert token_tape.tokens_remaining == 1
         assert isinstance(assignment, SourceAssignmentNode)
 
-        with pytest.raises(SemanticAnalysisUnknownVariable) as sauv:
+        with pytest.raises(SemanticAnalysisUnknownIdentifier) as sauv:
             _ = target.resolve_expression(assignment, identifier_map)
         assert sauv.value.message == "Unknown identifier 'a' at 0"
 
