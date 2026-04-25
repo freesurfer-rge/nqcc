@@ -292,6 +292,10 @@ class IdentifierResolver:
         match bi:
             case SourceVariableDeclarationNode():
                 return self.resolve_declaration(bi, identifier_map)
+            case SourceFunctionDeclarationNode():
+                if bi.body is not None:
+                    raise ValueError("Cannot nest function definitions")
+                return self.resolve_declaration(bi, identifier_map)
             case _ if isinstance(bi, get_args(SourceStatementNode)):
                 return self.resolve_statement(bi, identifier_map)
             case _:

@@ -4,7 +4,7 @@ from nqcc.parser import (
     SourceBinaryExpressionNode,
     SourceCompoundNode,
     SourceReturnNode,
-    SourceVariableDeclarationNode,
+    SourceVariableDeclarationNode,SourceFunctionCallNode, SourceFunctionDeclarationNode,
     SourceVarNode,
     TokenTape,
     parse_function,
@@ -93,7 +93,16 @@ class TestFunction:
 
         updated = resolve_function(func)
         assert updated.identifier == "main"
-        assert len(updated.body.items) == 3
+        assert len(updated.body.items) == 2
+
+        decl = updated.body.items[0]
+        assert isinstance(decl, SourceFunctionDeclarationNode)
+        assert decl.identifier == "foo"
+
+        ret = updated.body.items[1]
+        assert isinstance(ret, SourceReturnNode)
+        assert isinstance(ret.value, SourceFunctionCallNode)
+        assert ret.value.identifier == "foo"
 
     def test_no_nested_functions(self):
         c_str = """int main( void ) {
@@ -108,7 +117,7 @@ class TestFunction:
         func = parse_function(token_tape)
         assert token_tape.tokens_remaining == 0
 
-        with pytest.raises(ValueError, match="Soemthing"):
+        with pytest.raises(ValueError, match="Cannot nest function definitions"):
             _ = resolve_function(func)
 
 
