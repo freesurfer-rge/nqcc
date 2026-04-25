@@ -11,11 +11,13 @@ from nqcc.parser import (
     SourceCompoundNode,
     SourceConstantIntNode,
     SourceContinueNode,
+    SourceDeclarationNode,
     SourceDoWhileNode,
     SourceExpressionNode,
     SourceExpressionStatementNode,
     SourceForInitNode,
     SourceForNode,
+    SourceFunctionCallNode,
     SourceFunctionDeclarationNode,
     SourceIfStatementNode,
     SourceInitDeclNode,
@@ -29,8 +31,6 @@ from nqcc.parser import (
     SourceVariableDeclarationNode,
     SourceVarNode,
     SourceWhileNode,
-    SourceFunctionCallNode,
-    SourceDeclarationNode,
 )
 
 from ._exceptions import (
@@ -68,9 +68,9 @@ class IdentifierResolver:
                 return self.resolve_function_declaration(decl, identifier_map)
             case _:
                 raise ValueError(f"Unrecognised declaration: {decl}")
-            
+
     def resolve_function_declaration(
-            self, decl: SourceFunctionDeclarationNode, identifier_map: dict[str, IdentifierInfo]
+        self, decl: SourceFunctionDeclarationNode, identifier_map: dict[str, IdentifierInfo]
     ) -> SourceFunctionDeclarationNode:
         assert isinstance(decl, SourceFunctionDeclarationNode)
 
@@ -78,8 +78,10 @@ class IdentifierResolver:
             prev_entry = identifier_map[decl.identifier]
             if prev_entry.from_current_scope and (not prev_entry.has_linkage):
                 raise SemanticAnalysisDuplicateDeclaration(decl=decl)
-            
-        identifier_map[decl.identifier] = IdentifierInfo(name=decl.identifier, from_current_scope=True, has_linkage=True)
+
+        identifier_map[decl.identifier] = IdentifierInfo(
+            name=decl.identifier, from_current_scope=True, has_linkage=True
+        )
 
         inner_map = make_inner_identifier_map(identifier_map)
 
@@ -90,7 +92,12 @@ class IdentifierResolver:
         if decl.body is not None:
             new_body = self.resolve_block(decl.body)
 
-        return SourceFunctionDeclarationNode(start_position=decl.start_position, identifier=decl.identifier, params=new_params, body=new_body)
+        return SourceFunctionDeclarationNode(
+            start_position=decl.start_position,
+            identifier=decl.identifier,
+            params=new_params,
+            body=new_body,
+        )
 
     def resolve_variable_declaration(
         self, decl: SourceVariableDeclarationNode, identifier_map: dict[str, IdentifierInfo]
@@ -189,7 +196,7 @@ class IdentifierResolver:
             return None
         return self.resolve_expression(expr, identifier_map)
 
-    def resolve_expression(
+    def resolve_expression(  # noqa:C901
         self, expr: SourceExpressionNode, identifier_map: dict[str, IdentifierInfo]
     ) -> SourceExpressionNode:
         match expr:

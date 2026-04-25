@@ -3,10 +3,11 @@ import pytest
 from nqcc.parser import (
     SourceAssignmentNode,
     SourceConstantIntNode,
+    SourceFunctionCallNode,
+    SourceFunctionDeclarationNode,
     SourceTernaryExpressonNode,
     SourceVariableDeclarationNode,
     SourceVarNode,
-    SourceFunctionCallNode,
     TokenTape,
     parse_expression,
 )
@@ -104,6 +105,14 @@ class TestFunctionCalls:
         assert isinstance(func_call_expr, SourceFunctionCallNode)
         assert func_call_expr.identifier == "some_func"
         assert len(func_call_expr.args) == 0
+
+        # Ensure function is defined
+        decl = SourceFunctionDeclarationNode(
+            start_position=123, identifier="some_func", params=[], body=None
+        )
+
+        _ = target.resolve_declaration(decl, identifier_map)
+        assert "some_func" in identifier_map
 
         result = target.resolve_expression(func_call_expr, identifier_map)
         assert isinstance(result, SourceFunctionCallNode)

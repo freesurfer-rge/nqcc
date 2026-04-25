@@ -14,4 +14,6 @@ class TestInnerMap:
         result = make_inner_identifier_map(inner)
         assert len(result) == 2
         assert result["a"] == IdentifierInfo(name="a.0", from_current_scope=False, has_linkage=True)
-        assert result["b"] == IdentifierInfo(name="b.1", from_current_scope=False, has_linkage=False)
+        assert result["b"] == IdentifierInfo(
+            name="b.1", from_current_scope=False, has_linkage=False
+        )
