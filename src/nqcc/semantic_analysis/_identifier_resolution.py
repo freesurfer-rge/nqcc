@@ -302,25 +302,13 @@ class IdentifierResolver:
                 raise ValueError(f"Unrecognised: {bi}")
 
 
-def resolve_function(func: SourceFunctionDeclarationNode) -> SourceFunctionDeclarationNode:
+def resolve_program(prog: SourceProgramNode) -> SourceProgramNode:
     resolver = IdentifierResolver()
     identifier_map: dict[str, IdentifierInfo] = {}
-    updated_body = None
-    if func.body:
-        updated_body = resolver.resolve_block(func.body, identifier_map)
-    result = SourceFunctionDeclarationNode(
-        start_position=func.start_position,
-        identifier=func.identifier,
-        body=updated_body,
-        params=func.params,
-    )
-    return result
-
-
-def resolve_program(prog: SourceProgramNode) -> SourceProgramNode:
     updated_funcs = []
     for f in prog.functions:
-        updated = resolve_function(f)
+        updated = resolver.resolve_declaration(f, identifier_map)
+        assert isinstance(updated, SourceFunctionDeclarationNode)
         updated_funcs.append(updated)
     result = SourceProgramNode(start_position=prog.start_position, functions=updated_funcs)
     return result

@@ -13,20 +13,26 @@ from nqcc.parser import (
     parse_program,
 )
 from nqcc.semantic_analysis import (
-    resolve_function,
+    IdentifierInfo,
+    IdentifierResolver,
     resolve_program,
 )
 
 
 class TestFunction:
-    def test_simple(self):
+    def test_simple(self) -> None:
+        resolver = IdentifierResolver()
+        identifier_map: dict[str, IdentifierInfo] = {}
+
         c_str = "int main(void) { int a = 1; return a;}"
         token_tape = TokenTape.from_c_source(c_str)
         func = parse_function(token_tape)
         assert token_tape.tokens_remaining == 0
 
-        updated = resolve_function(func)
+        updated = resolver.resolve_declaration(func, identifier_map)
+        assert isinstance(updated, SourceFunctionDeclarationNode)
         assert updated.identifier == "main"
+        assert updated.body is not None
         assert len(updated.body.items) == 2
         decl = updated.body.items[0]
         assert isinstance(decl, SourceVariableDeclarationNode)
@@ -37,7 +43,10 @@ class TestFunction:
         assert isinstance(ret.value, SourceVarNode)
         assert ret.value.identifier == "a.0"
 
-    def test_with_nested(self):
+    def test_with_nested(self) -> None:
+        resolver = IdentifierResolver()
+        identifier_map: dict[str, IdentifierInfo] = {}
+
         c_str = """int main( void ) {
             int x=1;
             {
@@ -51,8 +60,10 @@ class TestFunction:
         func = parse_function(token_tape)
         assert token_tape.tokens_remaining == 0
 
-        updated = resolve_function(func)
+        updated = resolver.resolve_declaration(func, identifier_map)
+        assert isinstance(updated, SourceFunctionDeclarationNode)
         assert updated.identifier == "main"
+        assert updated.body is not None
         assert len(updated.body.items) == 3
 
         decl0 = updated.body.items[0]
@@ -82,7 +93,10 @@ class TestFunction:
         assert isinstance(ret.value, SourceVarNode)
         assert ret.value.identifier == "x.0"
 
-    def test_internal_func_defn(self):
+    def test_internal_func_defn(self) -> None:
+        resolver = IdentifierResolver()
+        identifier_map: dict[str, IdentifierInfo] = {}
+
         c_str = """
         int main(void){
             int foo(void);
@@ -93,8 +107,10 @@ class TestFunction:
         func = parse_function(token_tape)
         assert token_tape.tokens_remaining == 0
 
-        updated = resolve_function(func)
+        updated = resolver.resolve_declaration(func, identifier_map)
+        assert isinstance(updated, SourceFunctionDeclarationNode)
         assert updated.identifier == "main"
+        assert updated.body is not None
         assert len(updated.body.items) == 2
 
         decl = updated.body.items[0]
@@ -106,7 +122,10 @@ class TestFunction:
         assert isinstance(ret.value, SourceFunctionCallNode)
         assert ret.value.identifier == "foo"
 
-    def test_no_nested_functions(self):
+    def test_no_nested_functions(self) -> None:
+        resolver = IdentifierResolver()
+        identifier_map: dict[str, IdentifierInfo] = {}
+
         c_str = """int main( void ) {
             int my_func(int a)
             {
@@ -120,11 +139,11 @@ class TestFunction:
         assert token_tape.tokens_remaining == 0
 
         with pytest.raises(ValueError, match="Cannot nest function definitions"):
-            _ = resolve_function(func)
+            _ = resolver.resolve_declaration(func, identifier_map)
 
 
 class TestProgram:
-    def test_simple(self):
+    def test_simple(self) -> None:
         c_str = "int main(void) { int a = 1; return a;}"
         token_tape = TokenTape.from_c_source(c_str)
         prog = parse_program(token_tape)
@@ -134,6 +153,7 @@ class TestProgram:
 
         updated_func = updated.functions[0]
         assert updated_func.identifier == "main"
+        assert updated_func.body is not None
         assert len(updated_func.body.items) == 2
         decl = updated_func.body.items[0]
         assert isinstance(decl, SourceVariableDeclarationNode)

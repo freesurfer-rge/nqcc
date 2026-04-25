@@ -1,5 +1,11 @@
-from nqcc.parser import TokenTape, parse_block_item, parse_function, parse_program
-from nqcc.semantic_analysis import resolve_function
+from nqcc.parser import (
+    SourceFunctionDeclarationNode,
+    TokenTape,
+    parse_block_item,
+    parse_function,
+    parse_program,
+)
+from nqcc.semantic_analysis import IdentifierInfo, IdentifierResolver
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
@@ -56,7 +62,7 @@ class TestBlockItems:
 
 
 class TestFunctions:
-    def test_simple(self):
+    def test_simple(self) -> None:
         source = "int main(void) {return -    508;}"
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_function(token_tape)
@@ -69,6 +75,7 @@ class TestFunctions:
         assert len(result.instructions) == 3
 
         instr0 = result.instructions[0]
+        assert isinstance(instr0, TackyUnaryNode)
         assert instr0 == TackyUnaryNode(
             start_position=23,
             operator=TackyNegate(start_position=23),
@@ -77,6 +84,7 @@ class TestFunctions:
         )
 
         instr1 = result.instructions[1]
+        assert isinstance(instr1, TackyReturnNode)
         assert instr1 == TackyReturnNode(start_position=16, value=instr0.dst)
 
         # Recall that we force an extra 'return 0' in the tacky function generator
@@ -84,7 +92,7 @@ class TestFunctions:
             start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
         )
 
-    def test_simple_decl(self):
+    def test_simple_decl(self) -> None:
         source = """int main (  void ) {
             int a;
             int b = 1;
@@ -94,7 +102,12 @@ class TestFunctions:
 
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_function(token_tape)
-        resolved_node = resolve_function(src_node)
+
+        resolver = IdentifierResolver()
+        identifier_map: dict[str, IdentifierInfo] = {}
+
+        resolved_node = resolver.resolve_declaration(src_node, identifier_map)
+        assert isinstance(resolved_node, SourceFunctionDeclarationNode)
 
         target = TackyGenerator()
 
