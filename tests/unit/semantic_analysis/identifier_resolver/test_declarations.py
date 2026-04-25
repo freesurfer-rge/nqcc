@@ -147,8 +147,7 @@ class TestFunctionDeclarations:
         target = IdentifierResolver()
         identifier_map = {}
 
-        c_str = """int some_func(int a) { return a; }
-        """
+        c_str = """int some_func(int a) { return a; }"""
 
         token_tape = TokenTape.from_c_source(c_str)
         decl = parse_declaration(token_tape)
@@ -169,3 +168,47 @@ class TestFunctionDeclarations:
         assert identifier_map["some_func"].name == "some_func"
         assert identifier_map["some_func"].from_current_scope
         assert identifier_map["some_func"].has_linkage
+
+    def test_twoarg_nobody(self):
+        target = IdentifierResolver()
+        identifier_map = {}
+
+        c_str = """int some_func(int a, int b);"""
+
+        token_tape = TokenTape.from_c_source(c_str)
+        decl = parse_declaration(token_tape)
+        assert isinstance(decl, SourceFunctionDeclarationNode)
+
+        result = target.resolve_declaration(decl, identifier_map)
+        assert result.start_position == decl.start_position
+        assert result.identifier == decl.identifier
+        assert len(result.params) == 2
+        assert result.params[0] == "a.0"
+        assert result.params[1] == "b.1"
+        assert result.body is None
+
+    def test_param_unique_names(self):
+        target = IdentifierResolver()
+        identifier_map = {}
+
+        c_str = """int some_func(int a, int a);"""
+
+        token_tape = TokenTape.from_c_source(c_str)
+        decl = parse_declaration(token_tape)
+        assert isinstance(decl, SourceFunctionDeclarationNode)
+
+        with pytest.raises(ValueError, match="parameter a already defined"):
+            _ = target.resolve_declaration(decl, identifier_map)
+
+    def test_param_redeclared_in_body(self):
+        target = IdentifierResolver()
+        identifier_map = {}
+
+        c_str = """int some_func(int a) { int a = 0; return 2;}"""
+
+        token_tape = TokenTape.from_c_source(c_str)
+        decl = parse_declaration(token_tape)
+        assert isinstance(decl, SourceFunctionDeclarationNode)
+
+        with pytest.raises(ValueError, match="Duplicate declaration of 'a'"):
+            _ = target.resolve_declaration(decl, identifier_map)
