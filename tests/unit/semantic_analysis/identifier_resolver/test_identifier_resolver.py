@@ -184,6 +184,26 @@ class TestFunction:
         with pytest.raises(SemanticAnalysisUnknownIdentifier, match="'b'"):
             _ = resolver.resolve_declaration(func, identifier_map)
 
+    def test_arg_shadow_local_var(self) -> None:
+        resolver = IdentifierResolver()
+        identifier_map: dict[str, IdentifierInfo] = {}
+
+        # OK since the function args are a separate scope
+        c_str = """
+        int main(void) {
+            int a = 10;
+            int f(int a);
+            return f(a);
+        }
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        func = parse_function(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        updated = resolver.resolve_declaration(func, identifier_map)
+        assert isinstance(updated, SourceFunctionDeclarationNode)
+        assert updated.identifier == "main"
+
 
 class TestProgram:
     def test_simple(self) -> None:
