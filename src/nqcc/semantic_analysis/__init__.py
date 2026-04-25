@@ -5,7 +5,6 @@ from ._exceptions import (
     SemanticAnalysisOutsideLoop,
     SemanticAnalysisUnknownVariable,
 )
-from ._loop_labelling import LoopLabeller, label_loops_function, label_loops_program
 from ._identifier_resolution import (
     IdentifierInfo,
     IdentifierResolver,
@@ -13,15 +12,16 @@ from ._identifier_resolution import (
     resolve_function,
     resolve_program,
 )
+from ._loop_labelling import LoopLabeller, label_loops_function, label_loops_program
 
 __all__ = [
+    "IdentifierInfo",
+    "IdentifierResolver",
     "LoopLabeller",
     "SemanticAnalysisBadLValue",
     "SemanticAnalysisDuplicateDeclaration",
     "SemanticAnalysisOutsideLoop",
     "SemanticAnalysisUnknownVariable",
-    "IdentifierInfo",
-    "IdentifierResolver",
     "label_loops_function",
     "label_loops_program",
     "make_inner_identifier_map",

@@ -41,12 +41,13 @@ from ._exceptions import (
 class IdentifierInfo(BaseModel):
     name: str
     defined_in_block: bool
+    has_linkage: bool
 
 
 def make_inner_identifier_map(outer_map: dict[str, IdentifierInfo]) -> dict[str, IdentifierInfo]:
     result: dict[str, IdentifierInfo] = {}
     for k, v in outer_map.items():
-        nxt = IdentifierInfo(name=v.name, defined_in_block=False)
+        nxt = IdentifierInfo(name=v.name, defined_in_block=False, has_linkage=v.has_linkage)
         result[k] = nxt
     return result
 
@@ -65,7 +66,9 @@ class IdentifierResolver:
             raise SemanticAnalysisDuplicateDeclaration(decl=decl)
         unique_name = f"{orig_name}.{self._counter}"
         self._counter += 1
-        variable_map[orig_name] = IdentifierInfo(name=unique_name, defined_in_block=True)
+        variable_map[orig_name] = IdentifierInfo(
+            name=unique_name, defined_in_block=True, has_linkage=False
+        )
         nxt_init: SourceExpressionNode | None = None
         if decl.initial is not None:
             nxt_init = self.resolve_expression(decl.initial, variable_map)

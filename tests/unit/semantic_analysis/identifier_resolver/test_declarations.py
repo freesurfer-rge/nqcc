@@ -8,8 +8,8 @@ from nqcc.parser import (
     parse_declaration,
 )
 from nqcc.semantic_analysis import (
-    SemanticAnalysisDuplicateDeclaration,
     IdentifierResolver,
+    SemanticAnalysisDuplicateDeclaration,
 )
 
 

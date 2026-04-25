@@ -10,9 +10,9 @@ from nqcc.parser import (
     parse_expression,
 )
 from nqcc.semantic_analysis import (
+    IdentifierResolver,
     SemanticAnalysisBadLValue,
     SemanticAnalysisUnknownVariable,
-    IdentifierResolver,
 )
 
 
