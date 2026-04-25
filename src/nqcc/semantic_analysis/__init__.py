@@ -6,7 +6,7 @@ from ._exceptions import (
     SemanticAnalysisUnknownVariable,
 )
 from ._loop_labelling import LoopLabeller, label_loops_function, label_loops_program
-from ._variable_resolution import (
+from ._identifier_resolution import (
     IdentifierInfo,
     IdentifierResolver,
     make_inner_identifier_map,

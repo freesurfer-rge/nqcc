@@ -3,7 +3,7 @@ import pathlib
 from nqcc.parser import SourceProgramNode
 
 from ._loop_labelling import label_loops_program
-from ._variable_resolution import resolve_program
+from ._identifier_resolution import resolve_program
 
 SEMANTIC_ANALYSIS_RESOLVED_FILE = "semantic-analysis.0.ast"
 
