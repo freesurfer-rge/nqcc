@@ -66,6 +66,16 @@ class IdentifierResolver:
                 return self.resolve_variable_declaration(decl, identifier_map)
             case _:
                 raise ValueError(f"Unrecognised declaration: {decl}")
+            
+    def resolve_function_declaration(
+            self, decl: SourceFunctionDeclarationNode, identifier_map: dict[str, IdentifierInfo]
+    ) -> SourceFunctionDeclarationNode:
+        assert isinstance(decl, SourceFunctionDeclarationNode)
+
+        if decl.identifier in identifier_map:
+            prev_entry = identifier_map[decl.identifier]
+            if prev_entry.defined_in_block and (not prev_entry.has_linkage):
+                raise SemanticAnalysisDuplicateDeclaration(decl=decl)
 
     def resolve_variable_declaration(
         self, decl: SourceVariableDeclarationNode, identifier_map: dict[str, IdentifierInfo]

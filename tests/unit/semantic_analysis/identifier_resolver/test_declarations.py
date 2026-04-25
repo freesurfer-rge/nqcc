@@ -3,7 +3,7 @@ import pytest
 from nqcc.parser import (
     SourceConstantIntNode,
     SourceVariableDeclarationNode,
-    SourceVarNode,
+    SourceVarNode,SourceFunctionDeclarationNode,
     TokenTape,
     parse_declaration,
 )
@@ -98,3 +98,18 @@ class TestVariableDeclarations:
             _ = target.resolve_declaration(decl1, identifier_map)
         assert saduperr.value.decl == decl1
         assert saduperr.value.message == "Duplicate declaration of 'a' at 12"
+
+class TestFunctionDeclarations:
+    def test_noargs_nobody(self):
+        target = IdentifierResolver()
+        identifier_map = {}
+
+        decl = SourceFunctionDeclarationNode(
+            start_position=123, identifier="some_func", params=[], body=None
+        )
+
+        result = target.resolve_declaration(decl, identifier_map)
+        assert result.start_position==decl.start_position
+        assert result.identifier == decl.identifier
+        assert len(result.params) == 0
+        assert result.body is None
