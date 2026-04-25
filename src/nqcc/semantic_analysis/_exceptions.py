@@ -1,11 +1,12 @@
 from nqcc.parser import (
     SourceBreakNode,
     SourceContinueNode,
-    SourceExpressionNode,
     SourceDeclarationNode,
-    SourceVarNode,
-    SourceVariableDeclarationNode,
+    SourceExpressionNode,
+    SourceFunctionCallNode,
     SourceFunctionDeclarationNode,
+    SourceVariableDeclarationNode,
+    SourceVarNode,
 )
 
 
@@ -35,7 +36,7 @@ class SemanticAnalysisBadLValue(ValueError):
 
 
 class SemanticAnalysisUnknownIdentifier(ValueError):
-    def __init__(self, *, var: SourceVarNode):
+    def __init__(self, *, var: SourceVarNode | SourceFunctionCallNode):
         self.var = var
         message = f"Unknown identifier '{var.identifier}' at {var.start_position}"
         self.message = message

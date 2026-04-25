@@ -86,7 +86,7 @@ class IdentifierResolver:
         inner_map = make_inner_identifier_map(identifier_map)
 
         assert len(decl.params) == 0
-        new_params = []
+        new_params: list[str] = []
 
         new_body = None
         if decl.body is not None:
@@ -130,7 +130,7 @@ class IdentifierResolver:
         sp = init.start_position
         match init:
             case SourceInitDeclNode():
-                updated_decl = self.resolve_declaration(init.decl, identifier_map)
+                updated_decl = self.resolve_variable_declaration(init.decl, identifier_map)
                 return SourceInitDeclNode(start_position=sp, decl=updated_decl)
             case SourceInitExpressionNode():
                 updated_exp = self.resolve_optional_expression(init.expression, identifier_map)
@@ -241,7 +241,7 @@ class IdentifierResolver:
             case SourceFunctionCallNode():
                 if expr.identifier in identifier_map:
                     new_name = identifier_map[expr.identifier].name
-                    new_args = []
+                    new_args: list[SourceExpressionNode] = []
 
                     return SourceFunctionCallNode(
                         start_position=expr.start_position, identifier=new_name, args=new_args
