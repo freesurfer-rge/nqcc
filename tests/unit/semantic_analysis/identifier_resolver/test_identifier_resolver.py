@@ -192,8 +192,8 @@ class TestFunction:
         c_str = """
         int main(void) {
             int a = 10;
-            int f(int a);
-            return f(a);
+            int some_func(int a);
+            return some_func(a);
         }
         """
         token_tape = TokenTape.from_c_source(c_str)
@@ -203,6 +203,28 @@ class TestFunction:
         updated = resolver.resolve_declaration(func, identifier_map)
         assert isinstance(updated, SourceFunctionDeclarationNode)
         assert updated.identifier == "main"
+
+        assert updated.body is not None
+        assert len(updated.body.items) == 3
+
+        stmt0 = updated.body.items[0]
+        assert isinstance(stmt0, SourceVariableDeclarationNode)
+        assert stmt0.identifier.identifier == "a.0"
+
+        stmt1 = updated.body.items[1]
+        assert isinstance(stmt1, SourceFunctionDeclarationNode)
+        assert stmt1.identifier == "some_func"
+        assert len(stmt1.params) == 1
+        assert stmt1.params[0] == "a.arg.1"
+
+        stmt2 = updated.body.items[2]
+        assert isinstance(stmt2, SourceReturnNode)
+        assert isinstance(stmt2.value, SourceFunctionCallNode)
+        assert stmt2.value.identifier == "some_func"
+        assert len(stmt2.value.args) == 1
+        arg0 = stmt2.value.args[0]
+        assert isinstance(arg0, SourceVarNode)
+        assert arg0.identifier == "a.0"
 
 
 class TestProgram:
