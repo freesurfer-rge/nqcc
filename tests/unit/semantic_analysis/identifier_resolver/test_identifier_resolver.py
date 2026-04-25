@@ -159,14 +159,14 @@ class TestFunction:
         assert isinstance(updated, SourceFunctionDeclarationNode)
         assert updated.identifier == "identity"
         assert len(updated.params) == 1
-        assert updated.params[0] == "a.0"
+        assert updated.params[0] == "a.arg.0"
         assert updated.body is not None
         assert len(updated.body.items) == 1
 
         instr0 = updated.body.items[0]
         assert isinstance(instr0, SourceReturnNode)
         assert isinstance(instr0.value, SourceVarNode)
-        assert instr0.value.identifier == "a.0"
+        assert instr0.value.identifier == "a.arg.0"
 
     def test_func_bad_arg(self) -> None:
         resolver = IdentifierResolver()

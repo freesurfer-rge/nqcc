@@ -128,11 +128,11 @@ class IdentifierResolver:
         result = []
 
         for p in params:
-            if p in identifier_map:
+            if p in identifier_map and identifier_map[p].from_current_scope:
                 # Probably should have better exception
                 raise ValueError(f"parameter {p} already defined")
 
-            unique_name = f"{p}.{self._counter}"
+            unique_name = f"{p}.arg.{self._counter}"
             self._counter += 1
 
             identifier_map[p] = IdentifierInfo(

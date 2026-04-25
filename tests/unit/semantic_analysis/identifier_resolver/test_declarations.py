@@ -135,7 +135,7 @@ class TestFunctionDeclarations:
         assert result.start_position == decl.start_position
         assert result.identifier == decl.identifier
         assert len(result.params) == 1
-        assert result.params[0] == "a.0"
+        assert result.params[0] == "a.arg.0"
         assert result.body is None
 
         assert "some_func" in identifier_map
@@ -157,12 +157,12 @@ class TestFunctionDeclarations:
         assert result.start_position == decl.start_position
         assert result.identifier == decl.identifier
         assert len(result.params) == 1
-        assert result.params[0] == "a.0"
+        assert result.params[0] == "a.arg.0"
         assert isinstance(result.body, SourceBlockNode)
         assert len(result.body.items) == 1
         ret_node = result.body.items[0]
         assert isinstance(ret_node, SourceReturnNode)
-        assert ret_node.value == SourceVarNode(start_position=30, identifier="a.0")
+        assert ret_node.value == SourceVarNode(start_position=30, identifier="a.arg.0")
 
         assert "some_func" in identifier_map
         assert identifier_map["some_func"].name == "some_func"
@@ -183,8 +183,8 @@ class TestFunctionDeclarations:
         assert result.start_position == decl.start_position
         assert result.identifier == decl.identifier
         assert len(result.params) == 2
-        assert result.params[0] == "a.0"
-        assert result.params[1] == "b.1"
+        assert result.params[0] == "a.arg.0"
+        assert result.params[1] == "b.arg.1"
         assert result.body is None
 
     def test_param_unique_names(self):
