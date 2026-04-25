@@ -15,6 +15,7 @@ from nqcc.parser import (
 from nqcc.semantic_analysis import (
     IdentifierInfo,
     IdentifierResolver,
+    SemanticAnalysisUnknownIdentifier,
     resolve_program,
 )
 
@@ -93,7 +94,7 @@ class TestFunction:
         assert isinstance(ret.value, SourceVarNode)
         assert ret.value.identifier == "x.0"
 
-    def test_internal_func_defn(self) -> None:
+    def test_internal_func_decl(self) -> None:
         resolver = IdentifierResolver()
         identifier_map: dict[str, IdentifierInfo] = {}
 
@@ -139,6 +140,48 @@ class TestFunction:
         assert token_tape.tokens_remaining == 0
 
         with pytest.raises(ValueError, match="Cannot nest function definitions"):
+            _ = resolver.resolve_declaration(func, identifier_map)
+
+    def test_func_one_arg(self) -> None:
+        resolver = IdentifierResolver()
+        identifier_map: dict[str, IdentifierInfo] = {}
+
+        c_str = """
+        int identity(int a){
+            return a;
+        }
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        func = parse_function(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        updated = resolver.resolve_declaration(func, identifier_map)
+        assert isinstance(updated, SourceFunctionDeclarationNode)
+        assert updated.identifier == "identity"
+        assert len(updated.params) == 1
+        assert updated.params[0] == "a.0"
+        assert updated.body is not None
+        assert len(updated.body.items) == 1
+
+        instr0 = updated.body.items[0]
+        assert isinstance(instr0, SourceReturnNode)
+        assert isinstance(instr0.value, SourceVarNode)
+        assert instr0.value.identifier == "a.0"
+
+    def test_func_bad_arg(self) -> None:
+        resolver = IdentifierResolver()
+        identifier_map: dict[str, IdentifierInfo] = {}
+
+        c_str = """
+        int identity(int a){
+            return b;
+        }
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        func = parse_function(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        with pytest.raises(SemanticAnalysisUnknownIdentifier, match="'b'"):
             _ = resolver.resolve_declaration(func, identifier_map)
 
 
