@@ -12,13 +12,13 @@ from nqcc.parser import (
 from nqcc.semantic_analysis import (
     SemanticAnalysisBadLValue,
     SemanticAnalysisUnknownVariable,
-    VariableResolver,
+    IdentifierResolver,
 )
 
 
 class TestExpressions:
     def test_assignment(self):
-        target = VariableResolver()
+        target = IdentifierResolver()
         variable_map = {}
 
         # Make sure 'a' is declared
@@ -43,7 +43,7 @@ class TestExpressions:
         assert result.right.value == 1
 
     def test_assignment_undeclared(self):
-        target = VariableResolver()
+        target = IdentifierResolver()
         variable_map = {}
         c_str = "a=1;"
         token_tape = TokenTape.from_c_source(c_str)
@@ -56,7 +56,7 @@ class TestExpressions:
         assert sauv.value.message == "Unknown identifier 'a' at 0"
 
     def test_assignment_badlvalue(self):
-        target = VariableResolver()
+        target = IdentifierResolver()
         variable_map = {}
         c_str = "1=1+2;"
         token_tape = TokenTape.from_c_source(c_str)
@@ -69,7 +69,7 @@ class TestExpressions:
         assert sablv.value.message == "Not an lvalue at 0"
 
     def test_ternary(self):
-        target = VariableResolver()
+        target = IdentifierResolver()
         variable_map = {}
         c_str = "a?b:c;"
         token_tape = TokenTape.from_c_source(c_str)

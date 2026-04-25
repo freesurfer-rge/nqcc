@@ -23,7 +23,7 @@ from nqcc.parser import (
 )
 from nqcc.semantic_analysis import (
     IdentifierInfo,
-    VariableResolver,
+    IdentifierResolver,
 )
 
 
@@ -37,7 +37,7 @@ class TestStatements:
         ],
     )
     def test_null_statement(self, c_stmt: str, node_type: type):
-        target = VariableResolver()
+        target = IdentifierResolver()
         variable_map: dict[str, IdentifierInfo] = {}
         token_tape = TokenTape.from_c_source(c_stmt)
         stmt = parse_statement(token_tape)
@@ -49,7 +49,7 @@ class TestStatements:
         assert len(variable_map) == 0
 
     def test_expression_statement(self):
-        target = VariableResolver()
+        target = IdentifierResolver()
         variable_map = {}
         c_str = "a=22;"
         token_tape = TokenTape.from_c_source(c_str)
@@ -73,7 +73,7 @@ class TestStatements:
         assert result.value.right.value == 22
 
     def test_return_statement(self):
-        target = VariableResolver()
+        target = IdentifierResolver()
         variable_map = {}
         c_str = "return a+44;"
         token_tape = TokenTape.from_c_source(c_str)
@@ -100,7 +100,7 @@ class TestStatements:
 
 class TestConditionals:
     def test_if_statement(self):
-        target = VariableResolver()
+        target = IdentifierResolver()
         variable_map = {}
         c_str = """
         if( a )
@@ -144,7 +144,7 @@ class TestConditionals:
 
 class TestLoops:
     def test_while_statement(self):
-        target = VariableResolver()
+        target = IdentifierResolver()
         variable_map = {}
         c_str = """
         while( a < 10) a=a+1;
@@ -177,7 +177,7 @@ class TestLoops:
         assert result.body.value.right.left.identifier == "a.0"
 
     def test_dowhile_statement(self):
-        target = VariableResolver()
+        target = IdentifierResolver()
         variable_map = {}
         c_str = """
         do a=2+a; while( a < 3 );
@@ -210,7 +210,7 @@ class TestLoops:
         assert result.body.value.right.right.identifier == "a.0"
 
     def test_for_initexpr(self):
-        target = VariableResolver()
+        target = IdentifierResolver()
         variable_map = {}
         c_str = """
         for( a=0; a<10; a=a+1) b=b+1;
@@ -263,7 +263,7 @@ class TestLoops:
         assert result.body.value.right.left.identifier == "b.1"
 
     def test_for_initdecl(self):
-        target = VariableResolver()
+        target = IdentifierResolver()
         variable_map = {}
         c_str = """
         for( int a=0; a<10; a=a+1) b=b+1;

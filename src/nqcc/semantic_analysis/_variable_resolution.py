@@ -51,7 +51,7 @@ def make_inner_identifier_map(outer_map: dict[str, IdentifierInfo]) -> dict[str,
     return result
 
 
-class VariableResolver:
+class IdentifierResolver:
     def __init__(self) -> None:
         self._counter = 0
 
@@ -221,7 +221,7 @@ class VariableResolver:
 
 
 def resolve_function(func: SourceFunctionDeclarationNode) -> SourceFunctionDeclarationNode:
-    resolver = VariableResolver()
+    resolver = IdentifierResolver()
     variable_map: dict[str, IdentifierInfo] = {}
     assert func.body is not None, "Missing function body"
     updated_body = resolver.resolve_block(func.body, variable_map)

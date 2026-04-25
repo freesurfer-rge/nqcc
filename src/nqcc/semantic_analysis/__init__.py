@@ -8,7 +8,7 @@ from ._exceptions import (
 from ._loop_labelling import LoopLabeller, label_loops_function, label_loops_program
 from ._variable_resolution import (
     IdentifierInfo,
-    VariableResolver,
+    IdentifierResolver,
     make_inner_identifier_map,
     resolve_function,
     resolve_program,
@@ -21,7 +21,7 @@ __all__ = [
     "SemanticAnalysisOutsideLoop",
     "SemanticAnalysisUnknownVariable",
     "IdentifierInfo",
-    "VariableResolver",
+    "IdentifierResolver",
     "label_loops_function",
     "label_loops_program",
     "make_inner_identifier_map",

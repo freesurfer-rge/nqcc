@@ -9,13 +9,13 @@ from nqcc.parser import (
 )
 from nqcc.semantic_analysis import (
     SemanticAnalysisDuplicateDeclaration,
-    VariableResolver,
+    IdentifierResolver,
 )
 
 
 class TestDeclarations:
     def test_smoke_no_init(self):
-        target = VariableResolver()
+        target = IdentifierResolver()
         variable_map = {}
 
         decl = SourceVariableDeclarationNode(
@@ -32,7 +32,7 @@ class TestDeclarations:
         assert len(variable_map) == 1
 
     def test_decl_with_init(self):
-        target = VariableResolver()
+        target = IdentifierResolver()
         variable_map = {}
 
         program_str = "int a = 1;"
@@ -50,7 +50,7 @@ class TestDeclarations:
         assert len(variable_map) == 1
 
     def test_two_decl(self):
-        target = VariableResolver()
+        target = IdentifierResolver()
 
         decl0 = SourceVariableDeclarationNode(
             start_position=10,
@@ -78,7 +78,7 @@ class TestDeclarations:
         assert updated1.initial is None
 
     def test_duplicate_name(self):
-        target = VariableResolver()
+        target = IdentifierResolver()
         variable_map = {}
 
         decl0 = SourceVariableDeclarationNode(
