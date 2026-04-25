@@ -28,7 +28,7 @@ from nqcc.parser import (
     SourceUnaryExpressionNode,
     SourceVariableDeclarationNode,
     SourceVarNode,
-    SourceWhileNode,
+    SourceWhileNode,SourceFunctionCallNode
 )
 
 from ._exceptions import (
