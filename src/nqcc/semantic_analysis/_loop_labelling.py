@@ -81,8 +81,10 @@ def label_loops_function(func: SourceFunctionDeclarationNode) -> None:
     # Note that this (and everything else) updates in-place
     assert isinstance(func, SourceFunctionDeclarationNode)
 
+    if not func.body:
+        return
+
     labeller = LoopLabeller(function_name=func.identifier)
-    assert func.body is not None, "Missing function body"
     labeller.label_block(func.body, "")
 
 

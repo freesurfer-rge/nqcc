@@ -22,8 +22,8 @@ from nqcc.parser import (
     parse_statement,
 )
 from nqcc.semantic_analysis import (
-    VariableInfo,
-    VariableResolver,
+    IdentifierInfo,
+    IdentifierResolver,
 )
 
 
@@ -37,20 +37,20 @@ class TestStatements:
         ],
     )
     def test_null_statement(self, c_stmt: str, node_type: type):
-        target = VariableResolver()
-        variable_map: dict[str, VariableInfo] = {}
+        target = IdentifierResolver()
+        identifier_map: dict[str, IdentifierInfo] = {}
         token_tape = TokenTape.from_c_source(c_stmt)
         stmt = parse_statement(token_tape)
         assert isinstance(stmt, node_type)
 
-        result = target.resolve_statement(stmt, variable_map)
+        result = target.resolve_statement(stmt, identifier_map)
         assert isinstance(result, node_type)
         assert result == stmt
-        assert len(variable_map) == 0
+        assert len(identifier_map) == 0
 
     def test_expression_statement(self):
-        target = VariableResolver()
-        variable_map = {}
+        target = IdentifierResolver()
+        identifier_map = {}
         c_str = "a=22;"
         token_tape = TokenTape.from_c_source(c_str)
         stmt = parse_statement(token_tape)
@@ -62,9 +62,9 @@ class TestStatements:
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl_a, variable_map)
+        _ = target.resolve_declaration(decl_a, identifier_map)
 
-        result = target.resolve_statement(stmt, variable_map)
+        result = target.resolve_statement(stmt, identifier_map)
         assert isinstance(result, SourceExpressionStatementNode)
         assert isinstance(result.value, SourceAssignmentNode)
         assert isinstance(result.value.left, SourceVarNode)
@@ -73,8 +73,8 @@ class TestStatements:
         assert result.value.right.value == 22
 
     def test_return_statement(self):
-        target = VariableResolver()
-        variable_map = {}
+        target = IdentifierResolver()
+        identifier_map = {}
         c_str = "return a+44;"
         token_tape = TokenTape.from_c_source(c_str)
         stmt = parse_statement(token_tape)
@@ -86,9 +86,9 @@ class TestStatements:
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl_a, variable_map)
+        _ = target.resolve_declaration(decl_a, identifier_map)
 
-        result = target.resolve_statement(stmt, variable_map)
+        result = target.resolve_statement(stmt, identifier_map)
         assert isinstance(result, SourceReturnNode)
         assert isinstance(result.value, SourceBinaryExpressionNode)
         assert isinstance(result.value.operator, SourceAdd)
@@ -100,8 +100,8 @@ class TestStatements:
 
 class TestConditionals:
     def test_if_statement(self):
-        target = VariableResolver()
-        variable_map = {}
+        target = IdentifierResolver()
+        identifier_map = {}
         c_str = """
         if( a )
            return a;
@@ -120,15 +120,15 @@ class TestConditionals:
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl_a, variable_map)
+        _ = target.resolve_declaration(decl_a, identifier_map)
         decl_b = SourceVariableDeclarationNode(
             start_position=11,
             identifier=SourceVarNode(start_position=12, identifier="b"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl_b, variable_map)
+        _ = target.resolve_declaration(decl_b, identifier_map)
 
-        result = target.resolve_statement(stmt, variable_map)
+        result = target.resolve_statement(stmt, identifier_map)
         assert isinstance(result, SourceIfStatementNode)
         assert isinstance(result.condition, SourceVarNode)
         assert result.condition.identifier == "a.0"
@@ -144,8 +144,8 @@ class TestConditionals:
 
 class TestLoops:
     def test_while_statement(self):
-        target = VariableResolver()
-        variable_map = {}
+        target = IdentifierResolver()
+        identifier_map = {}
         c_str = """
         while( a < 10) a=a+1;
         """
@@ -159,10 +159,10 @@ class TestLoops:
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl_a, variable_map)
+        _ = target.resolve_declaration(decl_a, identifier_map)
 
-        result = target.resolve_statement(stmt, variable_map)
-        assert len(variable_map) == 1
+        result = target.resolve_statement(stmt, identifier_map)
+        assert len(identifier_map) == 1
         assert isinstance(result, SourceWhileNode)
         assert isinstance(result.condition, SourceBinaryExpressionNode)
         assert isinstance(result.condition.left, SourceVarNode)
@@ -177,8 +177,8 @@ class TestLoops:
         assert result.body.value.right.left.identifier == "a.0"
 
     def test_dowhile_statement(self):
-        target = VariableResolver()
-        variable_map = {}
+        target = IdentifierResolver()
+        identifier_map = {}
         c_str = """
         do a=2+a; while( a < 3 );
         """
@@ -192,10 +192,10 @@ class TestLoops:
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl_a, variable_map)
+        _ = target.resolve_declaration(decl_a, identifier_map)
 
-        result = target.resolve_statement(stmt, variable_map)
-        assert len(variable_map) == 1
+        result = target.resolve_statement(stmt, identifier_map)
+        assert len(identifier_map) == 1
         assert isinstance(result, SourceDoWhileNode)
         assert isinstance(result.condition, SourceBinaryExpressionNode)
         assert isinstance(result.condition.left, SourceVarNode)
@@ -210,8 +210,8 @@ class TestLoops:
         assert result.body.value.right.right.identifier == "a.0"
 
     def test_for_initexpr(self):
-        target = VariableResolver()
-        variable_map = {}
+        target = IdentifierResolver()
+        identifier_map = {}
         c_str = """
         for( a=0; a<10; a=a+1) b=b+1;
         """
@@ -225,7 +225,7 @@ class TestLoops:
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl_a, variable_map)
+        _ = target.resolve_declaration(decl_a, identifier_map)
 
         # And also 'b'
         decl_b = SourceVariableDeclarationNode(
@@ -233,10 +233,10 @@ class TestLoops:
             identifier=SourceVarNode(start_position=14, identifier="b"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl_b, variable_map)
+        _ = target.resolve_declaration(decl_b, identifier_map)
 
-        result = target.resolve_statement(stmt, variable_map)
-        assert len(variable_map) == 2
+        result = target.resolve_statement(stmt, identifier_map)
+        assert len(identifier_map) == 2
         assert isinstance(result, SourceForNode)
         assert isinstance(result.init, SourceInitExpressionNode)
         assert isinstance(result.init.expression, SourceAssignmentNode)
@@ -263,8 +263,8 @@ class TestLoops:
         assert result.body.value.right.left.identifier == "b.1"
 
     def test_for_initdecl(self):
-        target = VariableResolver()
-        variable_map = {}
+        target = IdentifierResolver()
+        identifier_map = {}
         c_str = """
         for( int a=0; a<10; a=a+1) b=b+1;
         """
@@ -278,7 +278,7 @@ class TestLoops:
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl_a, variable_map)
+        _ = target.resolve_declaration(decl_a, identifier_map)
 
         # And also 'b'
         decl_b = SourceVariableDeclarationNode(
@@ -286,11 +286,11 @@ class TestLoops:
             identifier=SourceVarNode(start_position=14, identifier="b"),
             initial=None,
         )
-        _ = target.resolve_declaration(decl_b, variable_map)
+        _ = target.resolve_declaration(decl_b, identifier_map)
 
-        result = target.resolve_statement(stmt, variable_map)
+        result = target.resolve_statement(stmt, identifier_map)
         # Original variable map unaffected by inner 'a' decl
-        assert len(variable_map) == 2
+        assert len(identifier_map) == 2
         assert isinstance(result, SourceForNode)
         assert isinstance(result.init, SourceInitDeclNode)
         assert isinstance(result.init.decl, SourceVariableDeclarationNode)

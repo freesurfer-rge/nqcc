@@ -3,29 +3,27 @@ from ._exceptions import (
     SemanticAnalysisBadLValue,
     SemanticAnalysisDuplicateDeclaration,
     SemanticAnalysisOutsideLoop,
-    SemanticAnalysisUnknownVariable,
+    SemanticAnalysisUnknownIdentifier,
 )
-from ._loop_labelling import LoopLabeller, label_loops_function, label_loops_program
-from ._variable_resolution import (
-    VariableInfo,
-    VariableResolver,
-    make_inner_variable_map,
-    resolve_function,
+from ._identifier_resolution import (
+    IdentifierInfo,
+    IdentifierResolver,
+    make_inner_identifier_map,
     resolve_program,
 )
+from ._loop_labelling import LoopLabeller, label_loops_function, label_loops_program
 
 __all__ = [
+    "IdentifierInfo",
+    "IdentifierResolver",
     "LoopLabeller",
     "SemanticAnalysisBadLValue",
     "SemanticAnalysisDuplicateDeclaration",
     "SemanticAnalysisOutsideLoop",
-    "SemanticAnalysisUnknownVariable",
-    "VariableInfo",
-    "VariableResolver",
+    "SemanticAnalysisUnknownIdentifier",
     "label_loops_function",
     "label_loops_program",
-    "make_inner_variable_map",
-    "resolve_function",
+    "make_inner_identifier_map",
     "resolve_program",
     "semantic_analysis_driver",
 ]
