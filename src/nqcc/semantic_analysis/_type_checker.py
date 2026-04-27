@@ -24,7 +24,7 @@ from nqcc.parser import (
     SourceVariableDeclarationNode,
     SourceExpressionNode,
     SourceFunctionCallNode,
-    SourceVarNode,
+    SourceVarNode,SourceReturnNode,SourceNullStatementNode
 )
 
 
@@ -132,8 +132,19 @@ class SymbolTable:
 
     def check_blockitem(self, source_node: SourceBlockItemNode):
         match source_node:
+            case _ if isinstance(source_node, get_args(SourceDeclarationNode)):
+                self.check_declaration(source_node)
+            case _ if isinstance(source_node, get_args(SourceStatementNode)):
+                self.check_statement(source_node)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
+
+    def check_statement(self,source_node: SourceStatementNode):
+        match source_node:
+            case SourceNullStatementNode():
+                pass
+            case SourceReturnNode():
+                self.check_expression(source_node.value)
 
     def check_program(self, source_node: SourceProgramNode):
         for f in source_node.functions:

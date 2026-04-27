@@ -10,9 +10,11 @@ def prepare_program(c_str: str) -> SourceProgramNode:
     program = parse_program(token_tape)
 
     resolved = resolve_program(program)
-    labelled = label_loops_program(resolved)
 
-    return labelled
+    # Recall that label_loops_program is in-place
+    label_loops_program(resolved)
+
+    return resolved
 
 
 class TestTypesOK:
