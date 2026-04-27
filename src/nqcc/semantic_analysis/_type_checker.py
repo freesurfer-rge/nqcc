@@ -6,6 +6,8 @@ from nqcc.parser import (
     SourceBlockItemNode,
     SourceBlockNode,
     SourceConstantIntNode,
+    SourceInitDeclNode,
+    SourceInitExpressionNode,
     SourceBinaryExpressionNode,
     SourceUnaryExpressionNode,
     SourceBreakNode,
@@ -13,11 +15,13 @@ from nqcc.parser import (
     SourceContinueNode,
     SourceDoWhileNode,
     SourceForNode,
+    SourceExpressionStatementNode,
     SourceFunctionDeclarationNode,
     SourceIfStatementNode,
     SourceProgramNode,
     SourceStatementNode,
     SourceAssignmentNode,
+    SourceForInitNode,
     SourceTernaryExpressonNode,
     SourceWhileNode,
     SourceDeclarationNode,
@@ -152,6 +156,40 @@ class SymbolTable:
                 pass
             case SourceReturnNode():
                 self.check_expression(source_node.value)
+            case SourceExpressionStatementNode():
+                self.check_expression(source_node.value)
+            case SourceIfStatementNode():
+                self.check_expression(source_node.condition)
+                self.check_statement(source_node.then)
+                if source_node.otherwise:
+                    self.check_statement(source_node.otherwise)
+            case SourceCompoundNode():
+                self.check_block(source_node.block)
+            case SourceWhileNode():
+                self.check_expression(source_node.condition)
+                self.check_statement(source_node.body)
+            case SourceDoWhileNode():
+                self.check_expression(source_node.condition)
+                self.check_statement(source_node.body)
+            case SourceForNode():
+                self.check_forinit(source_node.init)
+                if source_node.condition:
+                    self.check_expression(source_node.condition)
+                if source_node.post:
+                    self.check_expression(source_node.post)
+                self.check_statement(source_node.body)
+            case SourceBreakNode() | SourceContinueNode():
+                pass
+            case _:
+                raise ValueError(f"Unrecognised: {source_node}")
+
+    def check_forinit(self, source_node: SourceForInitNode):
+        match source_node:
+            case SourceInitDeclNode():
+                self.check_variable_declaration(source_node.decl)
+            case SourceInitExpressionNode():
+                if source_node.expression:
+                    self.check_expression(source_node.expression)
 
     def check_program(self, source_node: SourceProgramNode):
         for f in source_node.functions:
