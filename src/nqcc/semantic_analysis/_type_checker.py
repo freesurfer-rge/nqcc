@@ -1,40 +1,42 @@
-from typing import Union, get_args, Literal
+from typing import Literal, Union, get_args
 
 from pydantic import BaseModel, Field
 
 from nqcc.parser import (
+    SourceAssignmentNode,
+    SourceBinaryExpressionNode,
     SourceBlockItemNode,
     SourceBlockNode,
-    SourceConstantIntNode,
-    SourceInitDeclNode,
-    SourceInitExpressionNode,
-    SourceBinaryExpressionNode,
-    SourceUnaryExpressionNode,
     SourceBreakNode,
     SourceCompoundNode,
+    SourceConstantIntNode,
     SourceContinueNode,
+    SourceDeclarationNode,
     SourceDoWhileNode,
-    SourceForNode,
+    SourceExpressionNode,
     SourceExpressionStatementNode,
+    SourceForInitNode,
+    SourceForNode,
+    SourceFunctionCallNode,
     SourceFunctionDeclarationNode,
     SourceIfStatementNode,
-    SourceProgramNode,
-    SourceStatementNode,
-    SourceAssignmentNode,
-    SourceForInitNode,
-    SourceTernaryExpressonNode,
-    SourceWhileNode,
-    SourceDeclarationNode,
-    SourceVariableDeclarationNode,
-    SourceExpressionNode,
-    SourceFunctionCallNode,
-    SourceVarNode,
-    SourceReturnNode,
+    SourceInitDeclNode,
+    SourceInitExpressionNode,
     SourceNullStatementNode,
+    SourceProgramNode,
+    SourceReturnNode,
+    SourceStatementNode,
+    SourceTernaryExpressonNode,
+    SourceUnaryExpressionNode,
+    SourceVariableDeclarationNode,
+    SourceVarNode,
+    SourceWhileNode,
 )
+
 
 class SymbolEntry(BaseModel):
     entry_type: str
+
 
 class VariableInt(SymbolEntry):
     entry_type: Literal["VariableInt"] = "VariableInt"

@@ -12,6 +12,7 @@ SEMANTIC_ANALYSIS_LABELLED_LOOPS_FILE = "semantic-analysis.1.ast"
 
 SEMANTIC_ANALYSIS_SYMBOL_FILE = "semantic-analysis.symbols"
 
+
 def semantic_analysis_driver(
     source_program: SourceProgramNode, *, working_dir: pathlib.Path
 ) -> SourceProgramNode:
@@ -35,7 +36,7 @@ def semantic_analysis_driver(
     st = SymbolTable()
     st.check_program(resolved_program)
 
-    output_path = working_dir/SEMANTIC_ANALYSIS_SYMBOL_FILE
+    output_path = working_dir / SEMANTIC_ANALYSIS_SYMBOL_FILE
     with open(output_path, "w") as of:
         of.write(st.model_dump_json(indent=4))
 

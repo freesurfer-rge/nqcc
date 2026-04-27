@@ -1,14 +1,11 @@
+from nqcc.parser import SourceProgramNode, TokenTape, parse_program
 from nqcc.semantic_analysis import (
-    SymbolTable,
-    resolve_program,
-    label_loops_program,
     FunctionType,
-    VariableType,
+    SymbolTable,
     VariableInt,
+    label_loops_program,
+    resolve_program,
 )
-
-
-from nqcc.parser import TokenTape, parse_program, SourceProgramNode
 
 
 def prepare_program(c_str: str) -> SourceProgramNode:
