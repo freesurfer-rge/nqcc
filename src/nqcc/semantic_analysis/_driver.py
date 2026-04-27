@@ -4,6 +4,7 @@ from nqcc.parser import SourceProgramNode
 
 from ._identifier_resolution import resolve_program
 from ._loop_labelling import label_loops_program
+from ._type_checker import SymbolTable
 
 SEMANTIC_ANALYSIS_RESOLVED_FILE = "semantic-analysis.0.ast"
 
@@ -28,5 +29,9 @@ def semantic_analysis_driver(
     output_path = working_dir / SEMANTIC_ANALYSIS_LABELLED_LOOPS_FILE
     with open(output_path, "w") as of:
         of.write(resolved_program.model_dump_json(indent=4))
+
+    # Check symbols
+    st = SymbolTable()
+    st.check_program(resolved_program)
 
     return resolved_program
