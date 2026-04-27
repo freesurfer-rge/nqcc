@@ -31,8 +31,12 @@ from nqcc.parser import (
 class VariableInt:
     pass
 
+class VariableNotATypeForUnion:
+    # This is so get_args(VariableType) works
+    pass
 
-VariableType = Union[VariableInt]
+
+VariableType = Union[VariableInt,VariableNotATypeForUnion]
 
 
 class FunctionType(BaseModel):

@@ -1,4 +1,4 @@
-from nqcc.semantic_analysis import SymbolTable, resolve_program, label_loops_program
+from nqcc.semantic_analysis import SymbolTable, resolve_program, label_loops_program, FunctionType, VariableType, VariableInt
 
 
 from nqcc.parser import TokenTape, parse_program, SourceProgramNode
@@ -27,3 +27,16 @@ class TestTypesOK:
         target.check_program(prog)
 
         assert len(target.symbol_table) == 1
+        assert isinstance(target.symbol_table["main"], FunctionType)
+
+    def test_simple_decl(self):
+        c_str = "int main(void) { int a = 2; return a;}"
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        target.check_program(prog)
+
+        assert len(target.symbol_table) == 2
+        assert isinstance(target.symbol_table["main"], FunctionType)
+        assert isinstance(target.symbol_table["a.0"], VariableInt)
