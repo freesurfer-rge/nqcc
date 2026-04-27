@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 from nqcc.parser import (
     SourceBlockItemNode,
-    SourceBlockNode,
+    SourceBlockNode,SourceConstantIntNode,SourceBinaryExpressionNode,SourceUnaryExpressionNode,
     SourceBreakNode,
     SourceCompoundNode,
     SourceContinueNode,
@@ -14,7 +14,9 @@ from nqcc.parser import (
     SourceIfStatementNode,
     SourceProgramNode,
     SourceStatementNode,
-    SourceWhileNode,SourceDeclarationNode,SourceVariableDeclarationNode,SourceExpressionNode, SourceFunctionCallNode
+    SourceAssignmentNode,
+    SourceTernaryExpressonNode,
+    SourceWhileNode,SourceDeclarationNode,SourceVariableDeclarationNode,SourceExpressionNode, SourceFunctionCallNode, SourceVarNode
 )
 
 class VariableInt:
@@ -90,7 +92,24 @@ class SymbolTable:
                     raise ValueError(f"Wrong arg count: {source_node}")
                 for arg in source_node.args:
                     self.check_expression(arg)
-
+            case SourceVarNode():
+                v_symbol = self.symbol_table[source_node.identifier]
+                if not isinstance(v_symbol, VariableInt):
+                    raise ValueError(f"Function name used as variable: {source_node}")
+            case SourceConstantIntNode():
+                pass
+            case SourceUnaryExpressionNode():
+                self.check_expression(source_node.expression)
+            case SourceBinaryExpressionNode():
+                self.check_expression(source_node.left)
+                self.check_expression(source_node.right)
+            case SourceAssignmentNode():
+                self.check_expression(source_node.left)
+                self.check_expression(source_node.right)
+            case SourceTernaryExpressonNode():
+                self.check_expression(source_node.condition)
+                self.check_expression(source_node.then)
+                self.check_expression(source_node.otherwise)
             case _:
                 raise ValueError(f"Unrecogised: {source_node}")
             
