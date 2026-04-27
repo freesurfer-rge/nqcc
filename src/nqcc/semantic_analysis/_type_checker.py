@@ -100,13 +100,13 @@ class SymbolTable(BaseModel):
         )
         self.symbol_table[source_node.identifier] = new_symbol
 
-        if has_body:
+        if source_node.body is not None:
             for p in source_node.params:
                 self.symbol_table[p] = VariableInt()
             self.check_block(source_node.body)
 
-    def check_expression(self, source_node: SourceExpressionNode):
-        assert isinstance(source_node, SourceExpressionNode)
+    def check_expression(self, source_node: SourceExpressionNode):  # noqa: C901
+        assert isinstance(source_node, get_args(SourceExpressionNode))
 
         match source_node:
             case SourceFunctionCallNode():
@@ -154,7 +154,7 @@ class SymbolTable(BaseModel):
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
-    def check_statement(self, source_node: SourceStatementNode):
+    def check_statement(self, source_node: SourceStatementNode):  # noqa: C901
         match source_node:
             case SourceNullStatementNode():
                 pass
