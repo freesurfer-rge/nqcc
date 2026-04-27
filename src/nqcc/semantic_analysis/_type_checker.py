@@ -1,10 +1,13 @@
-from typing import Union
+from typing import Union, get_args
 
 from pydantic import BaseModel
 
 from nqcc.parser import (
     SourceBlockItemNode,
-    SourceBlockNode,SourceConstantIntNode,SourceBinaryExpressionNode,SourceUnaryExpressionNode,
+    SourceBlockNode,
+    SourceConstantIntNode,
+    SourceBinaryExpressionNode,
+    SourceUnaryExpressionNode,
     SourceBreakNode,
     SourceCompoundNode,
     SourceContinueNode,
@@ -16,8 +19,14 @@ from nqcc.parser import (
     SourceStatementNode,
     SourceAssignmentNode,
     SourceTernaryExpressonNode,
-    SourceWhileNode,SourceDeclarationNode,SourceVariableDeclarationNode,SourceExpressionNode, SourceFunctionCallNode, SourceVarNode
+    SourceWhileNode,
+    SourceDeclarationNode,
+    SourceVariableDeclarationNode,
+    SourceExpressionNode,
+    SourceFunctionCallNode,
+    SourceVarNode,
 )
+
 
 class VariableInt:
     pass
@@ -46,7 +55,7 @@ class SymbolTable:
                 self.check_function_declaration(source_node)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
-            
+
     def check_variable_declaration(self, source_node: SourceVariableDeclarationNode):
         assert isinstance(source_node, SourceVariableDeclarationNode)
         # We should have fully unique names by this point.....
@@ -58,7 +67,7 @@ class SymbolTable:
 
     def check_function_declaration(self, source_node: SourceFunctionDeclarationNode):
         assert isinstance(source_node, SourceFunctionDeclarationNode)
-        
+
         has_body = source_node.body is not None
         already_defined = False
 
@@ -70,8 +79,10 @@ class SymbolTable:
             already_defined = old_decl.defined
             if already_defined and has_body:
                 raise ValueError(f"Function defined more than once: {source_node}")
-            
-        new_symbol = FunctionType(param_count=len(source_node.params), defined = already_defined or has_body)
+
+        new_symbol = FunctionType(
+            param_count=len(source_node.params), defined=already_defined or has_body
+        )
         self.symbol_table[source_node.identifier] = new_symbol
 
         if has_body:
@@ -79,7 +90,7 @@ class SymbolTable:
                 self.symbol_table.add(p, VariableInt())
             self.check_block(source_node.body)
 
-    def check_expression(self, source_node:SourceExpressionNode):
+    def check_expression(self, source_node: SourceExpressionNode):
         assert isinstance(source_node, SourceExpressionNode)
 
         match source_node:
@@ -94,7 +105,7 @@ class SymbolTable:
                     self.check_expression(arg)
             case SourceVarNode():
                 v_symbol = self.symbol_table[source_node.identifier]
-                if not isinstance(v_symbol, VariableInt):
+                if not isinstance(v_symbol, get_args(VariableType)):
                     raise ValueError(f"Function name used as variable: {source_node}")
             case SourceConstantIntNode():
                 pass
@@ -112,8 +123,8 @@ class SymbolTable:
                 self.check_expression(source_node.otherwise)
             case _:
                 raise ValueError(f"Unrecogised: {source_node}")
-            
-    def check_block(self, source_node:SourceBlockNode):
+
+    def check_block(self, source_node: SourceBlockNode):
         assert isinstance(source_node, SourceBlockNode)
 
         for bi in source_node.items:
@@ -123,3 +134,7 @@ class SymbolTable:
         match source_node:
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
+
+    def check_program(self, source_node: SourceProgramNode):
+        for f in source_node.functions:
+            self.check_declaration(f)
