@@ -1,6 +1,6 @@
-from typing import Union, get_args
+from typing import Union, get_args, Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from nqcc.parser import (
     SourceBlockItemNode,
@@ -33,12 +33,14 @@ from nqcc.parser import (
     SourceNullStatementNode,
 )
 
+class SymbolEntry(BaseModel):
+    entry_type: str
 
-class VariableInt:
-    pass
+class VariableInt(SymbolEntry):
+    entry_type: Literal["VariableInt"] = "VariableInt"
 
 
-class VariableNotATypeForUnion:
+class VariableNotATypeForUnion(SymbolEntry):
     # This is so get_args(VariableType) works
     pass
 
@@ -47,6 +49,7 @@ VariableType = Union[VariableInt, VariableNotATypeForUnion]
 
 
 class FunctionType(BaseModel):
+    entry_type: Literal["FunctionType"] = "FunctionType"
     param_count: int
     defined: bool
 
@@ -54,9 +57,8 @@ class FunctionType(BaseModel):
 SymbolType = Union[VariableType, FunctionType]
 
 
-class SymbolTable:
-    def __init__(self) -> None:
-        self.symbol_table: dict[str, SymbolType] = {}
+class SymbolTable(BaseModel):
+    symbol_table: dict[str, SymbolType] = Field(default_factory=dict)
 
     def check_declaration(self, source_node: SourceDeclarationNode):
         match source_node:
