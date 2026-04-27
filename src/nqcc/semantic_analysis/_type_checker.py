@@ -24,19 +24,22 @@ from nqcc.parser import (
     SourceVariableDeclarationNode,
     SourceExpressionNode,
     SourceFunctionCallNode,
-    SourceVarNode,SourceReturnNode,SourceNullStatementNode
+    SourceVarNode,
+    SourceReturnNode,
+    SourceNullStatementNode,
 )
 
 
 class VariableInt:
     pass
 
+
 class VariableNotATypeForUnion:
     # This is so get_args(VariableType) works
     pass
 
 
-VariableType = Union[VariableInt,VariableNotATypeForUnion]
+VariableType = Union[VariableInt, VariableNotATypeForUnion]
 
 
 class FunctionType(BaseModel):
@@ -91,7 +94,7 @@ class SymbolTable:
 
         if has_body:
             for p in source_node.params:
-                self.symbol_table.add(p, VariableInt())
+                self.symbol_table[p] = VariableInt()
             self.check_block(source_node.body)
 
     def check_expression(self, source_node: SourceExpressionNode):
@@ -143,7 +146,7 @@ class SymbolTable:
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
-    def check_statement(self,source_node: SourceStatementNode):
+    def check_statement(self, source_node: SourceStatementNode):
         match source_node:
             case SourceNullStatementNode():
                 pass

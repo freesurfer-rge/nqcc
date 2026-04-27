@@ -1,4 +1,11 @@
-from nqcc.semantic_analysis import SymbolTable, resolve_program, label_loops_program, FunctionType, VariableType, VariableInt
+from nqcc.semantic_analysis import (
+    SymbolTable,
+    resolve_program,
+    label_loops_program,
+    FunctionType,
+    VariableType,
+    VariableInt,
+)
 
 
 from nqcc.parser import TokenTape, parse_program, SourceProgramNode
@@ -40,3 +47,39 @@ class TestTypesOK:
         assert len(target.symbol_table) == 2
         assert isinstance(target.symbol_table["main"], FunctionType)
         assert isinstance(target.symbol_table["a.0"], VariableInt)
+
+    def test_extra_function(self):
+        c_str = """int foo(void) { return 2; }
+
+        int main( void ) {
+            return foo();
+        }
+        """
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        target.check_program(prog)
+
+        assert len(target.symbol_table) == 2
+        assert isinstance(target.symbol_table["main"], FunctionType)
+        assert isinstance(target.symbol_table["foo"], FunctionType)
+
+    def test_func_with_arg(self):
+        c_str = """int check(int a) { return a%2 ? 1: 2;}
+
+        int main( void ) {
+            int a = 10;
+            return check(a);
+        }
+        """
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        target.check_program(prog)
+
+        assert len(target.symbol_table) == 4
+        assert isinstance(target.symbol_table["main"], FunctionType)
+        assert isinstance(target.symbol_table["check"], FunctionType)
+        assert isinstance(target.symbol_table["a.arg.0"], VariableInt)
+        assert isinstance(target.symbol_table["a.1"], VariableInt)
