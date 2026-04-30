@@ -155,7 +155,8 @@ class TestPrograms:
         assert isinstance(result, TackyProgramNode)
         assert result.start_position == 0
 
-        main_func = result.function_definition
+        assert len(result.function_definitions) == 1
+        main_func = result.function_definitions[0]
         assert isinstance(main_func, TackyFunctionNode)
         assert main_func.identifier == "main"
         assert main_func.start_position == 1

@@ -612,13 +612,16 @@ class TackyGenerator:
         return TackyFunctionNode(
             start_position=source_node.start_position,
             identifier=source_node.identifier,
+            params=[],
             instructions=self._current_instructions,
         )
 
     def emit_program(self, source_node: SourceProgramNode) -> TackyProgramNode:
         assert isinstance(source_node, SourceProgramNode)
 
-        assert len(source_node.functions) == 1
-        func = self.emit_function(source_node.functions[0])
+        funcs = []
+        for f in source_node.functions:
+            nxt = self.emit_function(f)
+            funcs.append(nxt)
 
-        return TackyProgramNode(start_position=0, function_definition=func)
+        return TackyProgramNode(start_position=0, function_definitions=funcs)
