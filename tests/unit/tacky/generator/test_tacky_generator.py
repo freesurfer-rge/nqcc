@@ -1,11 +1,11 @@
 from nqcc.parser import (
-    SourceFunctionDeclarationNode,
+    SourceFunctionDeclarationNode,SourceProgramNode,
     TokenTape,
     parse_block_item,
     parse_function,
     parse_program,
 )
-from nqcc.semantic_analysis import IdentifierInfo, IdentifierResolver
+from nqcc.semantic_analysis import IdentifierInfo, IdentifierResolver, resolve_program, label_loops_program, SymbolTable
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
@@ -142,6 +142,21 @@ class TestFunctions:
             start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
         )
 
+def prepare_program(c_str: str) -> SourceProgramNode:
+    token_tape = TokenTape.from_c_source(c_str)
+
+    program = parse_program(token_tape)
+
+    resolved_program = resolve_program(program)
+
+    # Recall that label_loops_program is in-place
+    label_loops_program(resolved_program)
+
+    st = SymbolTable()
+    st.check_program(resolved_program)
+
+    return resolved_program
+
 
 class TestPrograms:
     def test_simple(self):
@@ -177,3 +192,33 @@ class TestPrograms:
         assert main_func.instructions[-1] == TackyReturnNode(
             start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
         )
+
+
+    def test_func_call(self):
+        c_str = """
+        int inc(int a);
+
+        int inc(int a) {
+            return a+1;
+        }
+
+        int main( void ) {
+            return inc(2);
+        }
+        """
+
+        src_node = prepare_program(c_str)
+        assert isinstance(src_node, SourceProgramNode)
+
+        target = TackyGenerator()
+
+        result = target.emit_program(src_node)
+        assert isinstance(result, TackyProgramNode)
+        assert len(result.function_definitions) == 2
+
+        tacky_inc = result.function_definitions[0]
+        assert isinstance(tacky_inc, TackyFunctionNode)
+
+        tacky_main = result.function_definitions[1]
+        assert isinstance(tacky_main, TackyFunctionNode)
+

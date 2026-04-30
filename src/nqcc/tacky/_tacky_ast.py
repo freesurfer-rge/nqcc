@@ -168,8 +168,8 @@ class TackyLabelNode(TackyASTNode):
     identifier: str
 
 
-class TackyFunctionCall(TackyASTNode):
-    node_type: Literal["TackyFunctionCall"] = "TackyFunctionCall"
+class TackyFunctionCallNode(TackyASTNode):
+    node_type: Literal["TackyFunctionCallNode"] = "TackyFunctionCallNode"
     name: str
     args: list[TackyValue]
     dst: TackyValue
@@ -184,7 +184,7 @@ TackyInstruction = Union[
     TackyJumpIfZeroNode,
     TackyJumpIfNotZeroNode,
     TackyLabelNode,
-    TackyFunctionCall,
+    TackyFunctionCallNode,
 ]
 
 

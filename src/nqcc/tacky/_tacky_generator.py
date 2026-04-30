@@ -22,7 +22,7 @@ from nqcc.parser import (
     SourceExpressionStatementNode,
     SourceForInitNode,
     SourceForNode,
-    SourceFunctionDeclarationNode,
+    SourceFunctionDeclarationNode,SourceFunctionCallNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
     SourceIfStatementNode,
@@ -87,7 +87,7 @@ from ._tacky_ast import (
     TackyUnaryNode,
     TackyUnaryOperator,
     TackyValue,
-    TackyVarNode,
+    TackyVarNode,TackyFunctionCallNode
 )
 
 _UNARY_OPERATOR_MAP: dict[Type[SourceUnaryOperator], Type[TackyUnaryOperator]] = {
@@ -585,8 +585,12 @@ class TackyGenerator:
         for block_item in source_node.items:
             self.emit_blockitem(block_item)
 
-    def emit_function(self, source_node: SourceFunctionDeclarationNode) -> TackyFunctionNode:
+    def emit_function(self, source_node: SourceFunctionDeclarationNode) -> TackyFunctionNode | None:
         assert isinstance(source_node, SourceFunctionDeclarationNode)
+
+        if source_node.body is None:
+            # Nothing to do for declarations
+            return None
 
         # Set up internal state
         self._nxt_tmp = 0
@@ -595,11 +599,7 @@ class TackyGenerator:
         self._current_instructions = []
 
         # Process the internals
-        if source_node.body:
-            # Hmmm.... should probably always have body
-            self.emit_block(source_node.body)
-        else:
-            print("No body?")
+        self.emit_block(source_node.body)
 
         # What if there's no return statement?
         # We add an extra; this will not run if there is
@@ -622,6 +622,7 @@ class TackyGenerator:
         funcs = []
         for f in source_node.functions:
             nxt = self.emit_function(f)
-            funcs.append(nxt)
+            if nxt:
+                funcs.append(nxt)
 
         return TackyProgramNode(start_position=0, function_definitions=funcs)
