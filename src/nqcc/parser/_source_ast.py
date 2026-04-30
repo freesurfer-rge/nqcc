@@ -285,7 +285,7 @@ class SourceVariableDeclarationNode(SourceASTNode):
 
 
 class SourceFunctionDeclarationNode(SourceASTNode):
-    node_type: Literal["SourceVariableDeclarationNode"] = "SourceVariableDeclarationNode"
+    node_type: Literal["SourceFunctionDeclarationNode"] = "SourceFunctionDeclarationNode"
     identifier: str
     params: list[str]
     body: SourceBlockNode | None
