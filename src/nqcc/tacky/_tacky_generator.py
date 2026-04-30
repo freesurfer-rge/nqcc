@@ -22,8 +22,8 @@ from nqcc.parser import (
     SourceExpressionStatementNode,
     SourceForInitNode,
     SourceForNode,
-    SourceFunctionDeclarationNode,
     SourceFunctionCallNode,
+    SourceFunctionDeclarationNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
     SourceIfStatementNode,
@@ -65,6 +65,7 @@ from ._tacky_ast import (
     TackyCopyNode,
     TackyDivide,
     TackyEqualTo,
+    TackyFunctionCallNode,
     TackyFunctionNode,
     TackyGreaterThan,
     TackyGreaterThanOrEqual,
@@ -89,7 +90,6 @@ from ._tacky_ast import (
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
-    TackyFunctionCallNode,
 )
 
 _UNARY_OPERATOR_MAP: dict[Type[SourceUnaryOperator], Type[TackyUnaryOperator]] = {
@@ -380,7 +380,7 @@ class TackyGenerator:
                 self._current_instructions.append(tacky_copy)
                 return dst_assign
             case SourceFunctionCallNode():
-                self.emit_functioncall(source_node)
+                return self.emit_functioncall(source_node)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
@@ -538,7 +538,7 @@ class TackyGenerator:
         )
         tacky_fc = TackyFunctionCallNode(
             start_position=source_node.start_position,
-            name=source_node.identifier,
+            identifier=source_node.identifier,
             args=args,
             dst=result_var,
         )
@@ -634,7 +634,7 @@ class TackyGenerator:
         return TackyFunctionNode(
             start_position=source_node.start_position,
             identifier=source_node.identifier,
-            params=[],
+            params=source_node.params,
             instructions=self._current_instructions,
         )
 

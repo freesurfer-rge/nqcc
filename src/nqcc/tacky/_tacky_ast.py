@@ -170,7 +170,7 @@ class TackyLabelNode(TackyASTNode):
 
 class TackyFunctionCallNode(TackyASTNode):
     node_type: Literal["TackyFunctionCallNode"] = "TackyFunctionCallNode"
-    name: str
+    identifier: str
     args: list[TackyValue]
     dst: TackyValue
 

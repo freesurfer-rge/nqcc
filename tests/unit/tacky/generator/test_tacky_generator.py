@@ -9,15 +9,16 @@ from nqcc.parser import (
 from nqcc.semantic_analysis import (
     IdentifierInfo,
     IdentifierResolver,
-    resolve_program,
-    label_loops_program,
     SymbolTable,
+    label_loops_program,
+    resolve_program,
 )
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
     TackyConstantIntNode,
     TackyCopyNode,
+    TackyFunctionCallNode,
     TackyFunctionNode,
     TackyGenerator,
     TackyMultiply,
@@ -226,6 +227,46 @@ class TestPrograms:
 
         tacky_inc = result.function_definitions[0]
         assert isinstance(tacky_inc, TackyFunctionNode)
+        assert tacky_inc.identifier == "inc"
+        assert len(tacky_inc.params) == 1
+        assert tacky_inc.params[0] == "a.arg.1"
+        assert len(tacky_inc.instructions) == 3
+        inc_instr0 = tacky_inc.instructions[0]
+        assert isinstance(inc_instr0, TackyBinaryNode)
+        assert isinstance(inc_instr0.operator, TackyAdd)
+        assert inc_instr0.left == TackyVarNode(start_position=70, identifier="a.arg.1")
+        assert inc_instr0.right == TackyConstantIntNode(start_position=72, value=1)
+        assert inc_instr0.dst == TackyVarNode(start_position=71, identifier="tmp.inc.0")
+        inc_instr1 = tacky_inc.instructions[1]
+        assert isinstance(inc_instr1, TackyReturnNode)
+        assert inc_instr1.value == inc_instr0.dst
+        inc_instr2 = tacky_inc.instructions[2]
+        # The 'guard' return
+        assert isinstance(inc_instr2, TackyReturnNode)
+        assert inc_instr2 == TackyReturnNode(
+            start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
+        )
 
         tacky_main = result.function_definitions[1]
         assert isinstance(tacky_main, TackyFunctionNode)
+        assert tacky_main.identifier == "main"
+        assert len(tacky_main.params) == 0
+        assert len(tacky_main.instructions) == 3
+
+        main_instr0 = tacky_main.instructions[0]
+        assert isinstance(main_instr0, TackyFunctionCallNode)
+        assert main_instr0.identifier == "inc"
+        assert len(main_instr0.args) == 1
+        assert main_instr0.args[0] == TackyConstantIntNode(start_position=136, value=2)
+        assert main_instr0.dst == TackyVarNode(start_position=132, identifier="tmp.main.0")
+
+        main_instr1 = tacky_main.instructions[1]
+        assert isinstance(main_instr1, TackyReturnNode)
+        assert main_instr1.value == main_instr0.dst
+
+        main_instr2 = tacky_main.instructions[2]
+        # The 'guard' return
+        assert isinstance(main_instr2, TackyReturnNode)
+        assert main_instr2 == TackyReturnNode(
+            start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
+        )
