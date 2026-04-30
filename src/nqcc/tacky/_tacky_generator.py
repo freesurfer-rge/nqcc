@@ -597,8 +597,12 @@ class TackyGenerator:
         match source_node:
             case _ if isinstance(source_node, get_args(SourceStatementNode)):
                 self.emit_statement(source_node)
-            case _ if isinstance(source_node, SourceVariableDeclarationNode):
+            case SourceVariableDeclarationNode():
                 self.emit_declaration(source_node)
+            case SourceFunctionDeclarationNode():
+                assert source_node.body is None
+                # Nothing to do
+                return
             case _:
                 raise ValueError(f"Unrecognised blockitem: {source_node}")
 

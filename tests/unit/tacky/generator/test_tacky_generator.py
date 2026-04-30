@@ -270,3 +270,27 @@ class TestPrograms:
         assert main_instr2 == TackyReturnNode(
             start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
         )
+
+    def test_shadow_name(self):
+        # This is OK, since the function declaration is a separate scope
+        # (modified from the book's test suite)
+        c_str = """
+        int main(void) {
+            int a = 10;
+            int g(int a);
+            return g(a);
+        }
+
+        int g(int a) {
+            return a % 2;
+        }
+        """
+        src_node = prepare_program(c_str)
+        assert isinstance(src_node, SourceProgramNode)
+
+        target = TackyGenerator()
+
+        result = target.emit_program(src_node)
+        assert isinstance(result, TackyProgramNode)
+        # Make sure we don't have duplicate from the declaration of 'g'
+        assert len(result.function_definitions) == 2
