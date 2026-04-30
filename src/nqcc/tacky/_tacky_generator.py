@@ -22,6 +22,7 @@ from nqcc.parser import (
     SourceExpressionStatementNode,
     SourceForInitNode,
     SourceForNode,
+    SourceFunctionCallNode,
     SourceFunctionDeclarationNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
@@ -64,6 +65,7 @@ from ._tacky_ast import (
     TackyCopyNode,
     TackyDivide,
     TackyEqualTo,
+    TackyFunctionCallNode,
     TackyFunctionNode,
     TackyGreaterThan,
     TackyGreaterThanOrEqual,
@@ -377,6 +379,8 @@ class TackyGenerator:
                 )
                 self._current_instructions.append(tacky_copy)
                 return dst_assign
+            case SourceFunctionCallNode():
+                return self.emit_functioncall(source_node)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
@@ -523,6 +527,24 @@ class TackyGenerator:
             start_position=source_node.start_position, identifier=get_break_label(source_node.label)
         )
 
+    def emit_functioncall(self, source_node: SourceFunctionCallNode) -> TackyValue:
+        args = []
+        for e in source_node.args:
+            arg_val = self.emit_expression(e)
+            args.append(arg_val)
+        result_var = TackyVarNode(
+            start_position=source_node.start_position,
+            identifier=self.get_function_temporary(),
+        )
+        tacky_fc = TackyFunctionCallNode(
+            start_position=source_node.start_position,
+            identifier=source_node.identifier,
+            args=args,
+            dst=result_var,
+        )
+        self._current_instructions.append(tacky_fc)
+        return result_var
+
     def emit_statement(self, source_node: SourceStatementNode):  # noqa: C901
         assert isinstance(source_node, get_args(SourceStatementNode))
         match source_node:
@@ -575,8 +597,12 @@ class TackyGenerator:
         match source_node:
             case _ if isinstance(source_node, get_args(SourceStatementNode)):
                 self.emit_statement(source_node)
-            case _ if isinstance(source_node, SourceVariableDeclarationNode):
+            case SourceVariableDeclarationNode():
                 self.emit_declaration(source_node)
+            case SourceFunctionDeclarationNode():
+                assert source_node.body is None
+                # Nothing to do
+                return
             case _:
                 raise ValueError(f"Unrecognised blockitem: {source_node}")
 
@@ -585,8 +611,12 @@ class TackyGenerator:
         for block_item in source_node.items:
             self.emit_blockitem(block_item)
 
-    def emit_function(self, source_node: SourceFunctionDeclarationNode) -> TackyFunctionNode:
+    def emit_function(self, source_node: SourceFunctionDeclarationNode) -> TackyFunctionNode | None:
         assert isinstance(source_node, SourceFunctionDeclarationNode)
+
+        if source_node.body is None:
+            # Nothing to do for declarations
+            return None
 
         # Set up internal state
         self._nxt_tmp = 0
@@ -595,11 +625,7 @@ class TackyGenerator:
         self._current_instructions = []
 
         # Process the internals
-        if source_node.body:
-            # Hmmm.... should probably always have body
-            self.emit_block(source_node.body)
-        else:
-            print("No body?")
+        self.emit_block(source_node.body)
 
         # What if there's no return statement?
         # We add an extra; this will not run if there is
@@ -612,13 +638,17 @@ class TackyGenerator:
         return TackyFunctionNode(
             start_position=source_node.start_position,
             identifier=source_node.identifier,
+            params=source_node.params,
             instructions=self._current_instructions,
         )
 
     def emit_program(self, source_node: SourceProgramNode) -> TackyProgramNode:
         assert isinstance(source_node, SourceProgramNode)
 
-        assert len(source_node.functions) == 1
-        func = self.emit_function(source_node.functions[0])
+        funcs = []
+        for f in source_node.functions:
+            nxt = self.emit_function(f)
+            if nxt:
+                funcs.append(nxt)
 
-        return TackyProgramNode(start_position=0, function_definition=func)
+        return TackyProgramNode(start_position=0, function_definitions=funcs)
