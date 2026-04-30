@@ -22,7 +22,8 @@ from nqcc.parser import (
     SourceExpressionStatementNode,
     SourceForInitNode,
     SourceForNode,
-    SourceFunctionDeclarationNode,SourceFunctionCallNode,
+    SourceFunctionDeclarationNode,
+    SourceFunctionCallNode,
     SourceGreaterThan,
     SourceGreaterThanOrEqual,
     SourceIfStatementNode,
@@ -87,7 +88,8 @@ from ._tacky_ast import (
     TackyUnaryNode,
     TackyUnaryOperator,
     TackyValue,
-    TackyVarNode,TackyFunctionCallNode
+    TackyVarNode,
+    TackyFunctionCallNode,
 )
 
 _UNARY_OPERATOR_MAP: dict[Type[SourceUnaryOperator], Type[TackyUnaryOperator]] = {
@@ -377,6 +379,8 @@ class TackyGenerator:
                 )
                 self._current_instructions.append(tacky_copy)
                 return dst_assign
+            case SourceFunctionCallNode():
+                self.emit_functioncall(source_node)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
@@ -522,6 +526,24 @@ class TackyGenerator:
         self.emit_label(
             start_position=source_node.start_position, identifier=get_break_label(source_node.label)
         )
+
+    def emit_functioncall(self, source_node: SourceFunctionCallNode) -> TackyValue:
+        args = []
+        for e in source_node.args:
+            arg_val = self.emit_expression(e)
+            args.append(arg_val)
+        result_var = TackyVarNode(
+            start_position=source_node.start_position,
+            identifier=self.get_function_temporary(),
+        )
+        tacky_fc = TackyFunctionCallNode(
+            start_position=source_node.start_position,
+            name=source_node.identifier,
+            args=args,
+            dst=result_var,
+        )
+        self._current_instructions.append(tacky_fc)
+        return result_var
 
     def emit_statement(self, source_node: SourceStatementNode):  # noqa: C901
         assert isinstance(source_node, get_args(SourceStatementNode))

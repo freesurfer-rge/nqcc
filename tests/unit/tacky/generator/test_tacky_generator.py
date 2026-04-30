@@ -1,11 +1,18 @@
 from nqcc.parser import (
-    SourceFunctionDeclarationNode,SourceProgramNode,
+    SourceFunctionDeclarationNode,
+    SourceProgramNode,
     TokenTape,
     parse_block_item,
     parse_function,
     parse_program,
 )
-from nqcc.semantic_analysis import IdentifierInfo, IdentifierResolver, resolve_program, label_loops_program, SymbolTable
+from nqcc.semantic_analysis import (
+    IdentifierInfo,
+    IdentifierResolver,
+    resolve_program,
+    label_loops_program,
+    SymbolTable,
+)
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,
@@ -142,6 +149,7 @@ class TestFunctions:
             start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
         )
 
+
 def prepare_program(c_str: str) -> SourceProgramNode:
     token_tape = TokenTape.from_c_source(c_str)
 
@@ -193,7 +201,6 @@ class TestPrograms:
             start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
         )
 
-
     def test_func_call(self):
         c_str = """
         int inc(int a);
@@ -214,6 +221,7 @@ class TestPrograms:
 
         result = target.emit_program(src_node)
         assert isinstance(result, TackyProgramNode)
+        # Make sure we don't have duplicate from the declaration of 'inc'
         assert len(result.function_definitions) == 2
 
         tacky_inc = result.function_definitions[0]
@@ -221,4 +229,3 @@ class TestPrograms:
 
         tacky_main = result.function_definitions[1]
         assert isinstance(tacky_main, TackyFunctionNode)
-
