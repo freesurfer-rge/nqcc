@@ -134,6 +134,11 @@ class AsmAllocateStackNode(AsmASTNode):
     stack_size: int
 
 
+class AsmDeallocateStackNode(AsmASTNode):
+    node_type: Literal["AsmDeallocateStackNode"] = "AsmDeallocateStackNode"
+    stack_size: int
+
+
 class AsmJmpNode(AsmASTNode):
     node_type: Literal["AsmJmpNode"] = "AsmJmpNode"
     target: str
@@ -169,6 +174,7 @@ AsmInstructionNode = Union[
     AsmJmpCCNode,
     AsmSetCCNode,
     AsmLabelNode,
+    AsmDeallocateStackNode,
 ]
 
 
