@@ -283,6 +283,9 @@ def convert_tacky_program(tacky_program: TackyProgramNode) -> AsmProgramNode:
     assert isinstance(tacky_program, TackyProgramNode)
 
     assert len(tacky_program.function_definitions) == 1
-    func = convert_tacky_function(tacky_program.function_definitions[0])
+    asm_funcs = []
+    for tacky_func in tacky_program.function_definitions:
+        func = convert_tacky_function(tacky_func)
+        asm_funcs.append(func)
 
-    return AsmProgramNode(start_position=tacky_program.start_position, function_definition=func)
+    return AsmProgramNode(start_position=tacky_program.start_position, functions=asm_funcs)
