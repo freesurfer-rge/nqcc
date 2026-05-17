@@ -161,6 +161,16 @@ class AsmLabelNode(AsmASTNode):
     identifier: str
 
 
+class AsmPushNode(AsmASTNode):
+    node_type: Literal["AsmPushNode"] = "AsmPushNode"
+    target: AsmOperandNode
+
+
+class AsmCallNode(AsmASTNode):
+    node_type: Literal["AsmCallNode"] = "AsmCallNode"
+    identifier: str
+
+
 AsmInstructionNode = Union[
     AsmMovNode,
     AsmRetNode,
@@ -175,6 +185,8 @@ AsmInstructionNode = Union[
     AsmSetCCNode,
     AsmLabelNode,
     AsmDeallocateStackNode,
+    AsmPushNode,
+    AsmCallNode,
 ]
 
 
