@@ -206,9 +206,9 @@ def get_function_assembler(func_node: AsmFunctionNode) -> list[str]:
 
 
 def get_program_assembler(prog_node: AsmProgramNode) -> list[str]:
-    assert len(prog_node.functions) == 1
+    assert len(prog_node.function_definitions) == 1
     result = []
-    result += get_function_assembler(prog_node.functions[0])
+    result += get_function_assembler(prog_node.function_definitions[0])
     result.append('.section .note.GNU-stack, "",@progbits')
     return result
 

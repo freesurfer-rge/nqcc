@@ -199,4 +199,4 @@ class AsmFunctionNode(AsmASTNode):
 
 class AsmProgramNode(AsmASTNode):
     node_type: Literal["AsmFunctionNode"] = "AsmFunctionNode"
-    functions: list[AsmFunctionNode]
+    function_definitions: list[AsmFunctionNode]

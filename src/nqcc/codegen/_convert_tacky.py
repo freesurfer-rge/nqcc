@@ -288,4 +288,4 @@ def convert_tacky_program(tacky_program: TackyProgramNode) -> AsmProgramNode:
         func = convert_tacky_function(tacky_func)
         asm_funcs.append(func)
 
-    return AsmProgramNode(start_position=tacky_program.start_position, functions=asm_funcs)
+    return AsmProgramNode(start_position=tacky_program.start_position, function_definitions=asm_funcs)
