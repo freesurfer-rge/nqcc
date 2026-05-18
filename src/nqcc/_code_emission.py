@@ -45,14 +45,18 @@ _OPCODE_FIELD_WIDTH = 8
 _SEP_WIDTH = 70
 _SEP_CHAR = "="
 
-SubRegister = Literal["L8", "4B"]
+SubRegister = Literal["L8", "4B", "8B"]
 
 _REG_MAP: dict[AsmRegName, dict[SubRegister, str]] = {
-    "AX": {"4B": "eax", "L8": "al"},
-    "CX": {"4B": "ecx", "L8": "cl"},
-    "DX": {"4B": "edx", "L8": "dl"},
-    "R10": {"4B": "r10d", "L8": "r10b"},
-    "R11": {"4B": "r11d", "L8": "r11b"},
+    "AX": {"8B": "rax", "4B": "eax", "L8": "al"},
+    "CX": {"8B": "rcx", "4B": "ecx", "L8": "cl"},
+    "DX": {"8B": "rdx", "4B": "edx", "L8": "dl"},
+    "DI": {"8B": "rdi", "4B": "edi", "L8": "dil"},
+    "SI": {"8B": "rsi", "4B": "esi", "L8": "sil"},
+    "R8": {"8B": "r8", "4B": "r8d", "L8": "r8b"},
+    "R9": {"8B": "r9", "4B": "r9d", "L8": "r9b"},
+    "R10": {"8B": "r10", "4B": "r10d", "L8": "r10b"},
+    "R11": {"8B": "r11", "4B": "r11d", "L8": "r11b"},
 }
 
 
@@ -202,8 +206,9 @@ def get_function_assembler(func_node: AsmFunctionNode) -> list[str]:
 
 
 def get_program_assembler(prog_node: AsmProgramNode) -> list[str]:
+    assert len(prog_node.function_definitions) == 1
     result = []
-    result += get_function_assembler(prog_node.function_definition)
+    result += get_function_assembler(prog_node.function_definitions[0])
     result.append('.section .note.GNU-stack, "",@progbits')
     return result
 

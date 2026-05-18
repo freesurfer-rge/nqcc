@@ -264,7 +264,8 @@ class TestProgramUpdate:
 
         target = PseudoRegisterReplacer()
         target.pseudo_replace(asm_prog)
-        asm_func = asm_prog.function_definition
+        assert len(asm_prog.function_definitions) == 1
+        asm_func = asm_prog.function_definitions[0]
         assert asm_func.stack_size == 8
         # Add two instructions for 'guard' return added by Tacky
         assert len(asm_func.instructions) == 6 + 2

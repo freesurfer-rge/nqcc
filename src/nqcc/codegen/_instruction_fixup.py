@@ -153,4 +153,5 @@ def fixup_function_instructions(asm_func: AsmFunctionNode):
 def fixup_program_instructions(asm_prog: AsmProgramNode):
     assert isinstance(asm_prog, AsmProgramNode)
 
-    fixup_function_instructions(asm_prog.function_definition)
+    for f in asm_prog.function_definitions:
+        fixup_function_instructions(f)

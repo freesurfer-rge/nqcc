@@ -129,7 +129,8 @@ class TestPrograms:
         assert isinstance(asm_prog, AsmProgramNode)
         assert asm_prog.start_position == 0
 
-        asm_func = asm_prog.function_definition
+        assert len(asm_prog.function_definitions) == 1
+        asm_func = asm_prog.function_definitions[0]
         assert asm_func.start_position == 3
         assert asm_func.identifier == "main"
         # Add two instructions for 'guard' return added by Tacky

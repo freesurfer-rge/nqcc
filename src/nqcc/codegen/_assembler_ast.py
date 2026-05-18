@@ -2,7 +2,7 @@ from typing import Literal, Union
 
 from pydantic import BaseModel, Field
 
-AsmRegName = Literal["AX", "CX", "DX", "R10", "R11"]
+AsmRegName = Literal["AX", "CX", "DX", "DI", "SI", "R8", "R9", "R10", "R11"]
 AsmCondCode = Literal["E", "NE", "G", "GE", "L", "LE"]
 
 
@@ -134,6 +134,11 @@ class AsmAllocateStackNode(AsmASTNode):
     stack_size: int
 
 
+class AsmDeallocateStackNode(AsmASTNode):
+    node_type: Literal["AsmDeallocateStackNode"] = "AsmDeallocateStackNode"
+    stack_size: int
+
+
 class AsmJmpNode(AsmASTNode):
     node_type: Literal["AsmJmpNode"] = "AsmJmpNode"
     target: str
@@ -156,6 +161,16 @@ class AsmLabelNode(AsmASTNode):
     identifier: str
 
 
+class AsmPushNode(AsmASTNode):
+    node_type: Literal["AsmPushNode"] = "AsmPushNode"
+    target: AsmOperandNode
+
+
+class AsmCallNode(AsmASTNode):
+    node_type: Literal["AsmCallNode"] = "AsmCallNode"
+    identifier: str
+
+
 AsmInstructionNode = Union[
     AsmMovNode,
     AsmRetNode,
@@ -169,6 +184,9 @@ AsmInstructionNode = Union[
     AsmJmpCCNode,
     AsmSetCCNode,
     AsmLabelNode,
+    AsmDeallocateStackNode,
+    AsmPushNode,
+    AsmCallNode,
 ]
 
 
@@ -181,4 +199,4 @@ class AsmFunctionNode(AsmASTNode):
 
 class AsmProgramNode(AsmASTNode):
     node_type: Literal["AsmFunctionNode"] = "AsmFunctionNode"
-    function_definition: AsmFunctionNode
+    function_definitions: list[AsmFunctionNode]

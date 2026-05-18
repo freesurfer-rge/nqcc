@@ -392,9 +392,9 @@ class TestProgramFixup:
             stack_size=8,
         )
 
-        target = AsmProgramNode(start_position=0, function_definition=func)
+        target = AsmProgramNode(start_position=0, function_definitions=[func])
 
         fixup_program_instructions(target)
 
         # Just check that the expected increase has happened
-        assert len(target.function_definition.instructions) == 3
+        assert len(target.function_definitions[0].instructions) == 3
