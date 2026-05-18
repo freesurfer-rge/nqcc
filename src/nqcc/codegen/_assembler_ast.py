@@ -2,7 +2,7 @@ from typing import Literal, Union
 
 from pydantic import BaseModel, Field
 
-AsmRegName = Literal["AX", "CX", "DX", "R10", "R11"]
+AsmRegName = Literal["AX", "CX", "DX", "DI", "SI", "R8", "R9", "R10", "R11"]
 AsmCondCode = Literal["E", "NE", "G", "GE", "L", "LE"]
 
 
