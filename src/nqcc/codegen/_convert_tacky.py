@@ -33,6 +33,7 @@ from nqcc.tacky import (
     TackyRightShift,
     TackySubtract,
     TackyUnaryNode,
+    TackyFunctionCallNode,
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
@@ -63,6 +64,9 @@ from ._assembler_ast import (
     AsmOperandNode,
     AsmProgramNode,
     AsmPseudoRegisterNode,
+    AsmRegName,
+    AsmAllocateStackNode,
+    AsmPushNode,
     AsmRegisterNode,
     AsmRetNode,
     AsmRightShift,
@@ -96,6 +100,8 @@ _COND_CODE_MAP: dict[Type[TackyBinaryOperator], AsmCondCode] = {
     TackyLessThan: "L",
     TackyLessThanOrEqual: "LE",
 }
+
+_STACK_ALIGN = 16
 
 
 def convert_tacky_operand(tacky_value: TackyValue) -> AsmOperandNode:
@@ -262,6 +268,50 @@ def convert_tacky_instruction(tacky_instruction: TackyInstruction) -> list[AsmIn
             return [AsmMovNode(start_position=sp, src=copy_src, dst=copy_dst)]
         case _:
             raise ValueError(f"Unrecognised: {tacky_instruction}")
+
+
+def convert_tacky_function_call(tacky_call: TackyFunctionCallNode) -> list[AsmInstructionNode]:
+    # The registers we can use for arguments
+    arg_reg_names: list[AsmRegName] = ["DI", "SI", "DX", "CX", "R8", "R9"]
+
+    # The instructions to emit
+    asm_instructions: list[AsmInstructionNode] = []
+
+    # Split the arguments to be passed by register and by stack
+    reg_args = tacky_call.args[0 : len(arg_reg_names)]
+    stack_args = tacky_call.args[len(arg_reg_names) :]
+    assert len(reg_args) <= len(arg_reg_names)
+    assert len(reg_args) + len(stack_args) == len(tacky_call.args)
+
+    # The stack has to be 16-byte aligned, and we will pass everything
+    # as eight byte values (even though they'll only be four)
+    # So calculate the padding we'll need
+    stack_padding = 0
+    if len(stack_args) % 2 != 0:
+        stack_padding = _STACK_ALIGN // 2
+
+    if stack_padding != 0:
+        stack_align_instr = AsmAllocateStackNode(
+            start_position=tacky_call.start_position, stack_size=stack_padding
+        )
+        asm_instructions.append(stack_align_instr)
+
+    # Now see about passing args in registers
+    i_reg = 0
+    for t_a in reg_args:
+        r = arg_reg_names[i_reg]
+        a_arg = convert_tacky_operand(t_a)
+        reg_instr_0 = AsmMovNode(
+            start_position=tacky_call.start_position,
+            src=a_arg,
+            dst=AsmRegisterNode(start_position=tacky_call.start_position, value=r),
+        )
+        asm_instructions.append(reg_instr_0)
+
+    # And on the stack
+    raise NotImplementedError("TODO")
+
+    return asm_instructions
 
 
 def convert_tacky_function(tacky_function: TackyFunctionNode) -> AsmFunctionNode:
