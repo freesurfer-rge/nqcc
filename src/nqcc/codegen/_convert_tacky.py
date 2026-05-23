@@ -269,6 +269,8 @@ def convert_tacky_instruction(tacky_instruction: TackyInstruction) -> list[AsmIn
             copy_src = convert_tacky_operand(tacky_instruction.src)
             copy_dst = convert_tacky_operand(tacky_instruction.dst)
             return [AsmMovNode(start_position=sp, src=copy_src, dst=copy_dst)]
+        case TackyFunctionCallNode():
+            return convert_tacky_function_call(tacky_instruction)
         case _:
             raise ValueError(f"Unrecognised: {tacky_instruction}")
 
