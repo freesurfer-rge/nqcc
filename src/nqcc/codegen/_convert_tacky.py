@@ -103,6 +103,9 @@ _COND_CODE_MAP: dict[Type[TackyBinaryOperator], AsmCondCode] = {
     TackyLessThanOrEqual: "LE",
 }
 
+# The registers we can use for arguments
+_ARG_REG_NAMES: list[AsmRegName] = ["DI", "SI", "DX", "CX", "R8", "R9"]
+
 _STACK_ARG_SIZE = 8
 _STACK_ALIGN = 16
 
@@ -276,8 +279,7 @@ def convert_tacky_instruction(tacky_instruction: TackyInstruction) -> list[AsmIn
 
 
 def convert_tacky_function_call(tacky_call: TackyFunctionCallNode) -> list[AsmInstructionNode]:
-    # The registers we can use for arguments
-    arg_reg_names: list[AsmRegName] = ["DI", "SI", "DX", "CX", "R8", "R9"]
+    assert isinstance(tacky_call, TackyFunctionCallNode)
 
     # The instructions to emit
     asm_instructions: list[AsmInstructionNode] = []
@@ -286,9 +288,9 @@ def convert_tacky_function_call(tacky_call: TackyFunctionCallNode) -> list[AsmIn
     sp = tacky_call.start_position
 
     # Split the arguments to be passed by register and by stack
-    reg_args = tacky_call.args[0 : len(arg_reg_names)]
-    stack_args = tacky_call.args[len(arg_reg_names) :]
-    assert len(reg_args) <= len(arg_reg_names)
+    reg_args = tacky_call.args[0 : len(_ARG_REG_NAMES)]
+    stack_args = tacky_call.args[len(_ARG_REG_NAMES) :]
+    assert len(reg_args) <= len(_ARG_REG_NAMES)
     assert len(reg_args) + len(stack_args) == len(tacky_call.args)
 
     # The stack has to be 16-byte aligned, and we will pass everything
@@ -305,7 +307,7 @@ def convert_tacky_function_call(tacky_call: TackyFunctionCallNode) -> list[AsmIn
     # Now see about passing args in registers
     i_reg = 0
     for t_a in reg_args:
-        r = arg_reg_names[i_reg]
+        r = _ARG_REG_NAMES[i_reg]
         a_arg = convert_tacky_operand(t_a)
         reg_instr_0 = AsmMovNode(
             start_position=sp,
@@ -313,6 +315,7 @@ def convert_tacky_function_call(tacky_call: TackyFunctionCallNode) -> list[AsmIn
             dst=AsmRegisterNode(start_position=sp, value=r),
         )
         asm_instructions.append(reg_instr_0)
+        i_reg += 1
 
     # And on the stack
     for t_a in reversed(stack_args):
@@ -353,8 +356,29 @@ def convert_tacky_function_call(tacky_call: TackyFunctionCallNode) -> list[AsmIn
 
 def convert_tacky_function(tacky_function: TackyFunctionNode) -> AsmFunctionNode:
     assert isinstance(tacky_function, TackyFunctionNode)
+    sp = tacky_function.start_position
 
-    asm_instructions = []
+    asm_instructions: list[AsmInstructionNode] = []
+
+    reg_args = tacky_function.params[0 : len(_ARG_REG_NAMES)]
+    stack_args = tacky_function.params[len(_ARG_REG_NAMES) :]
+
+    # Fetch the register-passed args
+    i_reg = 0
+    for r_a in reg_args:
+        reg_name = _ARG_REG_NAMES[i_reg]
+        reg_arg_fetch_instr = AsmMovNode(
+            start_position=sp,
+            src=AsmRegisterNode(start_position=sp, value=reg_name),
+            dst=AsmPseudoRegisterNode(start_position=sp, identifier=r_a),
+        )
+        asm_instructions.append(reg_arg_fetch_instr)
+        i_reg += 1
+
+    # Fetch the stack-passed args
+    for s_a in stack_args:
+        raise NotImplementedError("stack args")
+
     for instr in tacky_function.instructions:
         asm = convert_tacky_instruction(instr)
         asm_instructions += asm
