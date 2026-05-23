@@ -75,7 +75,7 @@ from ._assembler_ast import (
     AsmSetCCNode,
     AsmSubtract,
     AsmUnaryNode,
-    AsmUnaryOperator,
+    AsmUnaryOperator,AsmStackNode
 )
 
 _UNARY_OPERATOR_MAP: dict[Type[TackyUnaryOperator], Type] = {
@@ -364,8 +364,7 @@ def convert_tacky_function(tacky_function: TackyFunctionNode) -> AsmFunctionNode
     stack_args = tacky_function.params[len(_ARG_REG_NAMES) :]
 
     # Fetch the register-passed args
-    i_reg = 0
-    for r_a in reg_args:
+    for i_reg, r_a in enumerate(reg_args):
         reg_name = _ARG_REG_NAMES[i_reg]
         reg_arg_fetch_instr = AsmMovNode(
             start_position=sp,
@@ -373,11 +372,20 @@ def convert_tacky_function(tacky_function: TackyFunctionNode) -> AsmFunctionNode
             dst=AsmPseudoRegisterNode(start_position=sp, identifier=r_a),
         )
         asm_instructions.append(reg_arg_fetch_instr)
-        i_reg += 1
 
     # Fetch the stack-passed args
-    for s_a in stack_args:
-        raise NotImplementedError("stack args")
+    for i_stack, s_a in enumerate(stack_args):
+        # To explain this calculation.... the return address
+        # is always at 8(%rbp), so the first stack argument will
+        # be 8 bytes past that (although it wll only be 4 bytes of
+        # those eight). Each stack argument is always eight bytes
+        stack_loc = _STACK_ARG_SIZE + ((i_stack+1) * _STACK_ARG_SIZE)
+        stack_arg_fetch_instr = AsmMovNode(
+            start_position=sp,
+            src=AsmStackNode(start_position=sp, offset=stack_loc),
+            dst=AsmPseudoRegisterNode(start_position=sp, identifier=s_a)
+        )
+        asm_instructions.push(stack_arg_fetch_instr)
 
     for instr in tacky_function.instructions:
         asm = convert_tacky_instruction(instr)
