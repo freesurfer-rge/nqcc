@@ -12,6 +12,7 @@ from nqcc.tacky import (
     TackyCopyNode,
     TackyDivide,
     TackyEqualTo,
+    TackyFunctionCallNode,
     TackyFunctionNode,
     TackyGreaterThan,
     TackyGreaterThanOrEqual,
@@ -33,7 +34,6 @@ from nqcc.tacky import (
     TackyRightShift,
     TackySubtract,
     TackyUnaryNode,
-    TackyFunctionCallNode,
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
@@ -41,14 +41,17 @@ from nqcc.tacky import (
 
 from ._assembler_ast import (
     AsmAdd,
+    AsmAllocateStackNode,
     AsmBinaryNode,
     AsmBinaryOperator,
     AsmBitwiseAnd,
     AsmBitwiseOr,
     AsmBitwiseXor,
+    AsmCallNode,
     AsmCdqNode,
     AsmCmpNode,
     AsmCondCode,
+    AsmDeallocateStackNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -64,10 +67,9 @@ from ._assembler_ast import (
     AsmOperandNode,
     AsmProgramNode,
     AsmPseudoRegisterNode,
-    AsmRegName,
-    AsmAllocateStackNode,
     AsmPushNode,
     AsmRegisterNode,
+    AsmRegName,
     AsmRetNode,
     AsmRightShift,
     AsmSetCCNode,
@@ -101,6 +103,7 @@ _COND_CODE_MAP: dict[Type[TackyBinaryOperator], AsmCondCode] = {
     TackyLessThanOrEqual: "LE",
 }
 
+_STACK_ARG_SIZE = 8
 _STACK_ALIGN = 16
 
 
@@ -277,6 +280,9 @@ def convert_tacky_function_call(tacky_call: TackyFunctionCallNode) -> list[AsmIn
     # The instructions to emit
     asm_instructions: list[AsmInstructionNode] = []
 
+    # The start_position
+    sp = tacky_call.start_position
+
     # Split the arguments to be passed by register and by stack
     reg_args = tacky_call.args[0 : len(arg_reg_names)]
     stack_args = tacky_call.args[len(arg_reg_names) :]
@@ -291,9 +297,7 @@ def convert_tacky_function_call(tacky_call: TackyFunctionCallNode) -> list[AsmIn
         stack_padding = _STACK_ALIGN // 2
 
     if stack_padding != 0:
-        stack_align_instr = AsmAllocateStackNode(
-            start_position=tacky_call.start_position, stack_size=stack_padding
-        )
+        stack_align_instr = AsmAllocateStackNode(start_position=sp, stack_size=stack_padding)
         asm_instructions.append(stack_align_instr)
 
     # Now see about passing args in registers
@@ -302,14 +306,45 @@ def convert_tacky_function_call(tacky_call: TackyFunctionCallNode) -> list[AsmIn
         r = arg_reg_names[i_reg]
         a_arg = convert_tacky_operand(t_a)
         reg_instr_0 = AsmMovNode(
-            start_position=tacky_call.start_position,
+            start_position=sp,
             src=a_arg,
-            dst=AsmRegisterNode(start_position=tacky_call.start_position, value=r),
+            dst=AsmRegisterNode(start_position=sp, value=r),
         )
         asm_instructions.append(reg_instr_0)
 
     # And on the stack
-    raise NotImplementedError("TODO")
+    for t_a in reversed(stack_args):
+        a_arg = convert_tacky_operand(t_a)
+        match a_arg:
+            case AsmImmediateIntNode():
+                stack_instr_0 = AsmPushNode(start_position=sp, target=a_arg)
+                asm_instructions.append(stack_instr_0)
+            case AsmPseudoRegisterNode():
+                stack_instr_1 = AsmMovNode(
+                    start_position=sp, src=a_arg, dst=AsmRegisterNode(start_position=sp, value="AX")
+                )
+                stack_instr_2 = AsmPushNode(start_position=sp, target=stack_instr_1.dst)
+                asm_instructions.append(stack_instr_1)
+                asm_instructions.append(stack_instr_2)
+            case _:
+                raise ValueError(f"Unexpected a_arg: {a_arg}")
+
+    # Emit the actual call
+    call_instr = AsmCallNode(start_position=sp, identifier=tacky_call.identifier)
+    asm_instructions.append(call_instr)
+
+    # Adjust stack pointer
+    bytes_to_remove = (_STACK_ARG_SIZE * len(stack_args)) + stack_padding
+    if bytes_to_remove != 0:
+        stack_free_instr = AsmDeallocateStackNode(start_position=sp, stack_size=bytes_to_remove)
+        asm_instructions.append(stack_free_instr)
+
+    # Store the function result
+    dst = convert_tacky_operand(tacky_call.dst)
+    ret_val_instr = AsmMovNode(
+        start_position=sp, src=AsmRegisterNode(start_position=sp, value="AX"), dst=dst
+    )
+    asm_instructions.append(ret_val_instr)
 
     return asm_instructions
 

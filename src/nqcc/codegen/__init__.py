@@ -37,7 +37,6 @@ from ._assembler_ast import (
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
-    AsmRegName,
 )
 from ._convert_tacky import (
     convert_tacky_binary_node,
@@ -88,12 +87,12 @@ __all__ = [
     "AsmMultiply",
     "AsmNeg",
     "AsmNot",
-    "AsmRegName",
     "AsmOperandNode",
     "AsmOperandNode",
     "AsmProgramNode",
     "AsmPseudoRegisterNode",
     "AsmPushNode",
+    "AsmRegName",
     "AsmRegName",
     "AsmRegisterNode",
     "AsmRetNode",
