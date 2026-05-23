@@ -73,9 +73,10 @@ from ._assembler_ast import (
     AsmRetNode,
     AsmRightShift,
     AsmSetCCNode,
+    AsmStackNode,
     AsmSubtract,
     AsmUnaryNode,
-    AsmUnaryOperator,AsmStackNode
+    AsmUnaryOperator,
 )
 
 _UNARY_OPERATOR_MAP: dict[Type[TackyUnaryOperator], Type] = {
@@ -379,13 +380,13 @@ def convert_tacky_function(tacky_function: TackyFunctionNode) -> AsmFunctionNode
         # is always at 8(%rbp), so the first stack argument will
         # be 8 bytes past that (although it wll only be 4 bytes of
         # those eight). Each stack argument is always eight bytes
-        stack_loc = _STACK_ARG_SIZE + ((i_stack+1) * _STACK_ARG_SIZE)
+        stack_loc = _STACK_ARG_SIZE + ((i_stack + 1) * _STACK_ARG_SIZE)
         stack_arg_fetch_instr = AsmMovNode(
             start_position=sp,
             src=AsmStackNode(start_position=sp, offset=stack_loc),
-            dst=AsmPseudoRegisterNode(start_position=sp, identifier=s_a)
+            dst=AsmPseudoRegisterNode(start_position=sp, identifier=s_a),
         )
-        asm_instructions.push(stack_arg_fetch_instr)
+        asm_instructions.append(stack_arg_fetch_instr)
 
     for instr in tacky_function.instructions:
         asm = convert_tacky_instruction(instr)
