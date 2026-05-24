@@ -22,7 +22,7 @@ from ._assembler_ast import (
     AsmRetNode,
     AsmSetCCNode,
     AsmStackNode,
-    AsmUnaryNode,
+    AsmUnaryNode,AsmDeallocateStackNode
 )
 
 FIRST_STACK_OFFSET = 0
@@ -86,7 +86,7 @@ class PseudoRegisterReplacer:
                 | AsmCallNode()
             ):
                 return
-            case AsmAllocateStackNode():
+            case AsmAllocateStackNode() | AsmDeallocateStackNode():
                 # Another possible place to log a warning
                 return
             case _:
