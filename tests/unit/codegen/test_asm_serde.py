@@ -45,3 +45,11 @@ class TestAsmSerde:
         int main(void) { return get_val(); }
         """
         self._check_from_source(source)
+
+    def test_nested_call(self):
+        source = """
+        int inc_cal(int v) { return v+1; }
+
+        int main(void) { return inc_val(inc_val(10)); }
+        """
+        self._check_from_source(source)
