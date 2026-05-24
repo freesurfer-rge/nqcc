@@ -37,3 +37,11 @@ class TestAsmSerde:
     def test_binary_ops(self):
         source = "  int main( void ) {return ~1 + 3 - 8/4;}"
         self._check_from_source(source)
+
+    def test_simple_call(self):
+        source = """
+        int get_val(void) { return 2;}
+
+        int main(void) { return get_val(); }
+        """
+        self._check_from_source(source)

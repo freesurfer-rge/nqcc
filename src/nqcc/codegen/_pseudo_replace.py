@@ -3,6 +3,7 @@ from typing import get_args
 from ._assembler_ast import (
     AsmAllocateStackNode,
     AsmBinaryNode,
+    AsmCallNode,
     AsmCdqNode,
     AsmCmpNode,
     AsmFunctionNode,
@@ -76,7 +77,14 @@ class PseudoRegisterReplacer:
                 asm_instr.src = self.get_updated_operand(asm_instr.src)
             case AsmPushNode():
                 asm_instr.target = self.get_updated_operand(asm_instr.target)
-            case AsmRetNode() | AsmCdqNode() | AsmJmpCCNode() | AsmJmpNode() | AsmLabelNode():
+            case (
+                AsmRetNode()
+                | AsmCdqNode()
+                | AsmJmpCCNode()
+                | AsmJmpNode()
+                | AsmLabelNode()
+                | AsmCallNode()
+            ):
                 return
             case AsmAllocateStackNode():
                 # Another possible place to log a warning
