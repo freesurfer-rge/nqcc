@@ -20,7 +20,7 @@ from ._assembler_ast import (
     AsmRetNode,
     AsmSetCCNode,
     AsmStackNode,
-    AsmUnaryNode,
+    AsmUnaryNode,AsmPushNode
 )
 
 FIRST_STACK_OFFSET = 0
@@ -73,6 +73,8 @@ class PseudoRegisterReplacer:
                 asm_instr.dst = self.get_updated_operand(asm_instr.dst)
             case AsmSetCCNode():
                 asm_instr.src = self.get_updated_operand(asm_instr.src)
+            case AsmPushNode():
+                asm_instr.target = self.get_updated_operand(asm_instr.target)
             case AsmRetNode() | AsmCdqNode() | AsmJmpCCNode() | AsmJmpNode() | AsmLabelNode():
                 return
             case AsmAllocateStackNode():
