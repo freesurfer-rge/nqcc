@@ -30,3 +30,10 @@ class TestChapter09:
 
         macros = []
         compile_run_check(target_file, macros=macros)
+
+    def test_check_memory_leaks(self):
+        target_file = SAMPLE_PROGRAM_DIR / TestChapter09.SUB_DIR / "check_memory_leaks.c"
+        assert target_file.exists(), f"{target_file} not found"
+
+        macros = []
+        compile_run_check(target_file, macros=macros)

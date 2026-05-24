@@ -175,7 +175,9 @@ def get_instruction_assembler(instr_node: AsmInstructionNode, symbol_table: Symb
                 opcode += "@PLT"
             return opcode
         case AsmPushNode():
-            target_code = get_operand_assembler(instr_node.target, "4B")
+            # We always push onto the stack as the 8-byte register, even though
+            # everything only uses four bytes (so long as we're int-only)
+            target_code = get_operand_assembler(instr_node.target, "8B")
             return f"pushq {target_code}"
         case _:
             raise ValueError(f"Unrecognised: {instr_node}")
