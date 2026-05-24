@@ -37,3 +37,11 @@ class TestChapter09:
 
         macros = []
         compile_run_check(target_file, macros=macros)
+
+    @pytest.mark.parametrize("v0", [0, 1, 2, 5, 8])
+    def test_fib(self, v0: int):
+        target_file = SAMPLE_PROGRAM_DIR / TestChapter09.SUB_DIR / "fib.c"
+        assert target_file.exists(), f"{target_file} not found"
+
+        macros = [f"V0={v0}"]
+        compile_run_check(target_file, macros=macros)
