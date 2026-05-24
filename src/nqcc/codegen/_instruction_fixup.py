@@ -19,6 +19,7 @@ from ._assembler_ast import (
     AsmStackNode,
     AsmSubtract,
 )
+from ._convert_tacky import _STACK_ALIGN
 
 
 def apply_mov_fixup(instr: AsmMovNode) -> list[AsmInstructionNode]:
@@ -118,6 +119,11 @@ def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
             raise ValueError(f"Unrecognised: {instr}")
 
 
+def round_to_multiple(n: int, m: int) -> int:
+    # From https://gist.github.com/OR13/20bc2044e01d512a51d0
+    return ((n + m - 1) // m) * m
+
+
 def fixup_function_instructions(asm_func: AsmFunctionNode):
     assert isinstance(asm_func, AsmFunctionNode)
 
@@ -125,8 +131,10 @@ def fixup_function_instructions(asm_func: AsmFunctionNode):
 
     # First deal with stack allocation
     if asm_func.stack_size > 0:
+        # Need to round up stack to _STACK_ALIGN
+        aligned_stack_size = round_to_multiple(asm_func.stack_size, _STACK_ALIGN)
         stack_instr = AsmAllocateStackNode(
-            start_position=asm_func.start_position, stack_size=asm_func.stack_size
+            start_position=asm_func.start_position, stack_size=aligned_stack_size
         )
         fixed_instructions.append(stack_instr)
 

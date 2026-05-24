@@ -16,11 +16,12 @@ from ._assembler_ast import (
     AsmOperandNode,
     AsmProgramNode,
     AsmPseudoRegisterNode,
+    AsmPushNode,
     AsmRegisterNode,
     AsmRetNode,
     AsmSetCCNode,
     AsmStackNode,
-    AsmUnaryNode,AsmPushNode
+    AsmUnaryNode,
 )
 
 FIRST_STACK_OFFSET = 0
