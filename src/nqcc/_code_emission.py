@@ -22,7 +22,7 @@ from nqcc.codegen import (
     AsmMovNode,
     AsmMultiply,
     AsmNeg,
-    AsmNot,
+    AsmNot,AsmCallNode,AsmPushNode, AsmDeallocateStackNode,
     AsmOperandNode,
     AsmProgramNode,
     AsmRegisterNode,
@@ -116,7 +116,7 @@ def get_binary_opcode(binary_operator: AsmBinaryOperator) -> str:
             raise ValueError(f"Unrecognised: {binary_operator}")
 
 
-def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:  # noqa: C901
+def get_instruction_assembler(instr_node: AsmInstructionNode, symbol_table: SymbolTable) -> str:  # noqa: C901
     match instr_node:
         case AsmAllocateStackNode():
             opcode = "subq".ljust(_OPCODE_FIELD_WIDTH)
@@ -161,6 +161,11 @@ def get_instruction_assembler(instr_node: AsmInstructionNode) -> str:  # noqa: C
         case AsmJmpCCNode():
             opcode = f"j{instr_node.cond_code.lower()}".ljust(_OPCODE_FIELD_WIDTH)
             return f"{opcode} .L{instr_node.target}"
+        case AsmCallNode():
+            opcode = f"call {instr_node.identifier}"
+            if instr_node.identifier not in symbol_table.symbol_table:
+                opcode += "@PLT"
+            return opcode
         case _:
             raise ValueError(f"Unrecognised: {instr_node}")
 
@@ -185,7 +190,7 @@ def stack_teardown() -> list[str]:
     return [c0, i0, i1, c1]
 
 
-def get_function_assembler(func_node: AsmFunctionNode) -> list[str]:
+def get_function_assembler(func_node: AsmFunctionNode, symbol_table: SymbolTable) -> list[str]:
     result = []
     result.append(f"# Starting {func_node.identifier} ".ljust(_SEP_WIDTH, _SEP_CHAR))
     result.append(f"{_INSTRUCTION_INDENT}.globl {func_node.identifier}")
@@ -194,7 +199,7 @@ def get_function_assembler(func_node: AsmFunctionNode) -> list[str]:
     result += stack_setup()
 
     for instr in func_node.instructions:
-        nxt = get_instruction_assembler(instr)
+        nxt = get_instruction_assembler(instr, symbol_table)
         if nxt == "ret":
             # This could get troublesome if 'ret' isn't the last thing
             result += stack_teardown()
@@ -206,10 +211,10 @@ def get_function_assembler(func_node: AsmFunctionNode) -> list[str]:
     return result
 
 
-def get_program_assembler(prog_node: AsmProgramNode) -> list[str]:
-    assert len(prog_node.function_definitions) == 1
+def get_program_assembler(prog_node: AsmProgramNode, symbol_table: SymbolTable) -> list[str]:
     result = []
-    result += get_function_assembler(prog_node.function_definitions[0])
+    for func in prog_node.function_definitions:
+        result += get_function_assembler(func, symbol_table)
     result.append('.section .note.GNU-stack, "",@progbits')
     return result
 
@@ -219,7 +224,7 @@ def emit_assembler(
 ) -> pathlib.Path:
     assert working_dir.exists(), f"Unable to find working directory {working_dir}"
 
-    asm_lines = get_program_assembler(asm_ast)
+    asm_lines = get_program_assembler(asm_ast, symbol_table)
 
     output_file = file_stem + ASSEMBLY_EXTENSION
     output_path = working_dir / output_file
