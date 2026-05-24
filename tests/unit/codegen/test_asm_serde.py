@@ -50,6 +50,6 @@ class TestAsmSerde:
         source = """
         int inc_cal(int v) { return v+1; }
 
-        int main(void) { return inc_val(inc_val(10)); }
+        int main(void) { int a = 10; return inc_val(inc_val(a)); }
         """
         self._check_from_source(source)

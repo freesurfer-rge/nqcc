@@ -22,7 +22,8 @@ from ._assembler_ast import (
     AsmRetNode,
     AsmSetCCNode,
     AsmStackNode,
-    AsmUnaryNode,AsmDeallocateStackNode
+    AsmUnaryNode,
+    AsmDeallocateStackNode,
 )
 
 FIRST_STACK_OFFSET = 0

@@ -155,3 +155,33 @@ class TestPrograms:
 
         i3 = asm_func.instructions[3]
         assert i3 == AsmRetNode(start_position=19)
+
+    def test_simple_function_call(self):
+        # This is little more than a smoke test
+        source = """
+        int get_val(void) { return 2;}
+
+        int main(void) { return get_val(); }
+        """
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_program(token_tape)
+
+        tg = TackyGenerator()
+        tacky_program = tg.emit_program(src_node)
+
+        asm_prog = convert_tacky_program(tacky_program)
+        assert isinstance(asm_prog, AsmProgramNode)
+        assert asm_prog.start_position == 0
+
+        assert len(asm_prog.function_definitions) == 2
+
+        f0 = asm_prog.function_definitions[0]
+        assert isinstance(f0, AsmFunctionNode)
+        assert f0.identifier == "get_val"
+        # Guard, addition and return
+        assert len(f0.instructions) == 2 + 2
+
+        f1 = asm_prog.function_definitions[1]
+        assert isinstance(f1, AsmFunctionNode)
+        assert f1.identifier == "main"
+        assert len(f1.instructions) == 2 + 4
