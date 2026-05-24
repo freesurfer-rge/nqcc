@@ -15,7 +15,7 @@ SEMANTIC_ANALYSIS_SYMBOL_FILE = "semantic-analysis.symbols"
 
 def semantic_analysis_driver(
     source_program: SourceProgramNode, *, working_dir: pathlib.Path
-) -> SourceProgramNode:
+) -> tuple[SourceProgramNode, SymbolTable]:
     assert working_dir.exists(), f"Unable to find working directory {working_dir}"
 
     # Resolve variables
@@ -40,4 +40,4 @@ def semantic_analysis_driver(
     with open(output_path, "w") as of:
         of.write(st.model_dump_json(indent=4))
 
-    return resolved_program
+    return resolved_program, st

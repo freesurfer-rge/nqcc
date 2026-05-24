@@ -116,7 +116,7 @@ def main(
         return
 
     _logger.info("Running semantic analysis")
-    src_ast = semantic_analysis_driver(src_ast, working_dir=working_dir)
+    src_ast, symbol_table = semantic_analysis_driver(src_ast, working_dir=working_dir)
 
     if exit_after_semantic_analysis:
         _logger.info("Exiting after semantic analysis")
