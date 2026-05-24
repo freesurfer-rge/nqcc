@@ -28,7 +28,7 @@ class AsmPseudoRegisterNode(AsmASTNode):
 
 class AsmStackNode(AsmASTNode):
     node_type: Literal["AsmStackNode"] = "AsmStackNode"
-    offset: int = Field(le=0)
+    offset: int
 
 
 AsmOperandNode = Union[AsmImmediateIntNode, AsmRegisterNode, AsmPseudoRegisterNode, AsmStackNode]
@@ -194,7 +194,7 @@ class AsmFunctionNode(AsmASTNode):
     node_type: Literal["AsmFunctionNode"] = "AsmFunctionNode"
     identifier: str
     instructions: list[AsmInstructionNode]
-    stack_size: int = Field(default=0)
+    stack_size: int = Field(ge=0, default=0)
 
 
 class AsmProgramNode(AsmASTNode):
