@@ -293,7 +293,7 @@ class TestFunctionFixup:
 
         assert len(target.instructions) == 3
         i0 = target.instructions[0]
-        assert i0 == AsmAllocateStackNode(start_position=0, stack_size=8)
+        assert i0 == AsmAllocateStackNode(start_position=0, stack_size=16)
 
         reg = AsmRegisterNode(start_position=1, value="R10")
         i1 = target.instructions[1]
@@ -315,7 +315,7 @@ class TestFunctionFixup:
 
         assert len(target.instructions) == 3
         i0 = target.instructions[0]
-        assert i0 == AsmAllocateStackNode(start_position=0, stack_size=8)
+        assert i0 == AsmAllocateStackNode(start_position=0, stack_size=16)
 
         reg = AsmRegisterNode(start_position=1, value="R10")
         i1 = target.instructions[1]
@@ -339,7 +339,7 @@ class TestFunctionFixup:
 
         assert len(target.instructions) == 3
         i0 = target.instructions[0]
-        assert i0 == AsmAllocateStackNode(start_position=0, stack_size=8)
+        assert i0 == AsmAllocateStackNode(start_position=0, stack_size=16)
 
         reg = AsmRegisterNode(start_position=1, value="R10")
         i1 = target.instructions[1]
@@ -366,7 +366,7 @@ class TestFunctionFixup:
 
         assert len(target.instructions) == 4
         i0 = target.instructions[0]
-        assert i0 == AsmAllocateStackNode(start_position=0, stack_size=8)
+        assert i0 == AsmAllocateStackNode(start_position=0, stack_size=16)
 
         reg = AsmRegisterNode(start_position=1, value="R11")
         i1 = target.instructions[1]

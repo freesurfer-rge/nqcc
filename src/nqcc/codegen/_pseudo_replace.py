@@ -3,8 +3,10 @@ from typing import get_args
 from ._assembler_ast import (
     AsmAllocateStackNode,
     AsmBinaryNode,
+    AsmCallNode,
     AsmCdqNode,
     AsmCmpNode,
+    AsmDeallocateStackNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -16,6 +18,7 @@ from ._assembler_ast import (
     AsmOperandNode,
     AsmProgramNode,
     AsmPseudoRegisterNode,
+    AsmPushNode,
     AsmRegisterNode,
     AsmRetNode,
     AsmSetCCNode,
@@ -73,9 +76,18 @@ class PseudoRegisterReplacer:
                 asm_instr.dst = self.get_updated_operand(asm_instr.dst)
             case AsmSetCCNode():
                 asm_instr.src = self.get_updated_operand(asm_instr.src)
-            case AsmRetNode() | AsmCdqNode() | AsmJmpCCNode() | AsmJmpNode() | AsmLabelNode():
+            case AsmPushNode():
+                asm_instr.target = self.get_updated_operand(asm_instr.target)
+            case (
+                AsmRetNode()
+                | AsmCdqNode()
+                | AsmJmpCCNode()
+                | AsmJmpNode()
+                | AsmLabelNode()
+                | AsmCallNode()
+            ):
                 return
-            case AsmAllocateStackNode():
+            case AsmAllocateStackNode() | AsmDeallocateStackNode():
                 # Another possible place to log a warning
                 return
             case _:

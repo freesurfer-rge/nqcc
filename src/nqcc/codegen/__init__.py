@@ -93,6 +93,7 @@ __all__ = [
     "AsmPseudoRegisterNode",
     "AsmPushNode",
     "AsmRegName",
+    "AsmRegName",
     "AsmRegisterNode",
     "AsmRetNode",
     "AsmRightShift",

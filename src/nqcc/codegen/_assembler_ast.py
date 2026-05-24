@@ -28,7 +28,7 @@ class AsmPseudoRegisterNode(AsmASTNode):
 
 class AsmStackNode(AsmASTNode):
     node_type: Literal["AsmStackNode"] = "AsmStackNode"
-    offset: int = Field(le=0)
+    offset: int
 
 
 AsmOperandNode = Union[AsmImmediateIntNode, AsmRegisterNode, AsmPseudoRegisterNode, AsmStackNode]
