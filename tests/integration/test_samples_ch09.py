@@ -1,0 +1,47 @@
+import pytest
+
+from .utils import SAMPLE_PROGRAM_DIR, compile_run_check
+
+
+class TestChapter09:
+    SUB_DIR = "ch09"
+
+    @pytest.mark.parametrize("v0", [1, 5, 15])
+    def test_simple_call(self, v0: int):
+        target_file = SAMPLE_PROGRAM_DIR / TestChapter09.SUB_DIR / "simple_call.c"
+        assert target_file.exists(), f"{target_file} not found"
+
+        macros = [f"V0={v0}"]
+        compile_run_check(target_file, macros=macros)
+
+    @pytest.mark.parametrize("v0", [1, 5, 15])
+    @pytest.mark.parametrize("v1", [2, 3, 4])
+    @pytest.mark.parametrize("v2", [7, 9, 16])
+    def test_simple_call_with_arg(self, v0: int, v1: int, v2: int):
+        target_file = SAMPLE_PROGRAM_DIR / TestChapter09.SUB_DIR / "simple_call_with_arg.c"
+        assert target_file.exists(), f"{target_file} not found"
+
+        macros = [f"V0={v0}", f"V1={v1}", f"V2={v2}"]
+        compile_run_check(target_file, macros=macros)
+
+    def test_hello_world(self):
+        target_file = SAMPLE_PROGRAM_DIR / TestChapter09.SUB_DIR / "hello_world.c"
+        assert target_file.exists(), f"{target_file} not found"
+
+        macros = []
+        compile_run_check(target_file, macros=macros)
+
+    def test_check_memory_leaks(self):
+        target_file = SAMPLE_PROGRAM_DIR / TestChapter09.SUB_DIR / "check_memory_leaks.c"
+        assert target_file.exists(), f"{target_file} not found"
+
+        macros = []
+        compile_run_check(target_file, macros=macros)
+
+    @pytest.mark.parametrize("v0", [0, 1, 2, 5, 8])
+    def test_fib(self, v0: int):
+        target_file = SAMPLE_PROGRAM_DIR / TestChapter09.SUB_DIR / "fib.c"
+        assert target_file.exists(), f"{target_file} not found"
+
+        macros = [f"V0={v0}"]
+        compile_run_check(target_file, macros=macros)
