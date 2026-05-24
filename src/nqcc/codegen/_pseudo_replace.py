@@ -6,6 +6,7 @@ from ._assembler_ast import (
     AsmCallNode,
     AsmCdqNode,
     AsmCmpNode,
+    AsmDeallocateStackNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -23,7 +24,6 @@ from ._assembler_ast import (
     AsmSetCCNode,
     AsmStackNode,
     AsmUnaryNode,
-    AsmDeallocateStackNode,
 )
 
 FIRST_STACK_OFFSET = 0
