@@ -9,8 +9,10 @@ from nqcc.codegen import (
     AsmBitwiseAnd,
     AsmBitwiseOr,
     AsmBitwiseXor,
+    AsmCallNode,
     AsmCdqNode,
     AsmCmpNode,
+    AsmDeallocateStackNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -22,9 +24,10 @@ from nqcc.codegen import (
     AsmMovNode,
     AsmMultiply,
     AsmNeg,
-    AsmNot,AsmCallNode,AsmPushNode, AsmDeallocateStackNode,
+    AsmNot,
     AsmOperandNode,
     AsmProgramNode,
+    AsmPushNode,
     AsmRegisterNode,
     AsmRegName,
     AsmRetNode,
@@ -123,6 +126,11 @@ def get_instruction_assembler(instr_node: AsmInstructionNode, symbol_table: Symb
             src = f"${instr_node.stack_size}"
             dst = r"%rsp"
             return f"{opcode} {src}, {dst} # Allocate stack"
+        case AsmDeallocateStackNode():
+            opcode = "addq".ljust(_OPCODE_FIELD_WIDTH)
+            src = f"${instr_node.stack_size}"
+            dst = r"%rsp"
+            return f"{opcode} {src}, {dst} # Deallocate stack"
         case AsmMovNode():
             opcode = "movl".ljust(_OPCODE_FIELD_WIDTH)
             src = get_operand_assembler(instr_node.src, "4B")
@@ -166,6 +174,9 @@ def get_instruction_assembler(instr_node: AsmInstructionNode, symbol_table: Symb
             if instr_node.identifier not in symbol_table.symbol_table:
                 opcode += "@PLT"
             return opcode
+        case AsmPushNode():
+            target_code = get_operand_assembler(instr_node.target, "4B")
+            return f"pushq {target_code}"
         case _:
             raise ValueError(f"Unrecognised: {instr_node}")
 
