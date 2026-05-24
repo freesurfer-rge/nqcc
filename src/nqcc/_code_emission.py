@@ -35,6 +35,7 @@ from nqcc.codegen import (
     AsmUnaryNode,
     AsmUnaryOperator,
 )
+from nqcc.semantic_analysis import SymbolTable
 
 ASSEMBLY_EXTENSION = ".s"
 
@@ -214,7 +215,7 @@ def get_program_assembler(prog_node: AsmProgramNode) -> list[str]:
 
 
 def emit_assembler(
-    asm_ast: AsmProgramNode, *, working_dir: pathlib.Path, file_stem: str
+    asm_ast: AsmProgramNode, symbol_table: SymbolTable, *, working_dir: pathlib.Path, file_stem: str
 ) -> pathlib.Path:
     assert working_dir.exists(), f"Unable to find working directory {working_dir}"
 
