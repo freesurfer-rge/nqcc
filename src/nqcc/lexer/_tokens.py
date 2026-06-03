@@ -44,7 +44,7 @@ class ConstantIntegerToken(Token):
         return "[0-9]+\\b"
 
 
-_KEYWORDS = {"int", "return", "void", "if", "else", "do", "while", "for", "break", "continue"}
+_KEYWORDS = {"int", "return", "void", "if", "else", "do", "while", "for", "break", "continue", "extern", "static"}
 
 
 class KeywordToken(Token):
