@@ -45,18 +45,18 @@ class ConstantIntegerToken(Token):
 
 
 _KEYWORDS = {
-    "int",
-    "return",
-    "void",
-    "if",
-    "else",
-    "do",
-    "while",
-    "for",
     "break",
     "continue",
+    "do",
+    "else",
     "extern",
+    "for",
+    "if",
+    "int",
+    "return",
     "static",
+    "void",
+    "while",
 }
 
 
