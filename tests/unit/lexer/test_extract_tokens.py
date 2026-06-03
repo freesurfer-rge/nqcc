@@ -39,7 +39,7 @@ from nqcc.lexer import (
 
 
 class TestExtractTokens:
-    @pytest.mark.parametrize("target", ["int", "void", "return"])
+    @pytest.mark.parametrize("target", ["int", "return", "void", "if", "else", "do", "while", "for", "break", "continue", "extern", "static"])
     @pytest.mark.parametrize("idx", [0, 10])
     def test_keywords(self, target: str, idx: int):
         toks = extract_tokens(target, idx)
