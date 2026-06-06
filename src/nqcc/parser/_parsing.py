@@ -499,9 +499,9 @@ def parse_function(token_tape: TokenTape) -> SourceFunctionDeclarationNode:
 
 
 def parse_program(token_tape: TokenTape) -> SourceProgramNode:
-    funcs = []
+    decls = []
     while token_tape.tokens_remaining > 0:
-        f = parse_function(token_tape)
-        funcs.append(f)
+        nxt_decl = parse_declaration(token_tape)
+        decls.append(nxt_decl)
 
-    return SourceProgramNode(start_position=0, declarations=funcs)
+    return SourceProgramNode(start_position=0, declarations=decls)
