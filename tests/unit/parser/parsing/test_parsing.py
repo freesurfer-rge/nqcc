@@ -11,6 +11,7 @@ from nqcc.parser import (
     SourceFunctionDeclarationNode,
     SourceProgramNode,
     SourceReturnNode,
+    SourceStorageType,
     SourceVariableDeclarationNode,
     SourceVarNode,
     TokenTape,
@@ -86,9 +87,9 @@ class TestSourceVariableDeclarationNode:
 
         assert isinstance(node, SourceVariableDeclarationNode)
         assert node.start_position == 0
-        assert node.identifier == SourceVarNode(start_position=4, identifier="a")
-        assert node.initial == SourceConstantIntNode(start_position=6, value=1)
-        assert node.storage_class == "Static"
+        assert node.identifier == SourceVarNode(start_position=11, identifier="a")
+        assert node.initial == SourceConstantIntNode(start_position=15, value=3)
+        assert node.storage_class == SourceStorageType(storage_type="Static")
 
     def test_expressions_initial(self):
         cdecl_str = "int a=1+2;"
