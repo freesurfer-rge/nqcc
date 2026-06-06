@@ -96,6 +96,7 @@ class IdentifierResolver:
             identifier=decl.identifier,
             params=new_params,
             body=new_body,
+            storage_class=decl.storage_class,
         )
 
     def resolve_variable_declaration(
@@ -119,7 +120,10 @@ class IdentifierResolver:
             start_position=decl.identifier.start_position, identifier=unique_name
         )
         return SourceVariableDeclarationNode(
-            start_position=decl.start_position, identifier=nxt_var, initial=nxt_init
+            start_position=decl.start_position,
+            identifier=nxt_var,
+            initial=nxt_init,
+            storage_class=decl.storage_class,
         )
 
     def resolve_function_params(
@@ -305,10 +309,10 @@ class IdentifierResolver:
 def resolve_program(prog: SourceProgramNode) -> SourceProgramNode:
     resolver = IdentifierResolver()
     identifier_map: dict[str, IdentifierInfo] = {}
-    updated_funcs = []
-    for f in prog.functions:
+    updated_funcs: list[SourceDeclarationNode] = []
+    for f in prog.declarations:
         updated = resolver.resolve_declaration(f, identifier_map)
         assert isinstance(updated, SourceFunctionDeclarationNode)
         updated_funcs.append(updated)
-    result = SourceProgramNode(start_position=prog.start_position, functions=updated_funcs)
+    result = SourceProgramNode(start_position=prog.start_position, declarations=updated_funcs)
     return result

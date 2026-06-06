@@ -61,6 +61,7 @@ class TestStatements:
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
+            storage_class=None,
         )
         _ = target.resolve_declaration(decl_a, identifier_map)
 
@@ -85,6 +86,7 @@ class TestStatements:
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
+            storage_class=None,
         )
         _ = target.resolve_declaration(decl_a, identifier_map)
 
@@ -119,12 +121,14 @@ class TestConditionals:
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
+            storage_class=None,
         )
         _ = target.resolve_declaration(decl_a, identifier_map)
         decl_b = SourceVariableDeclarationNode(
             start_position=11,
             identifier=SourceVarNode(start_position=12, identifier="b"),
             initial=None,
+            storage_class=None,
         )
         _ = target.resolve_declaration(decl_b, identifier_map)
 
@@ -158,6 +162,7 @@ class TestLoops:
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
+            storage_class=None,
         )
         _ = target.resolve_declaration(decl_a, identifier_map)
 
@@ -191,6 +196,7 @@ class TestLoops:
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
+            storage_class=None,
         )
         _ = target.resolve_declaration(decl_a, identifier_map)
 
@@ -224,6 +230,7 @@ class TestLoops:
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
+            storage_class=None,
         )
         _ = target.resolve_declaration(decl_a, identifier_map)
 
@@ -232,6 +239,7 @@ class TestLoops:
             start_position=13,
             identifier=SourceVarNode(start_position=14, identifier="b"),
             initial=None,
+            storage_class=None,
         )
         _ = target.resolve_declaration(decl_b, identifier_map)
 
@@ -277,6 +285,7 @@ class TestLoops:
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
+            storage_class=None,
         )
         _ = target.resolve_declaration(decl_a, identifier_map)
 
@@ -285,6 +294,7 @@ class TestLoops:
             start_position=13,
             identifier=SourceVarNode(start_position=14, identifier="b"),
             initial=None,
+            storage_class=None,
         )
         _ = target.resolve_declaration(decl_b, identifier_map)
 

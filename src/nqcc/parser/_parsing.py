@@ -85,6 +85,7 @@ from ._source_ast import (
     SourceReturnNode,
     SourceRightShift,
     SourceStatementNode,
+    SourceStorageType,
     SourceSubtract,
     SourceTernary,
     SourceTernaryExpressonNode,
@@ -258,9 +259,10 @@ def parse_optional_expression(
         _ = token_tape.expect(end_token)
         return None
     elif isinstance(first_token, KeywordToken):
-        assert first_token.value == "int", f"Was expecting int counter: {first_token}"
         parsed_decl = parse_declaration(token_tape)
-        assert not isinstance(parsed_decl, SourceFunctionDeclarationNode)
+        assert isinstance(parsed_decl, SourceVariableDeclarationNode)
+        if parsed_decl.storage_class is not None:
+            raise ValueError(f"Storage not allowed in for loop initialiser. {first_token}")
         # Decl will consume the ending token
         result = parsed_decl
     else:
@@ -405,9 +407,41 @@ def parse_block(token_tape: TokenTape) -> SourceBlockNode:
     return SourceBlockNode(start_position=opening_token.start_position, items=items)
 
 
+def parse_type_and_storage_class(token_tape: TokenTape) -> tuple[str, SourceStorageType | None]:
+    parsed_types = []
+    parsed_storage_classes = []
+
+    # Work through until we get to the identifier
+    while not isinstance(token_tape.peek(), IdentifierToken):
+        nxt_token = token_tape.expect(KeywordToken)
+
+        if nxt_token.value == "int":
+            parsed_types.append(nxt_token.value)
+        elif nxt_token.value in ["extern", "static"]:
+            parsed_storage_classes.append(nxt_token.value)
+        else:
+            raise ValueError(f"Unexpected: {nxt_token}")
+
+    if len(parsed_types) != 1:
+        raise ValueError(f"Bad types: {parsed_types}")
+    if len(parsed_storage_classes) > 1:
+        raise ValueError(f"Bad storage classes: {parsed_storage_classes}")
+
+    final_type = parsed_types[0]
+    final_storage: SourceStorageType | None = None
+    if len(parsed_storage_classes) == 1:
+        match parsed_storage_classes[0]:
+            case "static":
+                final_storage = SourceStorageType(storage_type="Static")
+            case "extern":
+                final_storage = SourceStorageType(storage_type="Extern")
+
+    return final_type, final_storage
+
+
 def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:
-    type_token = token_tape.expect(KeywordToken)
-    assert type_token.value == "int", "Can only handle int declarations!"
+    decl_start_token = token_tape.peek()
+    _, decl_storage = parse_type_and_storage_class(token_tape)
 
     name_token = token_tape.expect(IdentifierToken)
     assert isinstance(name_token, IdentifierToken), "Expected identifier!"
@@ -424,10 +458,11 @@ def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:
             body_block = None
 
         result = SourceFunctionDeclarationNode(
-            start_position=type_token.start_position,
+            start_position=decl_start_token.start_position,
             identifier=name_token.value,
             params=params,
             body=body_block,
+            storage_class=decl_storage,
         )
     else:
         # We have a variable declaration
@@ -440,7 +475,10 @@ def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:
         _ = token_tape.expect(SemicolonToken)
 
         result = SourceVariableDeclarationNode(
-            start_position=type_token.start_position, identifier=var, initial=initialiser
+            start_position=decl_start_token.start_position,
+            identifier=var,
+            initial=initialiser,
+            storage_class=decl_storage,
         )
 
     return result
@@ -450,7 +488,7 @@ def parse_block_item(token_tape: TokenTape) -> SourceBlockItemNode:
     peeked = token_tape.peek()
 
     # Only support 'int' declarations right now
-    if isinstance(peeked, KeywordToken) and peeked.value == "int":
+    if isinstance(peeked, KeywordToken) and peeked.value in ["int", "extern", "static"]:
         return parse_declaration(token_tape)
 
     return parse_statement(token_tape)
@@ -495,9 +533,9 @@ def parse_function(token_tape: TokenTape) -> SourceFunctionDeclarationNode:
 
 
 def parse_program(token_tape: TokenTape) -> SourceProgramNode:
-    funcs = []
+    decls = []
     while token_tape.tokens_remaining > 0:
-        f = parse_function(token_tape)
-        funcs.append(f)
+        nxt_decl = parse_declaration(token_tape)
+        decls.append(nxt_decl)
 
-    return SourceProgramNode(start_position=0, functions=funcs)
+    return SourceProgramNode(start_position=0, declarations=decls)

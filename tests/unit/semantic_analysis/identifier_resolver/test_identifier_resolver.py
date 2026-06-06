@@ -236,7 +236,8 @@ class TestProgram:
 
         updated = resolve_program(prog)
 
-        updated_func = updated.functions[0]
+        updated_func = updated.declarations[0]
+        assert isinstance(updated_func, SourceFunctionDeclarationNode)
         assert updated_func.identifier == "main"
         assert updated_func.body is not None
         assert len(updated_func.body.items) == 2
@@ -264,7 +265,7 @@ class TestProgram:
         updated = resolve_program(prog)
 
         # Not much, but at least it's something...
-        assert len(updated.functions) == 2
+        assert len(updated.declarations) == 2
 
     def test_func_with_defn(self) -> None:
         c_str = """
@@ -283,4 +284,4 @@ class TestProgram:
         updated = resolve_program(prog)
 
         # Not much, but at least it's something...
-        assert len(updated.functions) == 2
+        assert len(updated.declarations) == 2

@@ -29,6 +29,7 @@ class TestExpressions:
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
+            storage_class=None,
         )
         _ = target.resolve_declaration(decl_a, identifier_map)
 
@@ -85,6 +86,7 @@ class TestExpressions:
                 start_position=ord(decl_var),
                 identifier=SourceVarNode(start_position=ord(decl_var) + 32, identifier=decl_var),
                 initial=None,
+                storage_class=None,
             )
             _ = target.resolve_declaration(decl, identifier_map)
 
@@ -109,7 +111,11 @@ class TestFunctionCalls:
 
         # Ensure function is defined
         decl = SourceFunctionDeclarationNode(
-            start_position=123, identifier="some_func", params=[], body=None
+            start_position=123,
+            identifier="some_func",
+            params=[],
+            body=None,
+            storage_class=None,
         )
 
         _ = target.resolve_declaration(decl, identifier_map)

@@ -196,5 +196,5 @@ class SymbolTable(BaseModel):
                     self.check_expression(source_node.expression)
 
     def check_program(self, source_node: SourceProgramNode):
-        for f in source_node.functions:
+        for f in source_node.declarations:
             self.check_declaration(f)

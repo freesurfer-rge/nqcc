@@ -11,6 +11,7 @@ from nqcc.parser import (
     SourceFunctionDeclarationNode,
     SourceProgramNode,
     SourceReturnNode,
+    SourceStorageType,
     SourceVariableDeclarationNode,
     SourceVarNode,
     TokenTape,
@@ -62,6 +63,7 @@ class TestSourceVariableDeclarationNode:
         assert node.start_position == 0
         assert node.identifier == SourceVarNode(start_position=4, identifier="a")
         assert not node.initial
+        assert node.storage_class is None
 
     def test_constant_initial(self):
         cdecl_str = "int a=1;"
@@ -74,6 +76,33 @@ class TestSourceVariableDeclarationNode:
         assert node.start_position == 0
         assert node.identifier == SourceVarNode(start_position=4, identifier="a")
         assert node.initial == SourceConstantIntNode(start_position=6, value=1)
+        assert node.storage_class is None
+
+    @pytest.mark.parametrize("cdecl_str", ["static int a = 3;", "int static a = 3;"])
+    def test_static_decl(self, cdecl_str: str):
+        token_tape = TokenTape.from_c_source(cdecl_str)
+
+        node = parse_declaration(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        assert isinstance(node, SourceVariableDeclarationNode)
+        assert node.start_position == 0
+        assert node.identifier == SourceVarNode(start_position=11, identifier="a")
+        assert node.initial == SourceConstantIntNode(start_position=15, value=3)
+        assert node.storage_class == SourceStorageType(storage_type="Static")
+
+    @pytest.mark.parametrize("cdecl_str", ["extern int a;", "int extern a;"])
+    def test_extern_decl(self, cdecl_str: str):
+        token_tape = TokenTape.from_c_source(cdecl_str)
+
+        node = parse_declaration(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        assert isinstance(node, SourceVariableDeclarationNode)
+        assert node.start_position == 0
+        assert node.identifier == SourceVarNode(start_position=11, identifier="a")
+        assert node.initial is None
+        assert node.storage_class == SourceStorageType(storage_type="Extern")
 
     def test_expressions_initial(self):
         cdecl_str = "int a=1+2;"
@@ -91,6 +120,7 @@ class TestSourceVariableDeclarationNode:
             left=SourceConstantIntNode(start_position=6, value=1),
             right=SourceConstantIntNode(start_position=8, value=2),
         )
+        assert node.storage_class is None
 
 
 class TestSourceFunctionDeclarationNode:
@@ -104,6 +134,7 @@ class TestSourceFunctionDeclarationNode:
         assert isinstance(node, SourceFunctionDeclarationNode)
         assert node.identifier == "a_function_decl"
         assert len(node.params) == 0
+        assert node.storage_class is None
 
     def test_one_arg(self):
         cdecl_str = "int b_func(int a);"
@@ -116,6 +147,7 @@ class TestSourceFunctionDeclarationNode:
         assert node.identifier == "b_func"
         assert len(node.params) == 1
         assert node.params[0] == "a"
+        assert node.storage_class is None
 
 
 class TestSourceFunctionNode:
@@ -155,6 +187,7 @@ class TestSourceFunctionNode:
             start_position=15,
             identifier=SourceVarNode(start_position=19, identifier="a"),
             initial=SourceConstantIntNode(start_position=21, value=11),
+            storage_class=None,
         )
         assert node.body.items[1] == SourceReturnNode(
             start_position=25, value=SourceVarNode(start_position=32, identifier="a")
@@ -201,8 +234,8 @@ class TestSourceProgramNode:
         assert isinstance(node, SourceProgramNode)
         assert node.start_position == 0
 
-        assert len(node.functions) == 1
-        func_node = node.functions[0]
+        assert len(node.declarations) == 1
+        func_node = node.declarations[0]
         assert isinstance(func_node, SourceFunctionDeclarationNode)
 
         assert func_node.identifier == "main"
@@ -233,15 +266,15 @@ class TestSourceProgramNode:
         assert isinstance(node, SourceProgramNode)
         assert node.start_position == 0
 
-        assert len(node.functions) == 2
-        f0 = node.functions[0]
+        assert len(node.declarations) == 2
+        f0 = node.declarations[0]
         assert isinstance(f0, SourceFunctionDeclarationNode)
         assert f0.identifier == "combine"
         assert len(f0.params) == 2
         assert f0.params[0] == "first_num"
         assert f0.params[1] == "second_num"
 
-        f1 = node.functions[1]
+        f1 = node.declarations[1]
         assert isinstance(f1, SourceFunctionDeclarationNode)
         assert f1.identifier == "main"
         assert len(f1.params) == 0
