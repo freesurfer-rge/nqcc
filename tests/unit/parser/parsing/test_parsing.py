@@ -155,6 +155,7 @@ class TestSourceFunctionNode:
             start_position=15,
             identifier=SourceVarNode(start_position=19, identifier="a"),
             initial=SourceConstantIntNode(start_position=21, value=11),
+            storage_class=None,
         )
         assert node.body.items[1] == SourceReturnNode(
             start_position=25, value=SourceVarNode(start_position=32, identifier="a")

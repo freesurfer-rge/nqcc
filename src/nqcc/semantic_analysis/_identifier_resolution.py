@@ -96,6 +96,7 @@ class IdentifierResolver:
             identifier=decl.identifier,
             params=new_params,
             body=new_body,
+            storage_class=decl.storage_class,
         )
 
     def resolve_variable_declaration(
@@ -119,7 +120,10 @@ class IdentifierResolver:
             start_position=decl.identifier.start_position, identifier=unique_name
         )
         return SourceVariableDeclarationNode(
-            start_position=decl.start_position, identifier=nxt_var, initial=nxt_init
+            start_position=decl.start_position,
+            identifier=nxt_var,
+            initial=nxt_init,
+            storage_class=decl.storage_class,
         )
 
     def resolve_function_params(

@@ -25,6 +25,7 @@ class TestVariableDeclarations:
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
+            storage_class=None,
         )
 
         updated = target.resolve_declaration(decl, identifier_map)
@@ -59,6 +60,7 @@ class TestVariableDeclarations:
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
+            storage_class=None,
         )
 
         identifier_map = {}
@@ -72,6 +74,7 @@ class TestVariableDeclarations:
             start_position=12,
             identifier=SourceVarNode(start_position=13, identifier="b"),
             initial=None,
+            storage_class=None,
         )
 
         updated1 = target.resolve_declaration(decl1, identifier_map)
@@ -88,6 +91,7 @@ class TestVariableDeclarations:
             start_position=10,
             identifier=SourceVarNode(start_position=11, identifier="a"),
             initial=None,
+            storage_class=None,
         )
         _ = target.resolve_declaration(decl0, identifier_map)
 
@@ -95,6 +99,7 @@ class TestVariableDeclarations:
             start_position=12,
             identifier=SourceVarNode(start_position=13, identifier="a"),
             initial=None,
+            storage_class=None,
         )
 
         with pytest.raises(SemanticAnalysisDuplicateDeclaration) as saduperr:
@@ -109,7 +114,11 @@ class TestFunctionDeclarations:
         identifier_map = {}
 
         decl = SourceFunctionDeclarationNode(
-            start_position=123, identifier="some_func", params=[], body=None
+            start_position=123,
+            identifier="some_func",
+            params=[],
+            body=None,
+            storage_class=None,
         )
 
         result = target.resolve_declaration(decl, identifier_map)
@@ -128,7 +137,11 @@ class TestFunctionDeclarations:
         identifier_map = {}
 
         decl = SourceFunctionDeclarationNode(
-            start_position=123, identifier="some_func", params=["a"], body=None
+            start_position=123,
+            identifier="some_func",
+            params=["a"],
+            body=None,
+            storage_class=None,
         )
 
         result = target.resolve_declaration(decl, identifier_map)

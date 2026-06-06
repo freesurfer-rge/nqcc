@@ -428,6 +428,7 @@ def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:
             identifier=name_token.value,
             params=params,
             body=body_block,
+            storage_class=None,
         )
     else:
         # We have a variable declaration
@@ -440,7 +441,10 @@ def parse_declaration(token_tape: TokenTape) -> SourceDeclarationNode:
         _ = token_tape.expect(SemicolonToken)
 
         result = SourceVariableDeclarationNode(
-            start_position=type_token.start_position, identifier=var, initial=initialiser
+            start_position=type_token.start_position,
+            identifier=var,
+            initial=initialiser,
+            storage_class=None,
         )
 
     return result

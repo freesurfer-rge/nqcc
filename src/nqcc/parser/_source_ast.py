@@ -2,8 +2,10 @@ from typing import Literal, Union
 
 from pydantic import BaseModel
 
+
 class SourceStorageType(BaseModel):
     storage_type: Literal["Static", "Extern"]
+
 
 class SourceASTNode(BaseModel):
     node_type: str
