@@ -1,3 +1,5 @@
+import pytest
+
 from nqcc.parser import (
     SourceAdd,
     SourceAssignmentNode,
@@ -250,3 +252,12 @@ class TestSourceForNode:
         assert isinstance(assign_expr.operator, SourceAdd)
         assert assign_expr.left == SourceConstantIntNode(start_position=36, value=17)
         assert assign_expr.right == SourceVarNode(start_position=41, identifier="a")
+
+    def test_bad_storage_class(self):
+        c_str = """
+        for( static int i=0; i<10; i=i+1) a = a + i;
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+
+        with pytest.raises(ValueError, match="Storage not allowed in for loop initialiser"):
+            _ = parse_statement(token_tape)

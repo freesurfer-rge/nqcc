@@ -259,9 +259,10 @@ def parse_optional_expression(
         _ = token_tape.expect(end_token)
         return None
     elif isinstance(first_token, KeywordToken):
-        assert first_token.value == "int", f"Was expecting int counter: {first_token}"
         parsed_decl = parse_declaration(token_tape)
-        assert not isinstance(parsed_decl, SourceFunctionDeclarationNode)
+        assert isinstance(parsed_decl, SourceVariableDeclarationNode)
+        if parsed_decl.storage_class is not None:
+            raise ValueError(f"Storage not allowed in for loop initialiser. {first_token}")
         # Decl will consume the ending token
         result = parsed_decl
     else:
