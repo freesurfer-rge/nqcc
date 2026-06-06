@@ -91,6 +91,19 @@ class TestSourceVariableDeclarationNode:
         assert node.initial == SourceConstantIntNode(start_position=15, value=3)
         assert node.storage_class == SourceStorageType(storage_type="Static")
 
+    @pytest.mark.parametrize("cdecl_str", ["extern int a;", "int extern a;"])
+    def test_extern_decl(self, cdecl_str: str):
+        token_tape = TokenTape.from_c_source(cdecl_str)
+
+        node = parse_declaration(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        assert isinstance(node, SourceVariableDeclarationNode)
+        assert node.start_position == 0
+        assert node.identifier == SourceVarNode(start_position=11, identifier="a")
+        assert node.initial is None
+        assert node.storage_class == SourceStorageType(storage_type="Extern")
+
     def test_expressions_initial(self):
         cdecl_str = "int a=1+2;"
         token_tape = TokenTape.from_c_source(cdecl_str)
