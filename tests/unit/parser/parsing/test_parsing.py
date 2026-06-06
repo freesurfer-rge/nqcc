@@ -201,8 +201,8 @@ class TestSourceProgramNode:
         assert isinstance(node, SourceProgramNode)
         assert node.start_position == 0
 
-        assert len(node.functions) == 1
-        func_node = node.functions[0]
+        assert len(node.declarations) == 1
+        func_node = node.declarations[0]
         assert isinstance(func_node, SourceFunctionDeclarationNode)
 
         assert func_node.identifier == "main"
@@ -233,15 +233,15 @@ class TestSourceProgramNode:
         assert isinstance(node, SourceProgramNode)
         assert node.start_position == 0
 
-        assert len(node.functions) == 2
-        f0 = node.functions[0]
+        assert len(node.declarations) == 2
+        f0 = node.declarations[0]
         assert isinstance(f0, SourceFunctionDeclarationNode)
         assert f0.identifier == "combine"
         assert len(f0.params) == 2
         assert f0.params[0] == "first_num"
         assert f0.params[1] == "second_num"
 
-        f1 = node.functions[1]
+        f1 = node.declarations[1]
         assert isinstance(f1, SourceFunctionDeclarationNode)
         assert f1.identifier == "main"
         assert len(f1.params) == 0
