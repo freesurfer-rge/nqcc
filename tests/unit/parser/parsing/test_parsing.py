@@ -62,6 +62,7 @@ class TestSourceVariableDeclarationNode:
         assert node.start_position == 0
         assert node.identifier == SourceVarNode(start_position=4, identifier="a")
         assert not node.initial
+        assert node.storage_class is None
 
     def test_constant_initial(self):
         cdecl_str = "int a=1;"
@@ -74,6 +75,20 @@ class TestSourceVariableDeclarationNode:
         assert node.start_position == 0
         assert node.identifier == SourceVarNode(start_position=4, identifier="a")
         assert node.initial == SourceConstantIntNode(start_position=6, value=1)
+        assert node.storage_class is None
+
+    @pytest.mark.parametrize("cdecl_str", ["static int a = 3;", "int static a = 3;"])
+    def test_static_decl(self, cdecl_str: str):
+        token_tape = TokenTape.from_c_source(cdecl_str)
+
+        node = parse_declaration(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        assert isinstance(node, SourceVariableDeclarationNode)
+        assert node.start_position == 0
+        assert node.identifier == SourceVarNode(start_position=4, identifier="a")
+        assert node.initial == SourceConstantIntNode(start_position=6, value=1)
+        assert node.storage_class == "Static"
 
     def test_expressions_initial(self):
         cdecl_str = "int a=1+2;"
@@ -91,6 +106,7 @@ class TestSourceVariableDeclarationNode:
             left=SourceConstantIntNode(start_position=6, value=1),
             right=SourceConstantIntNode(start_position=8, value=2),
         )
+        assert node.storage_class is None
 
 
 class TestSourceFunctionDeclarationNode:
