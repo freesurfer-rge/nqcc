@@ -487,7 +487,7 @@ def parse_block_item(token_tape: TokenTape) -> SourceBlockItemNode:
     peeked = token_tape.peek()
 
     # Only support 'int' declarations right now
-    if isinstance(peeked, KeywordToken) and peeked.value == "int":
+    if isinstance(peeked, KeywordToken) and peeked.value in ["int", "extern", "static"]:
         return parse_declaration(token_tape)
 
     return parse_statement(token_tape)

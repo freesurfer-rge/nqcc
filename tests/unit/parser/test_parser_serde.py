@@ -78,3 +78,12 @@ class TestParserSerde:
         }
         """
         _check_round_trip(source)
+
+    def test_static_variables(self):
+        source = """
+        int main(void) {
+            static int i = 2;
+            return i;
+        }
+        """
+        _check_round_trip(source)
