@@ -500,4 +500,4 @@ def parse_program(token_tape: TokenTape) -> SourceProgramNode:
         f = parse_function(token_tape)
         funcs.append(f)
 
-    return SourceProgramNode(start_position=0, functions=funcs)
+    return SourceProgramNode(start_position=0, declarations=funcs)

@@ -306,9 +306,9 @@ def resolve_program(prog: SourceProgramNode) -> SourceProgramNode:
     resolver = IdentifierResolver()
     identifier_map: dict[str, IdentifierInfo] = {}
     updated_funcs = []
-    for f in prog.functions:
+    for f in prog.declarations:
         updated = resolver.resolve_declaration(f, identifier_map)
         assert isinstance(updated, SourceFunctionDeclarationNode)
         updated_funcs.append(updated)
-    result = SourceProgramNode(start_position=prog.start_position, functions=updated_funcs)
+    result = SourceProgramNode(start_position=prog.start_position, declarations=updated_funcs)
     return result

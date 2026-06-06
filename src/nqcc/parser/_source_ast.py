@@ -2,6 +2,8 @@ from typing import Literal, Union
 
 from pydantic import BaseModel
 
+class SourceStorageType(BaseModel):
+    storage_type: Literal["Static", "Extern"]
 
 class SourceASTNode(BaseModel):
     node_type: str
@@ -282,6 +284,7 @@ class SourceVariableDeclarationNode(SourceASTNode):
     node_type: Literal["SourceVariableDeclarationNode"] = "SourceVariableDeclarationNode"
     identifier: SourceVarNode
     initial: SourceExpressionNode | None
+    storage_class: SourceStorageType | None
 
 
 class SourceFunctionDeclarationNode(SourceASTNode):
@@ -289,6 +292,7 @@ class SourceFunctionDeclarationNode(SourceASTNode):
     identifier: str
     params: list[str]
     body: SourceBlockNode | None
+    storage_class: SourceStorageType | None
 
 
 SourceDeclarationNode = Union[SourceVariableDeclarationNode, SourceFunctionDeclarationNode]
@@ -316,4 +320,4 @@ SourceForInitNode = Union[SourceInitDeclNode, SourceInitExpressionNode]
 
 class SourceProgramNode(SourceASTNode):
     node_type: Literal["SourceProgramNode"] = "SourceProgramNode"
-    functions: list[SourceFunctionDeclarationNode]
+    declarations: list[SourceDeclarationNode]

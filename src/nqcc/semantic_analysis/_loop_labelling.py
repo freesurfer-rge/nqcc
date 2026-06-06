@@ -92,5 +92,5 @@ def label_loops_program(prog: SourceProgramNode) -> None:
     # An in-place update
     assert isinstance(prog, SourceProgramNode)
 
-    for f in prog.functions:
+    for f in prog.declarations:
         label_loops_function(f)
