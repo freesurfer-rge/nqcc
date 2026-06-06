@@ -237,6 +237,7 @@ class TestProgram:
         updated = resolve_program(prog)
 
         updated_func = updated.declarations[0]
+        assert isinstance(updated_func, SourceFunctionDeclarationNode)
         assert updated_func.identifier == "main"
         assert updated_func.body is not None
         assert len(updated_func.body.items) == 2

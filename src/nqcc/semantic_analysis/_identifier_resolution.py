@@ -309,7 +309,7 @@ class IdentifierResolver:
 def resolve_program(prog: SourceProgramNode) -> SourceProgramNode:
     resolver = IdentifierResolver()
     identifier_map: dict[str, IdentifierInfo] = {}
-    updated_funcs = []
+    updated_funcs: list[SourceDeclarationNode] = []
     for f in prog.declarations:
         updated = resolver.resolve_declaration(f, identifier_map)
         assert isinstance(updated, SourceFunctionDeclarationNode)

@@ -646,8 +646,9 @@ class TackyGenerator:
         assert isinstance(source_node, SourceProgramNode)
 
         funcs = []
-        for f in source_node.declarations:
-            nxt = self.emit_function(f)
+        for decl in source_node.declarations:
+            assert isinstance(decl, SourceFunctionDeclarationNode), "TBD"
+            nxt = self.emit_function(decl)
             if nxt:
                 funcs.append(nxt)
 
