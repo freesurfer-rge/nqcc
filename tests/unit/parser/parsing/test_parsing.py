@@ -121,6 +121,7 @@ class TestSourceFunctionDeclarationNode:
         assert isinstance(node, SourceFunctionDeclarationNode)
         assert node.identifier == "a_function_decl"
         assert len(node.params) == 0
+        assert node.storage_class is None
 
     def test_one_arg(self):
         cdecl_str = "int b_func(int a);"
@@ -133,6 +134,7 @@ class TestSourceFunctionDeclarationNode:
         assert node.identifier == "b_func"
         assert len(node.params) == 1
         assert node.params[0] == "a"
+        assert node.storage_class is None
 
 
 class TestSourceFunctionNode:
