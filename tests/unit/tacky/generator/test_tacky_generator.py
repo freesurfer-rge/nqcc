@@ -114,7 +114,7 @@ class TestFunctions:
         resolver = IdentifierResolver()
         identifier_map: dict[str, IdentifierInfo] = {}
 
-        resolved_node = resolver.resolve_declaration(src_node, identifier_map)
+        resolved_node = resolver.resolve_declaration(src_node, identifier_map, at_file_scope=True)
         assert isinstance(resolved_node, SourceFunctionDeclarationNode)
 
         target = TackyGenerator()

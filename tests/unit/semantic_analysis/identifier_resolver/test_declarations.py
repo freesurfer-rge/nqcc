@@ -12,9 +12,9 @@ from nqcc.parser import (
     parse_declaration,
 )
 from nqcc.semantic_analysis import (
+    IdentifierInfo,
     IdentifierResolver,
     SemanticAnalysisDuplicateDeclaration,
-    IdentifierInfo,
 )
 
 
