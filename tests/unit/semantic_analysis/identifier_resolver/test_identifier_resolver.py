@@ -30,7 +30,7 @@ class TestFunction:
         func = parse_function(token_tape)
         assert token_tape.tokens_remaining == 0
 
-        updated = resolver.resolve_declaration(func, identifier_map)
+        updated = resolver.resolve_declaration(func, identifier_map, at_file_scope=True)
         assert isinstance(updated, SourceFunctionDeclarationNode)
         assert updated.identifier == "main"
         assert updated.body is not None
@@ -61,7 +61,7 @@ class TestFunction:
         func = parse_function(token_tape)
         assert token_tape.tokens_remaining == 0
 
-        updated = resolver.resolve_declaration(func, identifier_map)
+        updated = resolver.resolve_declaration(func, identifier_map, at_file_scope=True)
         assert isinstance(updated, SourceFunctionDeclarationNode)
         assert updated.identifier == "main"
         assert updated.body is not None
@@ -108,7 +108,7 @@ class TestFunction:
         func = parse_function(token_tape)
         assert token_tape.tokens_remaining == 0
 
-        updated = resolver.resolve_declaration(func, identifier_map)
+        updated = resolver.resolve_declaration(func, identifier_map, at_file_scope=True)
         assert isinstance(updated, SourceFunctionDeclarationNode)
         assert updated.identifier == "main"
         assert updated.body is not None
@@ -122,6 +122,23 @@ class TestFunction:
         assert isinstance(ret, SourceReturnNode)
         assert isinstance(ret.value, SourceFunctionCallNode)
         assert ret.value.identifier == "foo"
+
+    def test_internal_func_decl_no_static(self) -> None:
+        resolver = IdentifierResolver()
+        identifier_map: dict[str, IdentifierInfo] = {}
+
+        c_str = """
+        int main(void){
+            static int foo(void);
+            return foo();
+        }
+        """
+        token_tape = TokenTape.from_c_source(c_str)
+        func = parse_function(token_tape)
+        assert token_tape.tokens_remaining == 0
+
+        with pytest.raises(ValueError, match="Cannot declare static function at block level"):
+            _ = resolver.resolve_declaration(func, identifier_map, at_file_scope=True)
 
     def test_no_nested_functions(self) -> None:
         resolver = IdentifierResolver()
@@ -140,7 +157,7 @@ class TestFunction:
         assert token_tape.tokens_remaining == 0
 
         with pytest.raises(ValueError, match="Cannot nest function definitions"):
-            _ = resolver.resolve_declaration(func, identifier_map)
+            _ = resolver.resolve_declaration(func, identifier_map, at_file_scope=True)
 
     def test_func_one_arg(self) -> None:
         resolver = IdentifierResolver()
@@ -155,7 +172,7 @@ class TestFunction:
         func = parse_function(token_tape)
         assert token_tape.tokens_remaining == 0
 
-        updated = resolver.resolve_declaration(func, identifier_map)
+        updated = resolver.resolve_declaration(func, identifier_map, at_file_scope=True)
         assert isinstance(updated, SourceFunctionDeclarationNode)
         assert updated.identifier == "identity"
         assert len(updated.params) == 1
@@ -182,7 +199,7 @@ class TestFunction:
         assert token_tape.tokens_remaining == 0
 
         with pytest.raises(SemanticAnalysisUnknownIdentifier, match="'b'"):
-            _ = resolver.resolve_declaration(func, identifier_map)
+            _ = resolver.resolve_declaration(func, identifier_map, at_file_scope=True)
 
     def test_arg_shadow_local_var(self) -> None:
         resolver = IdentifierResolver()
@@ -200,7 +217,7 @@ class TestFunction:
         func = parse_function(token_tape)
         assert token_tape.tokens_remaining == 0
 
-        updated = resolver.resolve_declaration(func, identifier_map)
+        updated = resolver.resolve_declaration(func, identifier_map, at_file_scope=True)
         assert isinstance(updated, SourceFunctionDeclarationNode)
         assert updated.identifier == "main"
 
