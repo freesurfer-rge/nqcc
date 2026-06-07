@@ -32,7 +32,8 @@ class TestVariableDeclarations:
         updated = target.resolve_declaration(decl, identifier_map, at_file_scope=at_file_scope)
         assert isinstance(updated, SourceVariableDeclarationNode)
         assert updated.start_position == 10
-        assert updated.identifier == SourceVarNode(start_position=11, identifier="a.0")
+        expected_identifier = "a" if at_file_scope else "a.0"
+        assert updated.identifier == SourceVarNode(start_position=11, identifier=expected_identifier)
         assert updated.initial is None
         assert len(identifier_map) == 1
 
@@ -50,7 +51,8 @@ class TestVariableDeclarations:
         result = target.resolve_declaration(decl, identifier_map, at_file_scope=at_file_scope)
         assert isinstance(result, SourceVariableDeclarationNode)
         assert result.start_position == 0
-        assert result.identifier == SourceVarNode(start_position=4, identifier="a.0")
+        expected_identifier = "a" if at_file_scope else "a.0"
+        assert result.identifier == SourceVarNode(start_position=4, identifier=expected_identifier)
         assert isinstance(result.initial, SourceConstantIntNode)
         assert result.initial.value == 1
         assert len(identifier_map) == 1
@@ -71,7 +73,8 @@ class TestVariableDeclarations:
         updated0 = target.resolve_declaration(decl0, identifier_map, at_file_scope=at_file_scope)
         assert isinstance(updated0, SourceVariableDeclarationNode)
         assert updated0.start_position == 10
-        assert updated0.identifier == SourceVarNode(start_position=11, identifier="a.0")
+        expected_identifier = "a" if at_file_scope else "a.0"
+        assert updated0.identifier == SourceVarNode(start_position=11, identifier=expected_identifier)
         assert updated0.initial is None
 
         decl1 = SourceVariableDeclarationNode(
@@ -84,7 +87,8 @@ class TestVariableDeclarations:
         updated1 = target.resolve_declaration(decl1, identifier_map, at_file_scope=at_file_scope)
         assert isinstance(updated1, SourceVariableDeclarationNode)
         assert updated1.start_position == 12
-        assert updated1.identifier == SourceVarNode(start_position=13, identifier="b.1")
+        expected_identifier = "b" if at_file_scope else "b.1"
+        assert updated1.identifier == SourceVarNode(start_position=13, identifier=expected_identifier)
         assert updated1.initial is None
 
     def test_duplicate_name(self):
@@ -97,7 +101,7 @@ class TestVariableDeclarations:
             initial=None,
             storage_class=None,
         )
-        _ = target.resolve_declaration(decl0, identifier_map)
+        _ = target.resolve_declaration(decl0, identifier_map, at_file_scope=False)
 
         decl1 = SourceVariableDeclarationNode(
             start_position=12,
