@@ -14,6 +14,7 @@ from nqcc.parser import (
 from nqcc.semantic_analysis import (
     IdentifierResolver,
     SemanticAnalysisDuplicateDeclaration,
+    IdentifierInfo,
 )
 
 
@@ -21,7 +22,7 @@ class TestVariableDeclarations:
     @pytest.mark.parametrize("at_file_scope", [False, True])
     def test_smoke_no_init(self, at_file_scope: bool):
         target = IdentifierResolver()
-        identifier_map = {}
+        identifier_map: dict[str, IdentifierInfo] = {}
 
         decl = SourceVariableDeclarationNode(
             start_position=10,
@@ -47,7 +48,7 @@ class TestVariableDeclarations:
     @pytest.mark.parametrize("at_file_scope", [False, True])
     def test_decl_with_init(self, at_file_scope: bool):
         target = IdentifierResolver()
-        identifier_map = {}
+        identifier_map: dict[str, IdentifierInfo] = {}
 
         program_str = "int a = 1;"
 
@@ -75,7 +76,7 @@ class TestVariableDeclarations:
             storage_class=None,
         )
 
-        identifier_map = {}
+        identifier_map: dict[str, IdentifierInfo] = {}
         updated0 = target.resolve_declaration(decl0, identifier_map, at_file_scope=at_file_scope)
         assert isinstance(updated0, SourceVariableDeclarationNode)
         assert updated0.start_position == 10
@@ -125,9 +126,9 @@ class TestVariableDeclarations:
         assert saduperr.value.decl == decl1
         assert saduperr.value.message == "Duplicate declaration of 'a' at 12"
 
-    def test_extern_decl(self):
+    def test_extern_decl(self) -> None:
         target = IdentifierResolver()
-        identifier_map = {}
+        identifier_map: dict[str, IdentifierInfo] = {}
 
         decl = SourceVariableDeclarationNode(
             start_position=10,
@@ -145,9 +146,9 @@ class TestVariableDeclarations:
 
 
 class TestFunctionDeclarations:
-    def test_noargs_nobody(self):
+    def test_noargs_nobody(self) -> None:
         target = IdentifierResolver()
-        identifier_map = {}
+        identifier_map: dict[str, IdentifierInfo] = {}
 
         decl = SourceFunctionDeclarationNode(
             start_position=123,
@@ -158,6 +159,7 @@ class TestFunctionDeclarations:
         )
 
         result = target.resolve_declaration(decl, identifier_map, at_file_scope=False)
+        assert isinstance(result, SourceFunctionDeclarationNode)
         assert result.start_position == decl.start_position
         assert result.identifier == decl.identifier
         assert len(result.params) == 0
@@ -171,7 +173,7 @@ class TestFunctionDeclarations:
     @pytest.mark.parametrize("at_file_scope", [False, True])
     def test_arg_nobody(self, at_file_scope: bool):
         target = IdentifierResolver()
-        identifier_map = {}
+        identifier_map: dict[str, IdentifierInfo] = {}
 
         decl = SourceFunctionDeclarationNode(
             start_position=123,
@@ -182,6 +184,7 @@ class TestFunctionDeclarations:
         )
 
         result = target.resolve_declaration(decl, identifier_map, at_file_scope=at_file_scope)
+        assert isinstance(result, SourceFunctionDeclarationNode)
         assert result.start_position == decl.start_position
         assert result.identifier == decl.identifier
         assert len(result.params) == 1
@@ -204,6 +207,7 @@ class TestFunctionDeclarations:
         assert isinstance(decl, SourceFunctionDeclarationNode)
 
         result = target.resolve_declaration(decl, identifier_map, at_file_scope=True)
+        assert isinstance(result, SourceFunctionDeclarationNode)
         assert result.start_position == decl.start_position
         assert result.identifier == decl.identifier
         assert len(result.params) == 1
@@ -222,7 +226,7 @@ class TestFunctionDeclarations:
     @pytest.mark.parametrize("at_file_scope", [False, True])
     def test_twoarg_nobody(self, at_file_scope: bool):
         target = IdentifierResolver()
-        identifier_map = {}
+        identifier_map: dict[str, IdentifierInfo] = {}
 
         c_str = """int some_func(int a, int b);"""
 
@@ -231,6 +235,7 @@ class TestFunctionDeclarations:
         assert isinstance(decl, SourceFunctionDeclarationNode)
 
         result = target.resolve_declaration(decl, identifier_map, at_file_scope=at_file_scope)
+        assert isinstance(result, SourceFunctionDeclarationNode)
         assert result.start_position == decl.start_position
         assert result.identifier == decl.identifier
         assert len(result.params) == 2
@@ -241,7 +246,7 @@ class TestFunctionDeclarations:
     @pytest.mark.parametrize("at_file_scope", [False, True])
     def test_param_unique_names(self, at_file_scope: bool):
         target = IdentifierResolver()
-        identifier_map = {}
+        identifier_map: dict[str, IdentifierInfo] = {}
 
         c_str = """int some_func(int a, int a);"""
 
