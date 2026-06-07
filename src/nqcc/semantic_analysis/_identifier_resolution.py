@@ -26,11 +26,12 @@ from nqcc.parser import (
     SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
+    SourceStorageType,
     SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
     SourceVariableDeclarationNode,
     SourceVarNode,
-    SourceWhileNode,SourceStorageType
+    SourceWhileNode,
 )
 
 from ._exceptions import (
@@ -59,7 +60,11 @@ class IdentifierResolver:
         self._counter = 0
 
     def resolve_declaration(
-        self, decl: SourceDeclarationNode, identifier_map: dict[str, IdentifierInfo], *, at_file_scope: bool
+        self,
+        decl: SourceDeclarationNode,
+        identifier_map: dict[str, IdentifierInfo],
+        *,
+        at_file_scope: bool,
     ) -> SourceDeclarationNode:
         match decl:
             case SourceVariableDeclarationNode():
@@ -120,15 +125,18 @@ class IdentifierResolver:
         if orig_name in identifier_map:
             prev_entry = identifier_map[orig_name]
             if prev_entry.from_current_scope:
-                if not (prev_entry.has_linkage and decl.storage_class == SourceStorageType(storage_type="Extern")):
+                if not (
+                    prev_entry.has_linkage
+                    and decl.storage_class == SourceStorageType(storage_type="Extern")
+                ):
                     raise SemanticAnalysisDuplicateDeclaration(decl=decl)
-        
+
         if decl.storage_class == SourceStorageType(storage_type="Extern"):
             identifier_map[orig_name] = IdentifierInfo(
                 name=orig_name, from_current_scope=True, has_linkage=True
             )
             return decl
-        
+
         unique_name = f"{orig_name}.{self._counter}"
         self._counter += 1
         identifier_map[orig_name] = IdentifierInfo(

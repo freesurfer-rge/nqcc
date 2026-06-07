@@ -5,6 +5,7 @@ from nqcc.parser import (
     SourceConstantIntNode,
     SourceFunctionDeclarationNode,
     SourceReturnNode,
+    SourceStorageType,
     SourceVariableDeclarationNode,
     SourceVarNode,
     TokenTape,
@@ -33,9 +34,15 @@ class TestVariableDeclarations:
         assert isinstance(updated, SourceVariableDeclarationNode)
         assert updated.start_position == 10
         expected_identifier = "a" if at_file_scope else "a.0"
-        assert updated.identifier == SourceVarNode(start_position=11, identifier=expected_identifier)
+        assert updated.identifier == SourceVarNode(
+            start_position=11, identifier=expected_identifier
+        )
         assert updated.initial is None
         assert len(identifier_map) == 1
+        var_id = identifier_map["a"]
+        assert var_id.name == expected_identifier
+        assert var_id.from_current_scope
+        assert var_id.has_linkage == at_file_scope
 
     @pytest.mark.parametrize("at_file_scope", [False, True])
     def test_decl_with_init(self, at_file_scope: bool):
@@ -57,7 +64,6 @@ class TestVariableDeclarations:
         assert result.initial.value == 1
         assert len(identifier_map) == 1
 
-
     @pytest.mark.parametrize("at_file_scope", [False, True])
     def test_two_decl(self, at_file_scope: bool):
         target = IdentifierResolver()
@@ -74,7 +80,9 @@ class TestVariableDeclarations:
         assert isinstance(updated0, SourceVariableDeclarationNode)
         assert updated0.start_position == 10
         expected_identifier = "a" if at_file_scope else "a.0"
-        assert updated0.identifier == SourceVarNode(start_position=11, identifier=expected_identifier)
+        assert updated0.identifier == SourceVarNode(
+            start_position=11, identifier=expected_identifier
+        )
         assert updated0.initial is None
 
         decl1 = SourceVariableDeclarationNode(
@@ -88,7 +96,9 @@ class TestVariableDeclarations:
         assert isinstance(updated1, SourceVariableDeclarationNode)
         assert updated1.start_position == 12
         expected_identifier = "b" if at_file_scope else "b.1"
-        assert updated1.identifier == SourceVarNode(start_position=13, identifier=expected_identifier)
+        assert updated1.identifier == SourceVarNode(
+            start_position=13, identifier=expected_identifier
+        )
         assert updated1.initial is None
 
     def test_duplicate_name(self):
@@ -114,6 +124,24 @@ class TestVariableDeclarations:
             _ = target.resolve_declaration(decl1, identifier_map, at_file_scope=False)
         assert saduperr.value.decl == decl1
         assert saduperr.value.message == "Duplicate declaration of 'a' at 12"
+
+    def test_extern_decl(self):
+        target = IdentifierResolver()
+        identifier_map = {}
+
+        decl = SourceVariableDeclarationNode(
+            start_position=10,
+            identifier=SourceVarNode(start_position=11, identifier="a"),
+            initial=None,
+            storage_class=SourceStorageType(storage_type="Extern"),
+        )
+        updated = target.resolve_declaration(decl, identifier_map, at_file_scope=False)
+        assert updated == decl
+        assert len(identifier_map) == 1
+        var_id = identifier_map["a"]
+        assert var_id.name == "a"
+        assert var_id.from_current_scope
+        assert var_id.has_linkage
 
 
 class TestFunctionDeclarations:
@@ -165,7 +193,6 @@ class TestFunctionDeclarations:
         assert identifier_map["some_func"].from_current_scope
         assert identifier_map["some_func"].has_linkage
 
-
     def test_arg_body(self):
         target = IdentifierResolver()
         identifier_map = {}
@@ -192,7 +219,6 @@ class TestFunctionDeclarations:
         assert identifier_map["some_func"].from_current_scope
         assert identifier_map["some_func"].has_linkage
 
-
     @pytest.mark.parametrize("at_file_scope", [False, True])
     def test_twoarg_nobody(self, at_file_scope: bool):
         target = IdentifierResolver()
@@ -211,7 +237,6 @@ class TestFunctionDeclarations:
         assert result.params[0] == "a.arg.0"
         assert result.params[1] == "b.arg.1"
         assert result.body is None
-
 
     @pytest.mark.parametrize("at_file_scope", [False, True])
     def test_param_unique_names(self, at_file_scope: bool):
