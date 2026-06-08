@@ -87,7 +87,7 @@ class SymbolTable(BaseModel):
         match source_node:
             case SourceVariableDeclarationNode():
                 if at_file_scope:
-                    raise NotImplementedError("TBD")
+                    self.check_file_scope_variable_declaration(source_node)
                 else:
                     self.check_local_variable_declaration(source_node)
             case SourceFunctionDeclarationNode():
@@ -122,6 +122,45 @@ class SymbolTable(BaseModel):
             )
             if source_node.initial:
                 self.check_expression(source_node.initial)
+
+    def check_file_scope_variable_declaration(self, source_node: SourceVariableDeclarationNode):
+        assert isinstance(source_node, SourceVariableDeclarationNode)
+
+        initial_value: InitialValueBase
+        if isinstance(source_node.initial, SourceConstantIntNode):
+            initial_value = Initial(value=source_node.initial.value)
+        elif source_node.initial is None:
+            if source_node.storage_class.storage_type == "Extern":
+                initial_value = NoInitialiser()
+            else:
+                initial_value = Tentative()
+        else:
+            raise ValueError(f"Non-constant initialiser: {source_node}")
+        
+        is_global = True
+        if source_node.storage_class and source_node.storage_class.storage_type == "Static":
+            is_global = False
+
+        if source_node.identifier.identifier in self.symbol_table:
+            old_decl = self.symbol_table[source_node.identifier.identifier]
+            if not isinstance(old_decl, StaticVariableType):
+                raise ValueError(f"Function redeclared as variable {source_node}")
+            if source_node.storage_class and source_node.storage_class.storage_type == "Extern":
+                is_global = old_decl.is_global
+            elif old_decl.is_global != is_global:
+                raise ValueError(f"Conflicting variable linkage: {source_node}")
+            
+            if isinstance(old_decl.initial_value, Initial):
+                if isinstance(initial_value, Initial):
+                    raise ValueError(f"Conflicting file scope variable definitions: {source_node}")
+                else:
+                    initial_value = old_decl.initial_value
+            elif not isinstance(initial_value, Initial) and isinstance(old_decl.initial_value, Tentative):
+                initial_value = Tentative()
+
+        new_decl = StaticVariableType(variable_type="int", initial_value=initial_value, is_global=is_global)
+        self.symbol_table[source_node.identifier.identifier] = new_decl
+
 
     def check_function_declaration(self, source_node: SourceFunctionDeclarationNode):
         assert isinstance(source_node, SourceFunctionDeclarationNode)
