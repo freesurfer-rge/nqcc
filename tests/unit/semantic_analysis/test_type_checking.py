@@ -3,8 +3,8 @@ import pytest
 from nqcc.parser import SourceProgramNode, TokenTape, parse_program
 from nqcc.semantic_analysis import (
     FunctionType,
-    SymbolTable,
     LocalVariableType,
+    SymbolTable,
     label_loops_program,
     resolve_program,
 )
@@ -34,6 +34,7 @@ class TestTypesOK:
 
         assert len(target.symbol_table) == 1
         assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
 
     def test_simple_decl(self):
         c_str = "int main(void) { int a = 2; return a;}"
@@ -45,6 +46,7 @@ class TestTypesOK:
 
         assert len(target.symbol_table) == 2
         assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
         assert isinstance(target.symbol_table["a.0"], LocalVariableType)
         assert target.symbol_table["a.0"].variable_type == "int"
 
@@ -80,7 +82,33 @@ class TestTypesOK:
 
         assert len(target.symbol_table) == 4
         assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
         assert isinstance(target.symbol_table["check"], FunctionType)
+        assert target.symbol_table["check"].is_global
+        assert isinstance(target.symbol_table["a.arg.0"], LocalVariableType)
+        assert target.symbol_table["a.arg.0"].variable_type == "int"
+        assert isinstance(target.symbol_table["a.1"], LocalVariableType)
+        assert target.symbol_table["a.1"].variable_type == "int"
+
+    def test_static_func(self):
+        c_str = """static int check(int a) { return a%2 ? 1: 2;}
+
+        int main( void ) {
+            int a = 10;
+            return check(a);
+        }
+        """
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        target.check_program(prog)
+
+        assert len(target.symbol_table) == 4
+        assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
+        assert isinstance(target.symbol_table["check"], FunctionType)
+        assert not target.symbol_table["check"].is_global
         assert isinstance(target.symbol_table["a.arg.0"], LocalVariableType)
         assert target.symbol_table["a.arg.0"].variable_type == "int"
         assert isinstance(target.symbol_table["a.1"], LocalVariableType)

@@ -108,6 +108,9 @@ class SymbolTable(BaseModel):
 
         has_body = source_node.body is not None
         already_defined = False
+        function_is_global = True
+        if source_node.storage_class and source_node.storage_class.storage_type == "Static":
+            function_is_global = False
 
         if source_node.identifier in self.symbol_table:
             old_decl = self.symbol_table[source_node.identifier]
@@ -118,8 +121,19 @@ class SymbolTable(BaseModel):
             if already_defined and has_body:
                 raise ValueError(f"Function defined more than once: {source_node}")
 
+            if (
+                old_decl.is_global
+                and source_node.storage_class
+                and source_node.storage_class.storage_type == "Static"
+            ):
+                raise ValueError(f"Static function declaration follows non-static: {source_node}")
+
+            function_is_global = old_decl.is_global
+
         new_symbol = FunctionType(
-            param_count=len(source_node.params), defined=already_defined or has_body
+            param_count=len(source_node.params),
+            defined=already_defined or has_body,
+            is_global=function_is_global,
         )
         self.symbol_table[source_node.identifier] = new_symbol
 
