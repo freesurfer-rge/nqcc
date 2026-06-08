@@ -157,7 +157,7 @@ class SymbolTable(BaseModel):
                     self.check_expression(arg)
             case SourceVarNode():
                 v_symbol = self.symbol_table[source_node.identifier]
-                if not isinstance(v_symbol, Union[LocalVariableType, StaticVariableType]):
+                if not isinstance(v_symbol, (LocalVariableType, StaticVariableType)):
                     raise ValueError(f"Function name used as variable: {source_node}")
             case SourceConstantIntNode():
                 pass
