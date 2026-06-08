@@ -4,7 +4,7 @@ from nqcc.parser import SourceProgramNode, TokenTape, parse_program
 from nqcc.semantic_analysis import (
     FunctionType,
     SymbolTable,
-    VariableInt,
+    LocalVariableType,
     label_loops_program,
     resolve_program,
 )
@@ -45,7 +45,8 @@ class TestTypesOK:
 
         assert len(target.symbol_table) == 2
         assert isinstance(target.symbol_table["main"], FunctionType)
-        assert isinstance(target.symbol_table["a.0"], VariableInt)
+        assert isinstance(target.symbol_table["a.0"], LocalVariableType)
+        assert target.symbol_table["a.0"].variable_type == "int"
 
     def test_extra_function(self):
         c_str = """int foo(void) { return 2; }
@@ -80,8 +81,10 @@ class TestTypesOK:
         assert len(target.symbol_table) == 4
         assert isinstance(target.symbol_table["main"], FunctionType)
         assert isinstance(target.symbol_table["check"], FunctionType)
-        assert isinstance(target.symbol_table["a.arg.0"], VariableInt)
-        assert isinstance(target.symbol_table["a.1"], VariableInt)
+        assert isinstance(target.symbol_table["a.arg.0"], LocalVariableType)
+        assert target.symbol_table["a.arg.0"].variable_type == "int"
+        assert isinstance(target.symbol_table["a.1"], LocalVariableType)
+        assert target.symbol_table["a.1"].variable_type == "int"
 
 
 class TestTypesFail:

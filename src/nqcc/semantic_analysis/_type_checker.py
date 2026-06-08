@@ -34,29 +34,50 @@ from nqcc.parser import (
 )
 
 
+class InitialValueBase(BaseModel):
+    initial_value_type: str
+
+
+class Tentative(InitialValueBase):
+    initial_value_type: Literal["Tentative"]
+
+
+class Initial(InitialValueBase):
+    initial_value_type: Literal["Initial"]
+    value: int
+
+
+class NoInitialiser(InitialValueBase):
+    initial_value_type: Literal["NoInitialiser"]
+
+
+InitialValue = Union[Tentative, Initial, NoInitialiser]
+
+
 class SymbolEntry(BaseModel):
     entry_type: str
 
 
-class VariableInt(SymbolEntry):
-    entry_type: Literal["VariableInt"] = "VariableInt"
+class LocalVariableType(SymbolEntry):
+    entry_type: Literal["LocalVariableType"] = "LocalVariableType"
+    variable_type: str
 
 
-class VariableNotATypeForUnion(SymbolEntry):
-    # This is so get_args(VariableType) works
-    pass
-
-
-VariableType = Union[VariableInt, VariableNotATypeForUnion]
+class StaticVariableType(SymbolEntry):
+    entry_type: Literal["StaticVariableType"] = "StaticVariableType"
+    variable_type: str
+    initial_value: InitialValue
+    is_global: bool
 
 
 class FunctionType(BaseModel):
     entry_type: Literal["FunctionType"] = "FunctionType"
     param_count: int
     defined: bool
+    is_global: bool
 
 
-SymbolType = Union[VariableType, FunctionType]
+SymbolType = Union[LocalVariableType, StaticVariableType, FunctionType]
 
 
 class SymbolTable(BaseModel):
@@ -76,7 +97,9 @@ class SymbolTable(BaseModel):
         # We should have fully unique names by this point.....
         assert source_node.identifier.identifier not in self.symbol_table
 
-        self.symbol_table[source_node.identifier.identifier] = VariableInt()
+        self.symbol_table[source_node.identifier.identifier] = LocalVariableType(
+            variable_type="int"
+        )
         if source_node.initial:
             self.check_expression(source_node.initial)
 
@@ -102,7 +125,7 @@ class SymbolTable(BaseModel):
 
         if source_node.body is not None:
             for p in source_node.params:
-                self.symbol_table[p] = VariableInt()
+                self.symbol_table[p] = LocalVariableType(variable_type="int")
             self.check_block(source_node.body)
 
     def check_expression(self, source_node: SourceExpressionNode):  # noqa: C901
@@ -120,7 +143,7 @@ class SymbolTable(BaseModel):
                     self.check_expression(arg)
             case SourceVarNode():
                 v_symbol = self.symbol_table[source_node.identifier]
-                if not isinstance(v_symbol, get_args(VariableType)):
+                if not isinstance(v_symbol, Union[LocalVariableType, StaticVariableType]):
                     raise ValueError(f"Function name used as variable: {source_node}")
             case SourceConstantIntNode():
                 pass
