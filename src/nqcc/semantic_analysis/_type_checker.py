@@ -39,16 +39,16 @@ class InitialValueBase(BaseModel):
 
 
 class Tentative(InitialValueBase):
-    initial_value_type: Literal["Tentative"]
+    initial_value_type: Literal["Tentative"] = "Tentative"
 
 
 class Initial(InitialValueBase):
-    initial_value_type: Literal["Initial"]
+    initial_value_type: Literal["Initial"] = "Initial"
     value: int
 
 
 class NoInitialiser(InitialValueBase):
-    initial_value_type: Literal["NoInitialiser"]
+    initial_value_type: Literal["NoInitialiser"] = "NoInitialiser"
 
 
 InitialValue = Union[Tentative, Initial, NoInitialiser]
@@ -97,14 +97,31 @@ class SymbolTable(BaseModel):
 
     def check_local_variable_declaration(self, source_node: SourceVariableDeclarationNode):
         assert isinstance(source_node, SourceVariableDeclarationNode)
-        # We should have fully unique names by this point.....
-        assert source_node.identifier.identifier not in self.symbol_table
 
-        self.symbol_table[source_node.identifier.identifier] = LocalVariableType(
-            variable_type="int"
-        )
-        if source_node.initial:
-            self.check_expression(source_node.initial)
+        if source_node.storage_class and source_node.storage_class.storage_type == "Extern":
+            if source_node.initial is not None:
+                raise ValueError(f"Initialiser on local extern variable: {source_node}")
+            if source_node.identifier.identifier in self.symbol_table:
+                old_decl = self.symbol_table[source_node.identifier.identifier]
+                if isinstance(old_decl, FunctionType):
+                    raise ValueError(f"Function redeclared as variable {source_node}")
+            else:
+                extern_symbol = StaticVariableType(
+                    variable_type="int", initial_value=NoInitialiser(), is_global=True
+                )
+                self.symbol_table[source_node.identifier.identifier] = extern_symbol
+        elif source_node.storage_class and source_node.storage_class.storage_type == "Static":
+            raise NotImplementedError("TBD")
+        else:
+            # Regular local variable
+            # We should have fully unique names by this point.....
+            assert source_node.identifier.identifier not in self.symbol_table
+
+            self.symbol_table[source_node.identifier.identifier] = LocalVariableType(
+                variable_type="int"
+            )
+            if source_node.initial:
+                self.check_expression(source_node.initial)
 
     def check_function_declaration(self, source_node: SourceFunctionDeclarationNode):
         assert isinstance(source_node, SourceFunctionDeclarationNode)

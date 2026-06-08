@@ -4,6 +4,8 @@ from nqcc.parser import SourceProgramNode, TokenTape, parse_program
 from nqcc.semantic_analysis import (
     FunctionType,
     LocalVariableType,
+    NoInitialiser,
+    StaticVariableType,
     SymbolTable,
     label_loops_program,
     resolve_program,
@@ -49,6 +51,22 @@ class TestTypesOK:
         assert target.symbol_table["main"].is_global
         assert isinstance(target.symbol_table["a.0"], LocalVariableType)
         assert target.symbol_table["a.0"].variable_type == "int"
+
+    def test_extern_decl(self):
+        c_str = "int main(void) { extern int a; return a;}"
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        target.check_program(prog)
+
+        assert len(target.symbol_table) == 2
+        assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
+        var_a = target.symbol_table["a"]
+        assert isinstance(var_a, StaticVariableType)
+        assert isinstance(var_a.initial_value, NoInitialiser)
+        assert var_a.is_global
 
     def test_extra_function(self):
         c_str = """int foo(void) { return 2; }
@@ -184,4 +202,29 @@ class TestTypesFail:
 
         target = SymbolTable()
         with pytest.raises(ValueError, match="Function name used as variable"):
+            target.check_program(prog)
+
+    def test_extern_decl_with_initialiser(self):
+        c_str = "int main(void) { extern int a = 2; return a;}"
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        with pytest.raises(ValueError, match="Initialiser on local extern variable"):
+            target.check_program(prog)
+
+    def test_extern_decl_redeclare_func(self):
+        c_str = """
+        int main(void) {
+            int a(void);
+            extern int a;
+
+            return 1;
+        }
+        """
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        with pytest.raises(ValueError, match="Function redeclared as variable"):
             target.check_program(prog)
