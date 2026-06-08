@@ -341,10 +341,9 @@ class IdentifierResolver:
 def resolve_program(prog: SourceProgramNode) -> SourceProgramNode:
     resolver = IdentifierResolver()
     identifier_map: dict[str, IdentifierInfo] = {}
-    updated_funcs: list[SourceDeclarationNode] = []
-    for f in prog.declarations:
-        updated = resolver.resolve_declaration(f, identifier_map, at_file_scope=True)
-        assert isinstance(updated, SourceFunctionDeclarationNode)
-        updated_funcs.append(updated)
-    result = SourceProgramNode(start_position=prog.start_position, declarations=updated_funcs)
+    updated_decls: list[SourceDeclarationNode] = []
+    for decl in prog.declarations:
+        updated = resolver.resolve_declaration(decl, identifier_map, at_file_scope=True)
+        updated_decls.append(updated)
+    result = SourceProgramNode(start_position=prog.start_position, declarations=updated_decls)
     return result

@@ -132,6 +132,20 @@ class TestTypesOK:
         assert isinstance(target.symbol_table["a.1"], LocalVariableType)
         assert target.symbol_table["a.1"].variable_type == "int"
 
+    def test_file_scope_variable(self):
+        c_str = """
+        int a = 0;
+
+        int main(void) { return a;}
+        """
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        target.check_program(prog)
+
+        assert len(target.symbol_table) == 4
+
 
 class TestTypesFail:
     def test_arg_mismatch(self):
