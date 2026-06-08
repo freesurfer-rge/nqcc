@@ -198,6 +198,48 @@ class TestTypesOK:
         assert var_a.initial_value == Initial(value=1)
         assert not var_a.is_global
 
+    def test_local_static_variable(self):
+        c_str = """
+        int main(void) {
+            static int a = 2;
+            return a;
+        }
+        """
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        target.check_program(prog)
+
+        assert len(target.symbol_table) == 2
+        assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
+
+        var_a = target.symbol_table["a.0"]
+        assert isinstance(var_a, StaticVariableType)
+        assert var_a.initial_value == Initial(value=2)
+        assert not var_a.is_global
+
+    def test_local_static_variable_no_init(self):
+        c_str = """
+        int main(void) {
+            static int a;
+            return a;
+        }
+        """
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        target.check_program(prog)
+
+        assert len(target.symbol_table) == 2
+        assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
+
+        var_a = target.symbol_table["a.0"]
+        assert isinstance(var_a, StaticVariableType)
+        assert var_a.initial_value == Initial(value=0)
+        assert not var_a.is_global
+
 
 class TestTypesFail:
     def test_arg_mismatch(self):
@@ -348,4 +390,17 @@ class TestTypesFail:
 
         target = SymbolTable()
         with pytest.raises(ValueError, match="Function redeclared as variable"):
+            target.check_program(prog)
+
+    def test_local_static_variable_nonconst_init(self):
+        c_str = """
+        int main(void) {
+            static int a = 1+2;
+            return a;
+        }
+        """
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        with pytest.raises(ValueError, match="Non-constant initialiser on local static variable"):
             target.check_program(prog)

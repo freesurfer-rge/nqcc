@@ -111,7 +111,17 @@ class SymbolTable(BaseModel):
                 )
                 self.symbol_table[source_node.identifier.identifier] = extern_symbol
         elif source_node.storage_class and source_node.storage_class.storage_type == "Static":
-            raise NotImplementedError("TBD")
+            initial_value: InitialValue
+            if source_node.initial and isinstance(source_node.initial, SourceConstantIntNode):
+                initial_value = Initial(value=source_node.initial.value)
+            elif not source_node.initial:
+                initial_value = Initial(value=0)
+            else:
+                raise ValueError("Non-constant initialiser on local static variable")
+            new_symbol = StaticVariableType(
+                variable_type="int", initial_value=initial_value, is_global=False
+            )
+            self.symbol_table[source_node.identifier.identifier] = new_symbol
         else:
             # Regular local variable
             # We should have fully unique names by this point.....
