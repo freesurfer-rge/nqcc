@@ -83,16 +83,19 @@ SymbolType = Union[LocalVariableType, StaticVariableType, FunctionType]
 class SymbolTable(BaseModel):
     symbol_table: dict[str, SymbolType] = Field(default_factory=dict)
 
-    def check_declaration(self, source_node: SourceDeclarationNode):
+    def check_declaration(self, source_node: SourceDeclarationNode, *, at_file_scope: bool):
         match source_node:
             case SourceVariableDeclarationNode():
-                self.check_variable_declaration(source_node)
+                if at_file_scope:
+                    raise NotImplementedError("TBD")
+                else:
+                    self.check_local_variable_declaration(source_node)
             case SourceFunctionDeclarationNode():
                 self.check_function_declaration(source_node)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
-    def check_variable_declaration(self, source_node: SourceVariableDeclarationNode):
+    def check_local_variable_declaration(self, source_node: SourceVariableDeclarationNode):
         assert isinstance(source_node, SourceVariableDeclarationNode)
         # We should have fully unique names by this point.....
         assert source_node.identifier.identifier not in self.symbol_table
@@ -185,7 +188,7 @@ class SymbolTable(BaseModel):
     def check_blockitem(self, source_node: SourceBlockItemNode):
         match source_node:
             case _ if isinstance(source_node, get_args(SourceDeclarationNode)):
-                self.check_declaration(source_node)
+                self.check_declaration(source_node, at_file_scope=False)
             case _ if isinstance(source_node, get_args(SourceStatementNode)):
                 self.check_statement(source_node)
             case _:
@@ -227,11 +230,11 @@ class SymbolTable(BaseModel):
     def check_forinit(self, source_node: SourceForInitNode):
         match source_node:
             case SourceInitDeclNode():
-                self.check_variable_declaration(source_node.decl)
+                self.check_local_variable_declaration(source_node.decl)
             case SourceInitExpressionNode():
                 if source_node.expression:
                     self.check_expression(source_node.expression)
 
     def check_program(self, source_node: SourceProgramNode):
-        for f in source_node.declarations:
-            self.check_declaration(f)
+        for decl in source_node.declarations:
+            self.check_declaration(decl, at_file_scope=True)
