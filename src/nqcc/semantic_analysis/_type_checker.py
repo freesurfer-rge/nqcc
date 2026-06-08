@@ -34,57 +34,155 @@ from nqcc.parser import (
 )
 
 
+class InitialValueBase(BaseModel):
+    initial_value_type: str
+
+
+class Tentative(InitialValueBase):
+    initial_value_type: Literal["Tentative"] = "Tentative"
+
+
+class Initial(InitialValueBase):
+    initial_value_type: Literal["Initial"] = "Initial"
+    value: int
+
+
+class NoInitialiser(InitialValueBase):
+    initial_value_type: Literal["NoInitialiser"] = "NoInitialiser"
+
+
+InitialValue = Union[Tentative, Initial, NoInitialiser]
+
+
 class SymbolEntry(BaseModel):
     entry_type: str
 
 
-class VariableInt(SymbolEntry):
-    entry_type: Literal["VariableInt"] = "VariableInt"
+class LocalVariableType(SymbolEntry):
+    entry_type: Literal["LocalVariableType"] = "LocalVariableType"
+    variable_type: str
 
 
-class VariableNotATypeForUnion(SymbolEntry):
-    # This is so get_args(VariableType) works
-    pass
-
-
-VariableType = Union[VariableInt, VariableNotATypeForUnion]
+class StaticVariableType(SymbolEntry):
+    entry_type: Literal["StaticVariableType"] = "StaticVariableType"
+    variable_type: str
+    initial_value: InitialValue
+    is_global: bool
 
 
 class FunctionType(BaseModel):
     entry_type: Literal["FunctionType"] = "FunctionType"
     param_count: int
     defined: bool
+    is_global: bool
 
 
-SymbolType = Union[VariableType, FunctionType]
+SymbolType = Union[LocalVariableType, StaticVariableType, FunctionType]
 
 
 class SymbolTable(BaseModel):
     symbol_table: dict[str, SymbolType] = Field(default_factory=dict)
 
-    def check_declaration(self, source_node: SourceDeclarationNode):
+    def check_declaration(self, source_node: SourceDeclarationNode, *, at_file_scope: bool):
         match source_node:
             case SourceVariableDeclarationNode():
-                self.check_variable_declaration(source_node)
+                if at_file_scope:
+                    self.check_file_scope_variable_declaration(source_node)
+                else:
+                    self.check_local_variable_declaration(source_node)
             case SourceFunctionDeclarationNode():
                 self.check_function_declaration(source_node)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")
 
-    def check_variable_declaration(self, source_node: SourceVariableDeclarationNode):
+    def check_local_variable_declaration(self, source_node: SourceVariableDeclarationNode):
         assert isinstance(source_node, SourceVariableDeclarationNode)
-        # We should have fully unique names by this point.....
-        assert source_node.identifier.identifier not in self.symbol_table
 
-        self.symbol_table[source_node.identifier.identifier] = VariableInt()
-        if source_node.initial:
-            self.check_expression(source_node.initial)
+        if source_node.storage_class and source_node.storage_class.storage_type == "Extern":
+            if source_node.initial is not None:
+                raise ValueError(f"Initialiser on local extern variable: {source_node}")
+            if source_node.identifier.identifier in self.symbol_table:
+                old_decl = self.symbol_table[source_node.identifier.identifier]
+                if isinstance(old_decl, FunctionType):
+                    raise ValueError(f"Function redeclared as variable {source_node}")
+            else:
+                extern_symbol = StaticVariableType(
+                    variable_type="int", initial_value=NoInitialiser(), is_global=True
+                )
+                self.symbol_table[source_node.identifier.identifier] = extern_symbol
+        elif source_node.storage_class and source_node.storage_class.storage_type == "Static":
+            initial_value: InitialValue
+            if source_node.initial and isinstance(source_node.initial, SourceConstantIntNode):
+                initial_value = Initial(value=source_node.initial.value)
+            elif not source_node.initial:
+                initial_value = Initial(value=0)
+            else:
+                raise ValueError("Non-constant initialiser on local static variable")
+            new_symbol = StaticVariableType(
+                variable_type="int", initial_value=initial_value, is_global=False
+            )
+            self.symbol_table[source_node.identifier.identifier] = new_symbol
+        else:
+            # Regular local variable
+            # We should have fully unique names by this point.....
+            assert source_node.identifier.identifier not in self.symbol_table
+
+            self.symbol_table[source_node.identifier.identifier] = LocalVariableType(
+                variable_type="int"
+            )
+            if source_node.initial:
+                self.check_expression(source_node.initial)
+
+    def check_file_scope_variable_declaration(self, source_node: SourceVariableDeclarationNode):  # noqa: C901
+        assert isinstance(source_node, SourceVariableDeclarationNode)
+
+        initial_value: InitialValueBase
+        if isinstance(source_node.initial, SourceConstantIntNode):
+            initial_value = Initial(value=source_node.initial.value)
+        elif source_node.initial is None:
+            if source_node.storage_class and source_node.storage_class.storage_type == "Extern":
+                initial_value = NoInitialiser()
+            else:
+                initial_value = Tentative()
+        else:
+            raise ValueError(f"Non-constant initialiser: {source_node}")
+
+        is_global = True
+        if source_node.storage_class and source_node.storage_class.storage_type == "Static":
+            is_global = False
+
+        if source_node.identifier.identifier in self.symbol_table:
+            old_decl = self.symbol_table[source_node.identifier.identifier]
+            if not isinstance(old_decl, StaticVariableType):
+                raise ValueError(f"Function redeclared as variable {source_node}")
+            if source_node.storage_class and source_node.storage_class.storage_type == "Extern":
+                is_global = old_decl.is_global
+            elif old_decl.is_global != is_global:
+                raise ValueError(f"Conflicting variable linkage: {source_node}")
+
+            if isinstance(old_decl.initial_value, Initial):
+                if isinstance(initial_value, Initial):
+                    raise ValueError(f"Conflicting file scope variable definitions: {source_node}")
+                else:
+                    initial_value = old_decl.initial_value
+            elif not isinstance(initial_value, Initial) and isinstance(
+                old_decl.initial_value, Tentative
+            ):
+                initial_value = Tentative()
+
+        new_decl = StaticVariableType(
+            variable_type="int", initial_value=initial_value, is_global=is_global
+        )
+        self.symbol_table[source_node.identifier.identifier] = new_decl
 
     def check_function_declaration(self, source_node: SourceFunctionDeclarationNode):
         assert isinstance(source_node, SourceFunctionDeclarationNode)
 
         has_body = source_node.body is not None
         already_defined = False
+        function_is_global = True
+        if source_node.storage_class and source_node.storage_class.storage_type == "Static":
+            function_is_global = False
 
         if source_node.identifier in self.symbol_table:
             old_decl = self.symbol_table[source_node.identifier]
@@ -95,14 +193,25 @@ class SymbolTable(BaseModel):
             if already_defined and has_body:
                 raise ValueError(f"Function defined more than once: {source_node}")
 
+            if (
+                old_decl.is_global
+                and source_node.storage_class
+                and source_node.storage_class.storage_type == "Static"
+            ):
+                raise ValueError(f"Static function declaration follows non-static: {source_node}")
+
+            function_is_global = old_decl.is_global
+
         new_symbol = FunctionType(
-            param_count=len(source_node.params), defined=already_defined or has_body
+            param_count=len(source_node.params),
+            defined=already_defined or has_body,
+            is_global=function_is_global,
         )
         self.symbol_table[source_node.identifier] = new_symbol
 
         if source_node.body is not None:
             for p in source_node.params:
-                self.symbol_table[p] = VariableInt()
+                self.symbol_table[p] = LocalVariableType(variable_type="int")
             self.check_block(source_node.body)
 
     def check_expression(self, source_node: SourceExpressionNode):  # noqa: C901
@@ -120,7 +229,7 @@ class SymbolTable(BaseModel):
                     self.check_expression(arg)
             case SourceVarNode():
                 v_symbol = self.symbol_table[source_node.identifier]
-                if not isinstance(v_symbol, get_args(VariableType)):
+                if not isinstance(v_symbol, (LocalVariableType, StaticVariableType)):
                     raise ValueError(f"Function name used as variable: {source_node}")
             case SourceConstantIntNode():
                 pass
@@ -148,7 +257,7 @@ class SymbolTable(BaseModel):
     def check_blockitem(self, source_node: SourceBlockItemNode):
         match source_node:
             case _ if isinstance(source_node, get_args(SourceDeclarationNode)):
-                self.check_declaration(source_node)
+                self.check_declaration(source_node, at_file_scope=False)
             case _ if isinstance(source_node, get_args(SourceStatementNode)):
                 self.check_statement(source_node)
             case _:
@@ -190,11 +299,11 @@ class SymbolTable(BaseModel):
     def check_forinit(self, source_node: SourceForInitNode):
         match source_node:
             case SourceInitDeclNode():
-                self.check_variable_declaration(source_node.decl)
+                self.check_local_variable_declaration(source_node.decl)
             case SourceInitExpressionNode():
                 if source_node.expression:
                     self.check_expression(source_node.expression)
 
     def check_program(self, source_node: SourceProgramNode):
-        for f in source_node.declarations:
-            self.check_declaration(f)
+        for decl in source_node.declarations:
+            self.check_declaration(decl, at_file_scope=True)

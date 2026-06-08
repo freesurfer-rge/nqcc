@@ -31,7 +31,7 @@ class TestExpressions:
             initial=None,
             storage_class=None,
         )
-        _ = target.resolve_declaration(decl_a, identifier_map)
+        _ = target.resolve_declaration(decl_a, identifier_map, at_file_scope=False)
 
         # Our assignment
         c_str = "a=1;"
@@ -88,7 +88,7 @@ class TestExpressions:
                 initial=None,
                 storage_class=None,
             )
-            _ = target.resolve_declaration(decl, identifier_map)
+            _ = target.resolve_declaration(decl, identifier_map, at_file_scope=False)
 
         result = target.resolve_expression(ternary_expr, identifier_map)
         assert isinstance(result, SourceTernaryExpressonNode)
@@ -118,7 +118,7 @@ class TestFunctionCalls:
             storage_class=None,
         )
 
-        _ = target.resolve_declaration(decl, identifier_map)
+        _ = target.resolve_declaration(decl, identifier_map, at_file_scope=False)
         assert "some_func" in identifier_map
 
         result = target.resolve_expression(func_call_expr, identifier_map)
@@ -167,7 +167,7 @@ class TestFunctionCalls:
         var_decl = parse_declaration(token_tape)
         assert token_tape.tokens_remaining == 0
         assert isinstance(var_decl, SourceVariableDeclarationNode)
-        var_resolved = target.resolve_declaration(var_decl, identifier_map)
+        var_resolved = target.resolve_declaration(var_decl, identifier_map, at_file_scope=False)
         assert var_resolved.identifier.identifier == "a.1"
 
         call_str = "some_func(a);"

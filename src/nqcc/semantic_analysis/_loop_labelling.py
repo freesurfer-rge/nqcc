@@ -93,5 +93,5 @@ def label_loops_program(prog: SourceProgramNode) -> None:
     assert isinstance(prog, SourceProgramNode)
 
     for decl in prog.declarations:
-        assert isinstance(decl, SourceFunctionDeclarationNode), "TBD"
-        label_loops_function(decl)
+        if isinstance(decl, SourceFunctionDeclarationNode):
+            label_loops_function(decl)

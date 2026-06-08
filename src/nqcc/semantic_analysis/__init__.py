@@ -12,21 +12,35 @@ from ._identifier_resolution import (
     resolve_program,
 )
 from ._loop_labelling import LoopLabeller, label_loops_function, label_loops_program
-from ._type_checker import FunctionType, SymbolTable, SymbolType, VariableInt, VariableType
+from ._type_checker import (
+    FunctionType,
+    Initial,
+    InitialValue,
+    LocalVariableType,
+    NoInitialiser,
+    StaticVariableType,
+    SymbolTable,
+    SymbolType,
+    Tentative,
+)
 
 __all__ = [
     "FunctionType",
     "IdentifierInfo",
     "IdentifierResolver",
+    "Initial",
+    "InitialValue",
+    "LocalVariableType",
     "LoopLabeller",
+    "NoInitialiser",
     "SemanticAnalysisBadLValue",
     "SemanticAnalysisDuplicateDeclaration",
     "SemanticAnalysisOutsideLoop",
     "SemanticAnalysisUnknownIdentifier",
+    "StaticVariableType",
     "SymbolTable",
     "SymbolType",
-    "VariableInt",
-    "VariableType",
+    "Tentative",
     "label_loops_function",
     "label_loops_program",
     "make_inner_identifier_map",

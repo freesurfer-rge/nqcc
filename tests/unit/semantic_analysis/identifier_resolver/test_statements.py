@@ -63,7 +63,7 @@ class TestStatements:
             initial=None,
             storage_class=None,
         )
-        _ = target.resolve_declaration(decl_a, identifier_map)
+        _ = target.resolve_declaration(decl_a, identifier_map, at_file_scope=False)
 
         result = target.resolve_statement(stmt, identifier_map)
         assert isinstance(result, SourceExpressionStatementNode)
@@ -88,7 +88,7 @@ class TestStatements:
             initial=None,
             storage_class=None,
         )
-        _ = target.resolve_declaration(decl_a, identifier_map)
+        _ = target.resolve_declaration(decl_a, identifier_map, at_file_scope=False)
 
         result = target.resolve_statement(stmt, identifier_map)
         assert isinstance(result, SourceReturnNode)
@@ -123,14 +123,14 @@ class TestConditionals:
             initial=None,
             storage_class=None,
         )
-        _ = target.resolve_declaration(decl_a, identifier_map)
+        _ = target.resolve_declaration(decl_a, identifier_map, at_file_scope=False)
         decl_b = SourceVariableDeclarationNode(
             start_position=11,
             identifier=SourceVarNode(start_position=12, identifier="b"),
             initial=None,
             storage_class=None,
         )
-        _ = target.resolve_declaration(decl_b, identifier_map)
+        _ = target.resolve_declaration(decl_b, identifier_map, at_file_scope=False)
 
         result = target.resolve_statement(stmt, identifier_map)
         assert isinstance(result, SourceIfStatementNode)
@@ -164,7 +164,7 @@ class TestLoops:
             initial=None,
             storage_class=None,
         )
-        _ = target.resolve_declaration(decl_a, identifier_map)
+        _ = target.resolve_declaration(decl_a, identifier_map, at_file_scope=False)
 
         result = target.resolve_statement(stmt, identifier_map)
         assert len(identifier_map) == 1
@@ -198,7 +198,7 @@ class TestLoops:
             initial=None,
             storage_class=None,
         )
-        _ = target.resolve_declaration(decl_a, identifier_map)
+        _ = target.resolve_declaration(decl_a, identifier_map, at_file_scope=False)
 
         result = target.resolve_statement(stmt, identifier_map)
         assert len(identifier_map) == 1
@@ -232,7 +232,7 @@ class TestLoops:
             initial=None,
             storage_class=None,
         )
-        _ = target.resolve_declaration(decl_a, identifier_map)
+        _ = target.resolve_declaration(decl_a, identifier_map, at_file_scope=False)
 
         # And also 'b'
         decl_b = SourceVariableDeclarationNode(
@@ -241,7 +241,7 @@ class TestLoops:
             initial=None,
             storage_class=None,
         )
-        _ = target.resolve_declaration(decl_b, identifier_map)
+        _ = target.resolve_declaration(decl_b, identifier_map, at_file_scope=False)
 
         result = target.resolve_statement(stmt, identifier_map)
         assert len(identifier_map) == 2
@@ -287,7 +287,7 @@ class TestLoops:
             initial=None,
             storage_class=None,
         )
-        _ = target.resolve_declaration(decl_a, identifier_map)
+        _ = target.resolve_declaration(decl_a, identifier_map, at_file_scope=False)
 
         # And also 'b'
         decl_b = SourceVariableDeclarationNode(
@@ -296,7 +296,7 @@ class TestLoops:
             initial=None,
             storage_class=None,
         )
-        _ = target.resolve_declaration(decl_b, identifier_map)
+        _ = target.resolve_declaration(decl_b, identifier_map, at_file_scope=False)
 
         result = target.resolve_statement(stmt, identifier_map)
         # Original variable map unaffected by inner 'a' decl

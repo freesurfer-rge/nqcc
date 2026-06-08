@@ -3,8 +3,11 @@ import pytest
 from nqcc.parser import SourceProgramNode, TokenTape, parse_program
 from nqcc.semantic_analysis import (
     FunctionType,
+    Initial,
+    LocalVariableType,
+    NoInitialiser,
+    StaticVariableType,
     SymbolTable,
-    VariableInt,
     label_loops_program,
     resolve_program,
 )
@@ -34,6 +37,7 @@ class TestTypesOK:
 
         assert len(target.symbol_table) == 1
         assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
 
     def test_simple_decl(self):
         c_str = "int main(void) { int a = 2; return a;}"
@@ -45,7 +49,25 @@ class TestTypesOK:
 
         assert len(target.symbol_table) == 2
         assert isinstance(target.symbol_table["main"], FunctionType)
-        assert isinstance(target.symbol_table["a.0"], VariableInt)
+        assert target.symbol_table["main"].is_global
+        assert isinstance(target.symbol_table["a.0"], LocalVariableType)
+        assert target.symbol_table["a.0"].variable_type == "int"
+
+    def test_extern_decl(self):
+        c_str = "int main(void) { extern int a; return a;}"
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        target.check_program(prog)
+
+        assert len(target.symbol_table) == 2
+        assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
+        var_a = target.symbol_table["a"]
+        assert isinstance(var_a, StaticVariableType)
+        assert isinstance(var_a.initial_value, NoInitialiser)
+        assert var_a.is_global
 
     def test_extra_function(self):
         c_str = """int foo(void) { return 2; }
@@ -79,9 +101,144 @@ class TestTypesOK:
 
         assert len(target.symbol_table) == 4
         assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
         assert isinstance(target.symbol_table["check"], FunctionType)
-        assert isinstance(target.symbol_table["a.arg.0"], VariableInt)
-        assert isinstance(target.symbol_table["a.1"], VariableInt)
+        assert target.symbol_table["check"].is_global
+        assert isinstance(target.symbol_table["a.arg.0"], LocalVariableType)
+        assert target.symbol_table["a.arg.0"].variable_type == "int"
+        assert isinstance(target.symbol_table["a.1"], LocalVariableType)
+        assert target.symbol_table["a.1"].variable_type == "int"
+
+    def test_static_func(self):
+        c_str = """static int check(int a) { return a%2 ? 1: 2;}
+
+        int main( void ) {
+            int a = 10;
+            return check(a);
+        }
+        """
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        target.check_program(prog)
+
+        assert len(target.symbol_table) == 4
+        assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
+        assert isinstance(target.symbol_table["check"], FunctionType)
+        assert not target.symbol_table["check"].is_global
+        assert isinstance(target.symbol_table["a.arg.0"], LocalVariableType)
+        assert target.symbol_table["a.arg.0"].variable_type == "int"
+        assert isinstance(target.symbol_table["a.1"], LocalVariableType)
+        assert target.symbol_table["a.1"].variable_type == "int"
+
+    def test_file_scope_variable(self):
+        c_str = """
+        int a;
+        int a = 0;
+
+        int main(void) { return a;}
+        """
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        target.check_program(prog)
+
+        assert len(target.symbol_table) == 2
+        assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
+
+        var_a = target.symbol_table["a"]
+        assert isinstance(var_a, StaticVariableType)
+        assert var_a.initial_value == Initial(value=0)
+        assert var_a.is_global
+
+    def test_file_scope_extern_variable(self):
+        c_str = """
+        extern int a;
+
+        int main(void) { return a;}
+        """
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        target.check_program(prog)
+
+        assert len(target.symbol_table) == 2
+        assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
+
+        var_a = target.symbol_table["a"]
+        assert isinstance(var_a, StaticVariableType)
+        assert var_a.initial_value == NoInitialiser()
+        assert var_a.is_global
+
+    def test_file_scope_static_variable(self):
+        c_str = """
+        static int a;
+        static int a = 1;
+
+        int main(void) { return a;}
+        """
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        target.check_program(prog)
+
+        assert len(target.symbol_table) == 2
+        assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
+
+        var_a = target.symbol_table["a"]
+        assert isinstance(var_a, StaticVariableType)
+        assert var_a.initial_value == Initial(value=1)
+        assert not var_a.is_global
+
+    def test_local_static_variable(self):
+        c_str = """
+        int main(void) {
+            static int a = 2;
+            return a;
+        }
+        """
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        target.check_program(prog)
+
+        assert len(target.symbol_table) == 2
+        assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
+
+        var_a = target.symbol_table["a.0"]
+        assert isinstance(var_a, StaticVariableType)
+        assert var_a.initial_value == Initial(value=2)
+        assert not var_a.is_global
+
+    def test_local_static_variable_no_init(self):
+        c_str = """
+        int main(void) {
+            static int a;
+            return a;
+        }
+        """
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        target.check_program(prog)
+
+        assert len(target.symbol_table) == 2
+        assert isinstance(target.symbol_table["main"], FunctionType)
+        assert target.symbol_table["main"].is_global
+
+        var_a = target.symbol_table["a.0"]
+        assert isinstance(var_a, StaticVariableType)
+        assert var_a.initial_value == Initial(value=0)
+        assert not var_a.is_global
 
 
 class TestTypesFail:
@@ -153,4 +310,97 @@ class TestTypesFail:
 
         target = SymbolTable()
         with pytest.raises(ValueError, match="Function name used as variable"):
+            target.check_program(prog)
+
+    def test_extern_decl_with_initialiser(self):
+        c_str = "int main(void) { extern int a = 2; return a;}"
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        with pytest.raises(ValueError, match="Initialiser on local extern variable"):
+            target.check_program(prog)
+
+    def test_extern_decl_redeclare_func(self):
+        c_str = """
+        int main(void) {
+            int a(void);
+            extern int a;
+
+            return 1;
+        }
+        """
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        with pytest.raises(ValueError, match="Function redeclared as variable"):
+            target.check_program(prog)
+
+    def test_file_scope_static_variable(self):
+        c_str = """
+        int a;
+        static int a = 1;
+
+        int main(void) { return a;}
+        """
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        with pytest.raises(ValueError, match="Conflicting variable linkage"):
+            target.check_program(prog)
+
+    def test_nonconst_initialiser(self):
+        c_str = """
+        static int a = 1+2;
+
+        int main(void) { return a;}
+        """
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        with pytest.raises(ValueError, match="Non-constant initialiser"):
+            target.check_program(prog)
+
+    def test_double_initialise(self):
+        c_str = """
+        int a = 1;
+        int a = 2;
+
+        int main(void) { return a;}
+        """
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        with pytest.raises(ValueError, match="Conflicting file scope variable definitions"):
+            target.check_program(prog)
+
+    def test_func_redecl(self):
+        c_str = """
+        int a(void);
+        static int a;
+
+        int main(void) { return a;}
+        """
+
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        with pytest.raises(ValueError, match="Function redeclared as variable"):
+            target.check_program(prog)
+
+    def test_local_static_variable_nonconst_init(self):
+        c_str = """
+        int main(void) {
+            static int a = 1+2;
+            return a;
+        }
+        """
+        prog = prepare_program(c_str)
+
+        target = SymbolTable()
+        with pytest.raises(ValueError, match="Non-constant initialiser on local static variable"):
             target.check_program(prog)

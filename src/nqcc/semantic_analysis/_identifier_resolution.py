@@ -26,6 +26,7 @@ from nqcc.parser import (
     SourceProgramNode,
     SourceReturnNode,
     SourceStatementNode,
+    SourceStorageType,
     SourceTernaryExpressonNode,
     SourceUnaryExpressionNode,
     SourceVariableDeclarationNode,
@@ -59,11 +60,18 @@ class IdentifierResolver:
         self._counter = 0
 
     def resolve_declaration(
-        self, decl: SourceDeclarationNode, identifier_map: dict[str, IdentifierInfo]
+        self,
+        decl: SourceDeclarationNode,
+        identifier_map: dict[str, IdentifierInfo],
+        *,
+        at_file_scope: bool,
     ) -> SourceDeclarationNode:
         match decl:
             case SourceVariableDeclarationNode():
-                return self.resolve_variable_declaration(decl, identifier_map)
+                if at_file_scope:
+                    return self.resolve_file_scope_variable_declaration(decl, identifier_map)
+                else:
+                    return self.resolve_local_variable_declaration(decl, identifier_map)
             case SourceFunctionDeclarationNode():
                 return self.resolve_function_declaration(decl, identifier_map)
             case _:
@@ -99,14 +107,36 @@ class IdentifierResolver:
             storage_class=decl.storage_class,
         )
 
-    def resolve_variable_declaration(
+    def resolve_file_scope_variable_declaration(
+        self, decl: SourceVariableDeclarationNode, identifier_map: dict[str, IdentifierInfo]
+    ) -> SourceVariableDeclarationNode:
+        assert isinstance(decl, SourceVariableDeclarationNode)
+        identifier_map[decl.identifier.identifier] = IdentifierInfo(
+            name=decl.identifier.identifier, from_current_scope=True, has_linkage=True
+        )
+        return decl
+
+    def resolve_local_variable_declaration(
         self, decl: SourceVariableDeclarationNode, identifier_map: dict[str, IdentifierInfo]
     ) -> SourceVariableDeclarationNode:
         assert isinstance(decl, SourceVariableDeclarationNode)
 
         orig_name = decl.identifier.identifier
-        if orig_name in identifier_map and identifier_map[orig_name].from_current_scope:
-            raise SemanticAnalysisDuplicateDeclaration(decl=decl)
+        if orig_name in identifier_map:
+            prev_entry = identifier_map[orig_name]
+            if prev_entry.from_current_scope:
+                if not (
+                    prev_entry.has_linkage
+                    and decl.storage_class == SourceStorageType(storage_type="Extern")
+                ):
+                    raise SemanticAnalysisDuplicateDeclaration(decl=decl)
+
+        if decl.storage_class == SourceStorageType(storage_type="Extern"):
+            identifier_map[orig_name] = IdentifierInfo(
+                name=orig_name, from_current_scope=True, has_linkage=True
+            )
+            return decl
+
         unique_name = f"{orig_name}.{self._counter}"
         self._counter += 1
         identifier_map[orig_name] = IdentifierInfo(
@@ -152,7 +182,7 @@ class IdentifierResolver:
         sp = init.start_position
         match init:
             case SourceInitDeclNode():
-                updated_decl = self.resolve_variable_declaration(init.decl, identifier_map)
+                updated_decl = self.resolve_local_variable_declaration(init.decl, identifier_map)
                 return SourceInitDeclNode(start_position=sp, decl=updated_decl)
             case SourceInitExpressionNode():
                 updated_exp = self.resolve_optional_expression(init.expression, identifier_map)
@@ -295,11 +325,13 @@ class IdentifierResolver:
 
         match bi:
             case SourceVariableDeclarationNode():
-                return self.resolve_declaration(bi, identifier_map)
+                return self.resolve_declaration(bi, identifier_map, at_file_scope=False)
             case SourceFunctionDeclarationNode():
                 if bi.body is not None:
                     raise ValueError("Cannot nest function definitions")
-                return self.resolve_declaration(bi, identifier_map)
+                if bi.storage_class == SourceStorageType(storage_type="Static"):
+                    raise ValueError("Cannot declare static function at block level")
+                return self.resolve_declaration(bi, identifier_map, at_file_scope=False)
             case _ if isinstance(bi, get_args(SourceStatementNode)):
                 return self.resolve_statement(bi, identifier_map)
             case _:
@@ -309,10 +341,9 @@ class IdentifierResolver:
 def resolve_program(prog: SourceProgramNode) -> SourceProgramNode:
     resolver = IdentifierResolver()
     identifier_map: dict[str, IdentifierInfo] = {}
-    updated_funcs: list[SourceDeclarationNode] = []
-    for f in prog.declarations:
-        updated = resolver.resolve_declaration(f, identifier_map)
-        assert isinstance(updated, SourceFunctionDeclarationNode)
-        updated_funcs.append(updated)
-    result = SourceProgramNode(start_position=prog.start_position, declarations=updated_funcs)
+    updated_decls: list[SourceDeclarationNode] = []
+    for decl in prog.declarations:
+        updated = resolver.resolve_declaration(decl, identifier_map, at_file_scope=True)
+        updated_decls.append(updated)
+    result = SourceProgramNode(start_position=prog.start_position, declarations=updated_decls)
     return result
