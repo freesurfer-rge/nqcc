@@ -1,6 +1,7 @@
 import pathlib
 
 from nqcc.parser import SourceProgramNode
+from nqcc.semantic_analysis import SymbolTable
 
 from ._tacky_ast import TackyProgramNode
 from ._tacky_generator import TackyGenerator
@@ -9,12 +10,12 @@ TACKY_FILE = "tacky.ast"
 
 
 def tacky_driver(
-    source_program: SourceProgramNode, *, working_dir: pathlib.Path
+    source_program: SourceProgramNode, symbol_table: SymbolTable, *, working_dir: pathlib.Path
 ) -> TackyProgramNode:
     assert working_dir.exists(), f"Unable to find working directory {working_dir}"
 
     generator = TackyGenerator()
-    tacky_ast = generator.emit_program(source_program)
+    tacky_ast = generator.emit_program(source_program, symbol_table)
 
     output_path = working_dir / TACKY_FILE
     with open(output_path, "w") as of:

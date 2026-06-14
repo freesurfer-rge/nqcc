@@ -52,6 +52,7 @@ from nqcc.parser import (
     SourceVarNode,
     SourceWhileNode,
 )
+from nqcc.semantic_analysis import SymbolTable, FunctionType
 
 from ._tacky_ast import (
     TackyAdd,
@@ -86,7 +87,7 @@ from ._tacky_ast import (
     TackyReturnNode,
     TackyRightShift,
     TackySubtract,
-    TackyUnaryNode,
+    TackyUnaryNode,TackyTopLevelNode,
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,
@@ -611,8 +612,13 @@ class TackyGenerator:
         for block_item in source_node.items:
             self.emit_blockitem(block_item)
 
-    def emit_function(self, source_node: SourceFunctionDeclarationNode) -> TackyFunctionNode | None:
+    def emit_function(
+        self, source_node: SourceFunctionDeclarationNode, symbol_table: SymbolTable
+    ) -> TackyFunctionNode | None:
         assert isinstance(source_node, SourceFunctionDeclarationNode)
+
+        symbol = symbol_table.symbol_table[source_node.identifier]
+        assert isinstance(symbol, FunctionType)
 
         if source_node.body is None:
             # Nothing to do for declarations
@@ -640,16 +646,19 @@ class TackyGenerator:
             identifier=source_node.identifier,
             params=source_node.params,
             instructions=self._current_instructions,
+            is_global=symbol.is_global,
         )
 
-    def emit_program(self, source_node: SourceProgramNode) -> TackyProgramNode:
+    def emit_program(
+        self, source_node: SourceProgramNode, symbol_table: SymbolTable
+    ) -> TackyProgramNode:
         assert isinstance(source_node, SourceProgramNode)
 
-        funcs = []
+        definitions: list[TackyTopLevelNode] = []
         for decl in source_node.declarations:
             assert isinstance(decl, SourceFunctionDeclarationNode), "TBD"
-            nxt = self.emit_function(decl)
+            nxt = self.emit_function(decl, symbol_table)
             if nxt:
-                funcs.append(nxt)
+                definitions.append(nxt)
 
-        return TackyProgramNode(start_position=0, function_definitions=funcs)
+        return TackyProgramNode(start_position=0, definitions=definitions)
