@@ -75,9 +75,13 @@ class TestFunctions:
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_function(token_tape)
 
+
+        st = SymbolTable()
+        st.check_function_declaration(src_node)
+
         target = TackyGenerator()
 
-        result = target.emit_function(src_node)
+        result = target.emit_function(src_node, st)
         assert isinstance(result, TackyFunctionNode)
         assert result.identifier == "main"
         assert len(result.instructions) == 3
@@ -111,6 +115,9 @@ class TestFunctions:
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_function(token_tape)
 
+        st = SymbolTable()
+        st.check_function_declaration(src_node)
+
         resolver = IdentifierResolver()
         identifier_map: dict[str, IdentifierInfo] = {}
 
@@ -119,7 +126,7 @@ class TestFunctions:
 
         target = TackyGenerator()
 
-        result = target.emit_function(resolved_node)
+        result = target.emit_function(resolved_node, st)
         assert isinstance(result, TackyFunctionNode)
         assert result.identifier == "main"
         assert len(result.instructions) == 5
@@ -151,7 +158,7 @@ class TestFunctions:
         )
 
 
-def prepare_program(c_str: str) -> SourceProgramNode:
+def prepare_program(c_str: str) -> tuple[SourceProgramNode, SymbolTable]:
     token_tape = TokenTape.from_c_source(c_str)
 
     program = parse_program(token_tape)
@@ -164,7 +171,7 @@ def prepare_program(c_str: str) -> SourceProgramNode:
     st = SymbolTable()
     st.check_program(resolved_program)
 
-    return resolved_program
+    return resolved_program, st
 
 
 class TestPrograms:
@@ -215,12 +222,12 @@ class TestPrograms:
         }
         """
 
-        src_node = prepare_program(c_str)
+        src_node, symbol_table = prepare_program(c_str)
         assert isinstance(src_node, SourceProgramNode)
 
         target = TackyGenerator()
 
-        result = target.emit_program(src_node)
+        result = target.emit_program(src_node, symbol_table)
         assert isinstance(result, TackyProgramNode)
         # Make sure we don't have duplicate from the declaration of 'inc'
         assert len(result.function_definitions) == 2
@@ -285,7 +292,7 @@ class TestPrograms:
             return a % 2;
         }
         """
-        src_node = prepare_program(c_str)
+        src_node, symbol_table = prepare_program(c_str, symbol_table)
         assert isinstance(src_node, SourceProgramNode)
 
         target = TackyGenerator()
