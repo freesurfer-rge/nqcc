@@ -1,20 +1,27 @@
+import pathlib
+import tempfile
+
 from nqcc.parser import TokenTape, parse_program
+from nqcc.semantic_analysis import semantic_analysis_driver
 from nqcc.tacky import TackyGenerator, TackyProgramNode
 
 
 class TestTackySerde:
     def _round_trip(self, source: str) -> None:
-        token_tape = TokenTape.from_c_source(source)
-        src_node = parse_program(token_tape)
+        with tempfile.TemporaryDirectory() as working_dir:
+            token_tape = TokenTape.from_c_source(source)
+            src_node = parse_program(token_tape)
 
-        target = TackyGenerator()
-        orig = target.emit_program(src_node)
+            src_node, symbol_table = semantic_analysis_driver(src_node, working_dir=pathlib.Path(working_dir))
 
-        json_str = orig.model_dump_json()
+            target = TackyGenerator()
+            orig = target.emit_program(src_node, symbol_table)
 
-        restored = TackyProgramNode.model_validate_json(json_str)
+            json_str = orig.model_dump_json()
 
-        assert restored == orig
+            restored = TackyProgramNode.model_validate_json(json_str)
+
+            assert restored == orig
 
     def test_simple(self):
         source = " int main(void) {return -  (  ~(566));}"
