@@ -28,6 +28,7 @@ from nqcc.codegen import (
     convert_tacky_program,
 )
 from nqcc.parser import TokenTape, parse_function, parse_program
+from nqcc.semantic_analysis import SymbolTable
 from nqcc.tacky import TackyGenerator
 
 
@@ -181,8 +182,10 @@ class TestFunctionUpdate:
         source = "   int main(void) {return -    508;}"
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_function(token_tape)
+        st = SymbolTable()
+        st.check_function_declaration(src_node)
         tg = TackyGenerator()
-        tacky_func = tg.emit_function(src_node)
+        tacky_func = tg.emit_function(src_node, st)
         asm_func = convert_tacky_function(tacky_func)
 
         target = PseudoRegisterReplacer()
@@ -216,8 +219,12 @@ class TestFunctionUpdate:
         source = "   int main(void) {return 1 + 4;}"
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_function(token_tape)
+
+        st = SymbolTable()
+        st.check_function_declaration(src_node)
+
         tg = TackyGenerator()
-        tacky_func = tg.emit_function(src_node)
+        tacky_func = tg.emit_function(src_node, st)
         asm_func = convert_tacky_function(tacky_func)
 
         target = PseudoRegisterReplacer()
@@ -258,8 +265,10 @@ class TestProgramUpdate:
         source = "   int main(void) {return ~(   -509);}"
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_program(token_tape)
+        st = SymbolTable()
+        st.check_program(src_node)
         tg = TackyGenerator()
-        tacky_program = tg.emit_program(src_node)
+        tacky_program = tg.emit_program(src_node, st)
         asm_prog = convert_tacky_program(tacky_program)
 
         target = PseudoRegisterReplacer()

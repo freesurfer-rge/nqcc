@@ -75,11 +75,15 @@ class TestFunctions:
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_function(token_tape)
 
+        st = SymbolTable()
+        st.check_function_declaration(src_node)
+
         target = TackyGenerator()
 
-        result = target.emit_function(src_node)
+        result = target.emit_function(src_node, st)
         assert isinstance(result, TackyFunctionNode)
         assert result.identifier == "main"
+        assert result.is_global
         assert len(result.instructions) == 3
 
         instr0 = result.instructions[0]
@@ -100,6 +104,40 @@ class TestFunctions:
             start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
         )
 
+    def test_simple_static(self) -> None:
+        source = "static int get_const(void) {return -    508;}"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_function(token_tape)
+
+        st = SymbolTable()
+        st.check_function_declaration(src_node)
+
+        target = TackyGenerator()
+
+        result = target.emit_function(src_node, st)
+        assert isinstance(result, TackyFunctionNode)
+        assert result.identifier == "get_const"
+        assert not result.is_global
+        assert len(result.instructions) == 3
+
+        instr0 = result.instructions[0]
+        assert isinstance(instr0, TackyUnaryNode)
+        assert instr0 == TackyUnaryNode(
+            start_position=35,
+            operator=TackyNegate(start_position=35),
+            src=TackyConstantIntNode(start_position=40, value=508),
+            dst=TackyVarNode(start_position=35, identifier="tmp.get_const.0"),
+        )
+
+        instr1 = result.instructions[1]
+        assert isinstance(instr1, TackyReturnNode)
+        assert instr1 == TackyReturnNode(start_position=28, value=instr0.dst)
+
+        # Recall that we force an extra 'return 0' in the tacky function generator
+        assert result.instructions[-1] == TackyReturnNode(
+            start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
+        )
+
     def test_simple_decl(self) -> None:
         source = """int main (  void ) {
             int a;
@@ -111,6 +149,9 @@ class TestFunctions:
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_function(token_tape)
 
+        st = SymbolTable()
+        st.check_function_declaration(src_node)
+
         resolver = IdentifierResolver()
         identifier_map: dict[str, IdentifierInfo] = {}
 
@@ -119,9 +160,10 @@ class TestFunctions:
 
         target = TackyGenerator()
 
-        result = target.emit_function(resolved_node)
+        result = target.emit_function(resolved_node, st)
         assert isinstance(result, TackyFunctionNode)
         assert result.identifier == "main"
+        assert result.is_global
         assert len(result.instructions) == 5
 
         instr0 = target._current_instructions[0]
@@ -151,7 +193,7 @@ class TestFunctions:
         )
 
 
-def prepare_program(c_str: str) -> SourceProgramNode:
+def prepare_program(c_str: str) -> tuple[SourceProgramNode, SymbolTable]:
     token_tape = TokenTape.from_c_source(c_str)
 
     program = parse_program(token_tape)
@@ -164,7 +206,7 @@ def prepare_program(c_str: str) -> SourceProgramNode:
     st = SymbolTable()
     st.check_program(resolved_program)
 
-    return resolved_program
+    return resolved_program, st
 
 
 class TestPrograms:
@@ -173,14 +215,17 @@ class TestPrograms:
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_program(token_tape)
 
+        st = SymbolTable()
+        st.check_program(src_node)
+
         target = TackyGenerator()
 
-        result = target.emit_program(src_node)
+        result = target.emit_program(src_node, st)
         assert isinstance(result, TackyProgramNode)
         assert result.start_position == 0
 
-        assert len(result.function_definitions) == 1
-        main_func = result.function_definitions[0]
+        assert len(result.definitions) == 1
+        main_func = result.definitions[0]
         assert isinstance(main_func, TackyFunctionNode)
         assert main_func.identifier == "main"
         assert main_func.start_position == 1
@@ -215,17 +260,17 @@ class TestPrograms:
         }
         """
 
-        src_node = prepare_program(c_str)
+        src_node, symbol_table = prepare_program(c_str)
         assert isinstance(src_node, SourceProgramNode)
 
         target = TackyGenerator()
 
-        result = target.emit_program(src_node)
+        result = target.emit_program(src_node, symbol_table)
         assert isinstance(result, TackyProgramNode)
         # Make sure we don't have duplicate from the declaration of 'inc'
-        assert len(result.function_definitions) == 2
+        assert len(result.definitions) == 2
 
-        tacky_inc = result.function_definitions[0]
+        tacky_inc = result.definitions[0]
         assert isinstance(tacky_inc, TackyFunctionNode)
         assert tacky_inc.identifier == "inc"
         assert len(tacky_inc.params) == 1
@@ -247,7 +292,7 @@ class TestPrograms:
             start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
         )
 
-        tacky_main = result.function_definitions[1]
+        tacky_main = result.definitions[1]
         assert isinstance(tacky_main, TackyFunctionNode)
         assert tacky_main.identifier == "main"
         assert len(tacky_main.params) == 0
@@ -285,12 +330,12 @@ class TestPrograms:
             return a % 2;
         }
         """
-        src_node = prepare_program(c_str)
+        src_node, symbol_table = prepare_program(c_str)
         assert isinstance(src_node, SourceProgramNode)
 
         target = TackyGenerator()
 
-        result = target.emit_program(src_node)
+        result = target.emit_program(src_node, symbol_table)
         assert isinstance(result, TackyProgramNode)
         # Make sure we don't have duplicate from the declaration of 'g'
-        assert len(result.function_definitions) == 2
+        assert len(result.definitions) == 2

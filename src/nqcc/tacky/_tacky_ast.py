@@ -191,10 +191,21 @@ TackyInstruction = Union[
 class TackyFunctionNode(TackyASTNode):
     node_type: Literal["TackyFunctionNode"] = "TackyFunctionNode"
     identifier: str
+    is_global: bool
     params: list[str]
     instructions: list[TackyInstruction]
 
 
+class TackyStaticVariableNode(TackyASTNode):
+    node_type: Literal["StaticVariableNode"] = "StaticVariableNode"
+    identifier: str
+    is_global: bool
+    initialiser: int
+
+
+TackyTopLevelNode = Union[TackyFunctionNode, TackyStaticVariableNode]
+
+
 class TackyProgramNode(TackyASTNode):
     node_type: Literal["TackyProgramNode"] = "TackyProgramNode"
-    function_definitions: list[TackyFunctionNode]
+    definitions: list[TackyTopLevelNode]
