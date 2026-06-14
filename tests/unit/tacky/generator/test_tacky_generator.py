@@ -83,6 +83,7 @@ class TestFunctions:
         result = target.emit_function(src_node, st)
         assert isinstance(result, TackyFunctionNode)
         assert result.identifier == "main"
+        assert result.is_global
         assert len(result.instructions) == 3
 
         instr0 = result.instructions[0]
@@ -97,6 +98,40 @@ class TestFunctions:
         instr1 = result.instructions[1]
         assert isinstance(instr1, TackyReturnNode)
         assert instr1 == TackyReturnNode(start_position=16, value=instr0.dst)
+
+        # Recall that we force an extra 'return 0' in the tacky function generator
+        assert result.instructions[-1] == TackyReturnNode(
+            start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
+        )
+
+    def test_simple_static(self) -> None:
+        source = "static int get_const(void) {return -    508;}"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_function(token_tape)
+
+        st = SymbolTable()
+        st.check_function_declaration(src_node)
+
+        target = TackyGenerator()
+
+        result = target.emit_function(src_node, st)
+        assert isinstance(result, TackyFunctionNode)
+        assert result.identifier == "get_const"
+        assert not result.is_global
+        assert len(result.instructions) == 3
+
+        instr0 = result.instructions[0]
+        assert isinstance(instr0, TackyUnaryNode)
+        assert instr0 == TackyUnaryNode(
+            start_position=35,
+            operator=TackyNegate(start_position=35),
+            src=TackyConstantIntNode(start_position=40, value=508),
+            dst=TackyVarNode(start_position=35, identifier="tmp.get_const.0"),
+        )
+
+        instr1 = result.instructions[1]
+        assert isinstance(instr1, TackyReturnNode)
+        assert instr1 == TackyReturnNode(start_position=28, value=instr0.dst)
 
         # Recall that we force an extra 'return 0' in the tacky function generator
         assert result.instructions[-1] == TackyReturnNode(
@@ -128,6 +163,7 @@ class TestFunctions:
         result = target.emit_function(resolved_node, st)
         assert isinstance(result, TackyFunctionNode)
         assert result.identifier == "main"
+        assert result.is_global
         assert len(result.instructions) == 5
 
         instr0 = target._current_instructions[0]

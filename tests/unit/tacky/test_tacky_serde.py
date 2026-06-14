@@ -76,3 +76,20 @@ int main( void ) {
         }
         """
         self._round_trip(source)
+
+    def test_statics(self):
+        source = """
+        static int plus_one(int a) {
+            static int call_count = 0;
+            call_count = call_count + 1;
+            return a+1;
+        }
+
+        int main(void) {
+            int b = 0;
+            int c = plus_one(b);
+            return c;
+        }
+        """
+
+        self._round_trip(source)

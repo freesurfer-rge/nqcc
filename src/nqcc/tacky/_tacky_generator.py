@@ -52,7 +52,14 @@ from nqcc.parser import (
     SourceVarNode,
     SourceWhileNode,
 )
-from nqcc.semantic_analysis import FunctionType, SymbolTable
+from nqcc.semantic_analysis import (
+    FunctionType,
+    Initial,
+    NoInitialiser,
+    StaticVariableType,
+    SymbolTable,
+    Tentative,
+)
 
 from ._tacky_ast import (
     TackyAdd,
@@ -86,6 +93,7 @@ from ._tacky_ast import (
     TackyProgramNode,
     TackyReturnNode,
     TackyRightShift,
+    TackyStaticVariableNode,
     TackySubtract,
     TackyTopLevelNode,
     TackyUnaryNode,
@@ -587,6 +595,8 @@ class TackyGenerator:
         assert isinstance(source_node, SourceVariableDeclarationNode)
         if source_node.initial is None:
             return
+        if source_node.storage_class is not None:
+            return
         src_decl = self.emit_expression(source_node.initial)
         dst_decl = self.emit_expression(source_node.identifier)
         tacky_copy = TackyCopyNode(
@@ -650,6 +660,31 @@ class TackyGenerator:
             is_global=symbol.is_global,
         )
 
+    def convert_symbols_to_tacky(self, symbol_table: SymbolTable) -> list[TackyTopLevelNode]:
+        result: list[TackyTopLevelNode] = []
+
+        for name, value in symbol_table.symbol_table.items():
+            if not isinstance(value, StaticVariableType):
+                continue
+            match value.initial_value:
+                case Initial():
+                    nxt = TackyStaticVariableNode(
+                        start_position=-1,
+                        identifier=name,
+                        is_global=value.is_global,
+                        initialiser=value.initial_value.value,
+                    )
+                case Tentative():
+                    nxt = TackyStaticVariableNode(
+                        start_position=-1, identifier=name, is_global=value.is_global, initialiser=0
+                    )
+                case NoInitialiser():
+                    # Must be initialised elsewhere
+                    continue
+            result.append(nxt)
+
+        return result
+
     def emit_program(
         self, source_node: SourceProgramNode, symbol_table: SymbolTable
     ) -> TackyProgramNode:
@@ -657,9 +692,12 @@ class TackyGenerator:
 
         definitions: list[TackyTopLevelNode] = []
         for decl in source_node.declarations:
-            assert isinstance(decl, SourceFunctionDeclarationNode), "TBD"
-            nxt = self.emit_function(decl, symbol_table)
-            if nxt:
-                definitions.append(nxt)
+            if isinstance(decl, SourceFunctionDeclarationNode):
+                nxt = self.emit_function(decl, symbol_table)
+                if nxt:
+                    definitions.append(nxt)
 
-        return TackyProgramNode(start_position=0, definitions=definitions)
+        # Apparently we should handle all the symbols after
+        var_defns = self.convert_symbols_to_tacky(symbol_table)
+
+        return TackyProgramNode(start_position=0, definitions=definitions + var_defns)
