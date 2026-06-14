@@ -665,11 +665,12 @@ class TackyGenerator:
 
         for name, value in symbol_table.symbol_table.items():
             if not isinstance(value, StaticVariableType):
+                # Don't process functions or local variables
                 continue
             match value.initial_value:
                 case Initial():
                     nxt = TackyStaticVariableNode(
-                        start_position=-1,
+                        start_position=-1,  # Don't have a start_position in the symbol table
                         identifier=name,
                         is_global=value.is_global,
                         initialiser=value.initial_value.value,
@@ -697,7 +698,7 @@ class TackyGenerator:
                 if nxt:
                     definitions.append(nxt)
 
-        # Apparently we should handle all the symbols after
+        # Apparently we should handle all the symbols after processing the AST
         var_defns = self.convert_symbols_to_tacky(symbol_table)
 
         return TackyProgramNode(start_position=0, definitions=definitions + var_defns)
