@@ -186,8 +186,8 @@ class TestPrograms:
         assert isinstance(result, TackyProgramNode)
         assert result.start_position == 0
 
-        assert len(result.function_definitions) == 1
-        main_func = result.function_definitions[0]
+        assert len(result.definitions) == 1
+        main_func = result.definitions[0]
         assert isinstance(main_func, TackyFunctionNode)
         assert main_func.identifier == "main"
         assert main_func.start_position == 1
@@ -230,9 +230,9 @@ class TestPrograms:
         result = target.emit_program(src_node, symbol_table)
         assert isinstance(result, TackyProgramNode)
         # Make sure we don't have duplicate from the declaration of 'inc'
-        assert len(result.function_definitions) == 2
+        assert len(result.definitions) == 2
 
-        tacky_inc = result.function_definitions[0]
+        tacky_inc = result.definitions[0]
         assert isinstance(tacky_inc, TackyFunctionNode)
         assert tacky_inc.identifier == "inc"
         assert len(tacky_inc.params) == 1
@@ -292,12 +292,12 @@ class TestPrograms:
             return a % 2;
         }
         """
-        src_node, symbol_table = prepare_program(c_str, symbol_table)
+        src_node, symbol_table = prepare_program(c_str)
         assert isinstance(src_node, SourceProgramNode)
 
         target = TackyGenerator()
 
-        result = target.emit_program(src_node)
+        result = target.emit_program(src_node, symbol_table)
         assert isinstance(result, TackyProgramNode)
         # Make sure we don't have duplicate from the declaration of 'g'
-        assert len(result.function_definitions) == 2
+        assert len(result.definitions) == 2

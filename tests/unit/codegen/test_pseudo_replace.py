@@ -28,6 +28,7 @@ from nqcc.codegen import (
     convert_tacky_program,
 )
 from nqcc.parser import TokenTape, parse_function, parse_program
+from nqcc.semantic_analysis import SymbolTable
 from nqcc.tacky import TackyGenerator
 
 
@@ -216,8 +217,12 @@ class TestFunctionUpdate:
         source = "   int main(void) {return 1 + 4;}"
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_function(token_tape)
+        
+        st = SymbolTable()
+        st.check_function(src_node)
+
         tg = TackyGenerator()
-        tacky_func = tg.emit_function(src_node)
+        tacky_func = tg.emit_function(src_node, st)
         asm_func = convert_tacky_function(tacky_func)
 
         target = PseudoRegisterReplacer()
