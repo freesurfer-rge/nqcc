@@ -75,7 +75,6 @@ class TestFunctions:
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_function(token_tape)
 
-
         st = SymbolTable()
         st.check_function_declaration(src_node)
 
@@ -180,9 +179,12 @@ class TestPrograms:
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_program(token_tape)
 
+        st = SymbolTable()
+        st.check_program(src_node)
+
         target = TackyGenerator()
 
-        result = target.emit_program(src_node)
+        result = target.emit_program(src_node, st)
         assert isinstance(result, TackyProgramNode)
         assert result.start_position == 0
 
@@ -254,7 +256,7 @@ class TestPrograms:
             start_position=0, value=TackyConstantIntNode(start_position=0, value=0)
         )
 
-        tacky_main = result.function_definitions[1]
+        tacky_main = result.definitions[1]
         assert isinstance(tacky_main, TackyFunctionNode)
         assert tacky_main.identifier == "main"
         assert len(tacky_main.params) == 0

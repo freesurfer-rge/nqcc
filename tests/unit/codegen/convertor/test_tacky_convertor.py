@@ -84,7 +84,6 @@ class TestFunctions:
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_function(token_tape)
 
-
         st = SymbolTable()
         st.check_function_declaration(src_node)
 
@@ -130,9 +129,8 @@ class TestPrograms:
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_program(token_tape)
 
-
         st = SymbolTable()
-        st.check_function_declaration(src_node)
+        st.check_program(src_node)
 
         tg = TackyGenerator()
         tacky_program = tg.emit_program(src_node, st)
@@ -178,9 +176,8 @@ class TestPrograms:
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_program(token_tape)
 
-
         st = SymbolTable()
-        st.check_function_declaration(src_node)
+        st.check_program(src_node)
 
         tg = TackyGenerator()
         tacky_program = tg.emit_program(src_node, st)

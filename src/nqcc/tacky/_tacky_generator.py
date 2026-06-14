@@ -52,7 +52,7 @@ from nqcc.parser import (
     SourceVarNode,
     SourceWhileNode,
 )
-from nqcc.semantic_analysis import SymbolTable, FunctionType
+from nqcc.semantic_analysis import FunctionType, SymbolTable
 
 from ._tacky_ast import (
     TackyAdd,
@@ -87,7 +87,8 @@ from ._tacky_ast import (
     TackyReturnNode,
     TackyRightShift,
     TackySubtract,
-    TackyUnaryNode,TackyTopLevelNode,
+    TackyTopLevelNode,
+    TackyUnaryNode,
     TackyUnaryOperator,
     TackyValue,
     TackyVarNode,

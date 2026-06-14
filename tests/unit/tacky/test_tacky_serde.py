@@ -12,7 +12,9 @@ class TestTackySerde:
             token_tape = TokenTape.from_c_source(source)
             src_node = parse_program(token_tape)
 
-            src_node, symbol_table = semantic_analysis_driver(src_node, working_dir=pathlib.Path(working_dir))
+            src_node, symbol_table = semantic_analysis_driver(
+                src_node, working_dir=pathlib.Path(working_dir)
+            )
 
             target = TackyGenerator()
             orig = target.emit_program(src_node, symbol_table)

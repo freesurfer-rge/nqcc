@@ -23,8 +23,10 @@ class TestAsmSerde:
         with tempfile.TemporaryDirectory() as working_dir:
             token_tape = TokenTape.from_c_source(source)
             src_node = parse_program(token_tape)
-            
-            src_node, symbol_table = semantic_analysis_driver(src_node, working_dir=pathlib.Path(working_dir))
+
+            src_node, symbol_table = semantic_analysis_driver(
+                src_node, working_dir=pathlib.Path(working_dir)
+            )
 
             tg = TackyGenerator()
             tacky_program = tg.emit_program(src_node, symbol_table)
@@ -57,7 +59,7 @@ class TestAsmSerde:
 
     def test_nested_call(self):
         source = """
-        int inc_cal(int v) { return v+1; }
+        int inc_val(int v) { return v+1; }
 
         int main(void) { int a = 10; return inc_val(inc_val(a)); }
         """
