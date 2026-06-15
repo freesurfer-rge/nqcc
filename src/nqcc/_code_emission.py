@@ -226,7 +226,7 @@ def get_function_assembler(func_node: AsmFunctionNode, symbol_table: SymbolTable
 
 def get_program_assembler(prog_node: AsmProgramNode, symbol_table: SymbolTable) -> list[str]:
     result = []
-    for func in prog_node.function_definitions:
+    for func in prog_node.definitions:
         result += get_function_assembler(func, symbol_table)
     result.append('.section .note.GNU-stack, "",@progbits')
     return result

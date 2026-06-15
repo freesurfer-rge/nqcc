@@ -139,8 +139,8 @@ class TestPrograms:
         assert isinstance(asm_prog, AsmProgramNode)
         assert asm_prog.start_position == 0
 
-        assert len(asm_prog.function_definitions) == 1
-        asm_func = asm_prog.function_definitions[0]
+        assert len(asm_prog.definitions) == 1
+        asm_func = asm_prog.definitions[0]
         assert asm_func.start_position == 3
         assert asm_func.identifier == "main"
         # Add two instructions for 'guard' return added by Tacky
@@ -186,15 +186,15 @@ class TestPrograms:
         assert isinstance(asm_prog, AsmProgramNode)
         assert asm_prog.start_position == 0
 
-        assert len(asm_prog.function_definitions) == 2
+        assert len(asm_prog.definitions) == 2
 
-        f0 = asm_prog.function_definitions[0]
+        f0 = asm_prog.definitions[0]
         assert isinstance(f0, AsmFunctionNode)
         assert f0.identifier == "get_val"
         # Guard, addition and return
         assert len(f0.instructions) == 2 + 2
 
-        f1 = asm_prog.function_definitions[1]
+        f1 = asm_prog.definitions[1]
         assert isinstance(f1, AsmFunctionNode)
         assert f1.identifier == "main"
         assert len(f1.instructions) == 2 + 4
