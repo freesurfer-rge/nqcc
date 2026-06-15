@@ -32,6 +32,7 @@ from nqcc.tacky import (
     TackyProgramNode,
     TackyReturnNode,
     TackyRightShift,
+    TackyStaticVariableNode,
     TackySubtract,
     TackyUnaryNode,
     TackyUnaryOperator,
@@ -52,6 +53,7 @@ from ._assembler_ast import (
     AsmCmpNode,
     AsmCondCode,
     AsmDeallocateStackNode,
+    AsmDefinitionNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -74,6 +76,7 @@ from ._assembler_ast import (
     AsmRightShift,
     AsmSetCCNode,
     AsmStackNode,
+    AsmStaticVariableNode,
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
@@ -396,16 +399,34 @@ def convert_tacky_function(tacky_function: TackyFunctionNode) -> AsmFunctionNode
         start_position=tacky_function.start_position,
         identifier=tacky_function.identifier,
         instructions=asm_instructions,
+        is_global=tacky_function.is_global,
+    )
+
+
+def convert_tacky_static_variable(tacky_var: TackyStaticVariableNode) -> AsmStaticVariableNode:
+    assert isinstance(tacky_var, TackyStaticVariableNode)
+
+    return AsmStaticVariableNode(
+        start_position=tacky_var.start_position,
+        identifier=tacky_var.identifier,
+        is_global=tacky_var.is_global,
+        init=tacky_var.initialiser,
     )
 
 
 def convert_tacky_program(tacky_program: TackyProgramNode) -> AsmProgramNode:
     assert isinstance(tacky_program, TackyProgramNode)
 
-    asm_funcs = []
+    asm_defs: list[AsmDefinitionNode] = []
     for definition in tacky_program.definitions:
-        assert isinstance(definition, TackyFunctionNode)
-        func = convert_tacky_function(definition)
-        asm_funcs.append(func)
+        match definition:
+            case TackyFunctionNode():
+                func = convert_tacky_function(definition)
+                asm_defs.append(func)
+            case TackyStaticVariableNode():
+                var = convert_tacky_static_variable(definition)
+                asm_defs.append(var)
+            case _:
+                raise ValueError(f"Unrecognised: {definition}")
 
-    return AsmProgramNode(start_position=tacky_program.start_position, definitions=asm_funcs)
+    return AsmProgramNode(start_position=tacky_program.start_position, definitions=asm_defs)
