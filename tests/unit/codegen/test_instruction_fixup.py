@@ -287,6 +287,7 @@ class TestFunctionFixup:
             identifier="abc",
             instructions=[AsmMovNode(start_position=1, src=src, dst=dst)],
             stack_size=8,
+            is_global=True,
         )
 
         fixup_function_instructions(target)
@@ -309,6 +310,7 @@ class TestFunctionFixup:
             identifier="abc",
             instructions=[AsmIDivNode(start_position=1, src=src)],
             stack_size=8,
+            is_global=False,
         )
 
         fixup_function_instructions(target)
@@ -333,6 +335,7 @@ class TestFunctionFixup:
             identifier="abc",
             instructions=[AsmBinaryNode(start_position=1, operator=op, src=src, dst=dst)],
             stack_size=8,
+            is_global=False
         )
 
         fixup_function_instructions(target)
@@ -360,6 +363,7 @@ class TestFunctionFixup:
                 )
             ],
             stack_size=8,
+            is_global=True
         )
 
         fixup_function_instructions(target)
@@ -390,6 +394,7 @@ class TestProgramFixup:
             identifier="abc",
             instructions=[AsmMovNode(start_position=1, src=src, dst=dst)],
             stack_size=8,
+            is_global=False,
         )
 
         target = AsmProgramNode(start_position=0, definitions=[func])
