@@ -36,7 +36,9 @@ class AsmDataNode(AsmASTNode):
     identifier: str
 
 
-AsmOperandNode = Union[AsmImmediateIntNode, AsmRegisterNode, AsmPseudoRegisterNode, AsmStackNode, AsmDataNode]
+AsmOperandNode = Union[
+    AsmImmediateIntNode, AsmRegisterNode, AsmPseudoRegisterNode, AsmStackNode, AsmDataNode
+]
 
 
 class AsmMovNode(AsmASTNode):
@@ -203,14 +205,15 @@ class AsmFunctionNode(AsmASTNode):
     is_global: bool
 
 
-
 class AsmStaticVariableNode(AsmASTNode):
     node_type: Literal["AsmStaticVariableNode"] = "AsmStaticVariableNode"
     identifier: str
     is_global: bool
     init: int
 
+
 AsmDefinitionNode = Union[AsmFunctionNode, AsmStaticVariableNode]
+
 
 class AsmProgramNode(AsmASTNode):
     node_type: Literal["AsmFunctionNode"] = "AsmFunctionNode"
