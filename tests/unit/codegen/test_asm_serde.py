@@ -34,7 +34,7 @@ class TestAsmSerde:
 
             self._round_trip(asm_prog)
 
-            prr = PseudoRegisterReplacer()
+            prr = PseudoRegisterReplacer(symbol_table)
             prr.pseudo_replace(asm_prog)
             self._round_trip(asm_prog)
 
