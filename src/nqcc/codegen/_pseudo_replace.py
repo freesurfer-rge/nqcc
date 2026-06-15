@@ -51,8 +51,8 @@ class PseudoRegisterReplacer:
             case AsmPseudoRegisterNode():
                 if operand.identifier in self.pseudo_map:
                     return self.pseudo_map[operand.identifier]
-                symbol_var = self.symbol_table.symbol_table[operand.identifier]
-                if isinstance(symbol_var, StaticVariableType):
+                symbol_var = self.symbol_table.symbol_table.get(operand.identifier)
+                if symbol_var and isinstance(symbol_var, StaticVariableType):
                     return AsmDataNode(
                         start_position=operand.start_position, identifier=operand.identifier
                     )
