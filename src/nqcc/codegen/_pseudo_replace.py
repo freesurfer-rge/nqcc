@@ -117,5 +117,6 @@ class PseudoRegisterReplacer:
     def pseudo_replace(self, asm_program: AsmProgramNode):
         assert isinstance(asm_program, AsmProgramNode)
 
-        for f in asm_program.definitions:
-            self.pseudo_replace_function(f)
+        for defn in asm_program.definitions:
+            if isinstance(defn, AsmFunctionNode):
+                self.pseudo_replace_function(defn)

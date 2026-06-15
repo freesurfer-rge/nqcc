@@ -2,6 +2,7 @@ import pytest
 
 from nqcc.codegen import (
     AsmAdd,
+    AsmDataNode,
     AsmAllocateStackNode,
     AsmBinaryNode,
     AsmBinaryOperator,
@@ -22,6 +23,7 @@ from nqcc.codegen import (
     AsmStackNode,
     AsmSubtract,
     AsmUnaryNode,
+    AsmStaticVariableNode,
     AsmUnaryOperator,
     PseudoRegisterReplacer,
     convert_tacky_function,
@@ -312,3 +314,44 @@ class TestProgramUpdate:
 
         i5 = asm_func.instructions[5]
         assert i5 == AsmRetNode(start_position=19)
+
+
+    def test_simple_static_var(self):
+        source = "static int value=2;   int main(void) {return value;}"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_program(token_tape)
+        st = SymbolTable()
+        st.check_program(src_node)
+        tg = TackyGenerator()
+        tacky_program = tg.emit_program(src_node, st)
+        asm_prog = convert_tacky_program(tacky_program)
+
+
+        target = PseudoRegisterReplacer(st)
+        target.pseudo_replace(asm_prog)
+
+        assert len(asm_prog.definitions) == 2
+        asm_func = asm_prog.definitions[0]
+        assert asm_func.stack_size == 0
+        # Add two instructions for 'guard' return added by Tacky
+        assert len(asm_func.instructions) == 2 + 2
+
+        i0 = asm_func.instructions[0]
+        assert i0 == AsmMovNode(
+            start_position=38,
+            src=AsmDataNode(start_position=45, identifier="value"),
+            dst=AsmRegisterNode(start_position=38, value="AX"),
+        )
+
+        i1 = asm_func.instructions[1]
+        assert i1 == AsmRetNode(
+            start_position=38
+        )
+
+        # Other two instructions just from the 'guard' added by Tacky
+
+        asm_var = asm_prog.definitions[1]
+        assert isinstance(asm_var, AsmStaticVariableNode)
+        assert asm_var.identifier == "value"
+        assert not asm_var.is_global
+        assert asm_var.init == 2
