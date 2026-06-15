@@ -1,14 +1,14 @@
 from typing import get_args
 
-from nqcc.semantic_analysis import SymbolTable, StaticVariableType
+from nqcc.semantic_analysis import StaticVariableType, SymbolTable
 
 from ._assembler_ast import (
     AsmAllocateStackNode,
-    AsmDataNode,
     AsmBinaryNode,
     AsmCallNode,
     AsmCdqNode,
     AsmCmpNode,
+    AsmDataNode,
     AsmDeallocateStackNode,
     AsmFunctionNode,
     AsmIDivNode,

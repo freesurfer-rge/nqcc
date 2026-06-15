@@ -21,7 +21,9 @@ def _write_output(asm_prog: AsmProgramNode, output_path: pathlib.Path) -> None:
         of.write(asm_prog.model_dump_json(indent=4))
 
 
-def codegen_driver(source_ast: TackyProgramNode, symbol_table: SymbolTable, *, working_dir: pathlib.Path) -> AsmProgramNode:
+def codegen_driver(
+    source_ast: TackyProgramNode, symbol_table: SymbolTable, *, working_dir: pathlib.Path
+) -> AsmProgramNode:
     assert working_dir.exists(), f"Unable to find working directory {working_dir}"
 
     _logger.info("Converting from Tacky")

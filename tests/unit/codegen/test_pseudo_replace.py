@@ -2,12 +2,12 @@ import pytest
 
 from nqcc.codegen import (
     AsmAdd,
-    AsmDataNode,
     AsmAllocateStackNode,
     AsmBinaryNode,
     AsmBinaryOperator,
     AsmCdqNode,
     AsmCmpNode,
+    AsmDataNode,
     AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
@@ -21,9 +21,9 @@ from nqcc.codegen import (
     AsmRetNode,
     AsmSetCCNode,
     AsmStackNode,
+    AsmStaticVariableNode,
     AsmSubtract,
     AsmUnaryNode,
-    AsmStaticVariableNode,
     AsmUnaryOperator,
     PseudoRegisterReplacer,
     convert_tacky_function,
@@ -315,7 +315,6 @@ class TestProgramUpdate:
         i5 = asm_func.instructions[5]
         assert i5 == AsmRetNode(start_position=19)
 
-
     def test_simple_static_var(self):
         source = "static int value=2;   int main(void) {return value;}"
         token_tape = TokenTape.from_c_source(source)
@@ -325,7 +324,6 @@ class TestProgramUpdate:
         tg = TackyGenerator()
         tacky_program = tg.emit_program(src_node, st)
         asm_prog = convert_tacky_program(tacky_program)
-
 
         target = PseudoRegisterReplacer(st)
         target.pseudo_replace(asm_prog)
@@ -344,9 +342,7 @@ class TestProgramUpdate:
         )
 
         i1 = asm_func.instructions[1]
-        assert i1 == AsmRetNode(
-            start_position=38
-        )
+        assert i1 == AsmRetNode(start_position=38)
 
         # Other two instructions just from the 'guard' added by Tacky
 
