@@ -335,7 +335,7 @@ class TestFunctionFixup:
             identifier="abc",
             instructions=[AsmBinaryNode(start_position=1, operator=op, src=src, dst=dst)],
             stack_size=8,
-            is_global=False
+            is_global=False,
         )
 
         fixup_function_instructions(target)
@@ -363,7 +363,7 @@ class TestFunctionFixup:
                 )
             ],
             stack_size=8,
-            is_global=True
+            is_global=True,
         )
 
         fixup_function_instructions(target)

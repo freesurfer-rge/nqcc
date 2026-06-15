@@ -1,6 +1,7 @@
 import logging
 import pathlib
 
+from nqcc.semantic_analysis import SymbolTable
 from nqcc.tacky import TackyProgramNode
 
 from ._assembler_ast import AsmProgramNode
@@ -20,7 +21,7 @@ def _write_output(asm_prog: AsmProgramNode, output_path: pathlib.Path) -> None:
         of.write(asm_prog.model_dump_json(indent=4))
 
 
-def codegen_driver(source_ast: TackyProgramNode, *, working_dir: pathlib.Path) -> AsmProgramNode:
+def codegen_driver(source_ast: TackyProgramNode, symbol_table: SymbolTable, *, working_dir: pathlib.Path) -> AsmProgramNode:
     assert working_dir.exists(), f"Unable to find working directory {working_dir}"
 
     _logger.info("Converting from Tacky")
@@ -28,7 +29,7 @@ def codegen_driver(source_ast: TackyProgramNode, *, working_dir: pathlib.Path) -
     _write_output(asm_ast_0, working_dir / CONVERTED_FILE)
 
     _logger.info("Running Pseudoregister replacement")
-    prr = PseudoRegisterReplacer()
+    prr = PseudoRegisterReplacer(symbol_table)
     prr.pseudo_replace(asm_ast_0)
     _write_output(asm_ast_0, working_dir / PSEUDOREG_REPLACE_FILE)
 
