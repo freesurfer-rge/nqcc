@@ -12,6 +12,7 @@ from nqcc.codegen import (
     AsmCallNode,
     AsmCdqNode,
     AsmCmpNode,
+    AsmDataNode,
     AsmDeallocateStackNode,
     AsmFunctionNode,
     AsmIDivNode,
@@ -34,6 +35,7 @@ from nqcc.codegen import (
     AsmRightShift,
     AsmSetCCNode,
     AsmStackNode,
+    AsmStaticVariableNode,
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
@@ -81,6 +83,8 @@ def get_operand_assembler(operand_node: AsmOperandNode, target: SubRegister) -> 
             return f"%{get_register(operand_node.value, target)}"
         case AsmStackNode():
             return f"{operand_node.offset}(%rbp)"
+        case AsmDataNode():
+            return f"{operand_node.identifier}(%rip)"
         case _:
             raise ValueError(f"Unrecognised: {operand_node}")
 
@@ -206,7 +210,9 @@ def stack_teardown() -> list[str]:
 def get_function_assembler(func_node: AsmFunctionNode, symbol_table: SymbolTable) -> list[str]:
     result = []
     result.append(f"# Starting {func_node.identifier} ".ljust(_SEP_WIDTH, _SEP_CHAR))
-    result.append(f"{_INSTRUCTION_INDENT}.globl {func_node.identifier}")
+    if func_node.is_global:
+        result.append(f"{_INSTRUCTION_INDENT}.globl {func_node.identifier}")
+    result.append(f"{_INSTRUCTION_INDENT}.text")
     result.append(f"{func_node.identifier}:")
 
     result += stack_setup()
@@ -224,11 +230,39 @@ def get_function_assembler(func_node: AsmFunctionNode, symbol_table: SymbolTable
     return result
 
 
+def get_staticvariable_assembler(staticvar_node: AsmStaticVariableNode) -> list[str]:
+    result = []
+    result.append(f"# Starting {staticvar_node.identifier} ".ljust(_SEP_WIDTH, _SEP_CHAR))
+    if staticvar_node.is_global:
+        result.append(f"{_INSTRUCTION_INDENT}.globl {staticvar_node.identifier}")
+    if staticvar_node.init == 0:
+        result.append(f"{_INSTRUCTION_INDENT}.bss")
+    else:
+        result.append(f"{_INSTRUCTION_INDENT}.data")
+    result.append(f"{_INSTRUCTION_INDENT}.align 4")
+    result.append(f"{staticvar_node.identifier}:")
+    if staticvar_node.init == 0:
+        result.append(f"{_INSTRUCTION_INDENT}.zero 4")
+    else:
+        result.append(f"{_INSTRUCTION_INDENT}.long {staticvar_node.init}")
+
+    return result
+
+
 def get_program_assembler(prog_node: AsmProgramNode, symbol_table: SymbolTable) -> list[str]:
     result = []
+
+    fn_lines = []
+    var_lines = []
     for defn in prog_node.definitions:
-        assert isinstance(defn, AsmFunctionNode)
-        result += get_function_assembler(defn, symbol_table)
+        match defn:
+            case AsmFunctionNode():
+                fn_lines += get_function_assembler(defn, symbol_table)
+            case AsmStaticVariableNode():
+                var_lines += get_staticvariable_assembler(defn)
+            case _:
+                raise ValueError(f"Unrecognised: {defn}")
+    result = var_lines + fn_lines
     result.append('.section .note.GNU-stack, "",@progbits')
     return result
 
