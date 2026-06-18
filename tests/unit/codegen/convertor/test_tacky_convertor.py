@@ -10,6 +10,7 @@ from nqcc.codegen import (
     AsmPseudoRegisterNode,
     AsmRegisterNode,
     AsmRetNode,
+    AsmStaticVariableNode,
     AsmUnaryNode,
     convert_tacky_function,
     convert_tacky_operand,
@@ -139,8 +140,8 @@ class TestPrograms:
         assert isinstance(asm_prog, AsmProgramNode)
         assert asm_prog.start_position == 0
 
-        assert len(asm_prog.function_definitions) == 1
-        asm_func = asm_prog.function_definitions[0]
+        assert len(asm_prog.definitions) == 1
+        asm_func = asm_prog.definitions[0]
         assert asm_func.start_position == 3
         assert asm_func.identifier == "main"
         # Add two instructions for 'guard' return added by Tacky
@@ -186,15 +187,86 @@ class TestPrograms:
         assert isinstance(asm_prog, AsmProgramNode)
         assert asm_prog.start_position == 0
 
-        assert len(asm_prog.function_definitions) == 2
+        assert len(asm_prog.definitions) == 2
 
-        f0 = asm_prog.function_definitions[0]
+        f0 = asm_prog.definitions[0]
         assert isinstance(f0, AsmFunctionNode)
         assert f0.identifier == "get_val"
+        assert f0.is_global
         # Guard, addition and return
         assert len(f0.instructions) == 2 + 2
 
-        f1 = asm_prog.function_definitions[1]
+        f1 = asm_prog.definitions[1]
         assert isinstance(f1, AsmFunctionNode)
         assert f1.identifier == "main"
+        assert f1.is_global
         assert len(f1.instructions) == 2 + 4
+
+    def test_simple_static_function_call(self):
+        # Like the previous, but make get_val static
+        source = """
+        static int get_val(void) { return 2;}
+
+        int main(void) { return get_val(); }
+        """
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_program(token_tape)
+
+        st = SymbolTable()
+        st.check_program(src_node)
+
+        tg = TackyGenerator()
+        tacky_program = tg.emit_program(src_node, st)
+
+        asm_prog = convert_tacky_program(tacky_program)
+        assert isinstance(asm_prog, AsmProgramNode)
+        assert asm_prog.start_position == 0
+
+        assert len(asm_prog.definitions) == 2
+
+        f0 = asm_prog.definitions[0]
+        assert isinstance(f0, AsmFunctionNode)
+        assert f0.identifier == "get_val"
+        assert not f0.is_global
+        # Guard, addition and return
+        assert len(f0.instructions) == 2 + 2
+
+        f1 = asm_prog.definitions[1]
+        assert isinstance(f1, AsmFunctionNode)
+        assert f1.identifier == "main"
+        assert f1.is_global
+        assert len(f1.instructions) == 2 + 4
+
+    def test_simple_static_variable(self):
+        # Like the previous, but make get_val static
+        source = """
+        static int value = 2;
+
+        int main(void) { return value; }
+        """
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_program(token_tape)
+
+        st = SymbolTable()
+        st.check_program(src_node)
+
+        tg = TackyGenerator()
+        tacky_program = tg.emit_program(src_node, st)
+
+        asm_prog = convert_tacky_program(tacky_program)
+        assert isinstance(asm_prog, AsmProgramNode)
+        assert asm_prog.start_position == 0
+
+        assert len(asm_prog.definitions) == 2
+
+        f_0 = asm_prog.definitions[0]
+        assert isinstance(f_0, AsmFunctionNode)
+        assert f_0.identifier == "main"
+        assert f_0.is_global
+        assert len(f_0.instructions) == 2 + 2
+
+        v_0 = asm_prog.definitions[1]
+        assert isinstance(v_0, AsmStaticVariableNode)
+        assert v_0.identifier == "value"
+        assert not v_0.is_global
+        assert v_0.init == 2

@@ -7,6 +7,7 @@ from nqcc.codegen import (
     AsmBinaryOperator,
     AsmCdqNode,
     AsmCmpNode,
+    AsmDataNode,
     AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
@@ -20,6 +21,7 @@ from nqcc.codegen import (
     AsmRetNode,
     AsmSetCCNode,
     AsmStackNode,
+    AsmStaticVariableNode,
     AsmSubtract,
     AsmUnaryNode,
     AsmUnaryOperator,
@@ -43,7 +45,7 @@ class TestOperandUpdate:
     )
     def test_unchanged_operands(self, operand: AsmOperandNode):
         orig_op = operand.model_copy(deep=True)
-        target = PseudoRegisterReplacer()
+        target = PseudoRegisterReplacer(SymbolTable())
 
         result = target.get_updated_operand(orig_op)
         assert result == orig_op
@@ -51,7 +53,7 @@ class TestOperandUpdate:
 
     def test_single_operand(self):
         pseudo_op = AsmPseudoRegisterNode(start_position=312, identifier="temp.0")
-        target = PseudoRegisterReplacer()
+        target = PseudoRegisterReplacer(SymbolTable())
 
         result0 = target.get_updated_operand(pseudo_op)
         assert isinstance(result0, AsmStackNode)
@@ -65,7 +67,7 @@ class TestOperandUpdate:
     def test_two_operands(self):
         pseudo_op0 = AsmPseudoRegisterNode(start_position=312, identifier="temp.0")
         pseudo_op1 = AsmPseudoRegisterNode(start_position=312, identifier="temp.1")
-        target = PseudoRegisterReplacer()
+        target = PseudoRegisterReplacer(SymbolTable())
 
         result0 = target.get_updated_operand(pseudo_op0)
         assert isinstance(result0, AsmStackNode)
@@ -96,12 +98,12 @@ class TestInstructionUpdate:
     )
     def test_unchanged_instructions(self, instr: AsmInstructionNode):
         orig_instr = instr.model_copy(deep=True)
-        target = PseudoRegisterReplacer()
+        target = PseudoRegisterReplacer(SymbolTable())
         target.update_instruction(instr)
         assert orig_instr == instr
 
     def test_mov(self):
-        target = PseudoRegisterReplacer()
+        target = PseudoRegisterReplacer(SymbolTable())
 
         pseudo_op0 = AsmPseudoRegisterNode(start_position=312, identifier="temp.0")
         pseudo_op1 = AsmPseudoRegisterNode(start_position=313, identifier="temp.1")
@@ -115,7 +117,7 @@ class TestInstructionUpdate:
 
     @pytest.mark.parametrize("op", [AsmNot(start_position=13), AsmNeg(start_position=14)])
     def test_unary(self, op: AsmUnaryOperator):
-        target = PseudoRegisterReplacer()
+        target = PseudoRegisterReplacer(SymbolTable())
 
         pseudo_op0 = AsmPseudoRegisterNode(start_position=315, identifier="temp.0")
         unary_node = AsmUnaryNode(start_position=32, operator=op, src=pseudo_op0)
@@ -130,7 +132,7 @@ class TestInstructionUpdate:
         [AsmAdd(start_position=1), AsmSubtract(start_position=1), AsmMultiply(start_position=1)],
     )
     def test_binary(self, op: AsmBinaryOperator):
-        target = PseudoRegisterReplacer()
+        target = PseudoRegisterReplacer(SymbolTable())
 
         pseudo_src = AsmPseudoRegisterNode(start_position=314, identifier="temp.0")
         pseudo_dst = AsmPseudoRegisterNode(start_position=315, identifier="temp.1")
@@ -144,7 +146,7 @@ class TestInstructionUpdate:
         assert binary_node.dst == AsmStackNode(start_position=315, offset=-8)
 
     def test_cmp(self):
-        target = PseudoRegisterReplacer()
+        target = PseudoRegisterReplacer(SymbolTable())
 
         pseudo_src = AsmPseudoRegisterNode(start_position=314, identifier="temp.0")
         pseudo_dst = AsmPseudoRegisterNode(start_position=315, identifier="temp.1")
@@ -156,7 +158,7 @@ class TestInstructionUpdate:
         assert asm_cmp_node.dst == AsmStackNode(start_position=315, offset=-8)
 
     def test_setcc(self):
-        target = PseudoRegisterReplacer()
+        target = PseudoRegisterReplacer(SymbolTable())
 
         pseudo_src = AsmPseudoRegisterNode(start_position=314, identifier="temp.0")
         asm_setcc_node = AsmSetCCNode(start_position=200, src=pseudo_src, cond_code="E")
@@ -167,7 +169,7 @@ class TestInstructionUpdate:
         assert asm_setcc_node.cond_code == "E"
 
     def test_idiv(self):
-        target = PseudoRegisterReplacer()
+        target = PseudoRegisterReplacer(SymbolTable())
 
         pseudo_src = AsmPseudoRegisterNode(start_position=129, identifier="temp.0")
         idiv_node = AsmIDivNode(start_position=31, src=pseudo_src)
@@ -188,7 +190,7 @@ class TestFunctionUpdate:
         tacky_func = tg.emit_function(src_node, st)
         asm_func = convert_tacky_function(tacky_func)
 
-        target = PseudoRegisterReplacer()
+        target = PseudoRegisterReplacer(st)
 
         target.pseudo_replace_function(asm_func)
         # Add two instructions for 'guard' return added by Tacky
@@ -227,7 +229,7 @@ class TestFunctionUpdate:
         tacky_func = tg.emit_function(src_node, st)
         asm_func = convert_tacky_function(tacky_func)
 
-        target = PseudoRegisterReplacer()
+        target = PseudoRegisterReplacer(st)
 
         target.pseudo_replace_function(asm_func)
         # Add two instructions for 'guard' return added by Tacky
@@ -271,10 +273,10 @@ class TestProgramUpdate:
         tacky_program = tg.emit_program(src_node, st)
         asm_prog = convert_tacky_program(tacky_program)
 
-        target = PseudoRegisterReplacer()
+        target = PseudoRegisterReplacer(st)
         target.pseudo_replace(asm_prog)
-        assert len(asm_prog.function_definitions) == 1
-        asm_func = asm_prog.function_definitions[0]
+        assert len(asm_prog.definitions) == 1
+        asm_func = asm_prog.definitions[0]
         assert asm_func.stack_size == 8
         # Add two instructions for 'guard' return added by Tacky
         assert len(asm_func.instructions) == 6 + 2
@@ -312,3 +314,40 @@ class TestProgramUpdate:
 
         i5 = asm_func.instructions[5]
         assert i5 == AsmRetNode(start_position=19)
+
+    def test_simple_static_var(self):
+        source = "static int value=2;   int main(void) {return value;}"
+        token_tape = TokenTape.from_c_source(source)
+        src_node = parse_program(token_tape)
+        st = SymbolTable()
+        st.check_program(src_node)
+        tg = TackyGenerator()
+        tacky_program = tg.emit_program(src_node, st)
+        asm_prog = convert_tacky_program(tacky_program)
+
+        target = PseudoRegisterReplacer(st)
+        target.pseudo_replace(asm_prog)
+
+        assert len(asm_prog.definitions) == 2
+        asm_func = asm_prog.definitions[0]
+        assert asm_func.stack_size == 0
+        # Add two instructions for 'guard' return added by Tacky
+        assert len(asm_func.instructions) == 2 + 2
+
+        i0 = asm_func.instructions[0]
+        assert i0 == AsmMovNode(
+            start_position=38,
+            src=AsmDataNode(start_position=45, identifier="value"),
+            dst=AsmRegisterNode(start_position=38, value="AX"),
+        )
+
+        i1 = asm_func.instructions[1]
+        assert i1 == AsmRetNode(start_position=38)
+
+        # Other two instructions just from the 'guard' added by Tacky
+
+        asm_var = asm_prog.definitions[1]
+        assert isinstance(asm_var, AsmStaticVariableNode)
+        assert asm_var.identifier == "value"
+        assert not asm_var.is_global
+        assert asm_var.init == 2

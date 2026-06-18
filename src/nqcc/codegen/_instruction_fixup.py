@@ -1,3 +1,5 @@
+from typing import get_args
+
 from ._assembler_ast import (
     AsmAdd,
     AsmAllocateStackNode,
@@ -6,6 +8,7 @@ from ._assembler_ast import (
     AsmBitwiseOr,
     AsmBitwiseXor,
     AsmCmpNode,
+    AsmDataNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -21,10 +24,12 @@ from ._assembler_ast import (
 )
 from ._convert_tacky import _STACK_ALIGN
 
+_MEM_NODE = AsmStackNode | AsmDataNode
+
 
 def apply_mov_fixup(instr: AsmMovNode) -> list[AsmInstructionNode]:
-    if isinstance(instr.src, AsmStackNode) and isinstance(instr.dst, AsmStackNode):
-        # Can't move from stack to stack; use R10
+    if isinstance(instr.src, get_args(_MEM_NODE)) and isinstance(instr.dst, get_args(_MEM_NODE)):
+        # Can't move from stack/mem to stack/mem; use R10
         reg = AsmRegisterNode(start_position=instr.start_position, value="R10")
         nxt0 = AsmMovNode(
             start_position=instr.start_position,
@@ -38,8 +43,8 @@ def apply_mov_fixup(instr: AsmMovNode) -> list[AsmInstructionNode]:
 
 
 def apply_cmp_fixup(instr: AsmCmpNode) -> list[AsmInstructionNode]:
-    if isinstance(instr.src, AsmStackNode) and isinstance(instr.dst, AsmStackNode):
-        # Can't have two stack operands; use R10
+    if isinstance(instr.src, get_args(_MEM_NODE)) and isinstance(instr.dst, get_args(_MEM_NODE)):
+        # Can't have two stack/memory operands; use R10
         reg = AsmRegisterNode(start_position=instr.start_position, value="R10")
         nxt0 = AsmMovNode(
             start_position=instr.start_position,
@@ -72,8 +77,8 @@ def apply_idiv_fixup(instr: AsmIDivNode) -> list[AsmInstructionNode]:
 def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
     match instr.operator:
         case AsmAdd() | AsmSubtract() | AsmBitwiseAnd() | AsmBitwiseOr() | AsmBitwiseXor():
-            if isinstance(instr.src, AsmStackNode):
-                # src cannot be on the stack
+            if isinstance(instr.src, get_args(_MEM_NODE)):
+                # src cannot be on the stack or in memory
                 reg = AsmRegisterNode(start_position=instr.start_position, value="R10")
                 nxt0 = AsmMovNode(start_position=instr.start_position, src=instr.src, dst=reg)
                 nxt1 = AsmBinaryNode(
@@ -101,8 +106,8 @@ def apply_binary_fixup(instr: AsmBinaryNode) -> list[AsmInstructionNode]:
             else:
                 return [instr]
         case AsmMultiply():
-            if isinstance(instr.dst, AsmStackNode):
-                # This is a dst fixup (dst cannot be on stack), so use R11
+            if isinstance(instr.dst, get_args(_MEM_NODE)):
+                # This is a dst fixup (dst cannot be on stack or in memory), so use R11
                 reg = AsmRegisterNode(start_position=instr.start_position, value="R11")
                 nxt0 = AsmMovNode(start_position=instr.start_position, src=instr.dst, dst=reg)
                 nxt1 = AsmBinaryNode(
@@ -161,5 +166,6 @@ def fixup_function_instructions(asm_func: AsmFunctionNode):
 def fixup_program_instructions(asm_prog: AsmProgramNode):
     assert isinstance(asm_prog, AsmProgramNode)
 
-    for f in asm_prog.function_definitions:
-        fixup_function_instructions(f)
+    for defn in asm_prog.definitions:
+        if isinstance(defn, AsmFunctionNode):
+            fixup_function_instructions(defn)

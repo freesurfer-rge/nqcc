@@ -31,7 +31,14 @@ class AsmStackNode(AsmASTNode):
     offset: int
 
 
-AsmOperandNode = Union[AsmImmediateIntNode, AsmRegisterNode, AsmPseudoRegisterNode, AsmStackNode]
+class AsmDataNode(AsmASTNode):
+    node_type: Literal["AsmDataNode"] = "AsmDataNode"
+    identifier: str
+
+
+AsmOperandNode = Union[
+    AsmImmediateIntNode, AsmRegisterNode, AsmPseudoRegisterNode, AsmStackNode, AsmDataNode
+]
 
 
 class AsmMovNode(AsmASTNode):
@@ -195,8 +202,19 @@ class AsmFunctionNode(AsmASTNode):
     identifier: str
     instructions: list[AsmInstructionNode]
     stack_size: int = Field(ge=0, default=0)
+    is_global: bool
+
+
+class AsmStaticVariableNode(AsmASTNode):
+    node_type: Literal["AsmStaticVariableNode"] = "AsmStaticVariableNode"
+    identifier: str
+    is_global: bool
+    init: int
+
+
+AsmDefinitionNode = Union[AsmFunctionNode, AsmStaticVariableNode]
 
 
 class AsmProgramNode(AsmASTNode):
     node_type: Literal["AsmFunctionNode"] = "AsmFunctionNode"
-    function_definitions: list[AsmFunctionNode]
+    definitions: list[AsmDefinitionNode]

@@ -1,11 +1,14 @@
 from typing import get_args
 
+from nqcc.semantic_analysis import StaticVariableType, SymbolTable
+
 from ._assembler_ast import (
     AsmAllocateStackNode,
     AsmBinaryNode,
     AsmCallNode,
     AsmCdqNode,
     AsmCmpNode,
+    AsmDataNode,
     AsmDeallocateStackNode,
     AsmFunctionNode,
     AsmIDivNode,
@@ -31,7 +34,8 @@ STACK_DELTA = 4
 
 
 class PseudoRegisterReplacer:
-    def __init__(self) -> None:
+    def __init__(self, symbol_table: SymbolTable) -> None:
+        self.symbol_table = symbol_table
         self._reset()
 
     def _reset(self) -> None:
@@ -47,12 +51,18 @@ class PseudoRegisterReplacer:
             case AsmPseudoRegisterNode():
                 if operand.identifier in self.pseudo_map:
                     return self.pseudo_map[operand.identifier]
-                self.curr_offset -= STACK_DELTA
-                result = AsmStackNode(
-                    start_position=operand.start_position, offset=self.curr_offset
-                )
-                self.pseudo_map[operand.identifier] = result
-                return result
+                symbol_var = self.symbol_table.symbol_table.get(operand.identifier)
+                if symbol_var and isinstance(symbol_var, StaticVariableType):
+                    return AsmDataNode(
+                        start_position=operand.start_position, identifier=operand.identifier
+                    )
+                else:
+                    self.curr_offset -= STACK_DELTA
+                    result = AsmStackNode(
+                        start_position=operand.start_position, offset=self.curr_offset
+                    )
+                    self.pseudo_map[operand.identifier] = result
+                    return result
             case AsmStackNode():
                 # Should we log a warning?
                 return operand
@@ -107,5 +117,6 @@ class PseudoRegisterReplacer:
     def pseudo_replace(self, asm_program: AsmProgramNode):
         assert isinstance(asm_program, AsmProgramNode)
 
-        for f in asm_program.function_definitions:
-            self.pseudo_replace_function(f)
+        for defn in asm_program.definitions:
+            if isinstance(defn, AsmFunctionNode):
+                self.pseudo_replace_function(defn)
