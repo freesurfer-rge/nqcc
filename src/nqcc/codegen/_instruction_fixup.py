@@ -1,3 +1,5 @@
+from typing import get_args
+
 from ._assembler_ast import (
     AsmAdd,
     AsmAllocateStackNode,
@@ -6,6 +8,7 @@ from ._assembler_ast import (
     AsmBitwiseOr,
     AsmBitwiseXor,
     AsmCmpNode,
+    AsmDataNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -21,9 +24,11 @@ from ._assembler_ast import (
 )
 from ._convert_tacky import _STACK_ALIGN
 
+_MEM_NODE = AsmStackNode | AsmDataNode
+
 
 def apply_mov_fixup(instr: AsmMovNode) -> list[AsmInstructionNode]:
-    if isinstance(instr.src, AsmStackNode) and isinstance(instr.dst, AsmStackNode):
+    if isinstance(instr.src, get_args(_MEM_NODE)) and isinstance(instr.dst, get_args(_MEM_NODE)):
         # Can't move from stack to stack; use R10
         reg = AsmRegisterNode(start_position=instr.start_position, value="R10")
         nxt0 = AsmMovNode(
@@ -161,5 +166,6 @@ def fixup_function_instructions(asm_func: AsmFunctionNode):
 def fixup_program_instructions(asm_prog: AsmProgramNode):
     assert isinstance(asm_prog, AsmProgramNode)
 
-    for f in asm_prog.definitions:
-        fixup_function_instructions(f)
+    for defn in asm_prog.definitions:
+        if isinstance(defn, AsmFunctionNode):
+            fixup_function_instructions(defn)

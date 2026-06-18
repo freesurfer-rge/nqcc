@@ -9,6 +9,7 @@ from nqcc.codegen import (
     AsmBitwiseOr,
     AsmBitwiseXor,
     AsmCmpNode,
+    AsmDataNode,
     AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
@@ -46,6 +47,14 @@ class TestMovFixup:
                 AsmStackNode(start_position=0, offset=-4),
                 AsmRegisterNode(start_position=0, value="R10"),
             ),
+            (
+                AsmDataNode(start_position=0, identifier="something"),
+                AsmRegisterNode(start_position=0, value="R10"),
+            ),
+            (
+                AsmRegisterNode(start_position=0, value="R10"),
+                AsmDataNode(start_position=0, identifier="something"),
+            ),
         ],
     )
     def test_unaffected_node(self, src: AsmOperandNode, dst: AsmOperandNode):
@@ -72,6 +81,34 @@ class TestMovFixup:
             start_position=0,
             src=fixed[0].dst,
             dst=dst,
+        )
+
+    @pytest.mark.parametrize(
+        "src_node",
+        [AsmStackNode(start_position=1, offset=-4), AsmDataNode(start_position=2, identifier="a")],
+    )
+    @pytest.mark.parametrize(
+        "dst_node",
+        [AsmStackNode(start_position=3, offset=-8), AsmDataNode(start_position=4, identifier="b")],
+    )
+    def test_mem_mem_node(
+        self, src_node: AsmStackNode | AsmDataNode, dst_node: AsmStackNode | AsmDataNode
+    ):
+        target = AsmMovNode(start_position=0, src=src_node, dst=dst_node)
+
+        fixed = apply_mov_fixup(target)
+        assert len(fixed) == 2
+        assert isinstance(fixed[0], AsmMovNode)
+        assert fixed[0] == AsmMovNode(
+            start_position=0,
+            src=src_node,
+            dst=AsmRegisterNode(start_position=0, value="R10"),
+        )
+        assert isinstance(fixed[1], AsmMovNode)
+        assert fixed[1] == AsmMovNode(
+            start_position=0,
+            src=fixed[0].dst,
+            dst=dst_node,
         )
 
 
