@@ -131,6 +131,34 @@ class TestCmpFixup:
             dst=dst,
         )
 
+    @pytest.mark.parametrize(
+        "src_node",
+        [AsmStackNode(start_position=1, offset=-4), AsmDataNode(start_position=2, identifier="a")],
+    )
+    @pytest.mark.parametrize(
+        "dst_node",
+        [AsmStackNode(start_position=3, offset=-8), AsmDataNode(start_position=4, identifier="b")],
+    )
+    def test_mem_mem_node(
+        self, src_node: AsmStackNode | AsmDataNode, dst_node: AsmStackNode | AsmDataNode
+    ):
+        target = AsmCmpNode(start_position=0, src=src_node, dst=dst_node)
+
+        fixed = apply_cmp_fixup(target)
+        assert len(fixed) == 2
+        assert isinstance(fixed[0], AsmMovNode)
+        assert fixed[0] == AsmMovNode(
+            start_position=0,
+            src=src_node,
+            dst=AsmRegisterNode(start_position=0, value="R10"),
+        )
+        assert isinstance(fixed[1], AsmCmpNode)
+        assert fixed[1] == AsmCmpNode(
+            start_position=0,
+            src=fixed[0].dst,
+            dst=dst_node,
+        )
+
     def test_dst_cmp(self):
         src = AsmRegisterNode(start_position=1, value="AX")
         dst = AsmImmediateIntNode(start_position=2, value=5)
@@ -235,6 +263,36 @@ class TestBinaryFixup:
     @pytest.mark.parametrize(
         "op",
         [
+            AsmAdd(start_position=3),
+            AsmSubtract(start_position=3),
+            AsmBitwiseAnd(start_position=3),
+            AsmBitwiseOr(start_position=3),
+            AsmBitwiseXor(start_position=3),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "src_node",
+        [AsmStackNode(start_position=1, offset=-4), AsmDataNode(start_position=2, identifier="a")],
+    )
+    def test_binopsrcfixup_node_all(
+        self, op: AsmBinaryOperator, src_node: AsmStackNode | AsmDataNode
+    ):
+        dst = AsmStackNode(start_position=2, offset=-8)
+        target = AsmBinaryNode(start_position=4, operator=op, src=src_node, dst=dst)
+
+        fixed = apply_binary_fixup(target)
+        assert len(fixed) == 2
+        assert isinstance(fixed[0], AsmMovNode)
+        assert fixed[0] == AsmMovNode(
+            start_position=4,
+            src=src_node,
+            dst=AsmRegisterNode(start_position=4, value="R10"),
+        )
+        assert fixed[1] == AsmBinaryNode(start_position=4, operator=op, src=fixed[0].dst, dst=dst)
+
+    @pytest.mark.parametrize(
+        "op",
+        [
             AsmLeftShift(start_position=3),
             AsmRightShift(start_position=3),
         ],
@@ -313,6 +371,34 @@ class TestBinaryFixup:
             dst=fixed[0].dst,
         )
         assert fixed[2] == AsmMovNode(start_position=4, src=fixed[0].dst, dst=dst)
+
+    @pytest.mark.parametrize(
+        "dst_node",
+        [AsmStackNode(start_position=3, offset=-8), AsmDataNode(start_position=4, identifier="b")],
+    )
+    def test_mul_node_all(self, dst_node: AsmStackNode | AsmDataNode):
+        src = AsmImmediateIntNode(start_position=1, value=13)
+        target = AsmBinaryNode(
+            start_position=4, operator=AsmMultiply(start_position=3), src=src, dst=dst_node
+        )
+
+        fixed = apply_binary_fixup(target)
+        assert len(fixed) == 3
+        assert isinstance(fixed[0], AsmMovNode)
+        assert fixed[0] == AsmMovNode(
+            start_position=4,
+            src=dst_node,
+            dst=AsmRegisterNode(start_position=4, value="R11"),
+        )
+        assert isinstance(fixed[1], AsmBinaryNode)
+        assert fixed[1] == AsmBinaryNode(
+            start_position=4,
+            operator=AsmMultiply(start_position=3),
+            src=src,
+            dst=fixed[0].dst,
+        )
+        assert isinstance(fixed[2], AsmMovNode)
+        assert fixed[2] == AsmMovNode(start_position=4, src=fixed[0].dst, dst=dst_node)
 
 
 class TestFunctionFixup:
