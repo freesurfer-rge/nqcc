@@ -1,4 +1,4 @@
-static int call_count = 0;
+static int call_count = V1;
 
 int my_func(void) {
     call_count = call_count + 1;

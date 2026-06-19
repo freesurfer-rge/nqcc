@@ -64,3 +64,13 @@ class TestAsmSerde:
         int main(void) { int a = 10; return inc_val(inc_val(a)); }
         """
         self._check_from_source(source)
+
+    def test_simple_statics(self):
+        source = """
+        static int a = 0;
+
+        static int my_func(void) { a = a+ 1;}
+
+        int main( void ) { my_func(); return a;}
+        """
+        self._check_from_source(source)
