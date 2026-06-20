@@ -13,7 +13,7 @@ from nqcc.frontend.semantic_analysis import (
     label_loops_program,
     resolve_program,
 )
-from nqcc.tacky import (
+from nqcc.frontend.tacky import (
     TackyAdd,
     TackyBinaryNode,
     TackyConstantIntNode,

@@ -8,7 +8,7 @@ from nqcc.codegen import codegen_driver
 from nqcc.frontend.lexer import lexer_driver
 from nqcc.frontend.parser import parser_driver
 from nqcc.frontend.semantic_analysis import semantic_analysis_driver
-from nqcc.tacky import tacky_driver
+from nqcc.frontend.tacky import tacky_driver
 
 _DESC = """\
 An implementation of the C Compiler described in Nora 

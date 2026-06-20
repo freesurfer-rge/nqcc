@@ -2,7 +2,7 @@ import logging
 import pathlib
 
 from nqcc.frontend.semantic_analysis import SymbolTable
-from nqcc.tacky import TackyProgramNode
+from nqcc.frontend.tacky import TackyProgramNode
 
 from ._assembler_ast import AsmProgramNode
 from ._convert_tacky import convert_tacky_program

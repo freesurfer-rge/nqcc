@@ -31,7 +31,7 @@ from nqcc.codegen import (
 )
 from nqcc.frontend.parser import TokenTape, parse_function, parse_program
 from nqcc.frontend.semantic_analysis import SymbolTable
-from nqcc.tacky import TackyGenerator
+from nqcc.frontend.tacky import TackyGenerator
 
 
 class TestOperandUpdate:

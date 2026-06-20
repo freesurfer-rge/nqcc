@@ -12,7 +12,7 @@ from nqcc.codegen import (
     convert_tacky_binary_operator,
     convert_tacky_unary_operator,
 )
-from nqcc.tacky import (
+from nqcc.frontend.tacky import (
     TackyAdd,
     TackyBitwiseAnd,
     TackyBitwiseOr,
