@@ -1,6 +1,6 @@
 import pytest
 
-from nqcc.lexer import CloseParenToken
+from nqcc.frontend.lexer import CloseParenToken
 from nqcc.parser import (
     SourceAdd,
     SourceASTBadTypeError,

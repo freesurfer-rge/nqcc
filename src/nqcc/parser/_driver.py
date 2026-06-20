@@ -1,6 +1,6 @@
 import pathlib
 
-from nqcc.lexer import Token
+from nqcc.frontend.lexer import Token
 
 from ._parsing import parse_program
 from ._source_ast import SourceProgramNode

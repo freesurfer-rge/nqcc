@@ -1,6 +1,6 @@
 import pytest
 
-from nqcc.lexer import (
+from nqcc.frontend.lexer import (
     AdditionToken,
     AssignmentToken,
     BitwiseAnd,

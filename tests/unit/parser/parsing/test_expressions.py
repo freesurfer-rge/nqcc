@@ -1,6 +1,6 @@
 import pytest
 
-from nqcc.lexer import ConstantIntegerToken, SemicolonToken
+from nqcc.frontend.lexer import ConstantIntegerToken, SemicolonToken
 from nqcc.parser import (
     SourceAdd,
     SourceAssignmentNode,

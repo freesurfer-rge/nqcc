@@ -1,6 +1,6 @@
 from typing import Type, get_args
 
-from nqcc.lexer import (
+from nqcc.frontend.lexer import (
     AdditionToken,
     AssignmentToken,
     BinaryOperatorToken,
