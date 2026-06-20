@@ -1,6 +1,6 @@
 from typing import get_args
 
-from nqcc.parser import (
+from nqcc.frontend.parser import (
     SourceBlockItemNode,
     SourceBlockNode,
     SourceBreakNode,

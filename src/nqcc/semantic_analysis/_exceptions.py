@@ -1,4 +1,4 @@
-from nqcc.parser import (
+from nqcc.frontend.parser import (
     SourceBreakNode,
     SourceContinueNode,
     SourceDeclarationNode,

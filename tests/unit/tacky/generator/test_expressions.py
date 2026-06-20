@@ -2,7 +2,7 @@ from typing import Type
 
 import pytest
 
-from nqcc.parser import TokenTape, parse_expression
+from nqcc.frontend.parser import TokenTape, parse_expression
 from nqcc.tacky import (
     TackyAdd,
     TackyBinaryNode,

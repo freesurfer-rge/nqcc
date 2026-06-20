@@ -1,6 +1,6 @@
 import pytest
 
-from nqcc.parser import (
+from nqcc.frontend.parser import (
     SourceBlockNode,
     SourceConstantIntNode,
     SourceFunctionDeclarationNode,

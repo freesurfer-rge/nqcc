@@ -16,7 +16,7 @@ from nqcc.codegen import (
     convert_tacky_operand,
     convert_tacky_program,
 )
-from nqcc.parser import TokenTape, parse_function, parse_program
+from nqcc.frontend.parser import TokenTape, parse_function, parse_program
 from nqcc.semantic_analysis import SymbolTable
 from nqcc.tacky import (
     TackyConstantIntNode,

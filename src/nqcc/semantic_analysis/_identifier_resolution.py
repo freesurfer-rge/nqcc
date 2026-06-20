@@ -2,7 +2,7 @@ from typing import get_args
 
 from pydantic import BaseModel
 
-from nqcc.parser import (
+from nqcc.frontend.parser import (
     SourceAssignmentNode,
     SourceBinaryExpressionNode,
     SourceBlockItemNode,

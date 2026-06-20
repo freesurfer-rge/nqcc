@@ -1,6 +1,6 @@
 import pytest
 
-from nqcc.parser import SourceProgramNode, TokenTape, parse_program
+from nqcc.frontend.parser import SourceProgramNode, TokenTape, parse_program
 from nqcc.semantic_analysis import (
     FunctionType,
     Initial,

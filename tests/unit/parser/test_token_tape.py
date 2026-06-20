@@ -1,7 +1,7 @@
 import pytest
 
 from nqcc.frontend.lexer import ConstantIntegerToken, SemicolonToken
-from nqcc.parser import SourceASTBadTypeError, TokenTape
+from nqcc.frontend.parser import SourceASTBadTypeError, TokenTape
 
 
 class TestTokenTape:

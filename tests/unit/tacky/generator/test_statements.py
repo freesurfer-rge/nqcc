@@ -1,4 +1,4 @@
-from nqcc.parser import TokenTape, parse_block_item, parse_statement
+from nqcc.frontend.parser import TokenTape, parse_block_item, parse_statement
 from nqcc.semantic_analysis import LoopLabeller
 from nqcc.tacky import (
     TackyAdd,

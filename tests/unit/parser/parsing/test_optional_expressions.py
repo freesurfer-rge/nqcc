@@ -1,5 +1,5 @@
 from nqcc.frontend.lexer import CloseParenToken, SemicolonToken
-from nqcc.parser import (
+from nqcc.frontend.parser import (
     SourceAdd,
     SourceAssignmentNode,
     SourceBinaryExpressionNode,
