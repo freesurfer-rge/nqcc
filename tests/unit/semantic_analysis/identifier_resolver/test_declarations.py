@@ -1,6 +1,6 @@
 import pytest
 
-from nqcc.parser import (
+from nqcc.frontend.parser import (
     SourceBlockNode,
     SourceConstantIntNode,
     SourceFunctionDeclarationNode,
@@ -11,7 +11,7 @@ from nqcc.parser import (
     TokenTape,
     parse_declaration,
 )
-from nqcc.semantic_analysis import (
+from nqcc.frontend.semantic_analysis import (
     IdentifierInfo,
     IdentifierResolver,
     SemanticAnalysisDuplicateDeclaration,

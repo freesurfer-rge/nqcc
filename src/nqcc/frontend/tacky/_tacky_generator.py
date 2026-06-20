@@ -1,6 +1,6 @@
 from typing import Type, get_args
 
-from nqcc.parser import (
+from nqcc.frontend.parser import (
     SourceAdd,
     SourceAssignmentNode,
     SourceBinaryExpressionNode,
@@ -52,7 +52,7 @@ from nqcc.parser import (
     SourceVarNode,
     SourceWhileNode,
 )
-from nqcc.semantic_analysis import (
+from nqcc.frontend.semantic_analysis import (
     FunctionType,
     Initial,
     NoInitialiser,

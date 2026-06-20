@@ -1,4 +1,4 @@
-from nqcc.parser import (
+from nqcc.frontend.parser import (
     SourceFunctionDeclarationNode,
     SourceProgramNode,
     TokenTape,
@@ -6,14 +6,14 @@ from nqcc.parser import (
     parse_function,
     parse_program,
 )
-from nqcc.semantic_analysis import (
+from nqcc.frontend.semantic_analysis import (
     IdentifierInfo,
     IdentifierResolver,
     SymbolTable,
     label_loops_program,
     resolve_program,
 )
-from nqcc.tacky import (
+from nqcc.frontend.tacky import (
     TackyAdd,
     TackyBinaryNode,
     TackyConstantIntNode,

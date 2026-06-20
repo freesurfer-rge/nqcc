@@ -1,6 +1,6 @@
 from typing import get_args
 
-from nqcc.semantic_analysis import StaticVariableType, SymbolTable
+from nqcc.frontend.semantic_analysis import StaticVariableType, SymbolTable
 
 from ._assembler_ast import (
     AsmAllocateStackNode,

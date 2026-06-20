@@ -1,7 +1,7 @@
 import pytest
 
-from nqcc.lexer import ConstantIntegerToken, KeywordToken, SemicolonToken
-from nqcc.parser import (
+from nqcc.frontend.lexer import ConstantIntegerToken, KeywordToken, SemicolonToken
+from nqcc.frontend.parser import (
     SourceAdd,
     SourceAssignmentNode,
     SourceASTBadValueError,

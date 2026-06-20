@@ -1,6 +1,6 @@
 import pathlib
 
-from nqcc.parser import SourceProgramNode
+from nqcc.frontend.parser import SourceProgramNode
 
 from ._identifier_resolution import resolve_program
 from ._loop_labelling import label_loops_program

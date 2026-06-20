@@ -7,9 +7,9 @@ from nqcc.codegen import (
     convert_tacky_program,
     fixup_program_instructions,
 )
-from nqcc.parser import TokenTape, parse_program
-from nqcc.semantic_analysis import semantic_analysis_driver
-from nqcc.tacky import TackyGenerator
+from nqcc.frontend.parser import TokenTape, parse_program
+from nqcc.frontend.semantic_analysis import semantic_analysis_driver
+from nqcc.frontend.tacky import TackyGenerator
 
 
 class TestAsmSerde:

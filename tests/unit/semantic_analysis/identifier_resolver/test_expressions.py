@@ -1,6 +1,6 @@
 import pytest
 
-from nqcc.parser import (
+from nqcc.frontend.parser import (
     SourceAssignmentNode,
     SourceConstantIntNode,
     SourceFunctionCallNode,
@@ -12,7 +12,7 @@ from nqcc.parser import (
     parse_declaration,
     parse_expression,
 )
-from nqcc.semantic_analysis import (
+from nqcc.frontend.semantic_analysis import (
     IdentifierResolver,
     SemanticAnalysisBadLValue,
     SemanticAnalysisUnknownIdentifier,

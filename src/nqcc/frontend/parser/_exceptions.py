@@ -1,4 +1,4 @@
-from nqcc.lexer import Token
+from nqcc.frontend.lexer import Token
 
 
 class SourceASTBadTypeError(ValueError):

@@ -31,7 +31,7 @@ from nqcc.codegen import (
     AsmUnaryOperator,
     convert_tacky_instruction,
 )
-from nqcc.tacky import (
+from nqcc.frontend.tacky import (
     TackyAdd,
     TackyBinaryNode,
     TackyBinaryOperator,

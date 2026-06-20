@@ -1,6 +1,6 @@
 from typing import Type
 
-from nqcc.tacky import (
+from nqcc.frontend.tacky import (
     TackyAdd,
     TackyBinaryNode,
     TackyBinaryOperator,

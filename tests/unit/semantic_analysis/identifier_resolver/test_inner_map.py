@@ -1,4 +1,4 @@
-from nqcc.semantic_analysis import (
+from nqcc.frontend.semantic_analysis import (
     IdentifierInfo,
     make_inner_identifier_map,
 )
