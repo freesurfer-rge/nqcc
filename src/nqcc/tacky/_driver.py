@@ -1,7 +1,7 @@
 import pathlib
 
 from nqcc.frontend.parser import SourceProgramNode
-from nqcc.semantic_analysis import SymbolTable
+from nqcc.frontend.semantic_analysis import SymbolTable
 
 from ._tacky_ast import TackyProgramNode
 from ._tacky_generator import TackyGenerator

@@ -7,7 +7,7 @@ from nqcc import emit_assembler, generate_executable, generate_objectfile, prepr
 from nqcc.codegen import codegen_driver
 from nqcc.frontend.lexer import lexer_driver
 from nqcc.frontend.parser import parser_driver
-from nqcc.semantic_analysis import semantic_analysis_driver
+from nqcc.frontend.semantic_analysis import semantic_analysis_driver
 from nqcc.tacky import tacky_driver
 
 _DESC = """\

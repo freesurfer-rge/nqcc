@@ -52,7 +52,7 @@ from nqcc.frontend.parser import (
     SourceVarNode,
     SourceWhileNode,
 )
-from nqcc.semantic_analysis import (
+from nqcc.frontend.semantic_analysis import (
     FunctionType,
     Initial,
     NoInitialiser,

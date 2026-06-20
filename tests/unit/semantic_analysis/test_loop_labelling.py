@@ -12,7 +12,7 @@ from nqcc.frontend.parser import (
     parse_function,
     parse_program,
 )
-from nqcc.semantic_analysis import (
+from nqcc.frontend.semantic_analysis import (
     LoopLabeller,
     SemanticAnalysisOutsideLoop,
     label_loops_function,

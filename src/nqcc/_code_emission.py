@@ -40,7 +40,7 @@ from nqcc.codegen import (
     AsmUnaryNode,
     AsmUnaryOperator,
 )
-from nqcc.semantic_analysis import SymbolTable
+from nqcc.frontend.semantic_analysis import SymbolTable
 
 ASSEMBLY_EXTENSION = ".s"
 

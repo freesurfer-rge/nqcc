@@ -8,7 +8,7 @@ from nqcc.codegen import (
     fixup_program_instructions,
 )
 from nqcc.frontend.parser import TokenTape, parse_program
-from nqcc.semantic_analysis import semantic_analysis_driver
+from nqcc.frontend.semantic_analysis import semantic_analysis_driver
 from nqcc.tacky import TackyGenerator
 
 

@@ -11,7 +11,7 @@ from nqcc.frontend.parser import (
     TokenTape,
     parse_declaration,
 )
-from nqcc.semantic_analysis import (
+from nqcc.frontend.semantic_analysis import (
     IdentifierInfo,
     IdentifierResolver,
     SemanticAnalysisDuplicateDeclaration,

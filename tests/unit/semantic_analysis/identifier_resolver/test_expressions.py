@@ -12,7 +12,7 @@ from nqcc.frontend.parser import (
     parse_declaration,
     parse_expression,
 )
-from nqcc.semantic_analysis import (
+from nqcc.frontend.semantic_analysis import (
     IdentifierResolver,
     SemanticAnalysisBadLValue,
     SemanticAnalysisUnknownIdentifier,
