@@ -47,7 +47,7 @@ class FrontEnd:
 
     def run_semantic_analysis(self):
         # Resolve variables
-        self._source_ast = resolve_program(self.source_ast)
+        self._source_ast = resolve_program(self._source_ast)
 
         if self._working_dir:
             output_path = self._working_dir / SEMANTIC_ANALYSIS_RESOLVED_FILE

@@ -1,5 +1,6 @@
 import pytest
 
+from nqcc.frontend import FrontEnd
 from nqcc.frontend.parser import SourceProgramNode, TokenTape, parse_program
 from nqcc.frontend.semantic_analysis import (
     FunctionType,
@@ -14,11 +15,11 @@ from nqcc.frontend.semantic_analysis import (
 
 
 def prepare_program(c_str: str) -> SourceProgramNode:
-    token_tape = TokenTape.from_c_source(c_str)
+    fe = FrontEnd(c_str, working_dir=None)
+    fe.run_lexer()
+    fe.run_parser()
 
-    program = parse_program(token_tape)
-
-    resolved = resolve_program(program)
+    resolved = resolve_program(fe.source_ast)
 
     # Recall that label_loops_program is in-place
     label_loops_program(resolved)

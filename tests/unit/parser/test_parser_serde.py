@@ -1,6 +1,7 @@
 from nqcc.frontend.parser import SourceProgramNode, TokenTape, parse_program
 from nqcc.frontend import FrontEnd
 
+
 def _check_round_trip(c_source: str):
     fe = FrontEnd(c_source, working_dir=None)
     fe.run_lexer()

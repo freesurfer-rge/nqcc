@@ -139,7 +139,9 @@ def main(
         return
 
     _logger.info("Emitting assembly code")
-    asm_path = emit_assembler(asm_ast, fe.symbol_table, working_dir=working_dir, file_stem=file_stem)
+    asm_path = emit_assembler(
+        asm_ast, fe.symbol_table, working_dir=working_dir, file_stem=file_stem
+    )
 
     if compile_only:
         _logger.info("Generating object file")
