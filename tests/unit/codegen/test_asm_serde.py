@@ -1,5 +1,3 @@
-import pathlib
-import tempfile
 
 from nqcc.codegen import (
     AsmProgramNode,
@@ -7,9 +5,7 @@ from nqcc.codegen import (
     convert_tacky_program,
     fixup_program_instructions,
 )
-from nqcc.frontend.parser import TokenTape, parse_program
-from nqcc.frontend.semantic_analysis import semantic_analysis_driver
-from nqcc.frontend.tacky import TackyGenerator
+from nqcc.frontend import FrontEnd
 
 
 class TestAsmSerde:
@@ -20,26 +16,22 @@ class TestAsmSerde:
 
     def _check_from_source(self, source: str) -> None:
 
-        with tempfile.TemporaryDirectory() as working_dir:
-            token_tape = TokenTape.from_c_source(source)
-            src_node = parse_program(token_tape)
+        fe = FrontEnd(source, working_dir=None)
+        fe.run_lexer()
+        fe.run_parser()
+        fe.run_semantic_analysis()
+        fe.run_tacky_generation()
 
-            src_node, symbol_table = semantic_analysis_driver(
-                src_node, working_dir=pathlib.Path(working_dir)
-            )
+        asm_prog = convert_tacky_program(fe.tacky)
 
-            tg = TackyGenerator()
-            tacky_program = tg.emit_program(src_node, symbol_table)
-            asm_prog = convert_tacky_program(tacky_program)
+        self._round_trip(asm_prog)
 
-            self._round_trip(asm_prog)
+        prr = PseudoRegisterReplacer(fe.symbol_table)
+        prr.pseudo_replace(asm_prog)
+        self._round_trip(asm_prog)
 
-            prr = PseudoRegisterReplacer(symbol_table)
-            prr.pseudo_replace(asm_prog)
-            self._round_trip(asm_prog)
-
-            fixup_program_instructions(asm_prog)
-            self._round_trip(asm_prog)
+        fixup_program_instructions(asm_prog)
+        self._round_trip(asm_prog)
 
     def test_simple(self):
         source = "   int main(void) {return ~(    509);}"

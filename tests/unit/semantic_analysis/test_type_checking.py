@@ -1,7 +1,7 @@
 import pytest
 
 from nqcc.frontend import FrontEnd
-from nqcc.frontend.parser import SourceProgramNode, TokenTape, parse_program
+from nqcc.frontend.parser import SourceProgramNode
 from nqcc.frontend.semantic_analysis import (
     FunctionType,
     Initial,

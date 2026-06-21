@@ -1,5 +1,5 @@
-from nqcc.frontend.parser import SourceProgramNode, TokenTape, parse_program
 from nqcc.frontend import FrontEnd
+from nqcc.frontend.parser import SourceProgramNode
 
 
 def _check_round_trip(c_source: str):

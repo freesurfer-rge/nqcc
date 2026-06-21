@@ -16,7 +16,8 @@ from nqcc.codegen import (
     convert_tacky_operand,
     convert_tacky_program,
 )
-from nqcc.frontend.parser import TokenTape, parse_function, parse_program
+from nqcc.frontend import FrontEnd
+from nqcc.frontend.parser import TokenTape, parse_function
 from nqcc.frontend.semantic_analysis import SymbolTable
 from nqcc.frontend.tacky import (
     TackyConstantIntNode,
@@ -127,16 +128,13 @@ class TestFunctions:
 class TestPrograms:
     def test_simple(self):
         source = "   int main(void) {return ~(    509);}"
-        token_tape = TokenTape.from_c_source(source)
-        src_node = parse_program(token_tape)
+        fe = FrontEnd(source, working_dir=None)
+        fe.run_lexer()
+        fe.run_parser()
+        fe.run_semantic_analysis()
+        fe.run_tacky_generation()
 
-        st = SymbolTable()
-        st.check_program(src_node)
-
-        tg = TackyGenerator()
-        tacky_program = tg.emit_program(src_node, st)
-
-        asm_prog = convert_tacky_program(tacky_program)
+        asm_prog = convert_tacky_program(fe.tacky)
         assert isinstance(asm_prog, AsmProgramNode)
         assert asm_prog.start_position == 0
 
@@ -174,16 +172,13 @@ class TestPrograms:
 
         int main(void) { return get_val(); }
         """
-        token_tape = TokenTape.from_c_source(source)
-        src_node = parse_program(token_tape)
+        fe = FrontEnd(source, working_dir=None)
+        fe.run_lexer()
+        fe.run_parser()
+        fe.run_semantic_analysis()
+        fe.run_tacky_generation()
 
-        st = SymbolTable()
-        st.check_program(src_node)
-
-        tg = TackyGenerator()
-        tacky_program = tg.emit_program(src_node, st)
-
-        asm_prog = convert_tacky_program(tacky_program)
+        asm_prog = convert_tacky_program(fe.tacky)
         assert isinstance(asm_prog, AsmProgramNode)
         assert asm_prog.start_position == 0
 
@@ -209,16 +204,13 @@ class TestPrograms:
 
         int main(void) { return get_val(); }
         """
-        token_tape = TokenTape.from_c_source(source)
-        src_node = parse_program(token_tape)
+        fe = FrontEnd(source, working_dir=None)
+        fe.run_lexer()
+        fe.run_parser()
+        fe.run_semantic_analysis()
+        fe.run_tacky_generation()
 
-        st = SymbolTable()
-        st.check_program(src_node)
-
-        tg = TackyGenerator()
-        tacky_program = tg.emit_program(src_node, st)
-
-        asm_prog = convert_tacky_program(tacky_program)
+        asm_prog = convert_tacky_program(fe.tacky)
         assert isinstance(asm_prog, AsmProgramNode)
         assert asm_prog.start_position == 0
 
@@ -244,16 +236,13 @@ class TestPrograms:
 
         int main(void) { return value; }
         """
-        token_tape = TokenTape.from_c_source(source)
-        src_node = parse_program(token_tape)
+        fe = FrontEnd(source, working_dir=None)
+        fe.run_lexer()
+        fe.run_parser()
+        fe.run_semantic_analysis()
+        fe.run_tacky_generation()
 
-        st = SymbolTable()
-        st.check_program(src_node)
-
-        tg = TackyGenerator()
-        tacky_program = tg.emit_program(src_node, st)
-
-        asm_prog = convert_tacky_program(tacky_program)
+        asm_prog = convert_tacky_program(fe.tacky)
         assert isinstance(asm_prog, AsmProgramNode)
         assert asm_prog.start_position == 0
 
