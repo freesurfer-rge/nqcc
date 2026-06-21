@@ -1,17 +1,14 @@
+from nqcc.frontend import FrontEnd
 from nqcc.frontend.parser import (
     SourceFunctionDeclarationNode,
-    SourceProgramNode,
     TokenTape,
     parse_block_item,
     parse_function,
-    parse_program,
 )
 from nqcc.frontend.semantic_analysis import (
     IdentifierInfo,
     IdentifierResolver,
     SymbolTable,
-    label_loops_program,
-    resolve_program,
 )
 from nqcc.frontend.tacky import (
     TackyAdd,
@@ -193,34 +190,16 @@ class TestFunctions:
         )
 
 
-def prepare_program(c_str: str) -> tuple[SourceProgramNode, SymbolTable]:
-    token_tape = TokenTape.from_c_source(c_str)
-
-    program = parse_program(token_tape)
-
-    resolved_program = resolve_program(program)
-
-    # Recall that label_loops_program is in-place
-    label_loops_program(resolved_program)
-
-    st = SymbolTable()
-    st.check_program(resolved_program)
-
-    return resolved_program, st
-
-
 class TestPrograms:
     def test_simple(self):
         source = " int main(void) {return -    566;}"
-        token_tape = TokenTape.from_c_source(source)
-        src_node = parse_program(token_tape)
+        fe = FrontEnd(source, working_dir=None)
+        fe.run_lexer()
+        fe.run_parser()
+        fe.run_semantic_analysis()
+        fe.run_tacky_generation()
 
-        st = SymbolTable()
-        st.check_program(src_node)
-
-        target = TackyGenerator()
-
-        result = target.emit_program(src_node, st)
+        result = fe.tacky
         assert isinstance(result, TackyProgramNode)
         assert result.start_position == 0
 
@@ -260,12 +239,13 @@ class TestPrograms:
         }
         """
 
-        src_node, symbol_table = prepare_program(c_str)
-        assert isinstance(src_node, SourceProgramNode)
+        fe = FrontEnd(c_str, working_dir=None)
+        fe.run_lexer()
+        fe.run_parser()
+        fe.run_semantic_analysis()
+        fe.run_tacky_generation()
 
-        target = TackyGenerator()
-
-        result = target.emit_program(src_node, symbol_table)
+        result = fe.tacky
         assert isinstance(result, TackyProgramNode)
         # Make sure we don't have duplicate from the declaration of 'inc'
         assert len(result.definitions) == 2
@@ -330,12 +310,13 @@ class TestPrograms:
             return a % 2;
         }
         """
-        src_node, symbol_table = prepare_program(c_str)
-        assert isinstance(src_node, SourceProgramNode)
+        fe = FrontEnd(c_str, working_dir=None)
+        fe.run_lexer()
+        fe.run_parser()
+        fe.run_semantic_analysis()
+        fe.run_tacky_generation()
 
-        target = TackyGenerator()
-
-        result = target.emit_program(src_node, symbol_table)
+        result = fe.tacky
         assert isinstance(result, TackyProgramNode)
         # Make sure we don't have duplicate from the declaration of 'g'
         assert len(result.definitions) == 2

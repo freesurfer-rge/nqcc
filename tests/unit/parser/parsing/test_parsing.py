@@ -1,5 +1,6 @@
 import pytest
 
+from nqcc.frontend import FrontEnd
 from nqcc.frontend.lexer import CloseParenToken
 from nqcc.frontend.parser import (
     SourceAdd,
@@ -18,7 +19,6 @@ from nqcc.frontend.parser import (
     parse_declaration,
     parse_function,
     parse_function_parameter_list,
-    parse_program,
 )
 
 
@@ -226,10 +226,11 @@ class TestSourceFunctionNode:
 class TestSourceProgramNode:
     def test_program(self):
         program_str = " int main( void ) { return 2;}"
+        fe = FrontEnd(program_str, working_dir=None)
+        fe.run_lexer()
+        fe.run_parser()
 
-        token_tape = TokenTape.from_c_source(program_str)
-
-        node = parse_program(token_tape)
+        node = fe.source_ast
 
         assert isinstance(node, SourceProgramNode)
         assert node.start_position == 0
@@ -259,9 +260,11 @@ class TestSourceProgramNode:
             return combine(10, 11);
         }
         """
-        token_tape = TokenTape.from_c_source(program_str)
+        fe = FrontEnd(program_str, working_dir=None)
+        fe.run_lexer()
+        fe.run_parser()
 
-        node = parse_program(token_tape)
+        node = fe.source_ast
 
         assert isinstance(node, SourceProgramNode)
         assert node.start_position == 0
@@ -291,9 +294,11 @@ class TestSourceProgramNode:
     def test_program_serde(self):
         program_str = "   int main( void ) { return 6;}"
 
-        token_tape = TokenTape.from_c_source(program_str)
+        fe = FrontEnd(program_str, working_dir=None)
+        fe.run_lexer()
+        fe.run_parser()
 
-        node = parse_program(token_tape)
+        node = fe.source_ast
         node_str = node.model_dump_json()
 
         node_serde = SourceProgramNode.model_validate_json(node_str)

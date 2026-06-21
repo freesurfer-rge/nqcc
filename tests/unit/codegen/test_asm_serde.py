@@ -1,4 +1,3 @@
-
 from nqcc.codegen import (
     AsmProgramNode,
     PseudoRegisterReplacer,
