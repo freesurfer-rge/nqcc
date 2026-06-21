@@ -1,15 +1,17 @@
-from nqcc.frontend.parser import SourceProgramNode, TokenTape, parse_program
+from nqcc.frontend import FrontEnd
+from nqcc.frontend.parser import SourceProgramNode
 
 
 def _check_round_trip(c_source: str):
-    token_tape = TokenTape.from_c_source(c_source)
-    src_node = parse_program(token_tape)
+    fe = FrontEnd(c_source, working_dir=None)
+    fe.run_lexer()
+    fe.run_parser()
 
-    json_str = src_node.model_dump_json()
+    json_str = fe.source_ast.model_dump_json()
 
     restored = SourceProgramNode.model_validate_json(json_str)
 
-    assert restored == src_node
+    assert restored == fe.source_ast
 
 
 class TestParserSerde:

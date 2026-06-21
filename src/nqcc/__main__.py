@@ -5,10 +5,7 @@ import shutil
 
 from nqcc import emit_assembler, generate_executable, generate_objectfile, preprocess_c_file
 from nqcc.codegen import codegen_driver
-from nqcc.frontend.lexer import lexer_driver
-from nqcc.frontend.parser import parser_driver
-from nqcc.frontend.semantic_analysis import semantic_analysis_driver
-from nqcc.frontend.tacky import tacky_driver
+from nqcc.frontend import FrontEnd
 
 _DESC = """\
 An implementation of the C Compiler described in Nora 
@@ -99,8 +96,13 @@ def main(
         target, working_dir, macro_defines=preprocessor_defines
     )
 
+    with open(preprocessed_file_path, "r") as f:
+        c_source = f.read()
+
+    fe = FrontEnd(c_source, working_dir=working_dir)
+
     _logger.info("Running lexer")
-    all_tokens = lexer_driver(preprocessed_file_path)
+    fe.run_lexer()
 
     if exit_after_lex:
         _logger.info("Exiting after lexer")
@@ -109,35 +111,37 @@ def main(
     file_stem = target.stem
 
     _logger.info("Running parser")
-    src_ast = parser_driver(all_tokens, working_dir=working_dir)
+    fe.run_parser()
 
     if exit_after_parse:
         _logger.info("Exiting after parse")
         return
 
     _logger.info("Running semantic analysis")
-    src_ast, symbol_table = semantic_analysis_driver(src_ast, working_dir=working_dir)
+    fe.run_semantic_analysis()
 
     if exit_after_semantic_analysis:
         _logger.info("Exiting after semantic analysis")
         return
 
     _logger.info("Running tacking generation")
-    tacky_ast = tacky_driver(src_ast, symbol_table, working_dir=working_dir)
+    fe.run_tacky_generation()
 
     if exit_after_tacky:
         _logger.info("Exiting after tacky generation")
         return
 
     _logger.info("Running code generator")
-    asm_ast = codegen_driver(tacky_ast, symbol_table, working_dir=working_dir)
+    asm_ast = codegen_driver(fe.tacky, fe.symbol_table, working_dir=working_dir)
 
     if exit_after_codegen:
         _logger.info("Exiting after code generation")
         return
 
     _logger.info("Emitting assembly code")
-    asm_path = emit_assembler(asm_ast, symbol_table, working_dir=working_dir, file_stem=file_stem)
+    asm_path = emit_assembler(
+        asm_ast, fe.symbol_table, working_dir=working_dir, file_stem=file_stem
+    )
 
     if compile_only:
         _logger.info("Generating object file")

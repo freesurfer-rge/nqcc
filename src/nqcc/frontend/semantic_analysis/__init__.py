@@ -1,4 +1,3 @@
-from ._driver import semantic_analysis_driver
 from ._exceptions import (
     SemanticAnalysisBadLValue,
     SemanticAnalysisDuplicateDeclaration,
@@ -45,5 +44,4 @@ __all__ = [
     "label_loops_program",
     "make_inner_identifier_map",
     "resolve_program",
-    "semantic_analysis_driver",
 ]
