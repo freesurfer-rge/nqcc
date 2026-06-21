@@ -16,7 +16,7 @@ TOKEN_FILE = "lexer.tokens"
 
 class FrontEnd:
     def __init__(self, c_source: str, *, working_dir: pathlib.Path | None):
-        self._working_dir: pathlib.Path | None
+        self._working_dir: pathlib.Path | None = None
         if working_dir and working_dir.exists() and working_dir.is_dir():
             self._working_dir = working_dir
         self._c_source: str = c_source
