@@ -139,5 +139,4 @@ __all__ = [
     "parse_optional_expression",
     "parse_program",
     "parse_statement",
-    "parser_driver",
 ]

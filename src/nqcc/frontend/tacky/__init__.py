@@ -83,5 +83,4 @@ __all__ = [
     "TackyUnaryOperator",
     "TackyValue",
     "TackyVarNode",
-    "tacky_driver",
 ]

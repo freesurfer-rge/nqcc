@@ -80,6 +80,5 @@ __all__ = [
     "UnaryOperatorToken",
     "extract_tokens",
     "lex_string",
-    "lexer_driver",
     "pick_token",
 ]

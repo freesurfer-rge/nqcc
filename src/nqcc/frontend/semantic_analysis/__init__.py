@@ -44,5 +44,4 @@ __all__ = [
     "label_loops_program",
     "make_inner_identifier_map",
     "resolve_program",
-    "semantic_analysis_driver",
 ]
