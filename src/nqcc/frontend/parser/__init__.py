@@ -1,4 +1,3 @@
-from ._driver import parser_driver
 from ._exceptions import SourceASTBadTypeError, SourceASTBadValueError
 from ._parsing import (
     parse_block_item,

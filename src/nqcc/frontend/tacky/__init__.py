@@ -1,4 +1,3 @@
-from ._driver import tacky_driver
 from ._tacky_ast import (
     TackyAdd,
     TackyASTNode,

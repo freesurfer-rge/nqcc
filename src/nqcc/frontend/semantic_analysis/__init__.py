@@ -1,4 +1,3 @@
-from ._driver import semantic_analysis_driver
 from ._exceptions import (
     SemanticAnalysisBadLValue,
     SemanticAnalysisDuplicateDeclaration,
