@@ -1,5 +1,4 @@
 import pytest
-
 from nqcc.frontend import FrontEnd
 from nqcc.frontend.parser import SourceProgramNode
 from nqcc.frontend.semantic_analysis import (

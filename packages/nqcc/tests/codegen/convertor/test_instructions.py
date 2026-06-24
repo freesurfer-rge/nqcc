@@ -1,7 +1,6 @@
 from typing import Type
 
 import pytest
-
 from nqcc.codegen import (
     AsmAdd,
     AsmBinaryNode,

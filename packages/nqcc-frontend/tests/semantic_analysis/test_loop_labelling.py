@@ -1,5 +1,4 @@
 import pytest
-
 from nqcc.frontend.parser import (
     SourceBreakNode,
     SourceCompoundNode,

@@ -1,5 +1,4 @@
 import pytest
-
 from nqcc.codegen import (
     AsmAdd,
     AsmAllocateStackNode,

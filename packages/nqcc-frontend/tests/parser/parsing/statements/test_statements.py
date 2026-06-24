@@ -1,5 +1,4 @@
 import pytest
-
 from nqcc.frontend.lexer import ConstantIntegerToken, KeywordToken, SemicolonToken
 from nqcc.frontend.parser import (
     SourceAdd,

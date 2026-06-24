@@ -1,7 +1,6 @@
 from typing import Type
 
 import pytest
-
 from nqcc.frontend.parser import TokenTape, parse_expression
 from nqcc.frontend.tacky import (
     TackyAdd,

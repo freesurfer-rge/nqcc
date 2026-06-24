@@ -1,5 +1,4 @@
 import pytest
-
 from nqcc.frontend import FrontEnd
 from nqcc.frontend.lexer import CloseParenToken
 from nqcc.frontend.parser import (
