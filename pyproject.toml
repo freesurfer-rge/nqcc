@@ -1,5 +1,5 @@
 [project]
-name = "nqcc"
+name = "nqcc-workspace"
 version = "0.0.1.dev0"
 description = "The Not-Quite-C-Compiler"
 authors = [
@@ -12,20 +12,28 @@ dependencies = [
     "pydantic",
 ]
 
-[project.optional-dependencies]
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[dependency-groups]
 dev = [
-    "mypy",
-    "pytest",
+    "mypy>=1.10",
+    "pytest>=8",
     "ruff==0.15.2",
+    "nqcc",
+    "nqcc-frontend",
 ]
+
+[tool.uv.sources]
+nqcc = { workspace = true }
+nqcc-frontend = { workspace = true }
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
 
-[tool.mypy]
-
 [tool.ruff]
 line-length = 100
+target-version = "py314"
 
 [tool.ruff.lint]
 preview = true
@@ -94,3 +102,9 @@ extend-select = [
     "D401",  # First line of docstring should be in imperative mood
     "D404",  # First word of the docstring should not be "This"
 ]
+
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+strict = true
+python_version = "3.14"
