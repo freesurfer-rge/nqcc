@@ -25,7 +25,7 @@ class FrontEnd:
         self._symbol_table: SymbolTable | None = None
         self._tacky: TackyProgramNode | None = None
 
-    def run_lexer(self):
+    def run_lexer(self) -> None:
         self._token_list = lex_string(self.c_source)
 
         if self._working_dir:
@@ -35,7 +35,7 @@ class FrontEnd:
                     [t.model_dump(round_trip=True) for t in self.tokens], token_file, indent=4
                 )
 
-    def run_parser(self):
+    def run_parser(self) -> None:
         tt = TokenTape(self.tokens)
 
         self._source_ast = parse_program(tt)
@@ -45,7 +45,7 @@ class FrontEnd:
             with open(output_path, "w") as of:
                 of.write(self.source_ast.model_dump_json(indent=4))
 
-    def run_semantic_analysis(self):
+    def run_semantic_analysis(self) -> None:
         # Resolve variables
         self._source_ast = resolve_program(self._source_ast)
 
@@ -71,7 +71,7 @@ class FrontEnd:
             with open(output_path, "w") as of:
                 of.write(self._symbol_table.model_dump_json(indent=4))
 
-    def run_tacky_generation(self):
+    def run_tacky_generation(self) -> None:
         generator = TackyGenerator()
         self._tacky = generator.emit_program(self.source_ast, self.symbol_table)
 
