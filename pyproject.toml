@@ -20,10 +20,12 @@ dev = [
     "mypy>=1.10",
     "pytest>=8",
     "ruff==0.15.2",
+    "nqcc",
     "nqcc-frontend",
 ]
 
 [tool.uv.sources]
+nqcc = { workspace = true }
 nqcc-frontend = { workspace = true }
 
 [tool.pytest.ini_options]

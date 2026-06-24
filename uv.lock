@@ -8,6 +8,7 @@ resolution-markers = [
 
 [manifest]
 members = [
+    "nqcc",
     "nqcc-frontend",
     "nqcc-workspace",
 ]
@@ -153,6 +154,21 @@ wheels = [
 ]
 
 [[package]]
+name = "nqcc"
+version = "0.1.0"
+source = { editable = "packages/nqcc" }
+dependencies = [
+    { name = "nqcc-frontend" },
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "nqcc-frontend", editable = "packages/nqcc-frontend" },
+    { name = "pydantic", specifier = ">=2" },
+]
+
+[[package]]
 name = "nqcc-frontend"
 version = "0.1.0"
 source = { editable = "packages/nqcc-frontend" }
@@ -174,6 +190,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "mypy" },
+    { name = "nqcc" },
     { name = "nqcc-frontend" },
     { name = "pytest" },
     { name = "ruff" },
@@ -185,6 +202,7 @@ requires-dist = [{ name = "pydantic" }]
 [package.metadata.requires-dev]
 dev = [
     { name = "mypy", specifier = ">=1.10" },
+    { name = "nqcc", editable = "packages/nqcc" },
     { name = "nqcc-frontend", editable = "packages/nqcc-frontend" },
     { name = "pytest", specifier = ">=8" },
     { name = "ruff", specifier = "==0.15.2" },
