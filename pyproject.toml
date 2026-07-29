@@ -20,6 +20,7 @@ dev = [
     "mypy>=1.10",
     "pytest>=8",
     "ruff==0.15.2",
+    "ty",
     "nqcc",
     "nqcc-frontend",
 ]
@@ -109,3 +110,5 @@ plugins = ["pydantic.mypy"]
 strict = true
 python_version = "3.14"
 exclude = ["packages/nqcc-frontend/src/nqcc/__init__.py"]
+
+[tool.ty]
