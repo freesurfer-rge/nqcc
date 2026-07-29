@@ -1,4 +1,4 @@
-from nqcc.frontend.parser import TokenTape, parse_block_item, parse_statement
+from nqcc.frontend.parser import SourceStatementNode, TokenTape, parse_block_item, parse_statement
 from nqcc.frontend.semantic_analysis import LoopLabeller
 from nqcc.frontend.tacky import (
     TackyAdd,
@@ -60,6 +60,7 @@ class TestStatements:
         assert len(target._current_instructions) == 2, "Expected two instructions"
 
         instr0 = target._current_instructions[0]
+        assert isinstance(instr0, TackyUnaryNode)
         assert instr0 == TackyUnaryNode(
             start_position=7,
             operator=TackyComplement(start_position=7),
@@ -83,6 +84,7 @@ class TestStatements:
         assert len(target._current_instructions) == 3
 
         instr0 = target._current_instructions[0]
+        assert isinstance(instr0, TackyUnaryNode)
         assert instr0 == TackyUnaryNode(
             start_position=10,
             operator=TackyNegate(start_position=10),
@@ -91,6 +93,7 @@ class TestStatements:
         )
 
         instr1 = target._current_instructions[1]
+        assert isinstance(instr1, TackyBinaryNode)
         assert instr1 == TackyBinaryNode(
             start_position=8,
             operator=TackySubtract(start_position=8),
@@ -247,6 +250,7 @@ class TestLoops:
         """
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_block_item(token_tape)
+        assert isinstance(src_node, SourceStatementNode)
 
         labeller = LoopLabeller(function_name="test_while")
         labeller.label_statement(src_node, current_label="")
@@ -308,6 +312,7 @@ class TestLoops:
         """
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_block_item(token_tape)
+        assert isinstance(src_node, SourceStatementNode)
 
         labeller = LoopLabeller(function_name="test_dowhile")
         labeller.label_statement(src_node, current_label="")
@@ -364,6 +369,7 @@ class TestLoops:
         """
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_block_item(token_tape)
+        assert isinstance(src_node, SourceStatementNode)
 
         labeller = LoopLabeller(function_name="test_for_init")
         labeller.label_statement(src_node, current_label="")
@@ -421,6 +427,7 @@ class TestLoops:
         """
         token_tape = TokenTape.from_c_source(source)
         src_node = parse_block_item(token_tape)
+        assert isinstance(src_node, SourceStatementNode)
 
         labeller = LoopLabeller(function_name="test_for_decl")
         labeller.label_statement(src_node, current_label="")
