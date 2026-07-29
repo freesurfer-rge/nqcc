@@ -1,5 +1,7 @@
 import re
 
+from typing import Sequence
+
 from ._tokens import DecrementToken, Token, TokenTypes
 
 
@@ -28,7 +30,7 @@ def extract_tokens(s: str, idx: int) -> list[Token]:
     return candidates
 
 
-def pick_token(tokens: list[Token]) -> Token:
+def pick_token(tokens: Sequence[Token]) -> Token:
     assert len(tokens) > 0, "Must have at least one token!"
     if len(tokens) == 1:
         return tokens[0]
