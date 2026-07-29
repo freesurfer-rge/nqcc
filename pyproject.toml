@@ -17,7 +17,7 @@ members = ["packages/*"]
 
 [dependency-groups]
 dev = [
-    "mypy>=1.10",
+    "ty",
     "pytest>=8",
     "ruff==0.15.2",
     "nqcc",
