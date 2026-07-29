@@ -1,5 +1,4 @@
-from typing import TypeGuard
-
+from nqcc.frontend._type_guards import is_block_item, is_statement
 from nqcc.frontend.parser import (
     SourceBlockItemNode,
     SourceBlockNode,
@@ -22,14 +21,6 @@ from nqcc.frontend.parser import (
 from ._exceptions import SemanticAnalysisOutsideLoop
 
 LABEL_MAP = {SourceForNode: "for", SourceWhileNode: "while", SourceDoWhileNode: "do"}
-
-
-def is_statement(node: object) -> TypeGuard[SourceStatementNode]:
-    return isinstance(node, (SourceBreakNode, SourceContinueNode, SourceCompoundNode, SourceIfStatementNode, SourceWhileNode, SourceDoWhileNode, SourceForNode, SourceReturnNode, SourceExpressionStatementNode, SourceNullStatementNode))
-
-
-def is_block_item(node: object) -> TypeGuard[SourceBlockItemNode]:
-    return isinstance(node, (SourceVariableDeclarationNode, SourceFunctionDeclarationNode)) or is_statement(node)
 
 
 # Note that in this file, we do in-place updates

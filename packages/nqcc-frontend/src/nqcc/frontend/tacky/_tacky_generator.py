@@ -1,5 +1,6 @@
-from typing import Type, TypeGuard
+from typing import Type
 
+from nqcc.frontend._type_guards import is_block_item, is_expression, is_for_init, is_statement
 from nqcc.frontend.parser import (
     SourceAdd,
     SourceAssignmentNode,
@@ -101,47 +102,6 @@ from ._tacky_ast import (
     TackyValue,
     TackyVarNode,
 )
-
-def is_expression(node: object) -> TypeGuard[SourceExpressionNode]:
-    return isinstance(
-        node,
-        (
-            SourceConstantIntNode,
-            SourceVarNode,
-            SourceUnaryExpressionNode,
-            SourceBinaryExpressionNode,
-            SourceAssignmentNode,
-            SourceTernaryExpressonNode,
-            SourceFunctionCallNode,
-        ),
-    )
-
-
-def is_statement(node: object) -> TypeGuard[SourceStatementNode]:
-    return isinstance(
-        node,
-        (
-            SourceReturnNode,
-            SourceExpressionStatementNode,
-            SourceNullStatementNode,
-            SourceIfStatementNode,
-            SourceCompoundNode,
-            SourceBreakNode,
-            SourceContinueNode,
-            SourceWhileNode,
-            SourceDoWhileNode,
-            SourceForNode,
-        ),
-    )
-
-
-def is_block_item(node: object) -> TypeGuard[SourceBlockItemNode]:
-    return isinstance(node, (SourceVariableDeclarationNode, SourceFunctionDeclarationNode)) or is_statement(node)
-
-
-def is_for_init(node: object) -> TypeGuard[SourceForInitNode]:
-    return isinstance(node, (SourceInitDeclNode, SourceInitExpressionNode))
-
 
 _UNARY_OPERATOR_MAP: dict[Type[SourceUnaryOperator], Type[TackyUnaryOperator]] = {
     SourceComplement: TackyComplement,

@@ -1,7 +1,6 @@
-from typing import TypeGuard
-
 from pydantic import BaseModel
 
+from nqcc.frontend._type_guards import is_block_item, is_statement
 from nqcc.frontend.parser import (
     SourceAssignmentNode,
     SourceBinaryExpressionNode,
@@ -53,28 +52,6 @@ def make_inner_identifier_map(outer_map: dict[str, IdentifierInfo]) -> dict[str,
         nxt = IdentifierInfo(name=v.name, from_current_scope=False, has_linkage=v.has_linkage)
         result[k] = nxt
     return result
-
-
-def is_statement(node: object) -> TypeGuard[SourceStatementNode]:
-    return isinstance(
-        node,
-        (
-            SourceReturnNode,
-            SourceExpressionStatementNode,
-            SourceNullStatementNode,
-            SourceIfStatementNode,
-            SourceCompoundNode,
-            SourceBreakNode,
-            SourceContinueNode,
-            SourceWhileNode,
-            SourceDoWhileNode,
-            SourceForNode,
-        ),
-    )
-
-
-def is_block_item(node: object) -> TypeGuard[SourceBlockItemNode]:
-    return isinstance(node, (SourceVariableDeclarationNode, SourceFunctionDeclarationNode)) or is_statement(node)
 
 
 class IdentifierResolver:

@@ -16,6 +16,26 @@ from nqcc.codegen import (
     convert_tacky_operand,
     convert_tacky_program,
 )
+
+
+def assert_mov_instruction(node: object) -> AsmMovNode:
+    assert isinstance(node, AsmMovNode)
+    return node
+
+
+def assert_unary_instruction(node: object) -> AsmUnaryNode:
+    assert isinstance(node, AsmUnaryNode)
+    return node
+
+
+def assert_binary_instruction(node: object) -> AsmBinaryNode:
+    assert isinstance(node, AsmBinaryNode)
+    return node
+
+
+def assert_function_definition(node: object) -> AsmFunctionNode:
+    assert isinstance(node, AsmFunctionNode)
+    return node
 from nqcc.frontend import FrontEnd
 from nqcc.frontend.parser import TokenTape, parse_function
 from nqcc.frontend.semantic_analysis import SymbolTable
@@ -68,7 +88,7 @@ class TestFunctions:
             dst=AsmPseudoRegisterNode(start_position=26, identifier="tmp.main.0"),
         )
 
-        i1 = asm_func.instructions[1]
+        i1 = assert_unary_instruction(asm_func.instructions[1])
         assert i1 == AsmUnaryNode(start_position=26, operator=AsmNeg(start_position=26), src=i0.dst)
 
         i2 = asm_func.instructions[2]
@@ -106,7 +126,7 @@ class TestFunctions:
             dst=AsmPseudoRegisterNode(start_position=28, identifier="tmp.main.0"),
         )
 
-        i1 = asm_func.instructions[1]
+        i1 = assert_binary_instruction(asm_func.instructions[1])
         assert i1 == AsmBinaryNode(
             start_position=28,
             operator=AsmAdd(start_position=28),
@@ -139,7 +159,7 @@ class TestPrograms:
         assert asm_prog.start_position == 0
 
         assert len(asm_prog.definitions) == 1
-        asm_func = asm_prog.definitions[0]
+        asm_func = assert_function_definition(asm_prog.definitions[0])
         assert asm_func.start_position == 3
         assert asm_func.identifier == "main"
         # Add two instructions for 'guard' return added by Tacky
@@ -152,7 +172,7 @@ class TestPrograms:
             dst=AsmPseudoRegisterNode(start_position=26, identifier="tmp.main.0"),
         )
 
-        i1 = asm_func.instructions[1]
+        i1 = assert_unary_instruction(asm_func.instructions[1])
         assert i1 == AsmUnaryNode(start_position=26, operator=AsmNot(start_position=26), src=i0.dst)
 
         i2 = asm_func.instructions[2]

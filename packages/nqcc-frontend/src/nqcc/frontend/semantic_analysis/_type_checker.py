@@ -1,7 +1,8 @@
-from typing import Literal, TypeGuard, Union
+from typing import Literal, Union
 
 from pydantic import BaseModel, Field
 
+from nqcc.frontend._type_guards import is_declaration, is_expression, is_statement
 from nqcc.frontend.parser import (
     SourceAssignmentNode,
     SourceBinaryExpressionNode,
@@ -78,43 +79,6 @@ class FunctionType(BaseModel):
 
 
 SymbolType = Union[LocalVariableType, StaticVariableType, FunctionType]
-
-
-def is_expression(node: object) -> TypeGuard[SourceExpressionNode]:
-    return isinstance(
-        node,
-        (
-            SourceConstantIntNode,
-            SourceVarNode,
-            SourceUnaryExpressionNode,
-            SourceBinaryExpressionNode,
-            SourceAssignmentNode,
-            SourceTernaryExpressonNode,
-            SourceFunctionCallNode,
-        ),
-    )
-
-
-def is_declaration(node: object) -> TypeGuard[SourceDeclarationNode]:
-    return isinstance(node, (SourceVariableDeclarationNode, SourceFunctionDeclarationNode))
-
-
-def is_statement(node: object) -> TypeGuard[SourceStatementNode]:
-    return isinstance(
-        node,
-        (
-            SourceReturnNode,
-            SourceExpressionStatementNode,
-            SourceNullStatementNode,
-            SourceIfStatementNode,
-            SourceCompoundNode,
-            SourceBreakNode,
-            SourceContinueNode,
-            SourceWhileNode,
-            SourceDoWhileNode,
-            SourceForNode,
-        ),
-    )
 
 
 class SymbolTable(BaseModel):
