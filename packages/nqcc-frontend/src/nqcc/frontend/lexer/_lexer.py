@@ -1,5 +1,4 @@
 import re
-
 from typing import Sequence
 
 from ._tokens import DecrementToken, Token, TokenTypes
