@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, TypeGuard
 
 from nqcc.frontend.tacky import (
     TackyAdd,
@@ -112,6 +112,29 @@ _ARG_REG_NAMES: list[AsmRegName] = ["DI", "SI", "DX", "CX", "R8", "R9"]
 
 _STACK_ARG_SIZE = 8
 _STACK_ALIGN = 16
+
+
+def is_instruction(node: object) -> TypeGuard[AsmInstructionNode]:
+    return isinstance(
+        node,
+        (
+            AsmMovNode,
+            AsmRetNode,
+            AsmUnaryNode,
+            AsmAllocateStackNode,
+            AsmBinaryNode,
+            AsmIDivNode,
+            AsmCdqNode,
+            AsmCmpNode,
+            AsmJmpNode,
+            AsmJmpCCNode,
+            AsmSetCCNode,
+            AsmLabelNode,
+            AsmDeallocateStackNode,
+            AsmPushNode,
+            AsmCallNode,
+        ),
+    )
 
 
 def convert_tacky_operand(tacky_value: TackyValue) -> AsmOperandNode:

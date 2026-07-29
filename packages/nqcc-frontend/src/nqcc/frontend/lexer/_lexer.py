@@ -18,9 +18,11 @@ def extract_tokens(s: str, idx: int) -> list[Token]:
         assert issubclass(tt, Token)
         m = re.match(tt.re(), s)
         if m and len(m.group(0)) > 0:
-            # Following has a suppression because the subclasses enforce
-            # a token_type argument but this isn't being picked up
-            candidate_token = tt(start_position=idx, value=m.group(0))  # type: ignore[call-arg]
+            candidate_token = tt.model_construct(
+                token_type=tt.__name__,
+                start_position=idx,
+                value=m.group(0),
+            )
             candidates.append(candidate_token)
     if len(candidates) == 0:
         raise LexerMatchError(position=idx)
