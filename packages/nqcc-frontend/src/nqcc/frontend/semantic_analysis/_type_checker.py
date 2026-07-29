@@ -1,4 +1,4 @@
-from typing import Literal, Union, get_args
+from typing import Literal, TypeGuard, Union
 
 from pydantic import BaseModel, Field
 
@@ -78,6 +78,43 @@ class FunctionType(BaseModel):
 
 
 SymbolType = Union[LocalVariableType, StaticVariableType, FunctionType]
+
+
+def is_expression(node: object) -> TypeGuard[SourceExpressionNode]:
+    return isinstance(
+        node,
+        (
+            SourceConstantIntNode,
+            SourceVarNode,
+            SourceUnaryExpressionNode,
+            SourceBinaryExpressionNode,
+            SourceAssignmentNode,
+            SourceTernaryExpressonNode,
+            SourceFunctionCallNode,
+        ),
+    )
+
+
+def is_declaration(node: object) -> TypeGuard[SourceDeclarationNode]:
+    return isinstance(node, (SourceVariableDeclarationNode, SourceFunctionDeclarationNode))
+
+
+def is_statement(node: object) -> TypeGuard[SourceStatementNode]:
+    return isinstance(
+        node,
+        (
+            SourceReturnNode,
+            SourceExpressionStatementNode,
+            SourceNullStatementNode,
+            SourceIfStatementNode,
+            SourceCompoundNode,
+            SourceBreakNode,
+            SourceContinueNode,
+            SourceWhileNode,
+            SourceDoWhileNode,
+            SourceForNode,
+        ),
+    )
 
 
 class SymbolTable(BaseModel):
@@ -215,7 +252,7 @@ class SymbolTable(BaseModel):
             self.check_block(source_node.body)
 
     def check_expression(self, source_node: SourceExpressionNode):  # noqa: C901
-        assert isinstance(source_node, get_args(SourceExpressionNode))
+        assert is_expression(source_node)
 
         match source_node:
             case SourceFunctionCallNode():
@@ -256,9 +293,9 @@ class SymbolTable(BaseModel):
 
     def check_blockitem(self, source_node: SourceBlockItemNode):
         match source_node:
-            case _ if isinstance(source_node, get_args(SourceDeclarationNode)):
+            case _ if is_declaration(source_node):
                 self.check_declaration(source_node, at_file_scope=False)
-            case _ if isinstance(source_node, get_args(SourceStatementNode)):
+            case _ if is_statement(source_node):
                 self.check_statement(source_node)
             case _:
                 raise ValueError(f"Unrecognised: {source_node}")

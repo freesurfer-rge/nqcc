@@ -1,4 +1,4 @@
-from typing import Type, get_args
+from typing import Type, TypeGuard
 
 from nqcc.frontend.parser import (
     SourceAdd,
@@ -101,6 +101,47 @@ from ._tacky_ast import (
     TackyValue,
     TackyVarNode,
 )
+
+def is_expression(node: object) -> TypeGuard[SourceExpressionNode]:
+    return isinstance(
+        node,
+        (
+            SourceConstantIntNode,
+            SourceVarNode,
+            SourceUnaryExpressionNode,
+            SourceBinaryExpressionNode,
+            SourceAssignmentNode,
+            SourceTernaryExpressonNode,
+            SourceFunctionCallNode,
+        ),
+    )
+
+
+def is_statement(node: object) -> TypeGuard[SourceStatementNode]:
+    return isinstance(
+        node,
+        (
+            SourceReturnNode,
+            SourceExpressionStatementNode,
+            SourceNullStatementNode,
+            SourceIfStatementNode,
+            SourceCompoundNode,
+            SourceBreakNode,
+            SourceContinueNode,
+            SourceWhileNode,
+            SourceDoWhileNode,
+            SourceForNode,
+        ),
+    )
+
+
+def is_block_item(node: object) -> TypeGuard[SourceBlockItemNode]:
+    return isinstance(node, (SourceVariableDeclarationNode, SourceFunctionDeclarationNode)) or is_statement(node)
+
+
+def is_for_init(node: object) -> TypeGuard[SourceForInitNode]:
+    return isinstance(node, (SourceInitDeclNode, SourceInitExpressionNode))
+
 
 _UNARY_OPERATOR_MAP: dict[Type[SourceUnaryOperator], Type[TackyUnaryOperator]] = {
     SourceComplement: TackyComplement,
@@ -330,7 +371,7 @@ class TackyGenerator:
         return result_var
 
     def emit_expression(self, source_node: SourceExpressionNode) -> TackyValue:
-        assert isinstance(source_node, get_args(SourceExpressionNode))
+        assert is_expression(source_node)
         match source_node:
             case SourceConstantIntNode():
                 return self.convert_constant_int(source_node)
@@ -490,7 +531,7 @@ class TackyGenerator:
         )
 
     def emit_forinit(self, source_node: SourceForInitNode):
-        assert isinstance(source_node, get_args(SourceForInitNode))
+        assert is_for_init(source_node)
 
         match source_node:
             case SourceInitDeclNode():
@@ -556,7 +597,7 @@ class TackyGenerator:
         return result_var
 
     def emit_statement(self, source_node: SourceStatementNode):  # noqa: C901
-        assert isinstance(source_node, get_args(SourceStatementNode))
+        assert is_statement(source_node)
         match source_node:
             case SourceNullStatementNode():
                 return
@@ -605,9 +646,9 @@ class TackyGenerator:
         self._current_instructions.append(tacky_copy)
 
     def emit_blockitem(self, source_node: SourceBlockItemNode):
-        assert isinstance(source_node, get_args(SourceBlockItemNode))
+        assert is_block_item(source_node)
         match source_node:
-            case _ if isinstance(source_node, get_args(SourceStatementNode)):
+            case _ if is_statement(source_node):
                 self.emit_statement(source_node)
             case SourceVariableDeclarationNode():
                 self.emit_declaration(source_node)

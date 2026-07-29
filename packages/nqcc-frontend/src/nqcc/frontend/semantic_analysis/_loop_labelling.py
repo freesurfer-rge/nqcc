@@ -1,4 +1,4 @@
-from typing import get_args
+from typing import TypeGuard
 
 from nqcc.frontend.parser import (
     SourceBlockItemNode,
@@ -7,17 +7,30 @@ from nqcc.frontend.parser import (
     SourceCompoundNode,
     SourceContinueNode,
     SourceDoWhileNode,
+    SourceExpressionStatementNode,
     SourceForNode,
     SourceFunctionDeclarationNode,
     SourceIfStatementNode,
+    SourceNullStatementNode,
     SourceProgramNode,
+    SourceReturnNode,
     SourceStatementNode,
+    SourceVariableDeclarationNode,
     SourceWhileNode,
 )
 
 from ._exceptions import SemanticAnalysisOutsideLoop
 
 LABEL_MAP = {SourceForNode: "for", SourceWhileNode: "while", SourceDoWhileNode: "do"}
+
+
+def is_statement(node: object) -> TypeGuard[SourceStatementNode]:
+    return isinstance(node, (SourceBreakNode, SourceContinueNode, SourceCompoundNode, SourceIfStatementNode, SourceWhileNode, SourceDoWhileNode, SourceForNode, SourceReturnNode, SourceExpressionStatementNode, SourceNullStatementNode))
+
+
+def is_block_item(node: object) -> TypeGuard[SourceBlockItemNode]:
+    return isinstance(node, (SourceVariableDeclarationNode, SourceFunctionDeclarationNode)) or is_statement(node)
+
 
 # Note that in this file, we do in-place updates
 # Unlike the variable resolver, we only have to deal with a subset of the statements
@@ -30,12 +43,18 @@ class LoopLabeller:
         self._nxt_loop = 0
 
     def get_loop_label(self, stmt: SourceForNode | SourceWhileNode | SourceDoWhileNode) -> str:
-        label = f"{LABEL_MAP[type(stmt)]}.{self._func_name}.{self._nxt_loop}"
+        if isinstance(stmt, SourceForNode):
+            loop_type = "for"
+        elif isinstance(stmt, SourceWhileNode):
+            loop_type = "while"
+        else:
+            loop_type = "do"
+        label = f"{loop_type}.{self._func_name}.{self._nxt_loop}"
         self._nxt_loop += 1
         return label
 
     def label_statement(self, stmt: SourceStatementNode, current_label: str) -> None:
-        assert isinstance(stmt, get_args(SourceStatementNode))
+        assert is_statement(stmt)
 
         match stmt:
             case SourceBreakNode() | SourceContinueNode():
@@ -71,9 +90,9 @@ class LoopLabeller:
             self.label_blockitem(item, current_label)
 
     def label_blockitem(self, bi: SourceBlockItemNode, current_label: str) -> None:
-        assert isinstance(bi, get_args(SourceBlockItemNode))
+        assert is_block_item(bi)
 
-        if isinstance(bi, get_args(SourceStatementNode)):
+        if is_statement(bi):
             self.label_statement(bi, current_label)
 
 

@@ -1,4 +1,4 @@
-from typing import get_args
+from typing import TypeGuard
 
 from pydantic import BaseModel
 
@@ -53,6 +53,28 @@ def make_inner_identifier_map(outer_map: dict[str, IdentifierInfo]) -> dict[str,
         nxt = IdentifierInfo(name=v.name, from_current_scope=False, has_linkage=v.has_linkage)
         result[k] = nxt
     return result
+
+
+def is_statement(node: object) -> TypeGuard[SourceStatementNode]:
+    return isinstance(
+        node,
+        (
+            SourceReturnNode,
+            SourceExpressionStatementNode,
+            SourceNullStatementNode,
+            SourceIfStatementNode,
+            SourceCompoundNode,
+            SourceBreakNode,
+            SourceContinueNode,
+            SourceWhileNode,
+            SourceDoWhileNode,
+            SourceForNode,
+        ),
+    )
+
+
+def is_block_item(node: object) -> TypeGuard[SourceBlockItemNode]:
+    return isinstance(node, (SourceVariableDeclarationNode, SourceFunctionDeclarationNode)) or is_statement(node)
 
 
 class IdentifierResolver:
@@ -178,7 +200,7 @@ class IdentifierResolver:
     def resolve_for_init(
         self, init: SourceForInitNode, identifier_map: dict[str, IdentifierInfo]
     ) -> SourceForInitNode:
-        assert isinstance(init, get_args(SourceForInitNode))
+        assert isinstance(init, (SourceInitDeclNode, SourceInitExpressionNode))
         sp = init.start_position
         match init:
             case SourceInitDeclNode():
@@ -332,7 +354,7 @@ class IdentifierResolver:
                 if bi.storage_class == SourceStorageType(storage_type="Static"):
                     raise ValueError("Cannot declare static function at block level")
                 return self.resolve_declaration(bi, identifier_map, at_file_scope=False)
-            case _ if isinstance(bi, get_args(SourceStatementNode)):
+            case _ if is_statement(bi):
                 return self.resolve_statement(bi, identifier_map)
             case _:
                 raise ValueError(f"Unrecognised: {bi}")

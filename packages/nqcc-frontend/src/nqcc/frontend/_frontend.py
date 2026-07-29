@@ -46,6 +46,9 @@ class FrontEnd:
                 of.write(self.source_ast.model_dump_json(indent=4))
 
     def run_semantic_analysis(self) -> None:
+        if self._source_ast is None:
+            raise ValueError("Parser not run")
+
         # Resolve variables
         self._source_ast = resolve_program(self._source_ast)
 
