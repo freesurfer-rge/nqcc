@@ -1,4 +1,4 @@
-from typing import get_args
+from typing import get_args, Type
 
 from nqcc.frontend.parser import (
     SourceBlockItemNode,
@@ -17,7 +17,11 @@ from nqcc.frontend.parser import (
 
 from ._exceptions import SemanticAnalysisOutsideLoop
 
-LABEL_MAP = {SourceForNode: "for", SourceWhileNode: "while", SourceDoWhileNode: "do"}
+LABEL_MAP: dict[Type[SourceStatementNode], str] = {
+    SourceForNode: "for",
+    SourceWhileNode: "while",
+    SourceDoWhileNode: "do",
+}
 
 # Note that in this file, we do in-place updates
 # Unlike the variable resolver, we only have to deal with a subset of the statements
