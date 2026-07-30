@@ -1,5 +1,5 @@
 import re
-from typing import Sequence
+from typing import Sequence, get_args
 
 from ._tokens import DecrementToken, Token, TokenTypes
 
@@ -19,9 +19,8 @@ def extract_tokens(s: str, idx: int) -> list[Token]:
         assert issubclass(tt, Token)
         m = re.match(tt.re(), s)
         if m and len(m.group(0)) > 0:
-            # Following has a suppression because the subclasses enforce
-            # a token_type argument but this isn't being picked up
-            candidate_token = tt(start_position=idx, value=m.group(0))  # type: ignore[call-arg]
+            token_type_str = get_args(tt.model_fields["token_type"].annotation)[0]
+            candidate_token = tt(token_type=token_type_str, start_position=idx, value=m.group(0))
             candidates.append(candidate_token)
     if len(candidates) == 0:
         raise LexerMatchError(position=idx)

@@ -1,4 +1,4 @@
-from typing import get_args, Type
+from typing import Type, get_args
 
 from nqcc.frontend.parser import (
     SourceBlockItemNode,
