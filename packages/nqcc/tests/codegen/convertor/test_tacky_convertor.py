@@ -53,6 +53,7 @@ class TestFunctions:
 
         tg = TackyGenerator()
         tacky_func = tg.emit_function(src_node, st)
+        assert tacky_func is not None
 
         asm_func = convert_tacky_function(tacky_func)
         assert isinstance(asm_func, AsmFunctionNode)
@@ -62,6 +63,7 @@ class TestFunctions:
         assert len(asm_func.instructions) == 4 + 2
 
         i0 = asm_func.instructions[0]
+        assert isinstance(i0, AsmMovNode)
         assert i0 == AsmMovNode(
             start_position=26,
             src=AsmImmediateIntNode(start_position=31, value=508),
@@ -69,6 +71,7 @@ class TestFunctions:
         )
 
         i1 = asm_func.instructions[1]
+        assert isinstance(i1, AsmUnaryNode)
         assert i1 == AsmUnaryNode(start_position=26, operator=AsmNeg(start_position=26), src=i0.dst)
 
         i2 = asm_func.instructions[2]
@@ -91,6 +94,7 @@ class TestFunctions:
 
         tg = TackyGenerator()
         tacky_func = tg.emit_function(src_node, st)
+        assert tacky_func is not None
 
         asm_func = convert_tacky_function(tacky_func)
         assert isinstance(asm_func, AsmFunctionNode)
@@ -100,6 +104,7 @@ class TestFunctions:
         assert len(asm_func.instructions) == 4 + 2
 
         i0 = asm_func.instructions[0]
+        assert isinstance(i0, AsmMovNode)
         assert i0 == AsmMovNode(
             start_position=28,
             src=AsmImmediateIntNode(start_position=26, value=1),
@@ -107,6 +112,7 @@ class TestFunctions:
         )
 
         i1 = asm_func.instructions[1]
+        assert isinstance(i1, AsmBinaryNode)
         assert i1 == AsmBinaryNode(
             start_position=28,
             operator=AsmAdd(start_position=28),
@@ -140,12 +146,14 @@ class TestPrograms:
 
         assert len(asm_prog.definitions) == 1
         asm_func = asm_prog.definitions[0]
+        assert isinstance(asm_func, AsmFunctionNode)
         assert asm_func.start_position == 3
         assert asm_func.identifier == "main"
         # Add two instructions for 'guard' return added by Tacky
         assert len(asm_func.instructions) == 4 + 2
 
         i0 = asm_func.instructions[0]
+        assert isinstance(i0, AsmMovNode)
         assert i0 == AsmMovNode(
             start_position=26,
             src=AsmImmediateIntNode(start_position=32, value=509),
@@ -153,6 +161,7 @@ class TestPrograms:
         )
 
         i1 = asm_func.instructions[1]
+        assert isinstance(i1, AsmUnaryNode)
         assert i1 == AsmUnaryNode(start_position=26, operator=AsmNot(start_position=26), src=i0.dst)
 
         i2 = asm_func.instructions[2]
