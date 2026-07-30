@@ -211,6 +211,7 @@ class TestPrograms:
         assert len(main_func.instructions) == 3
 
         instr0 = main_func.instructions[0]
+        assert isinstance(instr0, TackyUnaryNode)
         assert instr0 == TackyUnaryNode(
             start_position=24,
             operator=TackyNegate(start_position=24),

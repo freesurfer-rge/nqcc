@@ -46,6 +46,7 @@ class FrontEnd:
                 of.write(self.source_ast.model_dump_json(indent=4))
 
     def run_semantic_analysis(self) -> None:
+        assert self._source_ast is not None
         # Resolve variables
         self._source_ast = resolve_program(self._source_ast)
 

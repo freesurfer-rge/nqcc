@@ -44,7 +44,7 @@ class TestSourceWhileNode:
         assert isinstance(node.body.value, SourceAssignmentNode)
         body = node.body.value
         assert body.left == SourceVarNode(start_position=36, identifier="a")
-        isinstance(body.right, SourceBinaryExpressionNode)
+        assert isinstance(body.right, SourceBinaryExpressionNode)
         assert isinstance(body.right.operator, SourceDivide)
         assert body.right.left == SourceVarNode(start_position=40, identifier="a")
         assert body.right.right == SourceConstantIntNode(start_position=44, value=2)
@@ -74,7 +74,7 @@ class TestSourceWhileNode:
         assert isinstance(stmt, SourceExpressionStatementNode)
         assert isinstance(stmt.value, SourceAssignmentNode)
         assert stmt.value.left == SourceVarNode(start_position=38, identifier="a")
-        isinstance(stmt.value.right, SourceBinaryExpressionNode)
+        assert isinstance(stmt.value.right, SourceBinaryExpressionNode)
         assert isinstance(stmt.value.right.operator, SourceDivide)
         assert stmt.value.right.left == SourceVarNode(start_position=42, identifier="a")
         assert stmt.value.right.right == SourceConstantIntNode(start_position=46, value=2)
@@ -218,6 +218,7 @@ class TestSourceForNode:
         assert isinstance(node.body, SourceCompoundNode)
         assert len(node.body.block.items) == 1
         stmt = node.body.block.items[0]
+        assert isinstance(stmt, SourceExpressionStatementNode)
         assert isinstance(stmt.value, SourceAssignmentNode)
         assert stmt.value.left == SourceVarNode(start_position=50, identifier="a")
         assert isinstance(stmt.value.right, SourceBinaryExpressionNode)

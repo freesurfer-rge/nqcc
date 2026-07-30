@@ -144,6 +144,7 @@ class TestFunctionCalls:
         assert isinstance(call_expr, SourceFunctionCallNode)
 
         result = target.resolve_expression(call_expr, identifier_map)
+        assert isinstance(result, SourceFunctionCallNode)
         assert result.identifier == call_expr.identifier
         assert len(result.args) == 1
         arg0 = result.args[0]
@@ -167,6 +168,7 @@ class TestFunctionCalls:
         assert token_tape.tokens_remaining == 0
         assert isinstance(var_decl, SourceVariableDeclarationNode)
         var_resolved = target.resolve_declaration(var_decl, identifier_map, at_file_scope=False)
+        assert isinstance(var_resolved, SourceVariableDeclarationNode)
         assert var_resolved.identifier.identifier == "a.1"
 
         call_str = "some_func(a);"
@@ -176,6 +178,7 @@ class TestFunctionCalls:
         assert isinstance(call_expr, SourceFunctionCallNode)
 
         result = target.resolve_expression(call_expr, identifier_map)
+        assert isinstance(result, SourceFunctionCallNode)
         assert result.identifier == call_expr.identifier
         assert len(result.args) == 1
         arg0 = result.args[0]

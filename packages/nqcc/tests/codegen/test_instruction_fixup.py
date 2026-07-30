@@ -71,6 +71,7 @@ class TestMovFixup:
 
         fixed = apply_mov_fixup(target)
         assert len(fixed) == 2
+        assert isinstance(fixed[0], AsmMovNode)
         assert fixed[0] == AsmMovNode(
             start_position=0,
             src=src,
@@ -119,6 +120,7 @@ class TestCmpFixup:
 
         fixed = apply_cmp_fixup(target)
         assert len(fixed) == 2
+        assert isinstance(fixed[0], AsmMovNode)
         assert fixed[0] == AsmMovNode(
             start_position=0,
             src=src,
@@ -165,6 +167,7 @@ class TestCmpFixup:
 
         fixed = apply_cmp_fixup(target)
         assert len(fixed) == 2
+        assert isinstance(fixed[0], AsmMovNode)
         assert fixed[0] == AsmMovNode(
             start_position=0,
             src=dst,
@@ -199,6 +202,7 @@ class TestIDivFixup:
 
         fixed = apply_idiv_fixup(target)
         assert len(fixed) == 2
+        assert isinstance(fixed[0], AsmMovNode)
         assert fixed[0] == AsmMovNode(
             start_position=4,
             src=val,
@@ -358,11 +362,13 @@ class TestBinaryFixup:
 
         fixed = apply_binary_fixup(target)
         assert len(fixed) == 3
+        assert isinstance(fixed[0], AsmMovNode)
         assert fixed[0] == AsmMovNode(
             start_position=4,
             src=dst,
             dst=AsmRegisterNode(start_position=4, value="R11"),
         )
+        assert isinstance(fixed[1], AsmBinaryNode)
         assert fixed[1] == AsmBinaryNode(
             start_position=4,
             operator=AsmMultiply(start_position=3),
@@ -522,6 +528,7 @@ class TestProgramFixup:
         target = AsmProgramNode(start_position=0, definitions=[func])
 
         fixup_program_instructions(target)
+        assert isinstance(target.definitions[0], AsmFunctionNode)
 
         # Just check that the expected increase has happened
         assert len(target.definitions[0].instructions) == 3

@@ -7,6 +7,7 @@ from nqcc.codegen import (
     AsmCdqNode,
     AsmCmpNode,
     AsmDataNode,
+    AsmFunctionNode,
     AsmIDivNode,
     AsmImmediateIntNode,
     AsmInstructionNode,
@@ -74,7 +75,7 @@ class TestOperandUpdate:
         assert result0.offset == -4
 
         result1 = target.get_updated_operand(pseudo_op1)
-        assert isinstance(result0, AsmStackNode)
+        assert isinstance(result1, AsmStackNode)
         assert result1.start_position == 312
         assert result1.offset == -8
 
@@ -187,6 +188,7 @@ class TestFunctionUpdate:
         st.check_function_declaration(src_node)
         tg = TackyGenerator()
         tacky_func = tg.emit_function(src_node, st)
+        assert tacky_func is not None
         asm_func = convert_tacky_function(tacky_func)
 
         target = PseudoRegisterReplacer(st)
@@ -197,6 +199,7 @@ class TestFunctionUpdate:
         assert asm_func.stack_size == 4
 
         i0 = asm_func.instructions[0]
+        assert isinstance(i0, AsmMovNode)
         assert i0 == AsmMovNode(
             start_position=26,
             src=AsmImmediateIntNode(start_position=31, value=508),
@@ -204,6 +207,7 @@ class TestFunctionUpdate:
         )
 
         i1 = asm_func.instructions[1]
+        assert isinstance(i1, AsmUnaryNode)
         assert i1 == AsmUnaryNode(start_position=26, operator=AsmNeg(start_position=26), src=i0.dst)
 
         i2 = asm_func.instructions[2]
@@ -226,6 +230,7 @@ class TestFunctionUpdate:
 
         tg = TackyGenerator()
         tacky_func = tg.emit_function(src_node, st)
+        assert tacky_func is not None
         asm_func = convert_tacky_function(tacky_func)
 
         target = PseudoRegisterReplacer(st)
@@ -236,6 +241,7 @@ class TestFunctionUpdate:
         assert asm_func.stack_size == 4
 
         i0 = asm_func.instructions[0]
+        assert isinstance(i0, AsmMovNode)
         assert i0 == AsmMovNode(
             start_position=28,
             src=AsmImmediateIntNode(start_position=26, value=1),
@@ -243,11 +249,12 @@ class TestFunctionUpdate:
         )
 
         i1 = asm_func.instructions[1]
+        assert isinstance(i1, AsmBinaryNode)
         assert i1 == AsmBinaryNode(
             start_position=28,
             operator=AsmAdd(start_position=28),
             src=AsmImmediateIntNode(start_position=30, value=4),
-            dst=i1.dst,
+            dst=i0.dst,
         )
 
         i2 = asm_func.instructions[2]
@@ -276,11 +283,13 @@ class TestProgramUpdate:
         target.pseudo_replace(asm_prog)
         assert len(asm_prog.definitions) == 1
         asm_func = asm_prog.definitions[0]
+        assert isinstance(asm_func, AsmFunctionNode)
         assert asm_func.stack_size == 8
         # Add two instructions for 'guard' return added by Tacky
         assert len(asm_func.instructions) == 6 + 2
 
         i0 = asm_func.instructions[0]
+        assert isinstance(i0, AsmMovNode)
         assert i0 == AsmMovNode(
             start_position=31,
             src=AsmImmediateIntNode(start_position=32, value=509),
@@ -288,9 +297,11 @@ class TestProgramUpdate:
         )
 
         i1 = asm_func.instructions[1]
+        assert isinstance(i1, AsmUnaryNode)
         assert i1 == AsmUnaryNode(start_position=31, operator=AsmNeg(start_position=31), src=i0.dst)
 
         i2 = asm_func.instructions[2]
+        assert isinstance(i2, AsmMovNode)
         assert i2 == AsmMovNode(
             start_position=26,
             src=i1.src,
@@ -298,9 +309,10 @@ class TestProgramUpdate:
         )
 
         i3 = asm_func.instructions[3]
+        assert isinstance(i3, AsmUnaryNode)
         assert i3 == AsmUnaryNode(
             start_position=26,
-            operator=AsmNot(start_position=26, source=i2.dst),
+            operator=AsmNot(start_position=26),
             src=i2.dst,
         )
 
@@ -329,6 +341,7 @@ class TestProgramUpdate:
 
         assert len(asm_prog.definitions) == 2
         asm_func = asm_prog.definitions[0]
+        assert isinstance(asm_func, AsmFunctionNode)
         assert asm_func.stack_size == 0
         # Add two instructions for 'guard' return added by Tacky
         assert len(asm_func.instructions) == 2 + 2

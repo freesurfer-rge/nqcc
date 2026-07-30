@@ -1,5 +1,5 @@
 import abc
-from typing import Literal, Union
+from typing import Literal, Type, Union
 
 from pydantic import BaseModel, Field
 
@@ -476,7 +476,7 @@ class CommaToken(Token):
         return ","
 
 
-TokenTypes: list[type] = [
+TokenTypes: list[Type[Token]] = [
     AdditionToken,
     AssignmentToken,
     BitwiseAnd,

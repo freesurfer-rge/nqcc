@@ -5,6 +5,7 @@ from nqcc.frontend.parser import (
     SourceContinueNode,
     SourceDoWhileNode,
     SourceForNode,
+    SourceFunctionDeclarationNode,
     SourceIfStatementNode,
     SourceWhileNode,
     TokenTape,
@@ -60,6 +61,7 @@ class TestWhileLabelling:
 
         label_loops_function(func)
 
+        assert func.body is not None
         assert len(func.body.items) == 4
         while_stmt = func.body.items[2]
         assert isinstance(while_stmt, SourceWhileNode)
@@ -105,6 +107,7 @@ class TestWhileLabelling:
         # We don't need to do variable resolution to test
 
         label_loops_function(func)
+        assert func.body is not None
         assert len(func.body.items) == 4
 
         outer_while = func.body.items[2]
@@ -152,6 +155,7 @@ class TestDowhileLabelling:
         # We don't need to do variable resolution to test
 
         label_loops_function(func)
+        assert func.body is not None
         assert len(func.body.items) == 4
 
         do_stmt = func.body.items[2]
@@ -186,6 +190,7 @@ class TestForLabelling:
         # We don't need to do variable resolution to test
 
         label_loops_function(func)
+        assert func.body is not None
         assert len(func.body.items) == 3
 
         for_stmt = func.body.items[1]
@@ -212,6 +217,8 @@ class TestProgram:
         # We don't need to do variable resolution to test
 
         label_loops_program(prog)
+        assert isinstance(prog.declarations[0], SourceFunctionDeclarationNode)
+        assert prog.declarations[0].body is not None
         assert len(prog.declarations[0].body.items) == 3
 
         for_stmt = prog.declarations[0].body.items[1]

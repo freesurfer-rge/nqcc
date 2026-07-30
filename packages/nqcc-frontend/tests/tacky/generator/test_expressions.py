@@ -143,6 +143,7 @@ class TestExpressions:
         assert target._nxt_tmp == 2, "Needs two temporaries"
         assert len(target._current_instructions) == 2, "Should emit two instructions"
         instr0 = target._current_instructions[0]
+        assert isinstance(instr0, TackyUnaryNode)
         assert instr0 == TackyUnaryNode(
             start_position=4,
             operator=TackyComplement(start_position=4),
@@ -150,6 +151,7 @@ class TestExpressions:
             dst=TackyVarNode(start_position=4, identifier="tmp.test_simple_nested.0"),
         )
         instr1 = target._current_instructions[1]
+        assert isinstance(instr1, TackyUnaryNode)
         assert instr1 == TackyUnaryNode(
             start_position=1,
             operator=TackyNegate(start_position=1),
