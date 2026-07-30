@@ -105,10 +105,4 @@ extend-select = [
 ]
 
 
-[tool.mypy]
-plugins = ["pydantic.mypy"]
-strict = true
-python_version = "3.14"
-exclude = ["packages/nqcc-frontend/src/nqcc/__init__.py"]
-
 [tool.ty]
