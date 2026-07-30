@@ -182,8 +182,6 @@ def parse_factor(token_tape: TokenTape) -> SourceExpressionNode:
         # See
         # https://github.com/python/cpython/issues/106246
         # for the following ugliness
-        # Also get_args is needed to quiet mypy
-        # https://docs.python.org/3/library/typing.html#typing.get_args
         case unary if isinstance(unary, get_args(UnaryOperatorToken)):
             result = parse_unary_operator(token_tape)
 

@@ -421,7 +421,7 @@ class TackyGenerator:
         self.emit_statement(source_node.then)
 
         if has_otherwise:
-            # Assert should never fire, shuts up mypy
+            # Assert should never fire, but keeps type checking quiet
             assert source_node.otherwise is not None
             # 'then' has to jump to end
             jmp1 = TackyJumpNode(start_position=source_node.start_position, target=end_identifier)
