@@ -1,6 +1,7 @@
 import pytest
 from nqcc.codegen import (
-    AsmAdd,AsmFunctionNode,
+    AsmAdd,
+    AsmFunctionNode,
     AsmAllocateStackNode,
     AsmBinaryNode,
     AsmBinaryOperator,

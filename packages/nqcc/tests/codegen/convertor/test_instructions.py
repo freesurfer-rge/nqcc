@@ -184,6 +184,7 @@ class TestBinaryInstructions:
 
         result = convert_tacky_instruction(target)
         assert len(result) == 2
+        assert isinstance(result[0], AsmMovNode)
         assert result[0] == AsmMovNode(
             start_position=22,
             src=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
@@ -207,6 +208,7 @@ class TestBinaryInstructions:
 
         result = convert_tacky_instruction(target)
         assert len(result) == 2
+        assert isinstance(result[0], AsmMovNode)
         assert result[0] == AsmMovNode(
             start_position=22,
             src=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
@@ -230,6 +232,7 @@ class TestBinaryInstructions:
 
         result = convert_tacky_instruction(target)
         assert len(result) == 2
+        assert isinstance(result[0], AsmMovNode)
         assert result[0] == AsmMovNode(
             start_position=22,
             src=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
@@ -256,6 +259,7 @@ class TestBinaryInstructions:
 
         result = convert_tacky_instruction(target)
         assert len(result) == 2
+        assert isinstance(result[0], AsmMovNode)
         assert result[0] == AsmMovNode(
             start_position=22,
             src=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
@@ -288,6 +292,7 @@ class TestBinaryInstructions:
 
         result = convert_tacky_instruction(target)
         assert len(result) == 2
+        assert isinstance(result[0], AsmMovNode)
         assert result[0] == AsmMovNode(
             start_position=22,
             src=AsmPseudoRegisterNode(start_position=12, identifier="left.0"),
@@ -363,7 +368,7 @@ class TestBinaryInstructions:
             TackyLessThanOrEqual,
         ],
     )
-    def test_comparisons(self, op: Type):
+    def test_comparisons(self, op: Type[TackyBinaryOperator]):
         target = TackyBinaryNode(
             start_position=23,
             operator=op(start_position=24),
