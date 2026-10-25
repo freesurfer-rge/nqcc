@@ -1,10 +1,10 @@
 from typing import Literal, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class TackyASTNode(BaseModel):
-    node_type: str
+    node_type: str = Field(frozen=True)
     start_position: int
 
 

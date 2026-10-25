@@ -7,7 +7,7 @@ AsmCondCode = Literal["E", "NE", "G", "GE", "L", "LE"]
 
 
 class AsmASTNode(BaseModel):
-    node_type: str
+    node_type: str = Field(frozen=True)
     start_position: int
 
 

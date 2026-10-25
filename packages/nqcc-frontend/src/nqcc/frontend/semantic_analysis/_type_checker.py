@@ -35,7 +35,7 @@ from nqcc.frontend.parser import (
 
 
 class InitialValueBase(BaseModel):
-    initial_value_type: str
+    initial_value_type: str = Field(frozen=True)
 
 
 class Tentative(InitialValueBase):
@@ -55,7 +55,7 @@ InitialValue = Union[Tentative, Initial, NoInitialiser]
 
 
 class SymbolEntry(BaseModel):
-    entry_type: str
+    entry_type: str = Field(frozen=True)
 
 
 class LocalVariableType(SymbolEntry):
