@@ -11,6 +11,10 @@ on:
 
 jobs:
   build-check-test:
+      strategy:
+          matrix:
+              python-version: ["3.13", "3.15"]
+
       runs-on: ubuntu-latest
       permissions:
           contents: read
@@ -22,10 +26,10 @@ jobs:
 
           - uses: actions/setup-python@v6
             with:
-              python-version: "3.14"
+              python-version: ${{ matrix.python-version }}
 
           - name: Sync dependencies
-            run: uv sync --group dev
+            run: uv sync --python ${{ matrix.python-version }} --group dev
 
           - uses: astral-sh/ruff-action@v4.0.0
             name: Check format with ruff

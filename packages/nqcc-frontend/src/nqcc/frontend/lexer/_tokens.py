@@ -5,9 +5,9 @@ from pydantic import BaseModel, Field
 
 
 class Token(BaseModel, abc.ABC):
-    token_type: str
+    token_type: str = Field(frozen=True)
     start_position: int = Field(default=-1)
-    value: str = Field(default="")
+    value: str = Field(default="", frozen=True)
 
     @property
     @abc.abstractmethod

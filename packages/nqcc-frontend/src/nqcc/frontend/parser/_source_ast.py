@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from typing import Literal, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SourceStorageType(BaseModel):
@@ -8,7 +10,7 @@ class SourceStorageType(BaseModel):
 
 
 class SourceASTNode(BaseModel):
-    node_type: str
+    node_type: str = Field(frozen=True)
     start_position: int
 
 
@@ -44,7 +46,7 @@ class SourceUnaryExpressionNode(SourceASTNode):
 
 
 class SourceBinOp(SourceASTNode):
-    precedence: int
+    precedence: int = Field(frozen=True)
 
 
 class SourceAssignment(SourceBinOp):
