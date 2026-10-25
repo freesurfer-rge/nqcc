@@ -2,7 +2,7 @@
 name = "nqcc"
 version = "0.1.0"
 description = "Driver and x86 backend for nqcc"
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = [
     "pydantic>=2",
     "nqcc-frontend",
